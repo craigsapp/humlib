@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Mon Aug 12 10:58:43 PDT 2024
-// Last Modified: Tue Aug 13 20:19:09 PDT 2024
+// Last Modified: Sun Aug 18 00:19:45 PDT 2024
 // Filename:      cli/tandeminfo.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/cli/tandeminfo.cpp
 // Syntax:        C++11
@@ -46,6 +46,14 @@ string checkForVerseLabels    (const string& tok);
 string checkForLanguage       (const string& tok);
 string checkForStemInfo       (const string& tok);
 string checkForXywh           (const string& tok);
+string checkForCustos         (const string& tok);
+string checkForTextInterps    (const string& tok);
+string checkForRep            (const string& tok);
+string checkForPline          (const string& tok);
+string checkForTacet          (const string& tok);
+string checkForFb             (const string& tok);
+string checkForColor          (const string& tok);
+string checkForThru           (const string& tok);
 
 bool exclusiveQ = true;   // used with -X option (don't print exclusive interpretation)
 bool unknownQ   = false;  // used with -u option (print only unknown tandem interpretations)
@@ -106,7 +114,8 @@ void processFile(HumdrumFile& infile) {
 			if (meaningQ) {
 				meaning = getMeaning(token);
 				if (unknownQ) {
-					if (meaning != "unknown") {
+					HumRegex hre;
+					if (!hre.search(meaning, "unknown")) {
 						continue;
 					}
 				}
@@ -288,6 +297,232 @@ string getMeaning(HTp token) {
 		return meaning;
 	}
 
+	meaning = checkForCustos(tok);
+	if (meaning != "unknown") {
+		return meaning;
+	}
+
+	meaning = checkForTextInterps(tok);
+	if (meaning != "unknown") {
+		return meaning;
+	}
+
+	meaning = checkForRep(tok);
+	if (meaning != "unknown") {
+		return meaning;
+	}
+
+	meaning = checkForPline(tok);
+	if (meaning != "unknown") {
+		return meaning;
+	}
+
+	meaning = checkForTacet(tok);
+	if (meaning != "unknown") {
+		return meaning;
+	}
+
+	meaning = checkForFb(tok);
+	if (meaning != "unknown") {
+		return meaning;
+	}
+
+	meaning = checkForColor(tok);
+	if (meaning != "unknown") {
+		return meaning;
+	}
+
+	meaning = checkForThru(tok);
+	if (meaning != "unknown") {
+		return meaning;
+	}
+
+	HumRegex hre;
+	if (hre.search(token, "\\s+$")) {
+		return "unknown (space at end of interpretation may be the problem)";
+	} else {
+		return "unknown";
+	}
+}
+
+
+
+//////////////////////////////
+//
+// checkForThru -- Humdrum Toolkit interpretations related to thru command.
+//
+
+string checkForThru(const string& tok) {
+	if (tok == "thru") {
+		return "data processed by thru command (expansion lists processed)";
+	}
+
+	return "unknown";
+}
+
+
+
+//////////////////////////////
+//
+// checkForColor -- Extended interprerations for coloring notes in **kern data.
+//     Used in verovio.
+//
+
+string checkForColor(const string& tok) {
+	HumRegex hre;
+	if (hre.search(tok, "^color:(.*)")) {
+		string color = hre.getMatch(1);
+		string output;
+		if (hre.search(tok, "^#[0-9A-Fa-f]{3}$")) {
+			output = "3-digit hex ";
+		} else if (hre.search(tok, "^#[0-9A-Fa-f]{6}$")) {
+			output = "6-digit hex ";
+		} else if (hre.search(tok, "^#[0-9A-Fa-f]{8}$")) {
+			output = "8-digit hex  (RGB + transparency)";
+		} else if (hre.search(tok, "^rgb(\\d+\\s*,\\s*\\d+\\s*,\\s*\\d+)$")) {
+			output = "RGB integer";
+		} else if (hre.search(tok, "^rgb(\\d+\\s*,\\s*\\d+\\s*,\\s*\\d+\\s*,[\\d.]+)$")) {
+			output = "RGB integer with alpha";
+		} else if (hre.search(tok, "^hsl(\\d+\\s*,\\s*\\d+%\\s*,\\s*\\d+%)$")) {
+			output = "HSL";
+		} else if (hre.search(tok, "^hsl(\\d+\\s*,\\s*\\d+%\\s*,\\s*\\d+%,\\s*[\\d.]+)$")) {
+			output = "HSL with alpha";
+		} else if (hre.search(tok, "^[a-z]+$")) {
+			output = "named ";
+		}
+		output += " color";
+	}
+
+	return "unknown";
+}
+
+
+
+//////////////////////////////
+//
+// checkForFb -- Extended interprerations especially for **fb (**fa) exclusive
+//     interpretations.
+//
+
+string checkForFb(const string& tok) {
+	if (tok == "reverse") {
+		return "reverse order of accidental and number in figured bass";
+	}
+	if (tok == "Xreverse") {
+		return "stop reversing order of accidental and number in figured bass";
+	}
+
+	return "unknown";
+}
+
+
+
+//////////////////////////////
+//
+// checkForTacet -- Extended interprerations for marking parts that are not
+//     playing (rests only) in a movement/movement subsection.
+//
+
+string checkForTacet(const string& tok) {
+	if (tok == "tacet") {
+		return "part is tacet in movement/section";
+	}
+	if (tok == "Xtacet") {
+		return "end of part tacet";
+	}
+
+	return "unknown";
+}
+
+
+
+//////////////////////////////
+//
+// checkForRep -- Extended interprerations for poetic line analysis related to pline tool.
+//
+
+string checkForPline(const string& tok) {
+	HumRegex hre;
+	if (hre.search(tok, "^pline:(\\d+)([abcr]*)$")) {
+		string number = hre.getMatch(1);
+		string info = hre.getMatch(2);
+		string output = "poetic line markup: " + number + info;
+		return output;
+	}
+
+	return "unknown";
+}
+
+
+
+//////////////////////////////
+//
+// checkForRep -- Extended interprerations for adding repeat sign shorthand for
+//     repeated music.
+//
+
+string checkForRep(const string& tok) {
+	if (tok == "rep") {
+		return "start of repeat sign replacing notes/rests";
+	}
+	if (tok == "Xrep") {
+		return "end of repeat sign replacing notes/rests";
+	}
+
+	return "unknown";
+}
+
+
+
+//////////////////////////////
+//
+// checkForTextInterps -- Extended interprerations for **text and **silbe
+//
+
+string checkForTextInterps(const string& tok) {
+	if (tok == "ij") {
+		return "start of text repeat region";
+	}
+	if (tok == "Xij") {
+		return "end of text repeat region";
+	}
+	if (tok == "edit") {
+		return "start of editorial text region";
+	}
+	if (tok == "Xedit") {
+		return "end of editorial text region";
+	}
+
+	return "unknown";
+}
+
+
+
+//////////////////////////////
+//
+// checkForCustos -- Extended interprerations for marker
+//     at end of system for next note in part.
+//
+
+string checkForCustos(const string& tok) {
+	HumRegex hre;
+
+	if (tok == "custos") {
+		return "custos, pitch unspecified";
+	}
+
+	if (tok == "custos:") {
+		return "custos, pitch unspecified";
+	}
+
+	if (hre.search(tok, "^custos:([A-G]+|[a-g]+)(#+|-+|n)?$")) {
+		// also deal with chord custos
+		string pitch = hre.getMatch(1);
+		string accid = hre.getMatch(2);
+		string output = "custos on pitch " + pitch + accid;
+		return output;
+	}
+
 	return "unknown";
 }
 
@@ -330,27 +565,57 @@ string checkForXywh(const string& tok) {
 string checkForStemInfo(const string& tok) {
 	HumRegex hre;
 
-	if (hre.search(tok, "^(\\d+)/left")) {
+	if (hre.search(tok, "^(\\d+)/left$")) {
 		string rhythm = hre.getMatch(1);
 		string output = rhythm + " notes always have stem up on the left";
 		return output;
 	}
 
-	if (hre.search(tok, "^(\\d+)\\\\left")) {
+	if (hre.search(tok, "^(\\d+)\\\\left$")) {
 		string rhythm = hre.getMatch(1);
 		string output = rhythm + " notes always have stem down on the left";
 		return output;
 	}
 
-	if (hre.search(tok, "^(\\d+)/right")) {
+	if (hre.search(tok, "^(\\d+)/right$")) {
 		string rhythm = hre.getMatch(1);
 		string output = rhythm + " notes always have stem up on the right";
 		return output;
 	}
 
-	if (hre.search(tok, "^(\\d+)\\\\right")) {
+	if (hre.search(tok, "^(\\d+)\\\\right$")) {
 		string rhythm = hre.getMatch(1);
 		string output = rhythm + " notes always have stem down on the right";
+		return output;
+	}
+
+	if (tok == "all/right") {
+		string output = "all notes always have stem up on the right";
+		return output;
+	}
+
+	if (tok == "all\\right") {
+		string output = "all notes always have stem down on the right";
+		return output;
+	}
+
+	if (tok == "all/left") {
+		string output = "all notes always have stem up on the left";
+		return output;
+	}
+
+	if (tok == "all\\left") {
+		string output = "all notes always have stem down on the left";
+		return output;
+	}
+
+	if (tok == "all/center") {
+		string output = "all notes always have stem up on notehead center";
+		return output;
+	}
+
+	if (tok == "all\\center") {
+		string output = "all notes always have stem down on notehead center";
 		return output;
 	}
 
@@ -382,9 +647,9 @@ string checkForLanguage(const string& tok) {
 		}
 		string output = "language code";
 		if (code.size() == 2) {
-			output = "ISO 639-1 language code (";
+			output = "ISO 639-3 two-letter language code (";
 		} else if (code.size() == 3) {
-			output = "ISO 639-2 language code (";
+			output = "ISO 639-3 three-letter language code (";
 		}
 		output += name;
 		output += ")";
@@ -645,6 +910,12 @@ string checkForOttava(const string& tok) {
 	if (tok == "X15ma") {
 		return "end of 15ma line";
 	}
+	if (tok == "coll8ba") {
+		return "coll ottava basso start";
+	}
+	if (tok == "Xcoll8ba") {
+		return "coll ottava basso end";
+	}
 	return "unknown";
 }
 
@@ -780,6 +1051,10 @@ string checkForTuplet(const string& tok) {
 	if (tok == "Xtuplet") {
 		return "do not show tuplet numbers";
 	}
+	if (tok == "tupbreak") {
+		return "break tuplet at this point";
+	}
+	
 
 	return "unknown";
 }
@@ -848,11 +1123,12 @@ string checkForStaffPartGroup (const string& tok) {
 
 string checkForClef(const string& tok) {
 	HumRegex hre;
-	if (hre.search(tok, "^clef([GFCX])(.*?)([12345])?(yy)?$")) {
-		string ctype = hre.getMatch(1);
-		string octave = hre.getMatch(2);
-		string line = hre.getMatch(3);
-		string invisible = hre.getMatch(4);
+	if (hre.search(tok, "^(m|o)?clef([GFCX])(.*?)([12345])?(yy)?$")) {
+		string modori = hre.getMatch(1);
+		string ctype = hre.getMatch(2);
+		string octave = hre.getMatch(3);
+		string line = hre.getMatch(4);
+		string invisible = hre.getMatch(5);
 		string output = "clef: ";
 		if (ctype == "X") {
 			output += "percussion";
@@ -936,8 +1212,9 @@ string checkForTimeSignature(const string& tok) {
 
 string checkForMeter(const string& tok) {
 	HumRegex hre;
-	if (hre.search(tok, "^met\\((.*?)\\)$")) {
-		string meter = hre.getMatch(1);
+	if (hre.search(tok, "^(m|o)?met\\((.*?)\\)$")) {
+		string modori = hre.getMatch(1);
+		string meter = hre.getMatch(2);
 		if (meter == "c") {
 			return "meter (common time)";
 		}
@@ -963,9 +1240,15 @@ string checkForMeter(const string& tok) {
 
 string checkForTempoMarking(const string& tok) {
 	HumRegex hre;
-	if (hre.search(tok, "^MM(\\d+)(\\.\\d*)?")) {
+	if (hre.search(tok, "^MM(\\d+)(\\.\\d*)?$")) {
 		string tempo = hre.getMatch(1) + hre.getMatch(2);
 		string output = "tempo: " + tempo + " quarter notes per minute";
+		return output;
+	}
+
+	if (hre.search(tok, "^MM\\[(.*?)\\]$")) {
+		string text = hre.getMatch(1);
+		string output = "text-based tempo: " + text;
 		return output;
 	}
 
@@ -1016,52 +1299,95 @@ string checkForLabelInfo(const string& tok) {
 //
 // checkForInstrumentInfo -- Humdrum Toolkit and extended interpretations.
 //     Humdrum Tookit:
-//         instrument group
-//         instrument class
-//         instrument code
+//         instrument group	 *IG
+//         instrument class	*IC
+//         instrument code	*I
 //     Extended:
-//         instrument name
-//         instrument abbreviation
+//         instrument name *I"
+//         instrument number *I#
+//         instrument abbreviation *I'
+//
+//     modori tool extensions:
+//         *mI == modernized
+//         *oI == original
 //
 
 string checkForInstrumentInfo(const string& tok) {
 	HumRegex hre;
 
-	if (hre.search(tok, "^I\"(.*)")) {
-		string name = hre.getMatch(1);
+	if (hre.search(tok, "^(m|o)?I\"(.*)$")) {
+		string modori = hre.getMatch(1);
+		string name = hre.getMatch(2);
 		string output = "printable instrument name: \"";
 		output += name;
 		output += "\"";
+		if (modori == "o") {
+			output += " (original)";
+		} else if (modori == "m") {
+			output += " (modern)";
+		}
 		return output;
 	}
 
-	if (hre.search(tok, "^I'(.*)")) {
-		string abbr = hre.getMatch(1);
+	if (hre.search(tok, "^(m|o)?I'(.*)$")) {
+		string modori = hre.getMatch(1);
+		string abbr = hre.getMatch(2);
 		string output = "printable instrument abbreviation \"";
 		output += abbr;
 		output += "\"";
+		if (modori == "o") {
+			output += " (original)";
+		} else if (modori == "m") {
+			output += " (modern)";
+		}
 		return output;
 	}
 
-	if (hre.search(tok, "^IC(.*)")) {
-		string iclass = hre.getMatch(1);
+	if (hre.search(tok, "^(m|o)?IC([^\\s]*)$")) {
+		string modori = hre.getMatch(1);
+		string iclass = hre.getMatch(2);
 		string output = "instrument class (";
 		output += iclass;
 		output += ")";
+		if (modori == "o") {
+			output += " (original)";
+		} else if (modori == "m") {
+			output += " (modern)";
+		}
 		return output;
 	}
 
-	if (hre.search(tok, "^IC(.*)")) {
-		string group = hre.getMatch(1);
+	if (hre.search(tok, "^(m|o)?IG([^\\s]*)$")) {
+		string modori = hre.getMatch(1);
+		string group = hre.getMatch(2);
 		string output = "instrument group (";
 		output += group;
 		output += ")";
+		if (modori == "o") {
+			output += " (original)";
+		} else if (modori == "m") {
+			output += " (modern)";
+		}
 		return output;
 	}
 
-	if (hre.search(tok, "^I([a-z].*)")) {
-		string code = hre.getMatch(1);
+	if (hre.search(tok, "^(m|o)?I#(\\d+)$")) {
+		string modori = hre.getMatch(1);
+		string number = hre.getMatch(2);
+		string output = "instrument number (";
+		output += number;
+		output += ")";
+		if (modori == "o") {
+			output += " (original)";
+		} else if (modori == "m") {
+			output += " (modern)";
+		}
+		return output;
+	}
 
+	if (hre.search(tok, "^(m|o)?I([a-z][a-zA-Z0-9_-]+)$")) {
+		string modori = hre.getMatch(1);
+		string code = hre.getMatch(2);
 		bool andy = false;
 		bool ory  = false;
 		vector<string> codes;
@@ -1102,6 +1428,12 @@ string checkForInstrumentInfo(const string& tok) {
 					output += " or ";
 				}
 			}
+		}
+
+		if (modori == "o") {
+			output += " (original)";
+		} else if (modori == "m") {
+			output += " (modern)";
 		}
 
 		return output;
@@ -1147,13 +1479,26 @@ string checkForKeySignature(const string& tok) {
 		return "do not show cancellation naturals when changing key signatures (default)";
 	}
 
-	// analytic key signature:
 	if (tok == "k[]") {
 		return "key signature, no sharps or flats";
 	}
+	if (tok == "ok[]") {
+		return "original key signature, no sharps or flats";
+	}
+	if (tok == "mk[]") {
+		return "modern key signature, no sharps or flats";
+	}
+
 	HumRegex hre;
-	if (hre.search(tok, "^k\\[([a-gA-G]+[n#-]{1,2})+\\]$")) {
-		string output = "key signature";
+	if (hre.search(tok, "^(?:m|o)?k\\[([a-gA-G]+[n#-]{1,2})+\\]$")) {
+		string modori;
+		string output;
+		if (tok[0] == 'o') {
+			output = "original ";
+		} else if (tok[0] == 'm') {
+			output = "modern ";
+		}
+		output += "key signature";
 		int flats = 0;
 		int sharps = 0;
 		int naturals = 0;
@@ -1272,7 +1617,7 @@ string checkForKeyDesignation(const string& tok) {
 			return output;
 		} else {
 			// Modal key
-			if (isUpper && ((mode == "dor") || (mode == "phr") || (mode == "aeo") || (mode == "lyd"))) {
+			if (isUpper && ((mode == "dor") || (mode == "phr") || (mode == "aeo") || (mode == "loc"))) {
 				// need a lower-case letter for these modes (minor third above tonic)
 				return "unknown";
 			}
@@ -1301,6 +1646,7 @@ string checkForKeyDesignation(const string& tok) {
 			}
 
 			if (mode == "ion") {
+				output += " ionian";
 			} else if (mode == "dor") {
 				output += " dorian";
 			} else if (mode == "phr") {
