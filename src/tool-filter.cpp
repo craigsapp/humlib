@@ -83,6 +83,7 @@
 #include "tool-strophe.h"
 #include "tool-synco.h"
 #include "tool-tabber.h"
+#include "tool-tandeminfo.h"
 #include "tool-tassoize.h"
 #include "tool-textdur.h"
 #include "tool-thru.h"
@@ -363,6 +364,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(synco, infile, commands[i].second, status);
 		} else if (commands[i].first == "tabber") {
 			RUNTOOL(tabber, infile, commands[i].second, status);
+		} else if (commands[i].first == "tandeminfo") {
+			RUNTOOL(tandeminfo, infile, commands[i].second, status);
 		} else if (commands[i].first == "tassoize") {
 			RUNTOOL(tassoize, infile, commands[i].second, status);
 		} else if (commands[i].first == "tassoise") {
