@@ -194,7 +194,7 @@ void Tool_tandeminfo::printEntriesHtml(HumdrumFile& infile) {
 	m_humdrum_text << "!!.PREHTML table.tandeminfo { border: 1px solid black; border-collapse: collapse; width:98%; }" << endl;
 	m_humdrum_text << "!!.PREHTML table.tandeminfo th, .PREHTML table.tandeminfo td { vertical-align: top; padding-right: 10px; } " << endl;
 	m_humdrum_text << "!!.PREHTML table.tandeminfo tr:hover td { background-color: #eee; } " << endl;
-	m_humdrum_text << "!!.PREHTML table.tandeminfo th.tandem, .PREHTML table.tandeminfo td { padding-right: 30px; } " << endl;
+	m_humdrum_text << "!!.PREHTML table.tandeminfo th.tandem, .PREHTML table.tandeminfo td { white-space: nowrap; padding-right: 30px; } " << endl;
 	m_humdrum_text << "!!.PREHTML table.tandeminfo th.location, .PREHTML table.tandeminfo td.location { padding-right: 30px; } " << endl;
 	m_humdrum_text << "!!.PREHTML table.tandeminfo th.exclusive, .PREHTML table.tandeminfo td.exclusive { padding-right: 30px; } " << endl;
 	m_humdrum_text << "!!.PREHTML table.tandeminfo tr th:last-child, .PREHTML table.tandeminfo tr td:last-child { width:100%; padding-right: 0; } " << endl;
@@ -222,8 +222,8 @@ void Tool_tandeminfo::printEntriesHtml(HumdrumFile& infile) {
 	if (m_locationQ) {
 		m_humdrum_text << "!!<th class='location'>Location</th>" << endl;
 	}
-	if (m_locationQ) {
-		m_humdrum_text << "!!<th class='exclusive'>exclusive</th>" << endl;
+	if (m_exclusiveQ) {
+		m_humdrum_text << "!!<th class='exclusive'>Exclusive</th>" << endl;
 	}
 	m_humdrum_text << "!!<th class='tandem' >Tandem</th>" << endl;
 	m_humdrum_text << "!!<th class='description'>Description</th>" << endl;
