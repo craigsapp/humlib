@@ -217,6 +217,13 @@ int HumdrumFileStream::getFile(HumdrumFile& infile) {
 
 restarting:
 
+	stringstream buffer;
+	string templine;
+	if (!m_newfilebuffer.empty()) {
+		buffer << m_newfilebuffer << endl;
+		m_newfilebuffer = "";
+	}
+
 	newinput = NULL;
 
 	if (m_urlbuffer.eof()) {
@@ -310,7 +317,7 @@ restarting:
 		return 0;
 	}
 
-	stringstream buffer;
+
 	int foundUniversalQ = 0;
 
 	// Start reading the input stream.  If !!!!SEGMENT: universal comment
@@ -318,14 +325,13 @@ restarting:
 	// newly read HumdrumFile.  If other universal comments are found, then
 	// overwrite the old universal comments here.
 
-	int addedFilename = 0;
+	// int addedFilename = 0;
 	int dataFoundQ = 0;
 	int starstarFoundQ = 0;
 	int starminusFoundQ = 0;
 	if (m_newfilebuffer.size() < 4) {
 		//searchName = 1;
 	}
-	string templine;
 
 	if (newinput->eof()) {
 		if (m_curfile < (int)m_filelist.size()-1) {
@@ -405,7 +411,7 @@ restarting:
 		}
 
 		if (((starminusFoundQ == 1) || (starstarFoundQ == 0)) && (templine[0] != '*') && (templine[0] != '!')) {
-			if (!templine.empty() && (templine[0] != ' ')) {
+			if ((!templine.empty()) && (templine[0] != ' ')) {
 				int found = 0;
 				for (int mm = 0; mm < (int)m_filelist.size(); mm++) {
 					if (m_filelist[mm] == templine) {
@@ -414,7 +420,7 @@ restarting:
 				}
 				if (!found) {
 					m_filelist.push_back(templine);
-					addedFilename = 1;
+					// addedFilename = 1;
 				}
 				continue;
 			}
@@ -426,6 +432,7 @@ restarting:
 		buffer << templine << "\n";
 	}
 
+/*
 	if (dataFoundQ == 0) {
 		// never found anything for some strange reason.
 		if (addedFilename) {
@@ -433,6 +440,7 @@ restarting:
 		}
 		return 0;
 	}
+*/
 
 	// Arriving here means that reading of the data stream is complete.
 	// The string stream variable "buffer" contains the HumdrumFile
@@ -450,12 +458,11 @@ restarting:
 		}
 		contents << &(m_universals[i][1]) << "\n";
 	}
+
 	contents << buffer.str();
-	string filename = infile.getFilename();
 	infile.readNoRhythm(contents);
-	if (!filename.empty()) {
-		infile.setFilename(filename);
-	}
+	infile.setFilenameFromSegment();
+
 	return 1;
 }
 
@@ -466,7 +473,6 @@ restarting:
 //
 // HumdrumFileStream::fillUrlBuffer --
 //
-
 
 void HumdrumFileStream::fillUrlBuffer(stringstream& uribuffer,
 		const string& uriname) {

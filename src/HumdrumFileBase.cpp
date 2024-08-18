@@ -346,24 +346,16 @@ bool HumdrumFileBase::read(const char* filename) {
 
 
 bool HumdrumFileBase::read(istream& contents) {
-	clear();
-	m_displayError = true;
-	char buffer[123123] = {0};
-	HLp s;
-	while (contents.getline(buffer, sizeof(buffer), '\n')) {
-		s = new HumdrumLine(buffer);
-		s->setOwner(this);
-		m_lines.push_back(s);
-	}
-	return analyzeBaseFromLines();
-/*
-	if (!analyzeTokens()) { return isValid(); }
-	if (!analyzeLines() ) { return isValid(); }
-	if (!analyzeSpines()) { return isValid(); }
-	if (!analyzeLinks() ) { return isValid(); }
-	if (!analyzeTracks()) { return isValid(); }
-	return isValid();
-*/
+   clear();
+   m_displayError = true;
+   std::string buffer;
+   HLp s;
+   while (std::getline(contents, buffer)) {
+      s = new HumdrumLine(buffer);
+      s->setOwner(this);
+      m_lines.push_back(s);
+   }
+   return analyzeBaseFromLines();
 }
 
 
@@ -423,6 +415,39 @@ bool HumdrumFileBase::analyzeBaseFromLines(void)  {
 	if (!analyzeLinks() ) { return isValid(); }
 	if (!analyzeTracks()) { return isValid(); }
 	return isValid();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::setFilenameFromSegment -- Update filename based on any
+//      !!!!SEGMENT: line at the top of the file.
+//
+
+void HumdrumFileBase::setFilenameFromSegment(void) {
+	HumdrumFileBase& infile = *this;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (infile[i].isEmpty()) {
+			continue;
+		}
+		if (!infile[i].isCommentUniversal()) {
+			break;
+		}
+		if (!infile[i].isUniversalReference()) {
+			break;
+		}
+		string key = infile[i].getUniversalReferenceKey();
+		if (key != "SEGMENT") {
+			// consider segment levels as well...
+			continue;
+		}
+		string value = infile[i].getUniversalReferenceValue();
+		if (!value.empty()) {
+			infile.setFilename(value);
+			break;
+		}
+	}
 }
 
 
