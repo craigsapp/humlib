@@ -206,10 +206,10 @@ void HumInstrument::setHumdrum(const string& Hname) {
 void HumInstrument::initialize(void) {
    m_data.reserve(500);
 
+	// List has to be sorted by first parameter.  Maybe put in map.
    afi("accor",   GM_ACCORDION,             "accordion");
    afi("alto",    GM_RECORDER,              "alto");
    afi("anvil",   GM_TINKLE_BELL,           "anvil");
-   afi("hbell",   GM_TINKLE_BELL,           "handbell");
    afi("archl",   GM_ACOUSTIC_GUITAR_NYLON, "archlute");
    afi("armon",   GM_HARMONICA,             "harmonica");
    afi("arpa",    GM_ORCHESTRAL_HARP,       "harp");
@@ -218,16 +218,15 @@ void HumInstrument::initialize(void) {
    afi("banjo",   GM_BANJO,                 "banjo");
    afi("bansu",   GM_FLUTE,                 "bansuri");
    afi("barit",   GM_CHOIR_AAHS,            "baritone");
-   afi("mbari",   GM_CHOIR_AAHS,            "high baritone");
    afi("baset",   GM_CLARINET,              "bassett horn");
    afi("bass",    GM_CHOIR_AAHS,            "bass");
    afi("bdrum",   GM_TAIKO_DRUM,            "bass drum");
-   afi("bongo",   GM_TAIKO_DRUM,            "bongo");
    afi("bguit",   GM_ELECTRIC_BASS_FINGER,  "electric bass guitar");
    afi("biwa",    GM_FLUTE,                 "biwa");
+   afi("bongo",   GM_TAIKO_DRUM,            "bongo");
+   afi("brush",   GM_BREATH_NOISE,          "brush");
    afi("bscan",   GM_CHOIR_AAHS,            "basso cantante");
    afi("bspro",   GM_CHOIR_AAHS,            "basso profondo");
-   afi("brush",   GM_BREATH_NOISE,          "brush");
    afi("bugle",   GM_TRUMPET,               "bugle");
    afi("calam",   GM_OBOE,                  "chalumeau");
    afi("calpe",   GM_LEAD_CALLIOPE,         "calliope");
@@ -243,8 +242,8 @@ void HumInstrument::initialize(void) {
    afi("cemba",   GM_HARPSICHORD,           "harpsichord");
    afi("cetra",   GM_VIOLIN,                "cittern");
    afi("chain",   GM_TINKLE_BELL,           "chains");
-   afi("chime",   GM_TUBULAR_BELLS,         "chimes");
    afi("chcym",   GM_REVERSE_CYMBAL,        "China cymbal");
+   afi("chime",   GM_TUBULAR_BELLS,         "chimes");
    afi("chlma",   GM_BASSOON,               "alto shawm");
    afi("chlms",   GM_BASSOON,               "soprano shawm");
    afi("chlmt",   GM_BASSOON,               "tenor shawm");
@@ -275,8 +274,8 @@ void HumInstrument::initialize(void) {
    afi("fag_c",   GM_BASSOON,               "contrabassoon");
    afi("fagot",   GM_BASSOON,               "bassoon");
    afi("false",   GM_RECORDER,              "falsetto");
-   afi("feme",    GM_CHOIR_AAHS,            "female voice");
    afi("fdrum",   GM_TAIKO_DRUM,            "frame drum");
+   afi("feme",    GM_CHOIR_AAHS,            "female voice");
    afi("fife",    GM_BLOWN_BOTTLE,          "fife");
    afi("fingc",   GM_REVERSE_CYMBAL,        "finger cymbal");
    afi("flt",     GM_FLUTE,                 "flute");
@@ -289,13 +288,14 @@ void HumInstrument::initialize(void) {
    afi("fltdt",   GM_RECORDER,              "tenor recorder");
    afi("flugh",   GM_FRENCH_HORN,           "flugelhorn");
    afi("forte",   GM_HONKYTONK_PIANO,       "fortepiano");
-   afi("glock",   GM_GLOCKENSPIEL,          "glockenspiel");
    afi("gen",     GM_ACOUSTIC_GRAND_PIANO,  "generic instrument");
-   afi("genT",    GM_ACOUSTIC_GRAND_PIANO,  "generic treble instrument");
    afi("genB",    GM_ACOUSTIC_GRAND_PIANO,  "generic bass instrument");
+   afi("genT",    GM_ACOUSTIC_GRAND_PIANO,  "generic treble instrument");
+   afi("glock",   GM_GLOCKENSPIEL,          "glockenspiel");
    afi("gong",    GM_REVERSE_CYMBAL,        "gong");
    afi("guitr",   GM_ACOUSTIC_GUITAR_NYLON, "guitar");
    afi("hammd",   GM_DRAWBAR_ORGAN,         "Hammond electronic organ");
+   afi("hbell",   GM_TINKLE_BELL,           "handbell");
    afi("hbell",   GM_TINKLE_BELL,           "handbell");
    afi("heck",    GM_BASSOON,               "heckelphone");
    afi("heltn",   GM_CHOIR_AAHS,            "Heldentenor");
@@ -310,25 +310,27 @@ void HumInstrument::initialize(void) {
    afi("krumb",   GM_TRUMPET,               "bass crumhorn");
    afi("krums",   GM_TRUMPET,               "soprano crumhorn");
    afi("krumt",   GM_TRUMPET,               "tenor crumhorn");
-   afi("liuto",   GM_ACOUSTIC_GUITAR_NYLON, "lute");
    afi("lion",    GM_AGOGO,                 "lion's roar");
+   afi("liuto",   GM_ACOUSTIC_GUITAR_NYLON, "lute");
    afi("lyrsp",   GM_FLUTE,                 "lyric soprano");
    afi("lyrtn",   GM_FRENCH_HORN,           "lyric tenor");
    afi("male",    GM_CHOIR_AAHS,            "male voice");
    afi("mando",   GM_ACOUSTIC_GUITAR_NYLON, "mandolin");
    afi("marac",   GM_AGOGO,                 "maracas");
    afi("marim",   GM_MARIMBA,               "marimba");
+   afi("mbari",   GM_CHOIR_AAHS,            "high baritone");
    afi("mezzo",   GM_CHOIR_AAHS,            "mezzo soprano");
    afi("nfant",   GM_CHOIR_AAHS,            "child's voice");
    afi("nokan",   GM_SHAKUHACHI,            "nokan");
-   afi("oboeD",   GM_ENGLISH_HORN,          "oboe d'amore");
    afi("oboe",    GM_OBOE,                  "oboe");
+   afi("oboeD",   GM_ENGLISH_HORN,          "oboe d'amore");
    afi("ocari",   GM_OCARINA,               "ocarina");
    afi("ondes",   GM_PAD_SWEEP,             "ondes Martenot");
    afi("ophic",   GM_TUBA,                  "ophicleide");
    afi("organ",   GM_CHURCH_ORGAN,          "pipe organ");
-   afi("panpi",   GM_PAN_FLUTE,             "panpipe");
+   afi("oud",     GM_ACOUSTIC_GUITAR_NYLON, "oud");
    afi("paila",   GM_AGOGO,                 "timbales");
+   afi("panpi",   GM_PAN_FLUTE,             "panpipe");
    afi("pbell",   GM_TUBULAR_BELLS,         "bell plate");
    afi("pguit",   GM_ACOUSTIC_GUITAR_NYLON, "Portuguese guitar");
    afi("physh",   GM_REED_ORGAN,            "physharmonica");
@@ -370,11 +372,11 @@ void HumInstrument::initialize(void) {
    afi("spshc",   GM_REVERSE_CYMBAL,        "splash cymbal");
    afi("steel",   GM_STEEL_DRUMS,           "steel-drum");
    afi("stim",    GM_SEASHORE,              "Sprechstimme");
-   afi("stimS",   GM_SEASHORE,              "Sprechstimme, soprano");
    afi("stimA",   GM_SEASHORE,              "Sprechstimme, alto");
+   afi("stimB",   GM_SEASHORE,              "Sprechstimme, bass");
    afi("stimC",   GM_SEASHORE,              "Sprechstimme, contralto");
    afi("stimR",   GM_SEASHORE,              "Sprechstimme, baritone");
-   afi("stimB",   GM_SEASHORE,              "Sprechstimme, bass");
+   afi("stimS",   GM_SEASHORE,              "Sprechstimme, soprano");
    afi("strdr",   GM_AGOGO,                 "string drum");
    afi("sxhA",    GM_ALTO_SAX,              "alto saxhorn");
    afi("sxhB",    GM_BARITONE_SAX,          "bass saxhorn");
@@ -402,7 +404,6 @@ void HumInstrument::initialize(void) {
    afi("tubaC",   GM_TUBA,                  "contrabass tuba");
    afi("tubaT",   GM_TUBA,                  "tenor tuba");
    afi("tubaU",   GM_TUBA,                  "subcontra tuba");
-   afi("oud",     GM_ACOUSTIC_GUITAR_NYLON, "oud");
    afi("ukule",   GM_ACOUSTIC_GUITAR_NYLON, "ukulele");
    afi("vibra",   GM_VIBRAPHONE,            "vibraphone");
    afi("vina",    GM_SITAR,                 "vina");
@@ -418,6 +419,7 @@ void HumInstrument::initialize(void) {
    afi("xylo",    GM_XYLOPHONE,             "xylophone");
    afi("zithr",   GM_CLAVI,                 "zither");
    afi("zurna",   GM_ACOUSTIC_GUITAR_NYLON, "zurna");
+
 }
 
 

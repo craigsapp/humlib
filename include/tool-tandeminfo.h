@@ -31,6 +31,7 @@ class Tool_tandeminfo : public HumTool {
 		public:
 			HTp token = NULL;
 			std::string description;
+			int count = 0;
 	};
 
 		         Tool_tandeminfo   (void);
@@ -48,6 +49,7 @@ class Tool_tandeminfo : public HumTool {
 		void     printEntries      (HumdrumFile& infile);
 		void     printEntriesHtml  (HumdrumFile& infile);
 		void     printEntriesText  (HumdrumFile& infile);
+		void     doCountAnalysis   (void);
 
 		std::string getDescription         (HTp token);
 		std::string checkForKeySignature   (const std::string& tok);
@@ -94,13 +96,19 @@ class Tool_tandeminfo : public HumTool {
 		bool m_descriptionQ = false;  // used with -m option (print description of interpretation)
 		bool m_locationQ    = false;  // used with -l option (print location of interpretation in file)
 		bool m_zeroQ        = false;  // used with -z option (location address by 0-index)
-		bool m_tableQ       = false;  // used with -t option (display results as inline HTML table)
+		bool m_tableQ       = false;  // used with -t option (display results as HTML table)
 		bool m_closeQ       = false;  // used with --close option (HTML details closed by default)
 		bool m_sortQ        = false;  // used with -s (sort entries alphabetically by tandem interpretation)
+		bool m_headerOnlyQ  = false;  // used with -h option (process only header interpretations)
+		bool m_bodyOnlyQ    = false;  // used with -H option (process only body interpretations)
+		bool m_countQ       = false;  // used with -c option (only show unique list with counts);
+		bool m_sortByCountQ = false;  // used with -c and -n options (sort from low to high count)
+		bool m_sortByReverseCountQ = false;  // used with -c and -N options (sort from high to low count)
 
 		std::string m_unknown = "unknown";
 
 		std::vector<Tool_tandeminfo::Entry> m_entries;
+		std::map<std::string, int> m_count;
 };
 
 // END_MERGE

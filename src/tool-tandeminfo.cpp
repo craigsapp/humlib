@@ -31,9 +31,14 @@ Tool_tandeminfo::Tool_tandeminfo(void) {
 	define("f|filename=b",                            "show filename");
 	define("d|description|m|meaning=b",               "give description of tandem interpretation");
 	define("u|unknown-tandem-interpretations-only=b", "do not show exclusive interpretation context");
+	define("h|header-only=b",                         "only process interpretations before first data line");
+	define("H|body-only=b",                           "only process interpretations after first data line");
 	define("l|location=b",                            "show location of interpretation in file (row, column)");
+	define("n|sort-by-count=b",                       "sort entries by unique counts from low to high (when -c is used)");
+	define("N|sort-by-reverse-count=b",               "sort entries by unique counts from high to low (when -c is used)");
+	define("c|count=b",                               "show only unique list of interpretations with counts");
 	define("s|sort=b",                                "sort entries alphabetically by tandem interpretation");
-	define("t|inline-table=b",                        "embed analysis withing input data");
+	define("t|table=b",                               "embed analysis withing input data");
 	define("x|exclusive-interpretations=b",           "do not show exclusive interpretation context");
 	define("z|zero-indexed-locations=b",              "locations are 0-indexed");
 	define("close=b",                                 "close <details> by default in HTML output");
@@ -92,21 +97,36 @@ bool Tool_tandeminfo::run(HumdrumFile& infile) {
 //
 
 void Tool_tandeminfo::initialize(void) {
-	m_exclusiveQ = getBoolean("exclusive-interpretations");
-	m_unknownQ   = getBoolean("unknown-tandem-interpretations-only");
-	m_filenameQ  = getBoolean("filename");
-	m_locationQ  = getBoolean("location");
-	m_tableQ     = getBoolean("inline-table");
-	m_zeroQ      = getBoolean("zero-indexed-locations");
-	m_closeQ     = getBoolean("close");
-	m_sortQ      = getBoolean("sort");
+	m_exclusiveQ  = getBoolean("exclusive-interpretations");
+	m_unknownQ    = getBoolean("unknown-tandem-interpretations-only");
+	m_filenameQ   = getBoolean("filename");
+	m_locationQ   = getBoolean("location");
+	m_countQ      = getBoolean("count");
+	m_tableQ      = getBoolean("table");
+	m_zeroQ       = getBoolean("zero-indexed-locations");
+	m_closeQ      = getBoolean("close");
+	m_sortQ       = getBoolean("sort");
+	m_headerOnlyQ = getBoolean("header-only");
+	m_bodyOnlyQ   = getBoolean("body-only");
+
+	m_sortByCountQ = getBoolean("sort-by-count");
+	m_sortByReverseCountQ = getBoolean("sort-by-reverse-count");
+
+	if (m_headerOnlyQ && m_bodyOnlyQ) {
+		m_headerOnlyQ = 0;
+		m_bodyOnlyQ   = 0;
+	}
+
+	if (m_countQ && m_locationQ) {
+		m_locationQ = false;
+	}
 
 	#ifndef __EMSCRIPTEN__
 		m_descriptionQ = getBoolean("description");
-		m_tableQ       = getBoolean("inline-table");
+		m_tableQ       = getBoolean("table");
 	#else
 		m_descriptionQ = !getBoolean("description");
-		m_tableQ       = !getBoolean("inline-table");
+		m_tableQ       = !getBoolean("table");
 	#endif
 }
 
@@ -119,12 +139,23 @@ void Tool_tandeminfo::initialize(void) {
 
 void Tool_tandeminfo::processFile(HumdrumFile& infile) {
 	m_entries.clear();
+	m_count.clear();
 
+	bool foundDataQ = false;
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (infile[i].isManipulator()) {
 			continue;
 		}
+		if (infile[i].isData()) {
+			foundDataQ = true;
+		}
 		if (!infile[i].isInterpretation()) {
+			continue;
+		}
+		if (foundDataQ && m_headerOnlyQ) {
+			break;
+		}
+		if (!foundDataQ && m_bodyOnlyQ) {
 			continue;
 		}
 		for (int j=0; j<infile[i].getFieldCount(); j++) {
@@ -168,6 +199,41 @@ void Tool_tandeminfo::printEntries(HumdrumFile& infile) {
 			return (aa < bb);
 		});
 	}
+	if (m_countQ) {
+		doCountAnalysis();
+	}
+
+	if (m_sortByCountQ) {
+
+		sort(m_entries.begin(), m_entries.end(), [](const Entry &a, const Entry &b) {
+			int anum = a.count;
+			int bnum = b.count;
+			if (anum != bnum) {
+				return anum < bnum;
+			}
+			string aa = a.token->getText();
+			string bb = b.token->getText();
+			std::transform(aa.begin(), aa.end(), aa.begin(), ::tolower);
+			std::transform(bb.begin(), bb.end(), bb.begin(), ::tolower);
+			return (aa < bb);
+		});
+
+	} else if (m_sortByReverseCountQ) {
+
+		sort(m_entries.begin(), m_entries.end(), [](const Entry &a, const Entry &b) {
+			int anum = a.count;
+			int bnum = b.count;
+			if (anum != bnum) {
+				return anum > bnum;
+			}
+			string aa = a.token->getText();
+			string bb = b.token->getText();
+			std::transform(aa.begin(), aa.end(), aa.begin(), ::tolower);
+			std::transform(bb.begin(), bb.end(), bb.begin(), ::tolower);
+			return (aa < bb);
+		});
+
+	}
 
 	if (m_tableQ) {
 		printEntriesHtml(infile);
@@ -180,27 +246,61 @@ void Tool_tandeminfo::printEntries(HumdrumFile& infile) {
 
 //////////////////////////////
 //
+// Tool_tandeminfo::doCountAnalysis --
+//
+
+void Tool_tandeminfo::doCountAnalysis(void) {
+	m_count.clear();
+	for (int i=0; i<(int)m_entries.size(); i++) {
+		m_count[m_entries[i].token->getText()] += 1;
+	}
+
+	// store counts in entries:
+	for (int i=0; i<(int)m_entries.size(); i++) {
+		m_entries[i].count = m_count[m_entries[i].token->getText()];
+	}
+}
+
+
+
+//////////////////////////////
+//
 // Tool_tandeminfo::printEntiesHtml -- Print as embedded HTML code at end of
 //    input score.
 //
 
 void Tool_tandeminfo::printEntriesHtml(HumdrumFile& infile) {
+	map<string, bool> processed;  // used for -c option
+
 	m_humdrum_text << infile;
 
 	m_humdrum_text << "!!@@BEGIN: PREHTML" << endl;
+
+	m_humdrum_text << "!!@SCRIPT:" << endl;
+	m_humdrum_text << "!!function gotoEditorCoordinate(row, col) {" << endl;
+	m_humdrum_text << "!!   if ((typeof EDITOR == 'undefined') || !EDITOR) {" << endl;
+	m_humdrum_text << "!!      return;" << endl;
+	m_humdrum_text << "!!   }" << endl;
+	m_humdrum_text << "!!   gotoLineFieldInEditor(row, col);" << endl;
+	m_humdrum_text << "!!}" << endl;
 	m_humdrum_text << "!!@CONTENT:" << endl;
 
 	m_humdrum_text << "!!<style>" << endl;
-	m_humdrum_text << "!!.PREHTML table.tandeminfo { border: 1px solid black; border-collapse: collapse; width:98%; }" << endl;
+	m_humdrum_text << "!!.PREHTML table.tandeminfo { border: 1px solid black; border-collapse: collapse; max-width: 98%; width:98%; }" << endl;
 	m_humdrum_text << "!!.PREHTML table.tandeminfo th, .PREHTML table.tandeminfo td { vertical-align: top; padding-right: 10px; } " << endl;
 	m_humdrum_text << "!!.PREHTML table.tandeminfo tr:hover td { background-color: #eee; } " << endl;
-	m_humdrum_text << "!!.PREHTML table.tandeminfo th.tandem, .PREHTML table.tandeminfo td { white-space: nowrap; padding-right: 30px; } " << endl;
+	m_humdrum_text << "!!.PREHTML table.tandeminfo th.tandem, .PREHTML table.tandeminfo td.tandem { white-space: nowrap; padding-right: 30px; } " << endl;
+	m_humdrum_text << "!!.PREHTML table.tandeminfo td.tandem { font-family:\"Courier New\", Courier, monospace; }" << endl;
+	m_humdrum_text << "!!.PREHTML table.tandeminfo td.exclusive { font-family:\"Courier New\", Courier, monospace; } " << endl;
 	m_humdrum_text << "!!.PREHTML table.tandeminfo th.location, .PREHTML table.tandeminfo td.location { padding-right: 30px; } " << endl;
+	m_humdrum_text << "!!.PREHTML table.tandeminfo th.count { padding-left: 20px; padding-right: 10px; } " << endl;
+	m_humdrum_text << "!!.PREHTML table.tandeminfo td.count { text-align: right; padding-right: 30px; } " << endl;
 	m_humdrum_text << "!!.PREHTML table.tandeminfo th.exclusive, .PREHTML table.tandeminfo td.exclusive { padding-right: 30px; } " << endl;
 	m_humdrum_text << "!!.PREHTML table.tandeminfo tr th:last-child, .PREHTML table.tandeminfo tr td:last-child { width:100%; padding-right: 0; } " << endl;
 	m_humdrum_text << "!!.PREHTML table.tandeminfo tr th:last-child, .PREHTML table.tandeminfo tr td:last-child { width:100%; padding-right: 0; } " << endl;
 	m_humdrum_text << "!!.PREHTML table.tandeminfo tr th, .PREHTML table.tandeminfo tr td { padding:1px; padding-left:3px; } " << endl;
-	m_humdrum_text << "!!.PREHTML span.unknown.tandeminfo { color:crimson; font-weight:bold; }" << endl;
+	m_humdrum_text << "!!.PREHTML span.unknown { color:crimson; font-weight:bold; }" << endl;
+	m_humdrum_text << "!!.PREHTML td.squeeze { letter-spacing:-0.5px; }" << endl;
 
 	m_humdrum_text << "!!.PREHTML details { position: relative; padding-left: 20px; }" << endl;
 	m_humdrum_text << "!!.PREHTML summary { font-size: 1.5rem; cursor: pointer; list-style: none; }" << endl;
@@ -215,54 +315,104 @@ void Tool_tandeminfo::printEntriesHtml(HumdrumFile& infile) {
 	}
 	m_humdrum_text << ">" << endl;;
 	m_humdrum_text << "!!<summary class='tandeminfo'>Tandem interpretation information</summary>" << endl;;
-	m_humdrum_text << "!!<table class='tandeminfo'>" << endl;
+	if (!m_entries.empty()) {
+		m_humdrum_text << "!!<table class='tandeminfo'>" << endl;
 
-	// print table header
-	m_humdrum_text << "!!<tr>" << endl;
-	if (m_locationQ) {
-		m_humdrum_text << "!!<th class='location'>Location</th>" << endl;
-	}
-	if (m_exclusiveQ) {
-		m_humdrum_text << "!!<th class='exclusive'>Exclusive</th>" << endl;
-	}
-	m_humdrum_text << "!!<th class='tandem' >Tandem</th>" << endl;
-	m_humdrum_text << "!!<th class='description'>Description</th>" << endl;
-	m_humdrum_text << "!!</tr>" << endl;
-
-	// print table entries
-	for (int i=0; i<(int)m_entries.size(); i++) {
-		HTp token = m_entries[i].token;
+		// print table header
 		m_humdrum_text << "!!<tr>" << endl;
-
 		if (m_locationQ) {
-			m_humdrum_text << "!!<td class='location'>" << endl;
-			m_humdrum_text << "!!(" << token->getLineNumber() << ", " << token->getFieldNumber() << ")" << endl;
-			m_humdrum_text << "!!</td>" << endl;
+			m_humdrum_text << "!!<th class='location'>Location</th>" << endl;
+		} else if (m_countQ) {
+			m_humdrum_text << "!!<th class='count'>Count</th>" << endl;
 		}
-
 		if (m_exclusiveQ) {
-			m_humdrum_text << "!!<td class='exclusive'>" << endl;
-			m_humdrum_text << "!!" << token->getDataType() << endl;
+			m_humdrum_text << "!!<th class='exclusive'>Exclusive</th>" << endl;
+		}
+		m_humdrum_text << "!!<th class='tandem' >Tandem</th>" << endl;
+		m_humdrum_text << "!!<th class='description'>Description</th>" << endl;
+		m_humdrum_text << "!!</tr>" << endl;
+
+		// print table entries
+		for (int i=0; i<(int)m_entries.size(); i++) {
+			HTp token = m_entries[i].token;
+			if (processed[token->getText()]) {
+				continue;
+			}
+			processed[token->getText()] = true;
+			m_humdrum_text << "!!<tr" << " onclick='gotoEditorCoordinate(" << token->getLineNumber() << ", " << token->getFieldNumber() << ")'>" << endl;
+
+			if (m_locationQ) {
+				m_humdrum_text << "!!<td class='location'>" << endl;
+				m_humdrum_text << "!!(" << token->getLineNumber() << ", " << token->getFieldNumber() << ")" << endl;
+				m_humdrum_text << "!!</td>" << endl;
+			} else if (m_countQ) {
+				m_humdrum_text << "!!<td class='count'>";
+				m_humdrum_text << m_count[token->getText()];
+				m_humdrum_text << "</td>" << endl;
+			}
+
+			if (m_exclusiveQ) {
+				m_humdrum_text << "!!<td class='exclusive'>" << endl;
+				m_humdrum_text << "!!" << token->getDataType() << endl;
+				m_humdrum_text << "!!</td>" << endl;
+			}
+
+			m_humdrum_text << "!!<td class='tandem";
+			if (m_entries[i].token->size() > 15) {
+				m_humdrum_text << " squeeze";
+			}
+			m_humdrum_text << "'>" << endl;
+			m_humdrum_text << "!!" << m_entries[i].token << endl;
 			m_humdrum_text << "!!</td>" << endl;
+
+			HumRegex hre;
+			m_humdrum_text << "!!<td class='description'>" << endl;
+			string description = m_entries[i].description;
+			hre.replaceDestructive(description, "&lt;", "<", "g");
+			hre.replaceDestructive(description, "&gt;", ">", "g");
+			hre.replaceDestructive(description, "<span class='tandeminfo unknown'>unknown</span>", "unknown");
+			m_humdrum_text << "!!" << description << endl;
+			m_humdrum_text << "!!</td>" << endl;
+
+			m_humdrum_text << "!!</tr>" << endl;
 		}
 
-		m_humdrum_text << "!!<td class='tandem'>" << endl;
-		m_humdrum_text << "!!" << m_entries[i].token << endl;
-		m_humdrum_text << "!!</td>" << endl;
-
-		HumRegex hre;
-		m_humdrum_text << "!!<td class='description'>" << endl;
-		string description = m_entries[i].description;
-		hre.replaceDestructive(description, "&lt;", "<", "g");
-		hre.replaceDestructive(description, "&gt;", ">", "g");
-		hre.replaceDestructive(description, "<span class='tandeminfo unknown'>unknown</span>", "unknown");
-		m_humdrum_text << "!!" << description << endl;
-		m_humdrum_text << "!!</td>" << endl;
-
-		m_humdrum_text << "!!</tr>" << endl;
+		m_humdrum_text << "!!</table>" << endl;
 	}
 
-	m_humdrum_text << "!!</table>" << endl;
+	// print relevant settings
+	vector<string> settings;
+	if (m_entries.empty()) {
+		settings.push_back("No interpretations found");
+	}
+	if (m_headerOnlyQ) {
+		settings.push_back("Only processing header interpretations");
+	}
+	if (m_bodyOnlyQ) {
+		settings.push_back("Only processing body interpretations");
+	}
+	if (m_unknownQ) {
+		settings.push_back("Displaying only unknown interpretations");
+	}
+	if ((!m_countQ) && m_sortQ && !m_entries.empty()) {
+		settings.push_back("List sorted alphabetically by interpretation");
+	} else if (m_countQ && m_sortByCountQ) {
+		settings.push_back("List sorted low to high by count");
+	} else if (m_countQ && m_sortByReverseCountQ) {
+		settings.push_back("List sorted high to low by count");
+	}
+	if (!settings.empty()) {
+		m_humdrum_text << "!!<ul>" << endl;
+		for (int i=0; i<(int)settings.size(); i++) {
+			m_humdrum_text << "!!<li>";
+			m_humdrum_text << settings[i];
+			m_humdrum_text << "</li>" << endl;
+		}
+		m_humdrum_text << "!!</ul>" << endl;
+	}
+
+
+
 	m_humdrum_text << "!!</details>" << endl;
 	m_humdrum_text << "!!@@END: PREHTML" << endl;
 }
@@ -725,25 +875,25 @@ string Tool_tandeminfo::checkForStemInfo(const string& tok) {
 
 	if (hre.search(tok, "^(\\d+)/left$")) {
 		string rhythm = hre.getMatch(1);
-		string output = rhythm + " notes always have stem up on the left";
+		string output = rhythm + "-rhythm notes always have stem up on the left";
 		return output;
 	}
 
 	if (hre.search(tok, "^(\\d+)\\\\left$")) {
 		string rhythm = hre.getMatch(1);
-		string output = rhythm + " notes always have stem down on the left";
+		string output = rhythm + "-rhythm notes always have stem down on the left";
 		return output;
 	}
 
 	if (hre.search(tok, "^(\\d+)/right$")) {
 		string rhythm = hre.getMatch(1);
-		string output = rhythm + " notes always have stem up on the right";
+		string output = rhythm + "-rhythm notes always have stem up on the right";
 		return output;
 	}
 
 	if (hre.search(tok, "^(\\d+)\\\\right$")) {
 		string rhythm = hre.getMatch(1);
-		string output = rhythm + " notes always have stem down on the right";
+		string output = rhythm + "-rhythm notes always have stem down on the right";
 		return output;
 	}
 
@@ -776,6 +926,7 @@ string Tool_tandeminfo::checkForStemInfo(const string& tok) {
 		string output = "all notes always have stem down on notehead center";
 		return output;
 	}
+	// there is also "middle" which is the same as "center";
 
 	return m_unknown;
 }
@@ -1291,7 +1442,7 @@ string Tool_tandeminfo::checkForClef(const string& tok) {
 		if (ctype == "X") {
 			output += "percussion";
 			if (!line.empty()) {
-				output += ", line: " + line;
+				output += ", line=" + line;
 			}
 			if (!octave.empty()) {
 				return m_unknown;
@@ -1301,7 +1452,7 @@ string Tool_tandeminfo::checkForClef(const string& tok) {
 			if (line.empty()) {
 				return m_unknown;
 			}
-			output += ", line: " + line;
+			output += ", line=" + line;
 			if (!octave.empty()) {
 				if (hre.search(octave, "^v+$")) {
 					output += ", octave displacement -" + to_string(octave.size());
@@ -1350,7 +1501,7 @@ string Tool_tandeminfo::checkForTimeSignature(const string& tok) {
 		string top = hre.getMatch(1);
 		string bot = hre.getMatch(2) + hre.getMatch(3);
 		string invisible = hre.getMatch(4);
-		string output = "time signature: top: " + top + ", bottom: " + bot;
+		string output = "time signature: top=" + top + ", bottom=" + bot;
 		if (invisible == "yy") {
 			output += ", invisible";
 		}
@@ -1374,13 +1525,13 @@ string Tool_tandeminfo::checkForMeter(const string& tok) {
 		string modori = hre.getMatch(1);
 		string meter = hre.getMatch(2);
 		if (meter == "c") {
-			return "meter (common time)";
+			return "meter: common time";
 		}
 		if (meter == "c\\|") {
-			return "meter (cut time)";
+			return "meter: cut time";
 		}
 		if (meter == "") {
-			return "meter (empty)";
+			return "meter: empty";
 		}
 		string output = "mensuration sign: " + meter;
 		return output;
@@ -1476,7 +1627,7 @@ string Tool_tandeminfo::checkForInstrumentInfo(const string& tok) {
 	if (hre.search(tok, "^(m|o)?I\"(.*)$")) {
 		string modori = hre.getMatch(1);
 		string name = hre.getMatch(2);
-		string output = "printable instrument name: \"";
+		string output = "text to display in fromt of staff on first system (usually instrument name): \"";
 		output += name;
 		output += "\"";
 		if (modori == "o") {
@@ -1484,13 +1635,16 @@ string Tool_tandeminfo::checkForInstrumentInfo(const string& tok) {
 		} else if (modori == "m") {
 			output += " (modern)";
 		}
+		if (hre.search(tok, "\\\\n")) {
+			output += ", \"\\n\" means a line break";
+		}
 		return output;
 	}
 
 	if (hre.search(tok, "^(m|o)?I'(.*)$")) {
 		string modori = hre.getMatch(1);
 		string abbr = hre.getMatch(2);
-		string output = "printable instrument abbreviation \"";
+		string output = "text to display in front of staff on secondary systems (usually instrument abbreviation): \"";
 		output += abbr;
 		output += "\"";
 		if (modori == "o") {
@@ -1498,15 +1652,73 @@ string Tool_tandeminfo::checkForInstrumentInfo(const string& tok) {
 		} else if (modori == "m") {
 			output += " (modern)";
 		}
+		if (hre.search(tok, "\\\\n")) {
+			output += ", \"\\n\" means a line break";
+		}
 		return output;
 	}
+
 
 	if (hre.search(tok, "^(m|o)?IC([^\\s]*)$")) {
 		string modori = hre.getMatch(1);
 		string iclass = hre.getMatch(2);
-		string output = "instrument class (";
-		output += iclass;
-		output += ")";
+		bool andy = false;
+		bool ory  = false;
+		vector<string> iclasses;
+		string tok2 = tok;
+		hre.replaceDestructive(tok2, "", "IC", "g");
+		if (hre.search(tok2, "&")) {
+			hre.split(iclasses, tok2, "&+");
+			andy = true;
+		} else if (hre.search(tok2, "\\|")) {
+			hre.split(iclasses, tok2, "\\++");
+			ory = true;
+		} else {
+			iclasses.push_back(tok2);
+		}
+		string output;
+		if (modori == "o") {
+			output += "(original) ";
+		} else if (modori == "m") {
+			output += "(modern) ";
+		}
+		output += "instrument class";
+		if (iclasses.size() != 1) {
+			output += "es";
+		}
+		output += ":";
+		for (int i=0; i<(int)iclasses.size(); i++) {
+			output += " ";
+			output += iclasses[i];
+			HumInstrument inst;
+			inst.setHumdrum(iclasses[i]);
+			string name;
+			if (iclasses[i] == "bras") {
+				name = "brass";
+			} else if (iclasses[i] == "idio") {
+				name = "percussion";
+			} else if (iclasses[i] == "klav") {
+				name = "keyboards";
+			} else if (iclasses[i] == "str") {
+				name = "strings";
+			} else if (iclasses[i] == "vox") {
+				name = "voices";
+			} else if (iclasses[i] == "ww") {
+				name = "woodwinds";
+			} else if (iclasses[i] != "") {
+				name = "unknown";
+			}
+			if (!name.empty()) {
+				output += "=\"" + name + "\"";
+			}
+			if (i < (int)iclasses.size() - 1) {
+				if (andy) {
+					output += " and ";
+				} else if (ory) {
+					output += " or ";
+				}
+			}
+		}
 		if (modori == "o") {
 			output += " (original)";
 		} else if (modori == "m") {
@@ -1515,12 +1727,65 @@ string Tool_tandeminfo::checkForInstrumentInfo(const string& tok) {
 		return output;
 	}
 
+
 	if (hre.search(tok, "^(m|o)?IG([^\\s]*)$")) {
 		string modori = hre.getMatch(1);
 		string group = hre.getMatch(2);
-		string output = "instrument group (";
-		output += group;
-		output += ")";
+		bool andy = false;
+		bool ory  = false;
+		vector<string> groups;
+		string tok2 = tok;
+		hre.replaceDestructive(tok2, "", "IG", "g");
+		if (hre.search(tok2, "&")) {
+			hre.split(groups, tok2, "&+");
+			andy = true;
+		} else if (hre.search(tok2, "\\|")) {
+			hre.split(groups, tok2, "\\++");
+			ory = true;
+		} else {
+			groups.push_back(tok2);
+		}
+		string output;
+		if (modori == "o") {
+			output += "(original) ";
+		} else if (modori == "m") {
+			output += "(modern) ";
+		}
+		output += "instrument group";
+		if (groups.size() != 1) {
+			output += "s";
+		}
+		output += ":";
+		for (int i=0; i<(int)groups.size(); i++) {
+			output += " ";
+			output += groups[i];
+			HumInstrument inst;
+			inst.setHumdrum(groups[i]);
+			string name;
+			if (groups[i] == "acmp") {
+				name = "=accompaniment";
+			} else if (groups[i] == "solo") {
+				name = "=solo";
+			} else if (groups[i] == "cont") {
+				name = "=basso-continuo";
+			} else if (groups[i] == "ripn") {
+				name = "=ripieno";
+			} else if (groups[i] == "conc") {
+				name = "=concertino";
+			} else if (groups[i] != "") {
+				name = "=unknown";
+			}
+			if (!name.empty()) {
+				output += "=\"" + name + "\"";
+			}
+			if (i < (int)groups.size() - 1) {
+				if (andy) {
+					output += " and ";
+				} else if (ory) {
+					output += " or ";
+				}
+			}
+		}
 		if (modori == "o") {
 			output += " (original)";
 		} else if (modori == "m") {
@@ -1532,9 +1797,8 @@ string Tool_tandeminfo::checkForInstrumentInfo(const string& tok) {
 	if (hre.search(tok, "^(m|o)?I#(\\d+)$")) {
 		string modori = hre.getMatch(1);
 		string number = hre.getMatch(2);
-		string output = "instrument number (";
+		string output = "sub-instrument number: ";
 		output += number;
-		output += ")";
 		if (modori == "o") {
 			output += " (original)";
 		} else if (modori == "m") {
@@ -1543,7 +1807,7 @@ string Tool_tandeminfo::checkForInstrumentInfo(const string& tok) {
 		return output;
 	}
 
-	if (hre.search(tok, "^(m|o)?I([a-z][a-zA-Z0-9_-]+)$")) {
+	if (hre.search(tok, "^(m|o)?I([a-z][a-zA-Z0-9_|&-]+)$")) {
 		string modori = hre.getMatch(1);
 		string code = hre.getMatch(2);
 		bool andy = false;
@@ -1560,25 +1824,29 @@ string Tool_tandeminfo::checkForInstrumentInfo(const string& tok) {
 		} else {
 			codes.push_back(tok2);
 		}
-
-		string output = "instrument code";
+		string output;
+		if (modori == "o") {
+			output += "(original) ";
+		} else if (modori == "m") {
+			output += "(modern) ";
+		}
+		output += "instrument code";
 		if (codes.size() != 1) {
 			output += "s";
 		}
 		output += ":";
-
 		for (int i=0; i<(int)codes.size(); i++) {
-			output += " (";
+			output += " ";
 			output += codes[i];
 			HumInstrument inst;
 			inst.setHumdrum(codes[i]);
 			string text = inst.getName();
 			if (!text.empty()) {
-				output += ": \"" + text + "\"";
+				output += "= \"" + text + "\"";
 			} else {
-				output += ": unknown code";
+				output += "= unknown code";
 			}
-			output += ")";
+			output += "";
 			if (i < (int)codes.size() - 1) {
 				if (andy) {
 					output += " and ";
@@ -1586,12 +1854,6 @@ string Tool_tandeminfo::checkForInstrumentInfo(const string& tok) {
 					output += " or ";
 				}
 			}
-		}
-
-		if (modori == "o") {
-			output += " (original)";
-		} else if (modori == "m") {
-			output += " (modern)";
 		}
 
 		return output;
@@ -1611,12 +1873,12 @@ string Tool_tandeminfo::checkForInstrumentInfo(const string& tok) {
 //     which are very uncommon in real music.  Standard key signatures:
 //
 //     *k[f#c#g#d#a#e#b#]
-//     *k[c#g#d#a#e#b#]
-//     *k[g#d#a#e#b#]
-//     *k[d#a#e#b#]
-//     *k[a#e#b#]
-//     *k[e#b#]
-//     *k[b#]
+//     *k[f#c#g#d#a#e#]
+//     *k[f#c#g#d#a#]
+//     *k[f#c#g#d#]
+//     *k[f#c#g#]
+//     *k[f#c#]
+//     *k[f#]
 //     *k[]
 //     *k[b-]
 //     *k[b-e-]
@@ -1638,47 +1900,93 @@ string Tool_tandeminfo::checkForKeySignature(const string& tok) {
 	}
 
 	if (tok == "k[]") {
-		return "key signature, no sharps or flats";
+		return "key signature: no sharps or flats";
 	}
 	if (tok == "ok[]") {
-		return "original key signature, no sharps or flats";
+		return "original key signature: no sharps or flats";
 	}
 	if (tok == "mk[]") {
-		return "modern key signature, no sharps or flats";
+		return "modern key signature: no sharps or flats";
 	}
 
 	HumRegex hre;
-	if (hre.search(tok, "^(?:m|o)?k\\[([a-gA-G]+[n#-]{1,2})+\\]$")) {
+	string modori;
+	if (hre.search(tok, "^([m|o])k\\[")) {
+		modori = hre.getMatch(1);
+	}
+
+	if (hre.search(tok, "^(?:m|o)?k\\[(([a-gA-G]+[n#-]{1,2})+)\\]$")) {
 		string modori;
+		string pcs = hre.getMatch(1);
+		bool standardQ = false;
+		if (pcs == "f#") {
+			standardQ = true;
+		} else if (pcs == "b-") {
+			standardQ = true;
+		} else if (pcs == "f#c#") {
+			standardQ = true;
+		} else if (pcs == "b-e-") {
+			standardQ = true;
+		} else if (pcs == "f#c#g#") {
+			standardQ = true;
+		} else if (pcs == "b-e-a-") {
+			standardQ = true;
+		} else if (pcs == "f#c#g#d#") {
+			standardQ = true;
+		} else if (pcs == "b-e-a-d-") {
+			standardQ = true;
+		} else if (pcs == "f#c#g#d#a#") {
+			standardQ = true;
+		} else if (pcs == "b-e-a-d-g-") {
+			standardQ = true;
+		} else if (pcs == "f#c#g#d#a#e#") {
+			standardQ = true;
+		} else if (pcs == "b-e-a-d-g-c-") {
+			standardQ = true;
+		} else if (pcs == "f#c#g#d#a#e#b#") {
+			standardQ = true;
+		} else if (pcs == "b-e-a-d-g-c-f-") {
+			standardQ = true;
+		}
+
 		string output;
-		if (tok[0] == 'o') {
-			output = "original ";
-		} else if (tok[0] == 'm') {
+		if (modori == "m") {
 			output = "modern ";
+		} else if (modori == "o") {
+			output = "original ";
 		}
 		output += "key signature";
+		if (!standardQ) {
+			output += " (<span class='unknown'>non-standard</span>)";
+		}
+		output += ": ";
 		int flats = 0;
 		int sharps = 0;
 		int naturals = 0;
 		int doubleflats = 0;
 		int doublesharps = 0;
-		for (int i=0; i<hre.getMatchCount(); i++) {
-			string note = hre.getMatch(i+1);
-			if (note.find("##") != string::npos) {
+		vector<string> accidentals;
+		hre.split(accidentals, pcs, "[a-gA-G]");
+		for (int i=0; i<(int)accidentals.size(); i++) {
+			if (accidentals[i] == "##") {
 				doublesharps++;
-			} else if (note.find("--") != string::npos) {
+			} else if (accidentals[i] == "--") {
 				doubleflats++;
-			} else if (note.find("#") != string::npos) {
+			} else if (accidentals[i] == "#") {
 				sharps++;
-			} else if (note.find("-") != string::npos) {
+			} else if (accidentals[i] == "-") {
 				flats++;
-			} else if (note.find("n") != string::npos) {
+			} else if (accidentals[i] == "n") {
 				naturals++;
 			}
 		}
 
+		bool foundQ = false;
 		if (sharps) {
-			output += ", ";
+			if (foundQ) {
+				output += ", ";
+			}
+			foundQ = true;
 			if (sharps == 1) {
 				output += "1 sharp";
 			} else {
@@ -1687,7 +1995,10 @@ string Tool_tandeminfo::checkForKeySignature(const string& tok) {
 		}
 
 		if (flats) {
-			output += ", ";
+			if (foundQ) {
+				output += ", ";
+			}
+			foundQ = true;
 			if (flats == 1) {
 				output += "1 flat";
 			} else {
@@ -1696,7 +2007,10 @@ string Tool_tandeminfo::checkForKeySignature(const string& tok) {
 		}
 
 		if (naturals) {
-			output += ", ";
+			if (foundQ) {
+				output += ", ";
+			}
+			foundQ = true;
 			if (naturals == 1) {
 				output += "1 natural";
 			} else {
@@ -1705,7 +2019,10 @@ string Tool_tandeminfo::checkForKeySignature(const string& tok) {
 		}
 
 		if (doublesharps) {
-			output += ", ";
+			if (foundQ) {
+				output += ", ";
+			}
+			foundQ = true;
 			if (doublesharps == 1) {
 				output += "1 double sharp";
 			} else {
@@ -1714,7 +2031,10 @@ string Tool_tandeminfo::checkForKeySignature(const string& tok) {
 		}
 
 		if (doubleflats) {
-			output += ", ";
+			if (foundQ) {
+				output += ", ";
+			}
+			foundQ = true;
 			if (doubleflats == 1) {
 				output += "1 double flat";
 			} else {

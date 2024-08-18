@@ -606,6 +606,7 @@ void Tool_rphrase::printEmbeddedVoiceInfo(vector<Tool_rphrase::VoiceInfo>& voice
 	m_humdrum_text << "!!   }" << endl;
 
 	m_humdrum_text << "!!@CONTENT:\n";
+
 	if (m_compositeQ) {
 		m_humdrum_text << "!!<style> .PREHTML .composite ul .rest { color: #ccc; } </style>" << endl;
 		m_humdrum_text << "!!<style> .PREHTML .composite ul .measure { color: #ccc; } </style>" << endl;
