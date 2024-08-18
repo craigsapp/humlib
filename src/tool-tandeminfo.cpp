@@ -102,9 +102,11 @@ void Tool_tandeminfo::initialize(void) {
 	m_sortQ      = getBoolean("sort");
 
 	#ifndef __EMSCRIPTEN__
-		m_descriptionQ   = getBoolean("description");
+		m_descriptionQ = getBoolean("description");
+		m_tableQ       = getBoolean("inline-table");
 	#else
-		m_descriptionQ   = !getBoolean("description");
+		m_descriptionQ = !getBoolean("description");
+		m_tableQ       = !getBoolean("inline-table");
 	#endif
 }
 
