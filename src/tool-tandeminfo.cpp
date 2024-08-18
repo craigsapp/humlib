@@ -1588,7 +1588,10 @@ string Tool_tandeminfo::checkForLabelInfo(const string& tok) {
 	if (hre.search(tok, "^>([^[\\[\\]]+)(\\[.*\\]$)")) {
 		string expansionName = hre.getMatch(1);
 		string list = hre.getMatch(2);
-		string output = "alternate expansion list: label: " + expansionName;
+		string output = "alternate expansion list: label=" + expansionName;
+		if (expansionName == "norep") {
+			output += "(meaning: no repeats, i.e., take only second endings)";
+		}
 		output += ", expansion list: " + list;
 		return output;
 	}
