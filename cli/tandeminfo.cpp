@@ -42,6 +42,7 @@ string checkForTransposition  (const string& tok);
 string checkForGrp            (const string& tok);
 string checkForStria          (const string& tok);
 string checkForFont           (const string& tok);
+string checkForVerseLabels    (const string& tok);
 
 bool exclusiveQ = true;   // used with -X option (don't print exclusive interpretation)
 bool unknownQ   = false;  // used with -u option (print only unknown tandem interpretations)
@@ -262,6 +263,33 @@ string getMeaning(HTp token) {
 	meaning = checkForFont(tok);
 	if (meaning != "unknown") {
 		return meaning;
+	}
+
+	meaning = checkForVerseLabels(tok);
+	if (meaning != "unknown") {
+		return meaning;
+	}
+
+	return "unknown";
+}
+
+
+
+//////////////////////////////
+//
+// checkForVerseLabels -- Extended tandem interpretations (used by verovio
+//      for visual rendeing of notation).
+//
+
+string checkForVerseLabels(const string& tok) {
+	HumRegex hre;
+	if (hre.search(tok, "^v:(.*)$")) {
+		string output = "verse label \"" + hre.getMatch(1) + "\"";
+		return output;
+	}
+	if (hre.search(tok, "^vv:(.*)$")) {
+		string output = "verse label \"" + hre.getMatch(1) + "\", repeated after each system break";
+		return output;
 	}
 
 	return "unknown";
@@ -754,6 +782,12 @@ string checkForClef(const string& tok) {
 
 string checkForTimeSignature(const string& tok) {
 	HumRegex hre;
+	if (tok == "MX") {
+		return "unmeasured music time signature";
+	}
+	if (hre.search(tok, "^MX/(\\d+)(%\\d+)?")) {
+		string output = "unmeasured music with beat " + hre.getMatch(1) + hre.getMatch(2);
+	}
 	if (hre.search(tok, "^M(\\d+)/(\\d+)(%\\d+)?$")) {
 		string top = hre.getMatch(1);
 		string bot = hre.getMatch(2) + hre.getMatch(3);
