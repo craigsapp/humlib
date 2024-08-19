@@ -30,7 +30,7 @@ namespace hum {
 Tool_tandeminfo::Tool_tandeminfo(void) {
 
 	define("c|count=b",                               "show only unique list of interpretations with counts");
-	define("d|description|m|meaning=b",               "give descriptions of tandem interpretations");
+	define("D|no-description|M|no-meaning=b",         "do not include descriptions of tandem interpretations in output");
 	define("f|filename=b",                            "show filename");
 	define("h|header-only=b",                         "only process interpretations before first data line");
 	define("H|body-only=b",                           "only process interpretations after first data line");
@@ -109,6 +109,7 @@ void Tool_tandeminfo::initialize(void) {
 	m_sortQ       = getBoolean("sort");
 	m_headerOnlyQ = getBoolean("header-only");
 	m_bodyOnlyQ   = getBoolean("body-only");
+	m_descriptionQ = !getBoolean("no-description");
 
 	m_sortByCountQ = getBoolean("sort-by-count");
 	m_sortByReverseCountQ = getBoolean("sort-by-reverse-count");
@@ -122,11 +123,10 @@ void Tool_tandeminfo::initialize(void) {
 		m_locationQ = false;
 	}
 
+	// table option turned on by default for web interfaces:
 	#ifndef __EMSCRIPTEN__
-		m_descriptionQ = getBoolean("description");
 		m_tableQ       = getBoolean("table");
 	#else
-		m_descriptionQ = !getBoolean("description");
 		m_tableQ       = !getBoolean("table");
 	#endif
 }
@@ -165,7 +165,7 @@ void Tool_tandeminfo::processFile(HumdrumFile& infile) {
 				continue;
 			}
 			string description;
-			if (m_descriptionQ) {
+			if (m_descriptionQ || m_unknownQ) {
 				description = getDescription(token);
 				if (m_unknownQ) {
 					HumRegex hre;
@@ -369,9 +369,10 @@ void Tool_tandeminfo::printEntriesHtml(HumdrumFile& infile) {
 			HumRegex hre;
 			m_humdrum_text << "!!<td class='description'>" << endl;
 			string description = m_entries[i].description;
-			// hre.replaceDestructive(description, "&lt;", "<", "g");
-			// hre.replaceDestructive(description, "&gt;", ">", "g");
+			hre.replaceDestructive(description, "&lt;", "<", "g");
+			hre.replaceDestructive(description, "&gt;", ">", "g");
 			hre.replaceDestructive(description, "<span class='tandeminfo unknown'>unknown</span>", "unknown");
+			hre.replaceDestructive(description, "<span class='tandeminfo unknown'>non-standard</span>", "non-standard");
 			m_humdrum_text << "!!" << description << endl;
 			m_humdrum_text << "!!</td>" << endl;
 
@@ -383,9 +384,6 @@ void Tool_tandeminfo::printEntriesHtml(HumdrumFile& infile) {
 
 	// print relevant settings
 	vector<string> settings;
-	if (m_entries.empty()) {
-		settings.push_back("No interpretations found");
-	}
 	if (m_headerOnlyQ) {
 		settings.push_back("Only processing header interpretations");
 	}
@@ -393,14 +391,19 @@ void Tool_tandeminfo::printEntriesHtml(HumdrumFile& infile) {
 		settings.push_back("Only processing body interpretations");
 	}
 	if (m_unknownQ) {
-		settings.push_back("Displaying only unknown interpretations");
+		settings.push_back("Only processing unknown interpretations");
 	}
-	if ((!m_countQ) && m_sortQ && !m_entries.empty()) {
-		settings.push_back("List sorted alphabetically by interpretation");
-	} else if (m_countQ && m_sortByCountQ) {
-		settings.push_back("List sorted low to high by count");
-	} else if (m_countQ && m_sortByReverseCountQ) {
-		settings.push_back("List sorted high to low by count");
+	if (m_entries.empty()) {
+		settings.push_back("No interpretations found");
+	}
+	if (!m_entries.empty()) {
+		if ((!m_countQ) && m_sortQ && !m_entries.empty()) {
+			settings.push_back("List sorted alphabetically by interpretation");
+		} else if (m_countQ && m_sortByCountQ) {
+			settings.push_back("List sorted low to high by count");
+		} else if (m_countQ && m_sortByReverseCountQ) {
+			settings.push_back("List sorted high to low by count");
+		}
 	}
 	if (!settings.empty()) {
 		m_humdrum_text << "!!<ul>" << endl;
@@ -411,8 +414,6 @@ void Tool_tandeminfo::printEntriesHtml(HumdrumFile& infile) {
 		}
 		m_humdrum_text << "!!</ul>" << endl;
 	}
-
-
 
 	m_humdrum_text << "!!</details>" << endl;
 	m_humdrum_text << "!!@@END: PREHTML" << endl;
@@ -426,10 +427,18 @@ void Tool_tandeminfo::printEntriesHtml(HumdrumFile& infile) {
 //
 
 void Tool_tandeminfo::printEntriesText(HumdrumFile& infile) {
+	map<string, bool> processed;  // used for -c option
+
 	for (int i=0; i<(int)m_entries.size(); i++) {
 		HTp token          = m_entries[i].token;
-		string description = m_entries[i].description;
+		if (m_countQ && processed[token->getText()]) {
+			continue;
+		}
+		processed[token->getText()] = true;
 
+		string description = m_entries[i].description;
+		HumRegex hre;
+		hre.replaceDestructive(description, "", "</?span.*?>", "g");
 		if (m_filenameQ) {
 			m_free_text << infile.getFilename() << "\t";
 		}
@@ -443,6 +452,8 @@ void Tool_tandeminfo::printEntriesText(HumdrumFile& infile) {
 				int col = token->getFieldNumber();
 				m_free_text << "(" << row << ", " << col << ")" << "\t";
 			}
+		} else if (m_countQ) {
+			m_free_text << m_count[token->getText()] << "\t";
 		}
 		if (m_exclusiveQ) {
 			m_free_text << token->getDataType() << "\t";
@@ -700,6 +711,7 @@ string Tool_tandeminfo::checkForColor(const string& tok) {
 			output = "named ";
 		}
 		output += " color";
+		return output;
 	}
 
 	return m_unknown;
@@ -1966,7 +1978,7 @@ string Tool_tandeminfo::checkForKeySignature(const string& tok) {
 		}
 		output += "key signature";
 		if (!standardQ) {
-			output += " (<span class='unknown'>non-standard</span>)";
+			output += " (non-standard)";
 		}
 		output += ": ";
 		int flats = 0;
