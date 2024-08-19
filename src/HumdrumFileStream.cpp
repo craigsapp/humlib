@@ -317,7 +317,6 @@ restarting:
 		return 0;
 	}
 
-
 	int foundUniversalQ = 0;
 
 	// Start reading the input stream.  If !!!!SEGMENT: universal comment
@@ -452,7 +451,7 @@ restarting:
 	contents.str(""); // empty any contents in buffer
 	contents.clear(); // reset error flags in buffer
 
-	for (int i = 0; i < (int)m_universals.size(); i++) {
+	for (int i=0; i < (int)m_universals.size(); i++) {
 		if (m_universals[i].compare(0, 11, "!!!!filter:") == 0) {
 			continue;
 		}
@@ -460,7 +459,12 @@ restarting:
 	}
 
 	contents << buffer.str();
+	string oldfilename = infile.getFilename();
 	infile.readNoRhythm(contents);
+	string newfilename = infile.getFilename();
+	if (newfilename.empty() && !oldfilename.empty()) {
+		infile.setFilename(oldfilename);
+	}
 	infile.setFilenameFromSegment();
 
 	return 1;
