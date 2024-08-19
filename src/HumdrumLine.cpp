@@ -1300,7 +1300,7 @@ int HumdrumLine::createTokensFromLine(void) {
 		token = new HumdrumToken();
 		token->setOwner(this);
 		m_tokens.push_back(token);
-		m_tokens.push_back(0);
+		m_tabs.push_back(0);
 	} else if (this->compare(0, 2, "!!") == 0) {
 		token = new HumdrumToken(this->c_str());
 		token->setOwner(this);
