@@ -291,7 +291,7 @@ void Tool_tandeminfo::printEntriesHtml(HumdrumFile& infile) {
 	m_humdrum_text << "!!.PREHTML table.tandeminfo th, .PREHTML table.tandeminfo td { vertical-align: top; padding-right: 10px; } " << endl;
 	m_humdrum_text << "!!.PREHTML table.tandeminfo tr:hover td { background-color: #eee; } " << endl;
 	m_humdrum_text << "!!.PREHTML table.tandeminfo th.tandem, .PREHTML table.tandeminfo td.tandem { white-space: nowrap; padding-right: 30px; } " << endl;
-	m_humdrum_text << "!!.PREHTML table.tandeminfo td.tandem { font-family:\"Courier New\", Courier, monospace; }" << endl;
+	m_humdrum_text << "!!.PREHTML table.tandeminfo .tandem { font-family:\"Courier New\", Courier, monospace; }" << endl;
 	m_humdrum_text << "!!.PREHTML table.tandeminfo td.exclusive { font-family:\"Courier New\", Courier, monospace; } " << endl;
 	m_humdrum_text << "!!.PREHTML table.tandeminfo th.location, .PREHTML table.tandeminfo td.location { padding-right: 30px; } " << endl;
 	m_humdrum_text << "!!.PREHTML table.tandeminfo th.count { padding-left: 20px; padding-right: 10px; } " << endl;
@@ -336,7 +336,7 @@ void Tool_tandeminfo::printEntriesHtml(HumdrumFile& infile) {
 		// print table entries
 		for (int i=0; i<(int)m_entries.size(); i++) {
 			HTp token = m_entries[i].token;
-			if (processed[token->getText()]) {
+			if (m_countQ && processed[token->getText()]) {
 				continue;
 			}
 			processed[token->getText()] = true;
@@ -369,8 +369,8 @@ void Tool_tandeminfo::printEntriesHtml(HumdrumFile& infile) {
 			HumRegex hre;
 			m_humdrum_text << "!!<td class='description'>" << endl;
 			string description = m_entries[i].description;
-			hre.replaceDestructive(description, "&lt;", "<", "g");
-			hre.replaceDestructive(description, "&gt;", ">", "g");
+			// hre.replaceDestructive(description, "&lt;", "<", "g");
+			// hre.replaceDestructive(description, "&gt;", ">", "g");
 			hre.replaceDestructive(description, "<span class='tandeminfo unknown'>unknown</span>", "unknown");
 			m_humdrum_text << "!!" << description << endl;
 			m_humdrum_text << "!!</td>" << endl;
@@ -953,16 +953,20 @@ string Tool_tandeminfo::checkForLanguage(const string& tok) {
 		string code = hre.getMatch(1);
 		string name = Convert::getLanguageName(code);
 		if (name.empty()) {
-			return "language code " + code +  " (unknown)";
+			string output = "language code <span class='tandem'>" + code +  "</span>=unknown";
+			return output;
 		}
 		string output = "language code";
 		if (code.size() == 2) {
-			output = "ISO 639-3 two-letter language code (";
+			output = "ISO 639-3 two-letter language code: ";
 		} else if (code.size() == 3) {
-			output = "ISO 639-3 three-letter language code (";
+			output = "ISO 639-3 three-letter language code: ";
 		}
+		output += "<span class='tandem'>";
+		output += code;
+		output += "</span>=\"";
 		output += name;
-		output += ")";
+		output += "\"";
 		return output;
 	}
 
@@ -1840,8 +1844,9 @@ string Tool_tandeminfo::checkForInstrumentInfo(const string& tok) {
 		}
 		output += ":";
 		for (int i=0; i<(int)codes.size(); i++) {
-			output += " ";
+			output += " <span class='tandem'>";
 			output += codes[i];
+			output += "</span>";
 			HumInstrument inst;
 			inst.setHumdrum(codes[i]);
 			string text = inst.getName();
