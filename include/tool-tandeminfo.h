@@ -104,6 +104,7 @@ class Tool_tandeminfo : public HumTool {
 		bool m_countQ       = false;  // used with -c option (only show unique list with counts);
 		bool m_sortByCountQ = false;  // used with -c and -n options (sort from low to high count)
 		bool m_sortByReverseCountQ = false;  // used with -c and -N options (sort from high to low count)
+		bool m_humdrumQ     = false;  // used with --humdrum option (output data formatted with Humdrum syntax)
 
 		std::string m_unknown = "unknown";
 

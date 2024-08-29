@@ -42,7 +42,10 @@ Tool_tandeminfo::Tool_tandeminfo(void) {
 	define("u|unknown-tandem-interpretations-only=b", "only list unknown interpretations");
 	define("x|exclusive-interpretations=b",           "show exclusive interpretation context");
 	define("z|zero-indexed-locations=b",              "locations are 0-indexed");
+
 	define("close=b",                                 "close <details> by default in HTML output");
+	define("humdrum|hmd=b",                           "textual output formatted with Humdrum syntax");
+
 	m_entries.reserve(1000);
 }
 
@@ -98,19 +101,19 @@ bool Tool_tandeminfo::run(HumdrumFile& infile) {
 //
 
 void Tool_tandeminfo::initialize(void) {
-	m_exclusiveQ  = getBoolean("exclusive-interpretations");
-	m_unknownQ    = getBoolean("unknown-tandem-interpretations-only");
-	m_filenameQ   = getBoolean("filename");
-	m_locationQ   = getBoolean("location");
-	m_countQ      = getBoolean("count");
-	m_tableQ      = getBoolean("table");
-	m_zeroQ       = getBoolean("zero-indexed-locations");
-	m_closeQ      = getBoolean("close");
-	m_sortQ       = getBoolean("sort");
-	m_headerOnlyQ = getBoolean("header-only");
-	m_bodyOnlyQ   = getBoolean("body-only");
+	m_exclusiveQ   = getBoolean("exclusive-interpretations");
+	m_unknownQ     = getBoolean("unknown-tandem-interpretations-only");
+	m_filenameQ    = getBoolean("filename");
+	m_locationQ    = getBoolean("location");
+	m_countQ       = getBoolean("count");
+	m_tableQ       = getBoolean("table");
+	m_zeroQ        = getBoolean("zero-indexed-locations");
+	m_sortQ        = getBoolean("sort");
+	m_headerOnlyQ  = getBoolean("header-only");
+	m_bodyOnlyQ    = getBoolean("body-only");
+	m_closeQ       = getBoolean("close");
+	m_humdrumQ     = getBoolean("humdrum");
 	m_descriptionQ = !getBoolean("no-description");
-
 	m_sortByCountQ = getBoolean("sort-by-count");
 	m_sortByReverseCountQ = getBoolean("sort-by-reverse-count");
 
@@ -293,7 +296,7 @@ void Tool_tandeminfo::printEntriesHtml(HumdrumFile& infile) {
 	m_humdrum_text << "!!.PREHTML table.tandeminfo th.tandem, .PREHTML table.tandeminfo td.tandem { white-space: nowrap; padding-right: 30px; } " << endl;
 	m_humdrum_text << "!!.PREHTML table.tandeminfo .tandem { font-family:\"Courier New\", Courier, monospace; }" << endl;
 	m_humdrum_text << "!!.PREHTML table.tandeminfo td.exclusive { font-family:\"Courier New\", Courier, monospace; } " << endl;
-	m_humdrum_text << "!!.PREHTML table.tandeminfo th.location, .PREHTML table.tandeminfo td.location { padding-right: 30px; } " << endl;
+	m_humdrum_text << "!!.PREHTML table.tandeminfo th.location, .PREHTML table.tandeminfo td.location { white-space: nowrap; padding-right: 30px; } " << endl;
 	m_humdrum_text << "!!.PREHTML table.tandeminfo th.count { padding-left: 20px; padding-right: 10px; } " << endl;
 	m_humdrum_text << "!!.PREHTML table.tandeminfo td.count { text-align: right; padding-right: 30px; } " << endl;
 	m_humdrum_text << "!!.PREHTML table.tandeminfo th.exclusive, .PREHTML table.tandeminfo td.exclusive { padding-right: 30px; } " << endl;
@@ -369,8 +372,8 @@ void Tool_tandeminfo::printEntriesHtml(HumdrumFile& infile) {
 			HumRegex hre;
 			m_humdrum_text << "!!<td class='description'>" << endl;
 			string description = m_entries[i].description;
-			hre.replaceDestructive(description, "&lt;", "<", "g");
-			hre.replaceDestructive(description, "&gt;", ">", "g");
+			// hre.replaceDestructive(description, "&lt;", "<", "g");
+			// hre.replaceDestructive(description, "&gt;", ">", "g");
 			hre.replaceDestructive(description, "<span class='tandeminfo unknown'>unknown</span>", "unknown");
 			hre.replaceDestructive(description, "<span class='tandeminfo unknown'>non-standard</span>", "non-standard");
 			m_humdrum_text << "!!" << description << endl;
@@ -429,6 +432,25 @@ void Tool_tandeminfo::printEntriesHtml(HumdrumFile& infile) {
 void Tool_tandeminfo::printEntriesText(HumdrumFile& infile) {
 	map<string, bool> processed;  // used for -c option
 
+	if (m_humdrumQ) {
+		if (m_locationQ) {
+			m_free_text << "**loc" << "\t";
+		} else if (m_countQ) {
+			m_free_text << "**count" << "\t";
+		}
+		if (m_filenameQ) {
+			m_free_text << "**file" << "\t";
+		}
+		if (m_exclusiveQ) {
+			m_free_text << "**exinterp" << "\t";
+		}
+		m_free_text << "**tandem";
+		if (m_descriptionQ) {
+			m_free_text << "\t" << "**info";
+		}
+		m_free_text << endl;
+	}
+
 	for (int i=0; i<(int)m_entries.size(); i++) {
 		HTp token          = m_entries[i].token;
 		if (m_countQ && processed[token->getText()]) {
@@ -456,11 +478,40 @@ void Tool_tandeminfo::printEntriesText(HumdrumFile& infile) {
 			m_free_text << m_count[token->getText()] << "\t";
 		}
 		if (m_exclusiveQ) {
-			m_free_text << token->getDataType() << "\t";
+			string exinterp = token->getDataType();
+			if (m_humdrumQ) {
+				exinterp = exinterp.substr(2);
+			}
+			m_free_text << exinterp << "\t";
 		}
-		m_free_text << token;
+		if (m_humdrumQ) {
+			string text = token->getText();
+			text = text.substr(1);
+			m_free_text << text;
+		} else {
+			m_free_text << token;
+		}
 		if (m_descriptionQ) {
 			m_free_text << "\t" << description;
+		}
+		m_free_text << endl;
+	}
+
+	if (m_humdrumQ) {
+		if (m_locationQ) {
+			m_free_text << "*-" << "\t";
+		} else if (m_countQ) {
+			m_free_text << "*-" << "\t";
+		}
+		if (m_filenameQ) {
+			m_free_text << "*-" << "\t";
+		}
+		if (m_exclusiveQ) {
+			m_free_text << "*-" << "\t";
+		}
+		m_free_text << "*-";
+		if (m_descriptionQ) {
+			m_free_text << "\t" << "*-";
 		}
 		m_free_text << endl;
 	}
@@ -1518,7 +1569,19 @@ string Tool_tandeminfo::checkForTimeSignature(const string& tok) {
 		string top = hre.getMatch(1);
 		string bot = hre.getMatch(2) + hre.getMatch(3);
 		string invisible = hre.getMatch(4);
-		string output = "time signature: top=" + top + ", bottom=" + bot;
+		string output = "time signature: top=";
+		output += "<span class='tandem'>";
+		output += top;
+		output += "</span>";
+		output += ", bottom=";
+		output += "<span class='tandem'>";
+		output += bot;
+		output += "</span>";
+		if (bot == "3%2") {
+			output += " (triplet semibreve)";
+		} else if (bot == "3%4") {
+			output += " (triplet breve)";
+		}
 		if (invisible == "yy") {
 			output += ", invisible";
 		}
@@ -1544,13 +1607,30 @@ string Tool_tandeminfo::checkForMeter(const string& tok) {
 		if (meter == "c") {
 			return "meter: common time";
 		}
-		if (meter == "c\\|") {
+		if (meter == "c|") {
 			return "meter: cut time";
 		}
 		if (meter == "") {
 			return "meter: empty";
 		}
-		string output = "mensuration sign: " + meter;
+		string output = "mensuration sign: ";
+		if (meter == "O") {
+			output += "circle";
+		} else if (meter == "O|") {
+			output += "cut-circle";
+		} else if (meter == "C") {
+			output += "c";
+		} else if (meter == "C|") {
+			output += "cut-c";
+		} else if (meter == "Cr") {
+			output += "reverse-c";
+		} else if (meter == "C.") {
+			output += "c-dot";
+		} else if (meter == "O.") {
+			output += "circle-dot";
+		} else {
+			output += meter;
+		}
 		return output;
 	}
 
@@ -1597,16 +1677,20 @@ string Tool_tandeminfo::checkForLabelInfo(const string& tok) {
 
 	if (hre.search(tok, "^>(\\[.*\\]$)")) {
 		string list = hre.getMatch(1);
-		string output = "default expansion list: " + list;
+		string output = "default expansion list: ";
+		output += "<span class='tandem'>";
+		output += list;
+		output += "</span>";
 		return output;
 	}
 
 	if (hre.search(tok, "^>([^[\\[\\]]+)(\\[.*\\]$)")) {
 		string expansionName = hre.getMatch(1);
 		string list = hre.getMatch(2);
-		string output = "alternate expansion list: label=" + expansionName;
+		string output = "alternate expansion list: label=";
+		output += "<span class='tandem'>" + expansionName + "</span>";
 		if (expansionName == "norep") {
-			output += "(meaning: no repeats, i.e., take only second endings)";
+			output += " (meaning: no repeats, i.e., take only second endings)";
 		}
 		output += ", expansion list: " + list;
 		return output;
@@ -1614,7 +1698,10 @@ string Tool_tandeminfo::checkForLabelInfo(const string& tok) {
 
 	if (hre.search(tok, "^>([^\\[\\]]+)$")) {
 		string label = hre.getMatch(1);
-		string output = "expansion label: " + label;
+		string output = "expansion label: ";
+		output += "<span class='tandem'>";
+		output += label;
+		output += "</span>";
 		return output;
 	}
 
@@ -1709,7 +1796,9 @@ string Tool_tandeminfo::checkForInstrumentInfo(const string& tok) {
 		output += ":";
 		for (int i=0; i<(int)iclasses.size(); i++) {
 			output += " ";
+			output += "<span class='tandem'>";
 			output += iclasses[i];
+			output += "</span>";
 			HumInstrument inst;
 			inst.setHumdrum(iclasses[i]);
 			string name;
@@ -2081,10 +2170,11 @@ string Tool_tandeminfo::checkForKeyDesignation(const string& tok) {
 	if (tok == "?:") {
 		return "key designation, unknown/unassigned key";
 	}
-	if (hre.search(tok, "^([a-gA-G])([-#]*):(ion|dor|phr|lyd|mix|aeo|loc)?$")) {
+	if (hre.search(tok, "^([a-gA-G])([-#]*):(ion|dor|phr|lyd|mix|aeo|loc)?(-hypo|-auth)?$")) {
 		string tonic = hre.getMatch(1);
 		string accid = hre.getMatch(2);
 		string mode  = hre.getMatch(3);
+		string older = hre.getMatch(4);
 		bool isUpper = isupper(tonic[0]);
 		string output = "key designation: ";
 		if (mode.empty()) {
@@ -2161,6 +2251,17 @@ string Tool_tandeminfo::checkForKeyDesignation(const string& tok) {
 			} else {
 				return m_unknown;
 			}
+
+			if (!older.empty()) {
+				if (older == "-plag") {
+					output += " (plagal)";
+				} else if (older == "-auth") {
+					output += " (authentic)";
+				} else {
+					output += " (unknown mode type: should be -auth (authentic), or -plag (plagal) for hypo modes)";
+				}
+			}
+
 			return output;
 		}
 	}
