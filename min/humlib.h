@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Aug  2 14:35:37 PDT 2024
+// Last Modified: Wed Aug 28 09:24:36 PDT 2024
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -964,9 +964,9 @@ class HumInstrument {
 		int         setGM               (const std::string& Hname, int aValue);
 
 	private:
-		int                            index;
-		static std::vector<_HumInstrument>  data;
-		static int                     classcount;
+		int                            m_index;
+		static std::vector<_HumInstrument>  m_data;
+		static int                     m_classcount;
 
 	protected:
 		void       initialize          (void);
@@ -2043,6 +2043,7 @@ class HumdrumFileBase : public HumHash {
 		bool          isRhythmAnalyzed         (void);
 		bool          areStrandsAnalyzed       (void);
 		bool          areStrophesAnalyzed      (void);
+		void          setFilenameFromSegment   (void);
 
     	template <class TYPE>
 		   void       initializeArray          (std::vector<std::vector<TYPE>>& array, TYPE value);
@@ -7358,6 +7359,205 @@ class Tool_double : public HumTool {
 };
 
 
+class Tool_esac2hum : public HumTool {
+	public:
+
+		class Note {
+			public:
+				std::vector<std::string> m_errors;
+				std::string esac;
+				int    m_dots        = 0;
+				int    m_underscores = 0;
+				int    m_octave      = 0;
+				int    m_degree      = 0;  // scale degree (wrt major key)
+				int    m_b40degree   = 0;  // scale degree as b40 interval
+				int    m_alter       = 0;  // chromatic alteration of degree (flats/sharp from major scale degrees)
+				double m_ticks       = 0.0;
+				bool   m_tieBegin    = false;
+				bool   m_tieEnd      = false;
+				bool   m_phraseBegin = false;
+				bool   m_phraseEnd   = false;
+				std::string m_humdrum; // **kern conversion of EsAC note
+				int    m_b40         = 0;  // absolute b40 pitch (-1000 = rest);
+				int    m_b12         = 0;  // MIDI note number (-1000 = rest);
+				HumNum m_factor      = 1;  // for triplet which is 2/3 duration
+
+				void calculateRhythms(int minrhy);
+				void calculatePitches(int tonic);
+				bool parseNote(const std::string& note, HumNum factor);
+				void generateHumdrum(int minrhy, int b40tonic);
+				bool isPitch(void);
+				bool isRest(void);
+				std::string getScaleDegree(void);
+		};
+
+		class Measure : public std::vector<Tool_esac2hum::Note> {
+			public:
+				std::vector<std::string> m_errors;
+				std::string esac;
+				int m_barnum = -1;
+				double m_ticks = 0.0;
+				double m_tsticks = 0.0;
+				bool m_partialBegin = false;  // start of an incomplete measure
+				bool m_partialEnd = false;    // end of an incomplete measure (pickup)
+				bool m_complete = false;      // a complste measure
+				void calculateRhythms(int minrhy);
+				void calculatePitches(int tonic);
+				bool parseMeasure(const std::string& measure);
+				bool isUnassigned(void);
+				void setComplete(void);
+				bool isComplete(void);
+				void setPartialBegin(void);
+				bool isPartialBegin(void);
+				void setPartialEnd(void);
+				bool isPartialEnd(void);
+		};
+
+		class Phrase : public std::vector<Tool_esac2hum::Measure> {
+			public:
+				std::vector<std::string> m_errors;
+				double m_ticks = 0.0;
+				std::string esac;
+				void calculateRhythms(int minrhy);
+				void calculatePitches(int tonic);
+				bool parsePhrase(const std::string& phrase);
+				std::string getLastScaleDegree();
+				void getNoteList(std::vector<Tool_esac2hum::Note*>& notelist);
+				std::string getNO_REP(void);
+				int getFullMeasureCount(void);
+		};
+
+		class Score : public std::vector<Tool_esac2hum::Phrase> {
+			public:
+				int m_b40tonic = 0;
+				int m_minrhy   = 0;
+				std::string m_clef;
+				std::string m_keysignature;
+				std::string m_keydesignation;
+				std::string m_timesig;
+				std::map<std::string, std::string> m_params;
+				std::vector<std::string> m_errors;
+				bool m_finalBarline = false;
+				bool hasFinalBarline(void) { return m_finalBarline; }
+				void calculateRhythms(int minrhy);
+				void calculatePitches(int tonic);
+				bool parseMel(const std::string& mel);
+				void analyzeTies(void);
+				void analyzePhrases(void);
+				void getNoteList(std::vector<Tool_esac2hum::Note*>& notelist);
+				void getMeasureList(std::vector<Tool_esac2hum::Measure*>& measurelist);
+				void getPhraseNoteList(std::vector<Tool_esac2hum::Note*>& notelist, int index);
+				void generateHumdrumNotes(void);
+				void calculateClef(void);
+				void calculateKeyInformation(void);
+				void calculateTimeSignatures(void);
+				void setAllTimesigTicks(double ticks);
+				void assignFreeMeasureNumbers(void);
+				void assignSingleMeasureNumbers(void);
+
+				void doAnalyses(void);
+				void analyzeMEL_SEM(void);
+				void analyzeMEL_RAW(void);
+				void analyzeNO_REP(void);
+				void analyzeRTM(void);
+				void analyzeSCL_DEG(void);
+				void analyzeSCL_SEM(void);
+				void analyzePHR_NO(void);
+				void analyzePHR_BARS(void);
+				void analyzePHR_CAD(void);
+				void analyzeACC(void);
+		};
+
+		            Tool_esac2hum    (void);
+		           ~Tool_esac2hum    () {};
+
+		bool       convertFile          (std::ostream& out, const std::string& filename);
+		bool       convert              (std::ostream& out, const std::string& input);
+		bool       convert              (std::ostream& out, std::istream& input);
+
+
+	protected:
+		void        initialize          (void);
+
+		void        convertEsacToHumdrum(std::ostream& output, std::istream& infile);
+		bool        getSong             (std::vector<std::string>& song, std::istream& infile);
+		void        convertSong         (std::ostream& output, std::vector<std::string>& infile);
+		static std::string trimSpaces   (const std::string& input);
+		void        printHeader         (std::ostream& output);
+		void        printFooter         (std::ostream& output, std::vector<std::string>& infile);
+		void        printConversionDate (std::ostream& output);
+		void        printPdfLinks       (std::ostream& output);
+		void        printParameters     (void);
+		void        getParameters       (std::vector<std::string>& infile);
+		void        cleanText           (std::string& buffer);
+		std::string createFilename      (void);
+		void        printBemComment     (std::ostream& output);
+		void        processSong         (void);
+		void        printScoreContents  (std::ostream& output);
+		void        embedAnalyses       (std::ostream& output);
+
+	private:
+		bool        m_debugQ     = false;  // used with --debug option
+		bool        m_verboseQ   = false;  // used with --verbose option
+		std::string m_verbose;             //    p = print EsAC phrases, m = print measures, n = print notes.
+		                                   //    t after p, m, or n means print tick info
+		bool        m_embedEsacQ = true;   // used with -E option
+		bool        m_dwokQ      = false;  // true if source is Oskar Kolberg: Dzieła Wszystkie
+		                                   // (Oskar Kolberg: Complete Works)
+		                                   // determined automatically if header line or TRD source contains "DWOK" string.
+		bool        m_analysisQ  = false;  // used with -a option
+
+		int         m_inputline = 0;       // used to keep track if the EsAC input line.
+
+		std::string m_filePrefix;
+		std::string m_filePostfix = ".krn";
+		bool m_fileTitleQ = false;
+
+		std::string m_prevline;
+		std::string m_cutline;
+
+		int m_minrhy = 0;
+
+		Tool_esac2hum::Score m_score;
+
+		std::map<std::string, std::string> m_bem_translation = {
+			{"Czwarta zwrotka pieśni Niech będzie Jezus Chrystus pochwalony", "Fourth verse of the song \"Let Jesus Christ be praised\""},
+			{"Do oczepin, zakodować w A?", "For the unveiling, encode in A?"},
+			{"Do oczepin", "For the unveiling"},
+			{"Druga zwrotka poprzedniej pieśni", "Second verse of the previous song"},
+			{"Gdy zdejmują wianek", "When they remove the wreath"},
+			{"Jak do ślubu odjeżdżają (na wozie)", "As they depart for the wedding (on a wagon)"},
+			{"Krakowiak", "Krakowiak"},
+			{"Marsz (konfederatów Barskich) Przygrywka na trąbie", "March (of the Bar Confederates) Prelude on trumpet"},
+			{"Marsz konfederatów Barskich", "March of the Bar Confederates"},
+			{"Mazur", "Mazur"},
+			{"Na przodziek", "At the front"},
+			{"Owczarek gładki, szybko tańczony", "Smooth shepherd's dance, danced quickly"},
+			{"Owczarek", "Shepherd's dance"},
+			{"Piosenka żniwiarska", "Harvest song"},
+			{"Polonez (pokutującego wojaka)", "Polonaise (of the penitent soldier)"},
+			{"Polonez", "Polonaise"},
+			{"Polski chodzony", "Polish walking dance"},
+			{"Prawdopodobnie ośmiomiar 2+3+3", "Probably an eight-measure 2+3+3"},
+			{"Prawdopodobnie rytm jambiczny", "Probably iambic rhythm"},
+			{"Przy przenosinach", "During the moving"},
+			{"Tańczy na przodziek (na weselu)", "Dances at the front (at the wedding)"},
+			{"W sobotę gdy wianki wiją", "On Saturday when they weave the wreaths"},
+			{"Wesele do ślubu", "Wedding to the church"},
+			{"Wesele", "Wedding"},
+			{"Weselna gdy zbierają składkę", "Wedding song when collecting contributions"},
+			{"Weselna", "Wedding song"},
+			{"Wielkanoc", "Easter"},
+			{"Wieniec", "Wreath"},
+			{"Zakodować w C?", "Encode in C?"},
+			{"w t. 10 wpisany tryl dziadowski 43b21", "in measure 10, a beggar's trill written 43b21"},
+			{"żniwiarska", "Harvest song"}
+		};
+
+
+};
+
+
 
 #define ND_NOTE 0  /* notes or rests + text and phrase markings */
 #define ND_BAR  1  /* explicit barlines */
@@ -7387,10 +7587,10 @@ class NoteData {
 
 
 
-class Tool_esac2hum : public HumTool {
+class Tool_esac2humold : public HumTool {
 	public:
-		         Tool_esac2hum         (void);
-		        ~Tool_esac2hum         () {};
+		        Tool_esac2humold    (void);
+		       ~Tool_esac2humold    () {};
 
 		bool    convertFile          (std::ostream& out, const std::string& filename);
 		bool    convert              (std::ostream& out, const std::string& input);
@@ -7438,16 +7638,18 @@ class Tool_esac2hum : public HumTool {
 		void      printHumdrumFooterInfo(std::ostream& out, std::vector<std::string>& song);
 
 	private:
-		int            debugQ = 0;        // used with --debug option
-		int            verboseQ = 0;      // used with -v option
-		int            splitQ = 0;        // used with -s option
-		int            firstfilenum = 1;  // used with -f option
-		std::vector<std::string> header;            // used with -h option
-		std::vector<std::string> trailer;           // used with -t option
-		std::string         fileextension;     // used with -x option
-		std::string         namebase;          // used with -s option
+		int            debugQ = 0;         // used with --debug option
+		int            verboseQ = 0;       // used with -v option
+		int            splitQ = 0;         // used with -s option
+		int            firstfilenum = 1;   // used with -f option
+		std::vector<std::string> header;   // used with -h option
+		std::vector<std::string> trailer;  // used with -t option
+		std::string         fileextension; // used with -x option
+		std::string         namebase;      // used with -s option
 
-		std::vector<int>    chartable;  // used printChars() & printSpecialChars()
+		// Modern ESaC files use UTF-8 characters, older ESaC files use
+		//  ASCII encodings of non-UTF7 characters:
+		std::vector<int>    chartable;  // used in printChars() & printSpecialChars()
 		int inputline = 0;
 
 };
@@ -8386,9 +8588,12 @@ class Tool_kernify : public HumTool {
 		void        generateDummyKernSpine (HumdrumFile& infile);
 		std::string makeNullLine           (HumdrumLine& line);
 		std::string makeReverseLine        (HumdrumLine& line);
+		bool        prepareDataSpines      (HumdrumFile& infile);
+		bool        prepareDataSpine       (HTp spinestart);
 
 	private:
 		bool m_forceQ = false;  // used with -f option
+		bool m_hasDataInterpretations = false;
 
 };
 
@@ -10347,32 +10552,53 @@ class Tool_rphrase : public HumTool {
 		void     processFile       (HumdrumFile& infile);
 		void     fillVoiceInfo     (std::vector<Tool_rphrase::VoiceInfo>& voiceInfo, std::vector<HTp>& kstarts, HumdrumFile& infile);
 		void     fillVoiceInfo     (Tool_rphrase::VoiceInfo& voiceInfo, HTp& kstart, HumdrumFile& infile);
-		void     fillCollapseInfo  (Tool_rphrase::VoiceInfo& collapseInfo, HumdrumFile& infile);
+		void     fillCompositeInfo  (Tool_rphrase::VoiceInfo& collapseInfo, HumdrumFile& infile);
 		void     printVoiceInfo    (std::vector<Tool_rphrase::VoiceInfo>& voiceInfo);
 		void     printVoiceInfo    (Tool_rphrase::VoiceInfo& voiceInfo);
+
+		void     printEmbeddedVoiceInfo(std::vector<Tool_rphrase::VoiceInfo>& voiceInfo, Tool_rphrase::VoiceInfo& collapseInfo, HumdrumFile& infile);
+		void     printEmbeddedIndividualVoiceInfo(Tool_rphrase::VoiceInfo& voiceInfo, HumdrumFile& infile);
+		void     printEmbeddedCompositeInfo(Tool_rphrase::VoiceInfo& compositeInfo, HumdrumFile& infile);
+
 		void     getCompositeStates(std::vector<int>& noteStates, HumdrumFile& infile);
 		std::string getCompositeLabel(HumdrumFile& infile);
 		void     markPhraseStartsInScore(HumdrumFile& infile, Tool_rphrase::VoiceInfo& voiceInfo);
-		void     outputMarkedFile  (HumdrumFile& infile);
+		void     markCompositePhraseStartsInScore(HumdrumFile& infile, Tool_rphrase::VoiceInfo& collapseInfo);
+		void     outputMarkedFile  (HumdrumFile& infile, std::vector<Tool_rphrase::VoiceInfo>& voiceInfo,
+		                            Tool_rphrase::VoiceInfo& compositeInfo);
 		void     printDataLine     (HumdrumFile& infile, int index);
 		void     markLongaDurations(HumdrumFile& infile);
+		std::string getVoiceInfo(HumdrumFile& infile);
+		void     printEmbeddedVoiceInfoSummary(std::vector<Tool_rphrase::VoiceInfo>& voiceInfo, HumdrumFile& infile);
+		double   twoDigitRound(double input);
+		void     printHyperlink(const std::string& urlType);
 
 	private:
-		bool        m_averageQ      = false; // for -a option
-		bool        m_allAverageQ   = false; // for -A option
-		bool        m_barlineQ      = false; // for -m option
-		bool        m_collapseQ     = false; // for -c option
-		bool        m_longaQ        = false; // for -l option
-		bool        m_filenameQ     = false; // for -f option
-		bool        m_fullFilenameQ = false; // for -F option
-		std::string m_filename;              // for -f or -F option
-		bool        m_sortQ         = false; // for -s option
-		bool        m_reverseSortQ  = false; // for -S option
-		int         m_pcount        = 0;     // for -a option
-		double      m_sum           = 0.0;   // for -a option
-		int         m_pcountCollapse= 0;     // for -c option
-		double      m_sumCollapse   = 0.0;   // for -c option
-		bool        m_markQ         = false; // for --mark option
+		bool        m_averageQ        = false; // for -a option
+		bool        m_allAverageQ     = false; // for -A option
+		bool        m_breathQ         = true;  // for -B option
+		bool        m_barlineQ        = false; // for -m option
+		bool        m_compositeQ      = false; // for -c option
+		bool        m_longaQ          = false; // for -l option
+		bool        m_filenameQ       = false; // for -f option
+		bool        m_fullFilenameQ   = false; // for -F option
+		std::string m_filename;                // for -f or -F option
+		bool        m_sortQ           = false; // for -s option
+		bool        m_reverseSortQ    = false; // for -S option
+		int         m_pcount          = 0;     // for -a option
+		double      m_sum             = 0.0;   // for -a option
+		int         m_pcountComposite = 0;     // for -c option
+		double      m_sumComposite    = 0.0;   // for -c option
+		bool        m_markQ           = false; // for --mark option
+		double      m_durUnit         = 2.0;   // for -d option
+		bool        m_infoQ           = false; // for -i option (when --mark is active)
+		bool        m_squeezeQ        = false; // for -z option
+		bool        m_closeQ          = false; // for --close option
+		std::string m_urlType;                 // for -u option
+
+		int         m_line = 1;
+		std::string m_voiceLengthColor     = "crimson";
+		std::string m_compositeLengthColor = "limegreen";
 
 };
 
@@ -10913,6 +11139,94 @@ class Tool_tabber : public HumTool {
 
 };
 
+
+
+class Tool_tandeminfo : public HumTool {
+	public:
+	class Entry {
+		public:
+			HTp token = NULL;
+			std::string description;
+			int count = 0;
+	};
+
+		         Tool_tandeminfo   (void);
+		        ~Tool_tandeminfo   () {};
+
+		bool     run               (HumdrumFileSet& infiles);
+		bool     run               (HumdrumFile& infile);
+		bool     run               (const std::string& indata, std::ostream& out);
+		bool     run               (HumdrumFile& infile, std::ostream& out);
+
+
+	protected:
+		void     initialize        (void);
+		void     processFile       (HumdrumFile& infile);
+		void     printEntries      (HumdrumFile& infile);
+		void     printEntriesHtml  (HumdrumFile& infile);
+		void     printEntriesText  (HumdrumFile& infile);
+		void     doCountAnalysis   (void);
+
+		std::string getDescription         (HTp token);
+		std::string checkForKeySignature   (const std::string& tok);
+		std::string checkForKeyDesignation (const std::string& tok);
+		std::string checkForInstrumentInfo (const std::string& tok);
+		std::string checkForLabelInfo      (const std::string& tok);
+		std::string checkForTimeSignature  (const std::string& tok);
+		std::string checkForMeter          (const std::string& tok);
+		std::string checkForTempoMarking   (const std::string& tok);
+		std::string checkForClef           (const std::string& tok);
+		std::string checkForStaffPartGroup (const std::string& tok);
+		std::string checkForTuplet         (const std::string& tok);
+		std::string checkForHands          (const std::string& tok);
+		std::string checkForPosition       (const std::string& tok);
+		std::string checkForCue            (const std::string& tok);
+		std::string checkForFlip           (const std::string& tok);
+		std::string checkForTremolo        (const std::string& tok);
+		std::string checkForOttava         (const std::string& tok);
+		std::string checkForPedal          (const std::string& tok);
+		std::string checkForBracket        (const std::string& tok);
+		std::string checkForRscale         (const std::string& tok);
+		std::string checkForTimebase       (const std::string& tok);
+		std::string checkForTransposition  (const std::string& tok);
+		std::string checkForGrp            (const std::string& tok);
+		std::string checkForStria          (const std::string& tok);
+		std::string checkForFont           (const std::string& tok);
+		std::string checkForVerseLabels    (const std::string& tok);
+		std::string checkForLanguage       (const std::string& tok);
+		std::string checkForStemInfo       (const std::string& tok);
+		std::string checkForXywh           (const std::string& tok);
+		std::string checkForCustos         (const std::string& tok);
+		std::string checkForTextInterps    (const std::string& tok);
+		std::string checkForRep            (const std::string& tok);
+		std::string checkForPline          (const std::string& tok);
+		std::string checkForTacet          (const std::string& tok);
+		std::string checkForFb             (const std::string& tok);
+		std::string checkForColor          (const std::string& tok);
+		std::string checkForThru           (const std::string& tok);
+
+	private:
+		bool m_exclusiveQ   = true;   // used with -X option (don't print exclusive interpretation)
+		bool m_unknownQ     = false;  // used with -u option (print only unknown tandem interpretations)
+		bool m_filenameQ    = false;  // used with -f option (print only unknown tandem interpretations)
+		bool m_descriptionQ = false;  // used with -m option (print description of interpretation)
+		bool m_locationQ    = false;  // used with -l option (print location of interpretation in file)
+		bool m_zeroQ        = false;  // used with -z option (location address by 0-index)
+		bool m_tableQ       = false;  // used with -t option (display results as HTML table)
+		bool m_closeQ       = false;  // used with --close option (HTML details closed by default)
+		bool m_sortQ        = false;  // used with -s (sort entries alphabetically by tandem interpretation)
+		bool m_headerOnlyQ  = false;  // used with -h option (process only header interpretations)
+		bool m_bodyOnlyQ    = false;  // used with -H option (process only body interpretations)
+		bool m_countQ       = false;  // used with -c option (only show unique list with counts);
+		bool m_sortByCountQ = false;  // used with -c and -n options (sort from low to high count)
+		bool m_sortByReverseCountQ = false;  // used with -c and -N options (sort from high to low count)
+		bool m_humdrumQ     = false;  // used with --humdrum option (output data formatted with Humdrum syntax)
+
+		std::string m_unknown = "unknown";
+
+		std::vector<Tool_tandeminfo::Entry> m_entries;
+		std::map<std::string, int> m_count;
+};
 
 
 class Tool_tassoize : public HumTool {
