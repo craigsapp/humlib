@@ -53,17 +53,19 @@
 //          is implicit, so 6/8 + 3/4 cannot be distinguished.
 //
 // MEL[] = musical content of the melody.
-// * 1-7 = scale degree (major mode by default)
-// * 0 = rest
-// * 7b = lowered 7th degree (major) such as B- in C tonic or Fn in G tonic.
-// * 4# = raised 4th degree (major) such as F# in C tonic or Bn in F tonic.
-// * -7 = in the 3rd octave rather than 4th
-// * +3 = in the 5rd octave rather than 4th
-// * _ = power of two increase from the minimum rhythmic duration
-// 		e..g, if minrhy=16 then 3_ is an 8th note, 3__ is a 4th and 3___ is a 2nd.
-// * . = augmentation dot
-// * measures are separated by (2) spaces.
-// * linebreaks = phrase separator
+//   * 1-7 = scale degree (major mode by default)
+//   * ^ = treated like a scale degree: indicates tied to previous note.
+//   * 0 = rest
+//   * 7b = lowered 7th degree (major) such as B- in C tonic or Fn in G tonic.
+//   * 4# = raised 4th degree (major) such as F# in C tonic or Bn in F tonic.
+//   * -7 = in the 3rd octave rather than 4th
+//   * +3 = in the 5rd octave rather than 4th
+//   * _ = power of two increase from the minimum rhythmic duration
+//   		e..g, if minrhy=16 then 3_ is an 8th note, 3__ is a 4th and 3___ is a 2nd.
+//   * . = augmentation dot
+//   * () = tuplets inside parentheses.
+//   * measures are separated by (2) spaces.
+//   * linebreaks = phrase separator
 //
 // Automatic analyses (these can be generated during the conversion
 // process by using the -a option to add to the embedded input EsAC data):
@@ -72,7 +74,7 @@
 //   This is typically one line but may be two.   Text in this field
 //   is free-form, but if there is page number information in the source
 //   print, it will be prefixed with "s." or "S." and then a page number
-//   or two page numbers for the range separated by "-" or " - ". 
+//   or two page numbers for the range separated by "-" or " - ".
 //   Here is an example of a two line TRD[]:
 //   TRD[2, S. 66
 //       1814 aufgezeichnet (vor)]
@@ -325,6 +327,54 @@ bool Tool_esac2hum::getSong(vector<string>& song, istream& infile) {
 
 void Tool_esac2hum::cleanText(std::string& buffer) {
 	HumRegex hre;
+
+	// Fix UTF-8 double encodings (related to editing with Windows-1252 or ISO-8859-2 programs):
+
+	// ą:
+
+	// Ą:
+
+	// ć:
+
+	// Ć:
+
+	// ę: c3 84 c2 99 -> c4 99
+	hre.replaceDestructive(buffer, "\xc4\x99", "\xc3\x84\xc2\x99", "g");
+
+	// Ę:
+
+	// ł UTF-8 hex bytes: c5 82
+	hre.replaceDestructive(buffer, "\xc5\x82", "\xc4\xb9\xc2\x82", "g");
+
+	// Ł: c4 b9 c2 81 -> c5 81
+	hre.replaceDestructive(buffer, "\xc5\x81", "\xc4\xb9\xc2\x81", "g");
+
+	// ń: c4 b9 c2 84 -> c5 84
+	hre.replaceDestructive(buffer, "\xc5\x84", "\xc4\xb9\xc2\x84", "g");
+
+	// Ń:
+
+	// ó: c4 82 c5 82 -> c3 b3
+	hre.replaceDestructive(buffer, "\xc3\xb3", "\xc4\x82\xc5\x82", "g");
+
+	// Ó:
+
+	// ś:
+
+	// Ś:
+
+	// ź: c4 b9 c5 9f -> c5 ba
+	hre.replaceDestructive(buffer, "\xc5\xba", "\xc4\xb9\xc5\x9f", "g");
+
+	// Ź:
+	
+	// ż:
+
+	// Ż: c4 b9 c5 a5 -> c5 bb
+	hre.replaceDestructive(buffer, "\xc5\xbb", "\xc4\xb9\xc5\xa5", "g");
+
+
+	// Random leftover characters from some character conversion:
 	hre.replaceDestructive(buffer, "", "[\x88\x98]", "g");
 	if (!buffer.empty()) {
 		if (buffer.back() == 0x0d) {
@@ -434,8 +484,12 @@ void Tool_esac2hum::printScoreContents(ostream& output) {
 				output << "=";
 				if (measure.m_barnum > 0) {
 					output << measure.m_barnum;
-				} else {
+				} else if (measure.m_barnum == -1) {
 					output << "-"; // "non-controlling" barline.
+				} else {
+					// visible barline, but not assigned a measure
+					// number (probably need more analysis to assign
+					// a measure number to this barline).
 				}
 				output  << endl;
 			}
@@ -459,12 +513,17 @@ void Tool_esac2hum::printScoreContents(ostream& output) {
 					output << "]";
 				}
 				output << endl;
-				vector<string>& errors = measure.m_errors;
-				if (!errors.empty()) {
-					for (int z=0; z<(int)errors.size(); z++) {
-						output << "!!" << errors.at(z) << endl;
-					}
+			}
+			vector<string>& errors = measure.m_errors;
+			if (!errors.empty()) {
+				for (int z=0; z<(int)errors.size(); z++) {
+					output << "!!" << errors.at(z) << endl;
 				}
+			}
+
+			// print time signature change
+			if (!measure.m_measureTimeSignature.empty()) {
+				output << measure.m_measureTimeSignature << endl;
 			}
 
 			for (int k=0; k<(int)measure.size(); k++) {
@@ -768,12 +827,14 @@ bool Tool_esac2hum::Measure::isPartialEnd(void) {
 
 void Tool_esac2hum::Score::calculateTimeSignatures(void) {
 	string ts = m_params["_time"];
+	ts = trimSpaces(ts);
 	if (ts.find("FREI") != string::npos) {
 		m_timesig = "*MX";
 		setAllTimesigTicks(0.0);
 		assignFreeMeasureNumbers();
 		return;
 	}
+
 
 	HumRegex hre;
 	if (hre.search(ts, "^(\\d+)/(\\d+)$")) {
@@ -785,6 +846,8 @@ void Tool_esac2hum::Score::calculateTimeSignatures(void) {
 		setAllTimesigTicks(tsticks);
 		assignSingleMeasureNumbers();
 		return;
+	} else if (hre.search(ts, "^(\\d+/\\d+(?:\\s+|$)){2,}$")) {
+		prepareMultipleTimeSignatures(ts);
 	}
 
 	// Complicated case where the time signature changes
@@ -800,6 +863,208 @@ void Tool_esac2hum::Score::calculateTimeSignatures(void) {
 	for (int i=0; i<(int)bticks
 */
 
+
+}
+
+
+//////////////////////////////
+//
+// Tool_esac2hum::Score::prepareMultipleTimeSignatures --
+//    N.B.: Will have problems when the duration of time siganture
+//    in a list are the same such as "4/4 2/2".
+//
+
+void Tool_esac2hum::Score::prepareMultipleTimeSignatures(const string& ts) {
+	vector<string> tss;
+	HumRegex hre;
+	string timesigs = ts;
+	hre.split(tss, timesigs, "\\s+");
+	if (tss.size() < 2) {
+		cerr << "Time sigs: " << ts << " needs to have at least two time signatures" << endl;
+	}
+
+	// Calculate tick duration of time signature in list:
+	vector<double> tsticks(tss.size(), 0);
+	for (int i=0; i<(int)tss.size(); i++) {
+		if (!hre.search(tss[i], "^(\\d+)/(\\d+)$")) {
+			continue;
+		}
+		int top = hre.getMatchInt(1);
+		int bot = hre.getMatchInt(2);
+		double ticks = top * m_minrhy / bot;
+		tsticks[i] = ticks;
+	}
+
+	//cerr << "\nMultiple time signatures in melody: " << endl;
+	//for (int i=0; i<(int)tss.size(); i++) {
+	//	cerr << "(" << i+1 << "): " << tss[i] << "\tticks:" << tsticks[i] << endl;
+	//}
+	//cerr << endl;
+
+	// First assign a time signature to every inner measure in a phrase, which
+	// is presumed to be a complete measure:
+	for (int i=0; i<(int)size(); i++) {
+		Tool_esac2hum::Phrase& phrase = at(i);
+		for (int j=1; j<(int)phrase.size()-1; j++) {
+			Tool_esac2hum::Measure& measure = phrase.at(j);
+			for (int k=0; k<(int)tss.size(); k++) {
+				if (tsticks[k] == measure.m_ticks) {
+					measure.m_measureTimeSignature = "*M" + tss[k];
+					measure.setComplete();
+				}
+			}
+			
+		}
+	}
+
+	// Now check if the measure at the end and beginning
+	// of the next phrase are both complete.  If not then
+	// calculate partial measure pairs.
+	for (int i=0; i<(int)size()-1; i++) {
+		Tool_esac2hum::Phrase& phrase = at(i);
+		Tool_esac2hum::Phrase& nextphrase = at(i+1);
+      if (phrase.size() < 2) {
+			// deal with phrases with a single measure later
+			continue;
+		}
+      if (nextphrase.size() < 2) {
+			// deal with phrases with a single measure later
+			continue;
+		}
+		Tool_esac2hum::Measure& measure = phrase.back();
+		Tool_esac2hum::Measure& nextmeasure = nextphrase.at(0);
+
+		int mticks  = measure.m_ticks;
+		int nmticks = nextmeasure.m_ticks;
+
+		int found1 = -1;
+		int found2 = -1;
+
+		for (int j=(int)tss.size() - 1; j>=0; j--) {
+			if (tsticks.at(j) == mticks) {
+				found1 = j;
+			}
+			if (tsticks.at(j) == nmticks) {
+				found2 = j;
+			}
+		}
+		if ((found1 >= 0) && (found2 >= 0)) {
+			// The two measures are complete
+			measure.m_measureTimeSignature = "*M" + tss[found1];
+			nextmeasure.m_measureTimeSignature = "*M" + tss[found2];
+			measure.setComplete();
+			nextmeasure.setComplete();
+		} else {
+			// See if the sum of the two measures match
+			// a listed time signature.  if so, then they
+			// form two partial measures.
+			int ticksum = mticks + nmticks;
+			for (int z=0; z<(int)tsticks.size(); z++) {
+				if (tsticks.at(z) == ticksum) {
+					nextmeasure.m_barnum = -1;
+					measure.m_measureTimeSignature = "*M" + tss.at(z);
+					nextmeasure.m_measureTimeSignature = "*M" + tss.at(z);
+					measure.setPartialBegin();
+					nextmeasure.setPartialEnd();
+				}
+			}
+		}
+	}
+
+	// Check if the first measure is a complete time signature in duration.
+	// If not then mark as pickup measure.  If incomplete and last measure
+	// is incomplete, then merge into a single measure (partial start for
+	// last measure and partial end for first measure.
+	if (empty()) {
+		// no data
+	} else if ((size() == 1) && (at(0).size() <= 1)) {
+		// single measure in melody
+	} else {
+		Tool_esac2hum::Measure& firstmeasure = at(0).at(0);
+		Tool_esac2hum::Measure& lastmeasure  = back().back();
+
+		double firstticks = firstmeasure.m_ticks;
+		double lastticks = lastmeasure.m_ticks;
+
+		int foundfirst = -1;
+		int foundlast  = -1;
+
+		for (int i=(int)tss.size() - 1; i>=0; i--) {
+			if (tsticks.at(i) == firstticks) {
+				foundfirst = i;
+			}
+			if (tsticks.at(i) == lastticks) {
+				foundlast = i;
+			}
+		}
+
+		if ((foundfirst >= 0) && (foundlast >= 0)) {
+			// first and last measures are both complete
+			firstmeasure.m_measureTimeSignature = "*M" + tss.at(foundfirst);
+			lastmeasure.m_measureTimeSignature = "*M" + tss.at(foundlast);
+			firstmeasure.setComplete();
+			lastmeasure.setComplete();
+		} else {
+			// if both sum to a time signature than assigned that time signature to both
+			double sumticks = firstticks + lastticks;
+			int sumfound = -1;
+			for (int i=0; i<(int)tsticks.size(); i++) {
+				if (tsticks[i] == sumticks) {
+					sumfound = i;
+					break;
+				}
+			}
+			if (sumfound >= 0) {
+				// First and last meatures match a time signture, so
+				// use that time signture for both, mark firt measure
+				// last pickup (barnum -> 0), and mark last as partial
+				// measure start
+				firstmeasure.m_measureTimeSignature = "*M" + tss.at(sumfound);
+				lastmeasure.m_measureTimeSignature = "*M" + tss.at(sumfound);
+				firstmeasure.m_barnum = 0;
+				firstmeasure.setPartialEnd();
+				lastmeasure.setPartialBegin();
+			} else if ((foundfirst >= 0) && (foundlast < 0)) {
+				firstmeasure.setComplete();
+				lastmeasure.setPartialBegin();
+			} else if ((foundfirst < 0) && (foundlast >= 0)) {
+				firstmeasure.setPartialEnd();
+				lastmeasure.setComplete();
+			}
+		}
+	}
+
+
+	// Now assign bar numbers
+	// First probalby check for pairs of uncategorized measure durations (deal with that later).
+	vector<Tool_esac2hum::Measure*> measurelist;
+	getMeasureList(measurelist);
+	int barnum = 1;
+	for (int i=0; i<(int)measurelist.size(); i++) {
+		if ((i == 0) && measurelist.at(i)->isPartialEnd()) {
+			measurelist.at(i)->m_barnum = 0;
+			continue;
+		}
+		if (measurelist.at(i)->isComplete()) {
+			measurelist.at(i)->m_barnum = barnum++;
+		} else if (measurelist.at(i)->isPartialBegin()) {
+			measurelist.at(i)->m_barnum = barnum++;
+		} else if (measurelist.at(i)->isPartialEnd()) {
+			measurelist.at(i)->m_barnum = -1;
+		} else {
+			measurelist.at(i)->m_errors.push_back("UNCATEGORIZED MEASURE");
+		}
+	}
+
+	// Now remove duplicate time signatures
+	string current = "";
+	for (int i=0; i<(int)measurelist.size(); i++) {
+		if (measurelist.at(i)->m_measureTimeSignature == current) {
+			measurelist.at(i)->m_measureTimeSignature = "";
+		} else {
+			current = measurelist.at(i)->m_measureTimeSignature;
+		}
+	}
 
 }
 
@@ -1486,17 +1751,17 @@ void Tool_esac2hum::printHeader(ostream& output) {
 		output << "!!!TIN: " << incipit << endl;
 	}
 
-	string id = m_score.m_params["_id"];
-	output << "!!!id:";
-	if (!id.empty()) {
-		output << " " << id;
-	}
-	output << endl;
-
 	string source = m_score.m_params["_source"];
 	output << "!!!source:";
 	if (!source.empty()) {
 		output << " " << source;
+	}
+	output << endl;
+
+	string id = m_score.m_params["_id"];
+	output << "!!!id:";
+	if (!id.empty()) {
+		output << " " << id;
 	}
 	output << endl;
 
@@ -1547,7 +1812,8 @@ void Tool_esac2hum::printHeader(ostream& output) {
 //    };
 
 string Tool_esac2hum::createFilename(void) {
-	string prefix = m_score.m_params["_source"];
+	string source = m_score.m_params["_source"];
+	string prefix;
 	string sig = m_score.m_params["SIG"];
 	string title = m_score.m_params["_title"];
 	string id  = m_score.m_params["_id"];
@@ -1558,11 +1824,12 @@ string Tool_esac2hum::createFilename(void) {
 	HumRegex hre;
 	// Should not be spaces, but just in case;
 	hre.replaceDestructive(sig, "", "\\s+", "g");
-	hre.replaceDestructive(prefix, "", "\\s+", "g");
+	hre.replaceDestructive(source, "", "\\s+", "g");
 
 	if (!m_filePrefix.empty()) {
 		prefix = m_filePrefix;
-	}
+		source = "";
+	} 
 
 	// Convert spaces to underscores:
 	hre.replaceDestructive(title, "_", "\\s+", "g");
@@ -1611,6 +1878,28 @@ string Tool_esac2hum::createFilename(void) {
 	string output;
 	if (!prefix.empty()) {
 		output += prefix + "-";
+	} else if (!source.empty()) {
+		if (hre.search(source, "^DWOK(\\d+)$")) {
+			string volume = hre.getMatch(1);
+			if (volume.size() == 1) {
+				volume = "0" + volume;
+			}
+			if (!sig.empty()) {
+				if (hre.search(sig, "^(\\d\\d)")) {
+					string volume2 = hre.getMatch(1);
+					if (volume == volume2) {
+						source = "DWOK";
+						output += source;
+					}
+				} else {
+					output += source + "-";
+				}
+			} else {
+				output += source + "-";
+			}
+		} else {
+			output += source + "-";
+		}
 	}
 	output += sig;
 	if (!(sig.empty() || title.empty())) {
@@ -1807,13 +2096,15 @@ void Tool_esac2hum::printFooter(ostream& output, vector<string>& infile) {
 
 	printBemComment(output);
 	printPdfLinks(output);
+	printPageNumbers(output);
 	printConversionDate(output);
+
 
 	if (m_embedEsacQ) {
 		output << "!!@@BEGIN: ESAC" << endl;
 		output << "!!@CONTENTS:" << endl;;
 		for (int i=0; i<(int)infile.size(); i++) {
-//			cout << "!!" << infile[i] << endl;
+			output << "!!" << infile[i] << endl;
 		}
 		if (m_analysisQ) {
 			embedAnalyses(output);
@@ -1823,6 +2114,28 @@ void Tool_esac2hum::printFooter(ostream& output, vector<string>& infile) {
 }
 
 
+
+///////////////////////////////
+//
+// Tool_esac2hum::printPageNumbers --
+//
+
+void Tool_esac2hum::printPageNumbers(ostream& output) {
+	HumRegex hre;
+	string trd = m_score.m_params["TRD"];
+	if (hre.search(trd, "\\bs\\.\\s*(\\d+)\\s*-\\s*(\\d+)", "i")) {
+		output << "!!!page: " << hre.getMatch(1) << "-" << hre.getMatch(2) << endl;
+	} else if (hre.search(trd, "\\bs\\.\\s*(\\d+)", "i")) {
+		output << "!!!page: " << hre.getMatch(1) << endl;
+	}
+}
+
+
+
+///////////////////////////////
+//
+// Tool_esac::embedAnalyses --
+//
 
 void Tool_esac2hum::embedAnalyses(ostream& output) {
 	m_score.doAnalyses();
@@ -2309,10 +2622,29 @@ bool Tool_esac2hum::Note::isRest(void) {
 //////////////////////////////
 //
 // Tool_esac2hum::Score::analyzeACC --  The first scale degree
-//     of each (complete) meausre
+//     of each (complete) meausre, or partial measure start.
+//     the scale degress for each phrase are placed into a word
+//     without spaces, and then a space between each phrase.
+//
+//     Todo: Deal with tied notes at starts of measures.
 //
 
-void Tool_esac2hum::Score::analyzeACC(void) { }
+void Tool_esac2hum::Score::analyzeACC(void) { 
+	string output;
+	for (int i=0; i<(int)size(); i++) {
+		Tool_esac2hum::Phrase& phrase = at(i);
+		for (int j=0; j<(int)phrase.size(); j++) {
+			Tool_esac2hum::Measure& measure = phrase.at(j);
+			if (measure.isComplete()) {
+				output += measure.at(0).getScaleDegree();
+			}
+		}
+		if (i < (int)size() -1) {
+			output += " ";
+		}
+	}
+	m_params["ACC"] =  output;
+}
 
 
 // END_MERGE

@@ -61,9 +61,14 @@ class Tool_esac2hum : public HumTool {
 			public:
 				std::vector<std::string> m_errors;
 				std::string esac;
-				int m_barnum = -1;
+				int m_barnum = -1000; // -1000 == unassigned bar number for this measure
+				// m_barnum = -1 == invisible barline (between two partial measures)
+				// m_barnum =  0 == pickup measure (partial measure at start of music)
 				double m_ticks = 0.0;
 				double m_tsticks = 0.0;
+				// m_measureTimeSignature is a **kern time signature
+				// (change) to display in the converted score.
+				std::string m_measureTimeSignature = "";
 				bool m_partialBegin = false;  // start of an incomplete measure
 				bool m_partialEnd = false;    // end of an incomplete measure (pickup)
 				bool m_complete = false;      // a complste measure
@@ -120,6 +125,7 @@ class Tool_esac2hum : public HumTool {
 				void setAllTimesigTicks(double ticks);
 				void assignFreeMeasureNumbers(void);
 				void assignSingleMeasureNumbers(void);
+				void prepareMultipleTimeSignatures(const std::string& ts);
 
 				void doAnalyses(void);
 				void analyzeMEL_SEM(void);
@@ -154,6 +160,7 @@ class Tool_esac2hum : public HumTool {
 		void        printConversionDate (std::ostream& output);
 		void        printPdfLinks       (std::ostream& output);
 		void        printParameters     (void);
+		void        printPageNumbers    (std::ostream& output);
 		void        getParameters       (std::vector<std::string>& infile);
 		void        cleanText           (std::string& buffer);
 		std::string createFilename      (void);
