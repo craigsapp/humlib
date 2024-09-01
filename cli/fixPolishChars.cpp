@@ -210,7 +210,7 @@ string cleanText(std::string& input) {
 	// Ś: c4 b9 c2 9a -> c5 9a (keep below Ź)
 	hre.replaceDestructive(output, "=ABCDEFGHI=\xc5\x9a=ABCDEFGHI=", "\xc4\xb9\xc2\x9a", "g");
 
-   // ś: c5 9b c3 82 c2 -> c5 9b
+	// ś: c5 9b c3 82 c2 -> c5 9b
 	hre.replaceDestructive(output, "=ABCDEFGHI=\xc5\x9b=ABCDEFGHI=", "\xc5\x9b\xc3\x82\xc2", "g");
 
 	// ś: c4 b9 c2 9b -> c5 9b
@@ -271,12 +271,7 @@ string cleanText(std::string& input) {
 	// Żół: c4 8f c5 bc cb 9d c4 8f c5 bc cb -> c5 bb c3 b3 c5 82
 	hre.replaceDestructive(output, "=ABCDEFGHI=\xc5\xbb\xc3\xb3\xc5\x82=ABCDEFGHI=", "\xc4\x8f\xc5\xbc\xcb\x9d\xc4\x8f\xc5\xbc\xcb", "g");
 
-	// There are some stubborn bytes, but cannot remove them in isolation since they could be
-	// parts of UTF-8 characters:
-	// hre.replaceDestructive(output, "", "\x87", "g");
-	// hre.replaceDestructive(output, "", "\x9d", "g");
-
-	// remove temporary segmenting stirng:
+	// remove temporary segmenting string:
 	hre.replaceDestructive(output, "", "=ABCDEFGHI=", "g");
 
 	// random leftover characters from some character conversion:
