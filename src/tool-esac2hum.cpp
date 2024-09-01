@@ -330,58 +330,72 @@ void Tool_esac2hum::cleanText(std::string& buffer) {
 
 	// Fix UTF-8 double encodings (related to editing with Windows-1252 or ISO-8859-2 programs):
 
-	// ą:
+	// Ą: c3 84 c2 84 - c4 84
+	hre.replaceDestructive(buffer, "\xc4\x84", "\xc3\x84\xc2\x84", "g");
 
-	// Ą:
+	// ą: c3 84 c2 85 - c4 85
+	hre.replaceDestructive(buffer, "\xc4\x85", "\xc3\x84\xc2\x85", "g");
 
-	// ć:
+	// Ć: c3 84 c2 86 -> c4 86
+	hre.replaceDestructive(buffer, "\xc4\x86", "\xc3\x84\xc2\x86", "g");
 
-	// Ć:
+	// ć: c3 84 c2 87 -> c4 87
+	hre.replaceDestructive(buffer, "\xc4\x87", "\xc3\x84\xc2\x87", "g");
+
+	// Ę: c3 84 c2 98 -> c4 98
+	hre.replaceDestructive(buffer, "\xc4\x98", "\xc3\x84\xc2\x98", "g");
 
 	// ę: c3 84 c2 99 -> c4 99
 	hre.replaceDestructive(buffer, "\xc4\x99", "\xc3\x84\xc2\x99", "g");
 
-	// Ę:
-
-	// ł UTF-8 hex bytes: c5 82
-	hre.replaceDestructive(buffer, "\xc5\x82", "\xc4\xb9\xc2\x82", "g");
-
 	// Ł: c4 b9 c2 81 -> c5 81
 	hre.replaceDestructive(buffer, "\xc5\x81", "\xc4\xb9\xc2\x81", "g");
+
+	// ł: c4 b9 c2 82 -> c5 82
+	hre.replaceDestructive(buffer, "\xc5\x82", "\xc4\xb9\xc2\x82", "g");
+
+	// Ń: c4 b9 c2 83 -> c5 83
+	hre.replaceDestructive(buffer, "\xc5\x83", "\xc4\xb9\xc2\x83", "g");
 
 	// ń: c4 b9 c2 84 -> c5 84
 	hre.replaceDestructive(buffer, "\xc5\x84", "\xc4\xb9\xc2\x84", "g");
 
-	// Ń:
+	// Ó: c4 82 c5 93 -> c3 93 (note: not sequential with ó)
+	hre.replaceDestructive(buffer, "\xc3\x93", "\xc4\x82\xc5\x93", "g");
 
-	// ó: c4 82 c5 82 -> c3 b3
+	// ó: c4 82 c5 82 -> c3 b3 (note: not sequential with Ó)
 	hre.replaceDestructive(buffer, "\xc3\xb3", "\xc4\x82\xc5\x82", "g");
 
-	// Ó:
+	// Ś: c4 b9 c2 9a -> c5 9a
+	hre.replaceDestructive(buffer, "\xc5\x9a", "\xc4\xb9\xc2\x9b", "g");
 
-	// ś:
+	// ś: c4 b9 c2 9b -> c5 9b
+	hre.replaceDestructive(buffer, "\xc5\x9b", "\xc4\xb9\xc2\x9b", "g");
 
-	// Ś:
+	// Ź: c4 b9 c5 9a -> c5 b9
+	hre.replaceDestructive(buffer, "\xc5\xb9", "\xc4\xb9\xc5\x9a", "g");
 
 	// ź: c4 b9 c5 9f -> c5 ba
 	hre.replaceDestructive(buffer, "\xc5\xba", "\xc4\xb9\xc5\x9f", "g");
 
-	// Ź:
-	
-	// ż:
-
 	// Ż: c4 b9 c5 a5 -> c5 bb
 	hre.replaceDestructive(buffer, "\xc5\xbb", "\xc4\xb9\xc5\xa5", "g");
+	
+	// ż:  c4 b9 c5 ba -> c5 bc
+	hre.replaceDestructive(buffer, "\xc5\xbc", "\xc4\xb9\xc5\xba", "g");
 
 
 	// Random leftover characters from some character conversion:
 	hre.replaceDestructive(buffer, "", "[\x88\x98]", "g");
+
+	// Remove MS-DOS newline character at ends of lines:
 	if (!buffer.empty()) {
 		if (buffer.back() == 0x0d) {
 			// windows newline piece
 			buffer.resize(buffer.size() - 1);
 		}
 	}
+	// In VHV, when saving content to the local computer in EsAC mode, the 0x0d character should be added back.
 }
 
 
