@@ -171,6 +171,9 @@ string cleanText(std::string& input) {
 	// ó: c3 8b c2 -> c3 b3
 	hre.replaceDestructive(output, "=ABCDEFGHI=\xc3\xb3=ABCDEFGHI=", "\xc3\x8b\xc2", "g");
 
+	// ł: c5 82 c2 88 -> c5 82 (WebEsAC)
+	hre.replaceDestructive(output, "=ABCDEFGHI=\xc5\x82=ABCDEFGHI=", "\xc5\x82\xc2\x88", "g");
+
 	// ł: c4 b9 c2 82 -> c5 82
 	hre.replaceDestructive(output, "=ABCDEFGHI=\xc5\x82=ABCDEFGHI=", "\xc4\xb9\xc2\x82", "g");
 
@@ -218,6 +221,15 @@ string cleanText(std::string& input) {
 
 	// ś: c3 82 c2 -> c5 9b
 	hre.replaceDestructive(output, "=ABCDEFGHI=\xc5\x9b=ABCDEFGHI=", "\xc3\x82\xc2", "g");
+
+	// ś: c2 98 c5 9b -> c5 9b  (WebEsAC)
+	hre.replaceDestructive(output, "=ABCDEFGHI=\xc5\x9b=ABCDEFGHI=", "\xc2\x98\xc5\x9b", "g");
+
+	// ś: c5 9b c2 -> c5 9b (could be problemmatic if a valid UTF-8 character starts with c2)
+	hre.replaceDestructive(output, "=ABCDEFGHI=\xc5\x9b=ABCDEFGHI=", "\xc5\x9b\xc2", "g");
+
+	// ś: c2 c5 9b -> c5 9b
+	hre.replaceDestructive(output, "=ABCDEFGHI=\xc5\x9b=ABCDEFGHI=", "\xc2\xc5\x9b", "g");
 	
 	// ż:  c4 b9 c5 ba -> c5 bc (keep above ź)
 	hre.replaceDestructive(output, "=ABCDEFGHI=\xc5\xbc=ABCDEFGHI=", "\xc4\xb9\xc5\xba", "g");
@@ -228,7 +240,7 @@ string cleanText(std::string& input) {
 	// ź: c4 b9 c5 9f -> c5 ba (keep below ź)
 	hre.replaceDestructive(output, "=ABCDEFGHI=\xc5\xba=ABCDEFGHI=", "\xc4\xb9\xc5\x9f", "g");
 
-	// ź: c3 82 c5 a4 -> c5 ba
+	// ź: c3 82 c5 a4 -> c5 ba (c3 82 is Â, but unlikely to be present in Polish))
 	hre.replaceDestructive(output, "=ABCDEFGHI=\xc5\xba=ABCDEFGHI=", "\xc3\x82\xc5\xa4", "g");
 
 	// Ż: c4 b9 c5 a5 -> c5 bb

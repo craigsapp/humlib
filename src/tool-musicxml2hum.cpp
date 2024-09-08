@@ -62,10 +62,10 @@ bool Tool_musicxml2hum::convertFile(ostream& out, const char* filename) {
 	xml_document doc;
 	auto result = doc.load_file(filename);
 	if (!result) {
-		cerr << "\nXML file [" << filename << "] has syntax errors\n";
-		cerr << "Error description:\t" << result.description() << "\n";
-		cerr << "Error offset:\t" << result.offset << "\n\n";
-		exit(1);
+		cerr << "\nXML file [" << filename << "] has syntax errors ";
+		cerr << "Error description:\t" << result.description() << endl;
+		cerr << "Error offset:\t" << result.offset << "\n";
+		return false;
 	}
 
 	return convert(out, doc);
@@ -82,10 +82,10 @@ bool Tool_musicxml2hum::convert(ostream& out, const char* input) {
 	xml_document doc;
 	auto result = doc.load_string(input);
 	if (!result) {
-		cout << "\nXML content has syntax errors\n";
-		cout << "Error description:\t" << result.description() << "\n";
+		cout << "\nXML content has syntax errors";
+		cout << " Error description:\t" << result.description() << "\n";
 		cout << "Error offset:\t" << result.offset << "\n\n";
-		exit(1);
+		return false;
 	}
 
 	return convert(out, doc);
@@ -1030,10 +1030,10 @@ bool Tool_musicxml2hum::stitchParts(HumGrid& outdata,
 	// i used to start at 1 for some strange reason.
 	for (i=0; i<(int)partdata.size(); i++) {
 		if (measurecount != partdata[i].getMeasureCount()) {
-			cerr << "ERROR: cannot handle parts with different measure\n";
+			cerr << "ERROR: cannot handle parts with different measure ";
 			cerr << "counts yet. Compare MM" << measurecount << " to MM";
 			cerr << partdata[i].getMeasureCount() << endl;
-			exit(1);
+			return false;
 		}
 	}
 

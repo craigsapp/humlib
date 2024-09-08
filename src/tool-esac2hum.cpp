@@ -84,7 +84,7 @@
 // FKT[] = function of the piece (genre): e.g.: lullaby, ballad
 // BEM[] = additional notes.
 //
-// Analytic fields that are extracted automatically from musical data:
+// Analytic fields that are extracted automatically from musical data (WebEsAC):
 //
 // MEL_SEM[]  = semitone intervals of melody.
 // MEL_RAW[]  = MEL[] without rhythms.
@@ -96,6 +96,136 @@
 // PHR_BARS[] = number of measures in individual phrases.
 // PHR_CAD[]  = cadential notes of phrases (last scale degree of phrase).
 // ACC[]      = accented notes in melody (down beat of each full measure).
+//
+// Other metadata fields (MAPPET (Music Analysis Software Package),
+// see: https://esf.ccarh.org/ccarh-wiki/22-01_Mappet_v2.pdf#page=38)
+// Currently not processed (no data with these to test):
+// PB[]       = Publisher
+// CNR.       = Cut number of tape, etc.
+// REG[]      = Region
+// ETH[]      = Ethnic group (also language-family, etc.)
+// SRC[]      = Source / way of tradition
+// RHY[]      = Rhythm incipit
+// NP[]       = Number of phrases (Same as PHR_NO[] from WebEsAC).
+// STN[]      = Soundtrack number
+// ST[]       = Soundtrack (tape, video, etc.)
+// MOD[]      = Scale/Mode
+// RANGE[]    = low - high tone
+// CAD[]      = cadential tones (WebEsAC PHR_CAD?)
+// FOP[]      = FORM pitch
+// FOR[]      = FORM rhythm
+// FOC[]      = FORM contour
+// PHRAS[]    = up/down-beat of phrase
+// FCT[]      = function
+// CMT[]      = comment (BEM[] in WebEsAC?)
+// Interval analyses:
+// UN[]       = P1 (Unison)
+// 2S[]       = +m2 (s = small)
+// 2M[]       = +M2
+// 3S[]       = +m3
+// 3M[]       = +M3
+// 4P[]       = +P4
+// 4A[]       = +A4
+// 5P[]       = +P5
+// 6S[]       = +m6
+// 6M[]       = +M6
+// -----------------------------------
+// 7S[]       = +m7
+// 7M[]       = +M7
+// 8P[]       = +P8
+// 8L[]       = ascending, larger than an octave
+// SI[]       = sum of intervals ascending (%)
+// ABS[]      = absolute (sum) of (all) intervals
+// SA[]       = steps ascending (%)
+// LA[]       = leaps ascending (%)
+// -----------------------------------
+// SB[]       = sum of bars (absolute number)
+// 2s[]       = -m2 (s = small)
+// 2m[]       = -M2
+// 3s[]       = -m3
+// 3m[]       = -M3
+// 4p[]       = -P4
+// 4a[]       = -A4
+// 5p[]       = -P5
+// 6s[]       = -m6
+// 6m[]       = -M6
+// -----------------------------------
+// 7s[]       = -m7
+// 7m[]       = -M7
+// 8p[]       = -P8
+// 8l[]       = leap down, larger than an octave
+// si[]       = sum of descent intervals (%)
+// dt[]       = descendence tendency (pos., neg., 0)
+// sd[]       = steps descend. (%)
+// ld[]       = leaps descend. (%)
+// -----------------------------------
+// 1D[]       = Duration: smallest unit
+// 2D[]       = Duration: double length
+// 3D[]       = Duration: triple length
+// 4D[]       = Duration: quadruple length
+// LL[]       = Longer durations (length)
+// DD[]       = double dotted
+// TD[]       = triple dotted
+// QD[]       = quadruple dotted
+// TS[]       = triplets/sextuplets
+// SD[]       = sum of different durations (absolute)
+// SL[]       = sum of all durations (incl. pauses; absolute)
+// -----------------------------------
+// LD[]       = degrees lower than -3b
+// L3M[]      = lower third degree (minor)
+// L3[]       = lower third degree (major)
+// L4[]       = lower perfect fourth degrees
+// L4A[]      = lower augmented fourth degrees
+// L5[]       = lower perfect fifth degrees
+// L6M[]      = lower sixth degree (minor)
+// L6[]       = lower sixth degree (major)
+// L7M[]      = lower seventh degree (minor)
+// -----------------------------------
+// L7[]       = lower third degree (major)
+// M1[]       = middle first degree ("Tonic")
+// M2M[]      = middle second degree (minor)
+// M2[]       = middle second degree (major)
+// M3M[]      = middle third degree (minor)
+// M3[]       = middle third degree (major)
+// M4[]       = middle fourth degree (perfect)
+// M4A[]      = middle fourth degree (augmented)
+// M5[]       = middle fifth degree (perfect)
+// M6M[]      = middle sixth degree (minor)
+// M6[]       = middle sixth degree (major)
+// -----------------------------------
+// M7M[]      = middle seventh degree (minor)
+// M7[]       = middle seventh degree (major)
+// U1[]       = upper first degree (perfect)
+// U2M[]      = upper second degree (minor)
+// U2[]       = upper second degree (major)
+// U3M[]      = upper third degree (minor)
+// U3[]       = upper third degree (major)
+// HD[]       = higher degrees
+//
+// EsAC files (page 61)
+// BALLAD30.SM
+// BALLAD80.SM
+// DVA0.SM
+// ERK10.SM
+// TESTD.SM
+// BALLAD40.SM
+// ALTDEU1.SM
+// FINK0.SM
+// ERK20.SM
+// TESTE.SM
+// BALLAD50.SM
+// ALTDEU2.SM
+// VARIANT0.SM
+// ERK30.SM
+// TEST1.SM
+// BALLAD10.SM
+// BALLAD60.SM
+// BOEHME10.SM
+// ERK5.SM
+// BALLAD20.SM
+// KINDER0.SM
+// BOEHME20.SM
+// TEST0.SM
 //
 
 #include "tool-esac2hum.h"
@@ -223,6 +353,7 @@ void Tool_esac2hum::convertEsacToHumdrum(ostream& output, istream& infile) {
 
 bool Tool_esac2hum::getSong(vector<string>& song, istream& infile) {
 	song.resize(0);
+	m_globalComments.clear();
 
 	HumRegex hre;
 	string buffer;
@@ -233,6 +364,17 @@ bool Tool_esac2hum::getSong(vector<string>& song, istream& infile) {
 	if (m_cutline.empty()) {
 		while (!infile.eof()) {
 			getline(infile, buffer);
+
+			if (hre.search(buffer, "^[!#]{2,}")) {
+				hre.search(buffer, "^([!#]{2,})(.*)$");
+				string prefix = hre.getMatch(1);
+				string postfix = hre.getMatch(2);
+				hre.replaceDestructive(prefix, "!", "#", "g");
+				string comment = prefix + postfix;
+				m_globalComments.push_back(comment);
+				continue;
+			}
+
 			cleanText(buffer);
 			m_inputline++;
 			if (buffer.compare(0, 4, "CUT[") == 0) {
@@ -265,6 +407,17 @@ bool Tool_esac2hum::getSong(vector<string>& song, istream& infile) {
 
 	while (!infile.eof()) {
 		getline(infile, buffer);
+
+		if (hre.search(buffer, "^#{2,}")) {
+			hre.search(buffer, "^(#{2,})(.*)$");
+			string prefix = hre.getMatch(1);
+			string postfix = hre.getMatch(2);
+			hre.replaceDestructive(prefix, "!", "#", "g");
+			string comment = prefix + postfix;
+			m_globalComments.push_back(comment);
+			continue;
+		}
+
 		cleanText(buffer);
 		m_inputline++;
 		if (m_debugQ) {
@@ -1625,21 +1778,19 @@ bool Tool_esac2hum::Measure::parseMeasure(const string& measure) {
 		bool marker = false;
 		if (std::isdigit(measure[i])) {
 			marker = true;
+		} else if (measure[i] == '^') {  // tie placeholder for degree digit
+			marker = true;
 		} else if (measure[i] == '(') {  // tuplet start
 			marker = true;
-		} else if (measure[i] == '-') {  // flat
+		} else if (measure[i] == '-') {  // octave lower
 			marker = true;
-		} else if (measure[i] == '+') {  // sharp
-			marker = true;
-		} else if (measure[i] == '^') {  // tie placeholder for degree
+		} else if (measure[i] == '+') {  // octave higher
 			marker = true;
 		}
 
 		if (marker && !tokens.empty() && !tokens.back().empty()) {
 			char checkChar = tokens.back().back();
 			if (checkChar == '(') {
-				marker = false;
-			} else if (checkChar == '^') {
 				marker = false;
 			} else if (checkChar == '-') {
 				marker = false;
@@ -1843,7 +1994,7 @@ string Tool_esac2hum::createFilename(void) {
 	if (!m_filePrefix.empty()) {
 		prefix = m_filePrefix;
 		source = "";
-	} 
+	}
 
 	// Convert spaces to underscores:
 	hre.replaceDestructive(title, "_", "\\s+", "g");
@@ -1996,6 +2147,9 @@ void Tool_esac2hum::getParameters(vector<string>& infile) {
 			lastKey = key;
 			expectingCloseQ = true;
 			continue;
+		} else if (hre.search(infile[i], "^#")) {
+			// Do nothing: an external comment, or embedded filter processed
+			// when filter loading the file.
 		} else {
 			cerr << "UNKNOWN CASE: " << infile[i] << endl;
 		}
@@ -2039,13 +2193,16 @@ void Tool_esac2hum::getParameters(vector<string>& infile) {
 		cerr << "Problem parsing KEY parameter: " << key << endl;
 	}
 
-	string trd;
+	string trd = m_score.m_params["TRD"];
 	if (hre.search(trd, "^\\s*(.*)\\ss\\.")) {
 		m_score.m_params["_source_trd"] = hre.getMatch(1);
 	}
-	if (hre.search(trd, "s\\.\\s*(\\d+-?\\d*)")) {
-		// Could be text aftewards about the origin of the song.
+	if (hre.search(trd, "\\bs\\.\\s*(\\d+)\\s*-\\s*(\\d+)?")) {
+		m_score.m_params["_page"] = hre.getMatch(1) + "-" + hre.getMatch(2);
+	} else if (hre.search(trd, "\\bs\\.\\s*(\\d+)")) {
 		m_score.m_params["_page"] = hre.getMatch(1);
+	} else {
+		cerr << "CANNOT FIND PAGE NUMBER IN " << trd << endl;
 	}
 
 	if (m_debugQ) {
@@ -2089,13 +2246,7 @@ void Tool_esac2hum::printBemComment(ostream& output) {
 	if (bem.empty()) {
 		return;
 	}
-	string english = m_bem_translation[bem];
-	if (english.empty()) {
-		output << "!!!ONB: " << bem << endl;
-	} else {
-		output << "!!!ONB@@PL: " << bem << endl;
-		output << "!!!ONB@@EN: " << english << endl;
-	}
+	output << "!!!ONB: " << bem << endl;
 }
 
 
@@ -2125,6 +2276,12 @@ void Tool_esac2hum::printFooter(ostream& output, vector<string>& infile) {
 		}
 		output << "!!@@END: ESAC" << endl;
 	}
+
+	if (!m_globalComments.empty()) {
+		for (int i=0; i<(int)m_globalComments.size(); i++) {
+			output << m_globalComments.at(i) << endl;
+		}
+	}
 }
 
 
@@ -2137,9 +2294,9 @@ void Tool_esac2hum::printFooter(ostream& output, vector<string>& infile) {
 void Tool_esac2hum::printPageNumbers(ostream& output) {
 	HumRegex hre;
 	string trd = m_score.m_params["TRD"];
-	if (hre.search(trd, "\\bs\\.\\s*(\\d+)\\s*-\\s*(\\d+)", "i")) {
+	if (hre.search(trd, "\\bs\\.\\s*(\\d+)\\s*-\\s*(\\d+)", "im")) {
 		output << "!!!page: " << hre.getMatch(1) << "-" << hre.getMatch(2) << endl;
-	} else if (hre.search(trd, "\\bs\\.\\s*(\\d+)", "i")) {
+	} else if (hre.search(trd, "\\bs\\.\\s*(\\d+)", "im")) {
 		output << "!!!page: " << hre.getMatch(1) << endl;
 	}
 }
@@ -2209,25 +2366,7 @@ void Tool_esac2hum::printPdfLinks(ostream& output) {
 
 	output << "!!!URL: https::kolberg.ispan.pl/dwok/tomy Oskar Kolberg: Complete Works digital edition" << endl;
 
-	string source = m_score.m_params["_source"];
-	HumRegex hre;
-	if (!hre.search(source, "^DWOK(\\d+)")) {
-		return;
-	}
-	string volume = hre.getMatch(1);
-	if (volume.size() == 1) {
-		volume = "0" + volume;
-	}
-	if (volume.size() == 2) {
-		volume = "0" + volume;
-	}
-	if (volume.size() > 3) {
-		return;
-	}
-	string nozero = volume;
-	hre.replaceDestructive(nozero, "" , "^0+");
-	// need http:// not https:// for the following PDF link:
-	output << "!!!URL-pdf: http://oskarkolberg.pl/MediaFiles/" << volume << "dwok.pdf" << " Oskar Kolberg: Complete Works, volume " << nozero << endl;
+	printKolbergPdfUrl(output);
 
 }
 
@@ -2643,7 +2782,7 @@ bool Tool_esac2hum::Note::isRest(void) {
 //     Todo: Deal with tied notes at starts of measures.
 //
 
-void Tool_esac2hum::Score::analyzeACC(void) { 
+void Tool_esac2hum::Score::analyzeACC(void) {
 	string output;
 	for (int i=0; i<(int)size(); i++) {
 		Tool_esac2hum::Phrase& phrase = at(i);
@@ -2658,6 +2797,155 @@ void Tool_esac2hum::Score::analyzeACC(void) {
 		}
 	}
 	m_params["ACC"] =  output;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_esac2hum::getKolbergInfo --
+//
+
+Tool_esac2hum::KolbergInfo Tool_esac2hum::getKolbergInfo(int volume) {
+	static bool initialized = false;
+
+	if (!initialized) {
+		initialized = true;
+		// Parameters:                 Polish volume title,    English translation,      rint start page, Equivalent start scan (pdf page), Plate scan page vector
+		m_kinfo.emplace(1, KolbergInfo("Pieśni ludu polskego", "Polish folk songs",                    3,  99, {149, 150, 167, 168, 233, 234, 251, 252, 317, 318, 335, 336, 401, 402, 419, 420, 485, 486, 503, 504}));
+		m_kinfo.emplace(2, KolbergInfo("Sandomierskie",        "Sandomierz",                          23,  34, {}));
+		m_kinfo.emplace(3, KolbergInfo("Kujawy I",             "Kuyavia I (north central Poland)",   209, 221, {}));
+		m_kinfo.emplace(4, KolbergInfo("Kujawy II",            "Kuyavia II (north central Poland)",   69,  83, {}));
+		m_kinfo.emplace(5, KolbergInfo("Krakowskie I",         "Crakow I",                           194, 222, {}));
+		m_kinfo.emplace(6, KolbergInfo("Krakowskie II",        "Crakow II",                            5,  29, {49, 50}));
+	}
+
+
+    auto it = m_kinfo.find(volume);
+    if (it != m_kinfo.end()) {
+        return it->second;
+    } else {
+        return KolbergInfo();
+    }
+}
+
+
+
+//////////////////////////////
+//
+// Tool_esac::getKolbergUrl --
+//
+
+string Tool_esac2hum::getKolbergUrl(int volume) {
+	if ((volume < 1) || (volume > 84)) {
+		// Such a volume does not exist, return empty string.
+		return "";
+	}
+
+	stringstream ss;
+	ss << std::setw(3) << std::setfill('0') << volume;
+	// not https://
+	string url = "http://www.oskarkolberg.pl/MediaFiles/";
+	url += ss.str();
+	url += "dwok.pdf";
+
+	KolbergInfo kinfo = getKolbergInfo(volume);
+	if (kinfo.titlePL.empty()) {
+		// Do not have the page number info for volume, so just give URL for the volume.
+		return url;
+	}
+
+	string pageinfo = m_score.m_params["_page"];
+	int printPage = 0;
+	if (!pageinfo.empty()) {
+		HumRegex hre;
+		if (hre.search(pageinfo, "(\\d+)")) {
+			printPage = hre.getMatchInt(1);
+		} else {
+		     cerr << "XX PRINT PAGE: " << printPage << "\t_page: " << pageinfo << endl;
+		}
+	} else {
+		cerr << "YY PRINT PAGE: " << printPage << "\t_page: IS EMPTY: " << pageinfo << endl;
+	}
+
+	// Calculate the scan page that matches with the print page:
+	int startPrintPage = kinfo.firstPrintPage;
+	int startScanPage  = kinfo.firstScanPage;
+	int scanPage = calculateScanPage(printPage, startPrintPage, startScanPage, kinfo.plates);
+
+	url += "#page=" + to_string(scanPage);
+
+	if (!kinfo.titlePL.empty()) {
+		url += " @PL{Oskar Kolberg Dzieła Wszystkie " + to_string(volume) + ": " + kinfo.titlePL;
+		url += ", s. " + pageinfo;
+		url += "}";
+	}
+
+	if (!kinfo.titleEN.empty()) {
+		url += " @EN{Oskar Kolberg Complete Works " + to_string(volume) + ": " + kinfo.titleEN;
+		url += ", p";
+		if (pageinfo.find("-") != string::npos) {
+			url += "p";
+		}
+		url += "." + pageinfo;
+		url += "}";
+	}
+
+	if (kinfo.titlePL.empty() && kinfo.titleEN.empty()) {
+		url += " @PL{Oskar Kolberg Dzieła Wszystike " + to_string(volume);
+		url += " @PL{Oskar Kolberg Complete Works " + to_string(volume);
+	}
+
+	return url;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_esac2hum::printKolbergPdfUrl --
+//
+
+void Tool_esac2hum::printKolbergPdfUrl(ostream& output) {
+	string source = m_score.m_params["_source"];
+	HumRegex hre;
+	if (!hre.search(source, "^DWOK(\\d+)")) {
+		return;
+	}
+	int volume = hre.getMatchInt(1);
+	string url = getKolbergUrl(volume);
+	if (!url.empty()) {
+		output << "!!!URL-pdf: " << url << endl;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_esac2hum::calculateScanPage --
+//
+
+int Tool_esac2hum::calculateScanPage(int inputPrintPage, int printPage, int scanPage, const std::vector<int>& platePages) {
+	int currentPrintPage = printPage;
+	int currentScanPage = scanPage;
+	size_t plateIndex = 0;
+
+	// Iterate until we reach the input print page
+	while (currentPrintPage < inputPrintPage) {
+		++currentScanPage;  // Increment the scan page
+
+		// Check if the current scan page matches the current plate page in the vector
+		if (plateIndex < platePages.size() && currentScanPage == platePages[plateIndex]) {
+			// Skip the plate page (increment scanPage but not printPage)
+			++plateIndex;
+		} else {
+			// If not a plate page, increment the print page
+			++currentPrintPage;
+		}
+	}
+
+	return currentScanPage;
 }
 
 

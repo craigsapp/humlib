@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Aug 30 22:55:34 PDT 2024
+// Last Modified: Sat Sep  7 19:15:25 PDT 2024
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -55582,6 +55582,7 @@ bool Tool_autobeam::run(HumdrumFile& infile) {
 	}
 	// Re-load the text for each line from their tokens.
 	infile.createLinesFromTokens();
+	m_humdrum_text << infile;
 	return true;
 }
 
@@ -56410,9 +56411,9 @@ void Tool_autobeam::processMeasure(vector<HTp>& measure) {
 			if ((current.first % 3 == 0) && (current.first != 3)) {
 				// compound meter, so shift the beat to 3x the demoniator
 				beatdur *= 3;
-			} else if (current.first == 3 && (current.second > 4)) {
+			} else if (current.first == 3 && (current.second < 4)) {
 				// time signatures such as 3/8 and 3/16 which should
-				// beam together at the measure level (3/4 not included).
+				// beam together at the measure level (3/4 and 3/2 not included).
 				beatdur *= 3;
 			}
 		}
@@ -78346,6 +78347,7 @@ void Tool_esac2hum::convertEsacToHumdrum(ostream& output, istream& infile) {
 
 bool Tool_esac2hum::getSong(vector<string>& song, istream& infile) {
 	song.resize(0);
+	m_globalComments.clear();
 
 	HumRegex hre;
 	string buffer;
@@ -78356,6 +78358,17 @@ bool Tool_esac2hum::getSong(vector<string>& song, istream& infile) {
 	if (m_cutline.empty()) {
 		while (!infile.eof()) {
 			getline(infile, buffer);
+
+			if (hre.search(buffer, "^[!#]{2,}")) {
+				hre.search(buffer, "^([!#]{2,})(.*)$");
+				string prefix = hre.getMatch(1);
+				string postfix = hre.getMatch(2);
+				hre.replaceDestructive(prefix, "!", "#", "g");
+				string comment = prefix + postfix;
+				m_globalComments.push_back(comment);
+				continue;
+			}
+
 			cleanText(buffer);
 			m_inputline++;
 			if (buffer.compare(0, 4, "CUT[") == 0) {
@@ -78388,6 +78401,17 @@ bool Tool_esac2hum::getSong(vector<string>& song, istream& infile) {
 
 	while (!infile.eof()) {
 		getline(infile, buffer);
+
+		if (hre.search(buffer, "^#{2,}")) {
+			hre.search(buffer, "^(#{2,})(.*)$");
+			string prefix = hre.getMatch(1);
+			string postfix = hre.getMatch(2);
+			hre.replaceDestructive(prefix, "!", "#", "g");
+			string comment = prefix + postfix;
+			m_globalComments.push_back(comment);
+			continue;
+		}
+
 		cleanText(buffer);
 		m_inputline++;
 		if (m_debugQ) {
@@ -78453,58 +78477,72 @@ void Tool_esac2hum::cleanText(std::string& buffer) {
 
 	// Fix UTF-8 double encodings (related to editing with Windows-1252 or ISO-8859-2 programs):
 
-	// ą:
+	// Ą: c3 84 c2 84 - c4 84
+	hre.replaceDestructive(buffer, "\xc4\x84", "\xc3\x84\xc2\x84", "g");
 
-	// Ą:
+	// ą: c3 84 c2 85 - c4 85
+	hre.replaceDestructive(buffer, "\xc4\x85", "\xc3\x84\xc2\x85", "g");
 
-	// ć:
+	// Ć: c3 84 c2 86 -> c4 86
+	hre.replaceDestructive(buffer, "\xc4\x86", "\xc3\x84\xc2\x86", "g");
 
-	// Ć:
+	// ć: c3 84 c2 87 -> c4 87
+	hre.replaceDestructive(buffer, "\xc4\x87", "\xc3\x84\xc2\x87", "g");
+
+	// Ę: c3 84 c2 98 -> c4 98
+	hre.replaceDestructive(buffer, "\xc4\x98", "\xc3\x84\xc2\x98", "g");
 
 	// ę: c3 84 c2 99 -> c4 99
 	hre.replaceDestructive(buffer, "\xc4\x99", "\xc3\x84\xc2\x99", "g");
 
-	// Ę:
-
-	// ł UTF-8 hex bytes: c5 82
-	hre.replaceDestructive(buffer, "\xc5\x82", "\xc4\xb9\xc2\x82", "g");
-
 	// Ł: c4 b9 c2 81 -> c5 81
 	hre.replaceDestructive(buffer, "\xc5\x81", "\xc4\xb9\xc2\x81", "g");
+
+	// ł: c4 b9 c2 82 -> c5 82
+	hre.replaceDestructive(buffer, "\xc5\x82", "\xc4\xb9\xc2\x82", "g");
+
+	// Ń: c4 b9 c2 83 -> c5 83
+	hre.replaceDestructive(buffer, "\xc5\x83", "\xc4\xb9\xc2\x83", "g");
 
 	// ń: c4 b9 c2 84 -> c5 84
 	hre.replaceDestructive(buffer, "\xc5\x84", "\xc4\xb9\xc2\x84", "g");
 
-	// Ń:
+	// Ó: c4 82 c5 93 -> c3 93 (note: not sequential with ó)
+	hre.replaceDestructive(buffer, "\xc3\x93", "\xc4\x82\xc5\x93", "g");
 
-	// ó: c4 82 c5 82 -> c3 b3
+	// ó: c4 82 c5 82 -> c3 b3 (note: not sequential with Ó)
 	hre.replaceDestructive(buffer, "\xc3\xb3", "\xc4\x82\xc5\x82", "g");
 
-	// Ó:
+	// Ś: c4 b9 c2 9a -> c5 9a
+	hre.replaceDestructive(buffer, "\xc5\x9a", "\xc4\xb9\xc2\x9b", "g");
 
-	// ś:
+	// ś: c4 b9 c2 9b -> c5 9b
+	hre.replaceDestructive(buffer, "\xc5\x9b", "\xc4\xb9\xc2\x9b", "g");
 
-	// Ś:
+	// Ź: c4 b9 c5 9a -> c5 b9
+	hre.replaceDestructive(buffer, "\xc5\xb9", "\xc4\xb9\xc5\x9a", "g");
 
 	// ź: c4 b9 c5 9f -> c5 ba
 	hre.replaceDestructive(buffer, "\xc5\xba", "\xc4\xb9\xc5\x9f", "g");
 
-	// Ź:
-	
-	// ż:
-
 	// Ż: c4 b9 c5 a5 -> c5 bb
 	hre.replaceDestructive(buffer, "\xc5\xbb", "\xc4\xb9\xc5\xa5", "g");
+	
+	// ż:  c4 b9 c5 ba -> c5 bc
+	hre.replaceDestructive(buffer, "\xc5\xbc", "\xc4\xb9\xc5\xba", "g");
 
 
 	// Random leftover characters from some character conversion:
 	hre.replaceDestructive(buffer, "", "[\x88\x98]", "g");
+
+	// Remove MS-DOS newline character at ends of lines:
 	if (!buffer.empty()) {
 		if (buffer.back() == 0x0d) {
 			// windows newline piece
 			buffer.resize(buffer.size() - 1);
 		}
 	}
+	// In VHV, when saving content to the local computer in EsAC mode, the 0x0d character should be added back.
 }
 
 
@@ -79734,21 +79772,19 @@ bool Tool_esac2hum::Measure::parseMeasure(const string& measure) {
 		bool marker = false;
 		if (std::isdigit(measure[i])) {
 			marker = true;
+		} else if (measure[i] == '^') {  // tie placeholder for degree digit
+			marker = true;
 		} else if (measure[i] == '(') {  // tuplet start
 			marker = true;
-		} else if (measure[i] == '-') {  // flat
+		} else if (measure[i] == '-') {  // octave lower
 			marker = true;
-		} else if (measure[i] == '+') {  // sharp
-			marker = true;
-		} else if (measure[i] == '^') {  // tie placeholder for degree
+		} else if (measure[i] == '+') {  // octave higher
 			marker = true;
 		}
 
 		if (marker && !tokens.empty() && !tokens.back().empty()) {
 			char checkChar = tokens.back().back();
 			if (checkChar == '(') {
-				marker = false;
-			} else if (checkChar == '^') {
 				marker = false;
 			} else if (checkChar == '-') {
 				marker = false;
@@ -79952,7 +79988,7 @@ string Tool_esac2hum::createFilename(void) {
 	if (!m_filePrefix.empty()) {
 		prefix = m_filePrefix;
 		source = "";
-	} 
+	}
 
 	// Convert spaces to underscores:
 	hre.replaceDestructive(title, "_", "\\s+", "g");
@@ -80105,6 +80141,9 @@ void Tool_esac2hum::getParameters(vector<string>& infile) {
 			lastKey = key;
 			expectingCloseQ = true;
 			continue;
+		} else if (hre.search(infile[i], "^#")) {
+			// Do nothing: an external comment, or embedded filter processed
+			// when filter loading the file.
 		} else {
 			cerr << "UNKNOWN CASE: " << infile[i] << endl;
 		}
@@ -80148,13 +80187,16 @@ void Tool_esac2hum::getParameters(vector<string>& infile) {
 		cerr << "Problem parsing KEY parameter: " << key << endl;
 	}
 
-	string trd;
+	string trd = m_score.m_params["TRD"];
 	if (hre.search(trd, "^\\s*(.*)\\ss\\.")) {
 		m_score.m_params["_source_trd"] = hre.getMatch(1);
 	}
-	if (hre.search(trd, "s\\.\\s*(\\d+-?\\d*)")) {
-		// Could be text aftewards about the origin of the song.
+	if (hre.search(trd, "\\bs\\.\\s*(\\d+)\\s*-\\s*(\\d+)?")) {
+		m_score.m_params["_page"] = hre.getMatch(1) + "-" + hre.getMatch(2);
+	} else if (hre.search(trd, "\\bs\\.\\s*(\\d+)")) {
 		m_score.m_params["_page"] = hre.getMatch(1);
+	} else {
+		cerr << "CANNOT FIND PAGE NUMBER IN " << trd << endl;
 	}
 
 	if (m_debugQ) {
@@ -80198,13 +80240,7 @@ void Tool_esac2hum::printBemComment(ostream& output) {
 	if (bem.empty()) {
 		return;
 	}
-	string english = m_bem_translation[bem];
-	if (english.empty()) {
-		output << "!!!ONB: " << bem << endl;
-	} else {
-		output << "!!!ONB@@PL: " << bem << endl;
-		output << "!!!ONB@@EN: " << english << endl;
-	}
+	output << "!!!ONB: " << bem << endl;
 }
 
 
@@ -80234,6 +80270,12 @@ void Tool_esac2hum::printFooter(ostream& output, vector<string>& infile) {
 		}
 		output << "!!@@END: ESAC" << endl;
 	}
+
+	if (!m_globalComments.empty()) {
+		for (int i=0; i<(int)m_globalComments.size(); i++) {
+			output << m_globalComments.at(i) << endl;
+		}
+	}
 }
 
 
@@ -80246,9 +80288,9 @@ void Tool_esac2hum::printFooter(ostream& output, vector<string>& infile) {
 void Tool_esac2hum::printPageNumbers(ostream& output) {
 	HumRegex hre;
 	string trd = m_score.m_params["TRD"];
-	if (hre.search(trd, "\\bs\\.\\s*(\\d+)\\s*-\\s*(\\d+)", "i")) {
+	if (hre.search(trd, "\\bs\\.\\s*(\\d+)\\s*-\\s*(\\d+)", "im")) {
 		output << "!!!page: " << hre.getMatch(1) << "-" << hre.getMatch(2) << endl;
-	} else if (hre.search(trd, "\\bs\\.\\s*(\\d+)", "i")) {
+	} else if (hre.search(trd, "\\bs\\.\\s*(\\d+)", "im")) {
 		output << "!!!page: " << hre.getMatch(1) << endl;
 	}
 }
@@ -80318,25 +80360,7 @@ void Tool_esac2hum::printPdfLinks(ostream& output) {
 
 	output << "!!!URL: https::kolberg.ispan.pl/dwok/tomy Oskar Kolberg: Complete Works digital edition" << endl;
 
-	string source = m_score.m_params["_source"];
-	HumRegex hre;
-	if (!hre.search(source, "^DWOK(\\d+)")) {
-		return;
-	}
-	string volume = hre.getMatch(1);
-	if (volume.size() == 1) {
-		volume = "0" + volume;
-	}
-	if (volume.size() == 2) {
-		volume = "0" + volume;
-	}
-	if (volume.size() > 3) {
-		return;
-	}
-	string nozero = volume;
-	hre.replaceDestructive(nozero, "" , "^0+");
-	// need http:// not https:// for the following PDF link:
-	output << "!!!URL-pdf: http://oskarkolberg.pl/MediaFiles/" << volume << "dwok.pdf" << " Oskar Kolberg: Complete Works, volume " << nozero << endl;
+	printKolbergPdfUrl(output);
 
 }
 
@@ -80752,7 +80776,7 @@ bool Tool_esac2hum::Note::isRest(void) {
 //     Todo: Deal with tied notes at starts of measures.
 //
 
-void Tool_esac2hum::Score::analyzeACC(void) { 
+void Tool_esac2hum::Score::analyzeACC(void) {
 	string output;
 	for (int i=0; i<(int)size(); i++) {
 		Tool_esac2hum::Phrase& phrase = at(i);
@@ -80767,6 +80791,155 @@ void Tool_esac2hum::Score::analyzeACC(void) {
 		}
 	}
 	m_params["ACC"] =  output;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_esac2hum::getKolbergInfo --
+//
+
+Tool_esac2hum::KolbergInfo Tool_esac2hum::getKolbergInfo(int volume) {
+	static bool initialized = false;
+
+	if (!initialized) {
+		initialized = true;
+		// Parameters:                 Polish volume title,    English translation,      rint start page, Equivalent start scan (pdf page), Plate scan page vector
+		m_kinfo.emplace(1, KolbergInfo("Pieśni ludu polskego", "Polish folk songs",                    3,  99, {149, 150, 167, 168, 233, 234, 251, 252, 317, 318, 335, 336, 401, 402, 419, 420, 485, 486, 503, 504}));
+		m_kinfo.emplace(2, KolbergInfo("Sandomierskie",        "Sandomierz",                          23,  34, {}));
+		m_kinfo.emplace(3, KolbergInfo("Kujawy I",             "Kuyavia I (north central Poland)",   209, 221, {}));
+		m_kinfo.emplace(4, KolbergInfo("Kujawy II",            "Kuyavia II (north central Poland)",   69,  83, {}));
+		m_kinfo.emplace(5, KolbergInfo("Krakowskie I",         "Crakow I",                           194, 222, {}));
+		m_kinfo.emplace(6, KolbergInfo("Krakowskie II",        "Crakow II",                            5,  29, {49, 50}));
+	}
+
+
+    auto it = m_kinfo.find(volume);
+    if (it != m_kinfo.end()) {
+        return it->second;
+    } else {
+        return KolbergInfo();
+    }
+}
+
+
+
+//////////////////////////////
+//
+// Tool_esac::getKolbergUrl --
+//
+
+string Tool_esac2hum::getKolbergUrl(int volume) {
+	if ((volume < 1) || (volume > 84)) {
+		// Such a volume does not exist, return empty string.
+		return "";
+	}
+
+	stringstream ss;
+	ss << std::setw(3) << std::setfill('0') << volume;
+	// not https://
+	string url = "http://www.oskarkolberg.pl/MediaFiles/";
+	url += ss.str();
+	url += "dwok.pdf";
+
+	KolbergInfo kinfo = getKolbergInfo(volume);
+	if (kinfo.titlePL.empty()) {
+		// Do not have the page number info for volume, so just give URL for the volume.
+		return url;
+	}
+
+	string pageinfo = m_score.m_params["_page"];
+	int printPage = 0;
+	if (!pageinfo.empty()) {
+		HumRegex hre;
+		if (hre.search(pageinfo, "(\\d+)")) {
+			printPage = hre.getMatchInt(1);
+		} else {
+		     cerr << "XX PRINT PAGE: " << printPage << "\t_page: " << pageinfo << endl;
+		}
+	} else {
+		cerr << "YY PRINT PAGE: " << printPage << "\t_page: IS EMPTY: " << pageinfo << endl;
+	}
+
+	// Calculate the scan page that matches with the print page:
+	int startPrintPage = kinfo.firstPrintPage;
+	int startScanPage  = kinfo.firstScanPage;
+	int scanPage = calculateScanPage(printPage, startPrintPage, startScanPage, kinfo.plates);
+
+	url += "#page=" + to_string(scanPage);
+
+	if (!kinfo.titlePL.empty()) {
+		url += " @PL{Oskar Kolberg Dzieła Wszystkie " + to_string(volume) + ": " + kinfo.titlePL;
+		url += ", s. " + pageinfo;
+		url += "}";
+	}
+
+	if (!kinfo.titleEN.empty()) {
+		url += " @EN{Oskar Kolberg Complete Works " + to_string(volume) + ": " + kinfo.titleEN;
+		url += ", p";
+		if (pageinfo.find("-") != string::npos) {
+			url += "p";
+		}
+		url += "." + pageinfo;
+		url += "}";
+	}
+
+	if (kinfo.titlePL.empty() && kinfo.titleEN.empty()) {
+		url += " @PL{Oskar Kolberg Dzieła Wszystike " + to_string(volume);
+		url += " @PL{Oskar Kolberg Complete Works " + to_string(volume);
+	}
+
+	return url;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_esac2hum::printKolbergPdfUrl --
+//
+
+void Tool_esac2hum::printKolbergPdfUrl(ostream& output) {
+	string source = m_score.m_params["_source"];
+	HumRegex hre;
+	if (!hre.search(source, "^DWOK(\\d+)")) {
+		return;
+	}
+	int volume = hre.getMatchInt(1);
+	string url = getKolbergUrl(volume);
+	if (!url.empty()) {
+		output << "!!!URL-pdf: " << url << endl;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_esac2hum::calculateScanPage --
+//
+
+int Tool_esac2hum::calculateScanPage(int inputPrintPage, int printPage, int scanPage, const std::vector<int>& platePages) {
+	int currentPrintPage = printPage;
+	int currentScanPage = scanPage;
+	size_t plateIndex = 0;
+
+	// Iterate until we reach the input print page
+	while (currentPrintPage < inputPrintPage) {
+		++currentScanPage;  // Increment the scan page
+
+		// Check if the current scan page matches the current plate page in the vector
+		if (plateIndex < platePages.size() && currentScanPage == platePages[plateIndex]) {
+			// Skip the plate page (increment scanPage but not printPage)
+			++plateIndex;
+		} else {
+			// If not a plate page, increment the print page
+			++currentPrintPage;
+		}
+	}
+
+	return currentScanPage;
 }
 
 
@@ -106377,10 +106550,10 @@ bool Tool_musicxml2hum::convertFile(ostream& out, const char* filename) {
 	xml_document doc;
 	auto result = doc.load_file(filename);
 	if (!result) {
-		cerr << "\nXML file [" << filename << "] has syntax errors\n";
-		cerr << "Error description:\t" << result.description() << "\n";
-		cerr << "Error offset:\t" << result.offset << "\n\n";
-		exit(1);
+		cerr << "\nXML file [" << filename << "] has syntax errors ";
+		cerr << "Error description:\t" << result.description() << endl;
+		cerr << "Error offset:\t" << result.offset << "\n";
+		return false;
 	}
 
 	return convert(out, doc);
@@ -106397,10 +106570,10 @@ bool Tool_musicxml2hum::convert(ostream& out, const char* input) {
 	xml_document doc;
 	auto result = doc.load_string(input);
 	if (!result) {
-		cout << "\nXML content has syntax errors\n";
-		cout << "Error description:\t" << result.description() << "\n";
+		cout << "\nXML content has syntax errors";
+		cout << " Error description:\t" << result.description() << "\n";
 		cout << "Error offset:\t" << result.offset << "\n\n";
-		exit(1);
+		return false;
 	}
 
 	return convert(out, doc);
@@ -107345,10 +107518,10 @@ bool Tool_musicxml2hum::stitchParts(HumGrid& outdata,
 	// i used to start at 1 for some strange reason.
 	for (i=0; i<(int)partdata.size(); i++) {
 		if (measurecount != partdata[i].getMeasureCount()) {
-			cerr << "ERROR: cannot handle parts with different measure\n";
+			cerr << "ERROR: cannot handle parts with different measure ";
 			cerr << "counts yet. Compare MM" << measurecount << " to MM";
 			cerr << partdata[i].getMeasureCount() << endl;
-			exit(1);
+			return false;
 		}
 	}
 
