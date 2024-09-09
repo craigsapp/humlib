@@ -193,6 +193,7 @@ class Tool_esac2hum : public HumTool {
 		std::string m_cutline;
 		std::vector<std::string> m_globalComments;
 
+		bool m_initialized = false;
 		int m_minrhy = 0;
 
 		Tool_esac2hum::Score m_score;

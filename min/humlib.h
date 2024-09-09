@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Sep  7 19:15:25 PDT 2024
+// Last Modified: Sun Sep  8 21:17:59 PDT 2024
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -7527,6 +7527,7 @@ class Tool_esac2hum : public HumTool {
 		std::string m_cutline;
 		std::vector<std::string> m_globalComments;
 
+		bool m_initialized = false;
 		int m_minrhy = 0;
 
 		Tool_esac2hum::Score m_score;

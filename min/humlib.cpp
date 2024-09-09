@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Sep  7 19:15:25 PDT 2024
+// Last Modified: Sun Sep  8 21:17:59 PDT 2024
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -79015,7 +79015,9 @@ void Tool_esac2hum::Score::calculateTimeSignatures(void) {
 	vector<string> timesigs;
 	hre.split(timesigs, ts, "\\s+");
 	if (timesigs.size() < 2) {
-		m_errors.push_back("ERROR: strange format for time signatures.");
+		string error = "ERROR: Cannot find time signature(s) in KEY[] field: ";
+		error += m_params["KEY"];
+		m_errors.push_back(error);
 		return;
 	}
 
@@ -79436,7 +79438,9 @@ void Tool_esac2hum::Score::generateHumdrumNotes(void) {
 
 	string tonic = m_params["_tonic"];
 	if (tonic.empty()) {
-		m_errors.push_back("Error: cannot find KEY[] tonic pitch");
+		string error = "Error: cannot find tonic pitch in KEY[] field: ";
+		error += m_params["KEY"];
+		m_errors.push_back(error);
 		return;
 	}
 	char letter = std::tolower(tonic[0]);
@@ -80163,7 +80167,7 @@ void Tool_esac2hum::getParameters(vector<string>& infile) {
 	}
 
 	string key = m_score.m_params["KEY"];
-	if (hre.search(key, "^\\s*([^\\s]+)\\s+(\\d+)\\s+([A-Gacdefg][bs]*)\\s+(.*?)\\s*$")) {
+	if (hre.search(key, "^\\s*([^\\s]+)\\s+(\\d+)\\s+([A-Gacdefg][b#]*)\\s+(.*?)\\s*$")) {
 		string id     = hre.getMatch(1);
 		string minrhy = hre.getMatch(2);
 		string tonic  = hre.getMatch(3);
@@ -80801,26 +80805,108 @@ void Tool_esac2hum::Score::analyzeACC(void) {
 //
 
 Tool_esac2hum::KolbergInfo Tool_esac2hum::getKolbergInfo(int volume) {
-	static bool initialized = false;
 
-	if (!initialized) {
-		initialized = true;
-		// Parameters:                 Polish volume title,    English translation,      rint start page, Equivalent start scan (pdf page), Plate scan page vector
-		m_kinfo.emplace(1, KolbergInfo("Pieśni ludu polskego", "Polish folk songs",                    3,  99, {149, 150, 167, 168, 233, 234, 251, 252, 317, 318, 335, 336, 401, 402, 419, 420, 485, 486, 503, 504}));
-		m_kinfo.emplace(2, KolbergInfo("Sandomierskie",        "Sandomierz",                          23,  34, {}));
-		m_kinfo.emplace(3, KolbergInfo("Kujawy I",             "Kuyavia I (north central Poland)",   209, 221, {}));
-		m_kinfo.emplace(4, KolbergInfo("Kujawy II",            "Kuyavia II (north central Poland)",   69,  83, {}));
-		m_kinfo.emplace(5, KolbergInfo("Krakowskie I",         "Crakow I",                           194, 222, {}));
-		m_kinfo.emplace(6, KolbergInfo("Krakowskie II",        "Crakow II",                            5,  29, {49, 50}));
+	if (!m_initialized) {
+		m_initialized = true;
+		// Parameters:          Polish volume title,                                                          English translation,                                    print start page, Equivalent start scan (pdf page), Plate scan page vector
+		m_kinfo.emplace( 1,     KolbergInfo("Pieśni ludu polskego",                                          "Polish folk songs",                                                    3,  99, {149, 150, 167, 168, 233, 234, 251, 252, 317, 318, 335, 336, 401, 402, 419, 420, 485, 486, 503, 504}));
+		m_kinfo.emplace( 2,     KolbergInfo("Sandomierskie",                                                 "Sandomierz",                                                          23,  34, {}));
+		m_kinfo.emplace( 3,     KolbergInfo("Kujawy I",                                                      "Kuyavia I (north central Poland)",                                   209, 221, {}));
+		m_kinfo.emplace( 4,     KolbergInfo("Kujawy II",                                                     "Kuyavia II (north central Poland)",                                   69,  83, {}));
+		m_kinfo.emplace( 5,     KolbergInfo("Krakowskie I",                                                  "Crakow I",                                                           194, 222, {}));
+		m_kinfo.emplace( 6,     KolbergInfo("Krakowskie II",                                                 "Crakow II",                                                            5,  29, {49, 50}));
+		//               7:     Krakowskie III/Crakow III: no music                                                                                                                                                                       
+		m_kinfo.emplace( 8,     KolbergInfo("Krakowskie IV",                                                 "Crakow IV",                                                          162, 182, {}));
+		m_kinfo.emplace( 9,     KolbergInfo("W. Ks. Poznańskie I",                                           "Grand Duchy of Poznań I",                                            117, 141, {}));
+		m_kinfo.emplace(10,     KolbergInfo("W. Ks. Poznańskie II",                                          "Grand Duchy of Poznań II",                                            60,  76, {}));
+		m_kinfo.emplace(11,     KolbergInfo("W. Ks. Poznańskie III",                                         "Grand Duchy of Poznań III",                                           39,  57, {}));
+		m_kinfo.emplace(12,     KolbergInfo("W. Ks. Poznańskie IV",                                          "Grand Duchy of Poznań IV",                                             3,  19, {}));
+		m_kinfo.emplace(13,     KolbergInfo("W. Ks. Poznańskie V",                                           "Grand Duchy of Poznań V",                                              3,  27, {}));
+		m_kinfo.emplace(14,     KolbergInfo("W. Ks. Poznańskie VI",                                          "Grand Duchy of Poznań VI",                                           157, 165, {}));
+		m_kinfo.emplace(15,     KolbergInfo("W. Ks. Poznańskie VII",                                         "Grand Duchy of Poznań VII",                                          317, 327, {}));
+		m_kinfo.emplace(16,     KolbergInfo("Lubelskie I",                                                   "Lublin Voivodeship I",                                               105, 125, {}));
+		m_kinfo.emplace(17,     KolbergInfo("Lubelskie II",                                                  "Lublin Voivodeship II",                                                1,  23, {}));
+		m_kinfo.emplace(18,     KolbergInfo("Kieleckie I",                                                   "Kielce Voivodeship I",                                                49,  65, {}));
+		m_kinfo.emplace(19,     KolbergInfo("Kieleckie II",                                                  "Kielce Voivodeship II",                                                1,  15, {}));
+		m_kinfo.emplace(20,     KolbergInfo("Radomskie I",                                                   "Radom Voivodeship I",                                                 75,  95, {}));
+		m_kinfo.emplace(21,     KolbergInfo("Radomskie II",                                                  "Radom Voivodeship II",                                                 1,  19, {}));
+		m_kinfo.emplace(22,     KolbergInfo("Łęczyckie",                                                     "Łęczyca Voivodeship",                                                 18,  36, {}));
+		m_kinfo.emplace(23,     KolbergInfo("Kaliskie",                                                      "Kalisz Region",                                                       54,  68, {}));
+		m_kinfo.emplace(24,     KolbergInfo("Mazowsze I",                                                    "Mazovia I",                                                           79, 103, {}));
+		m_kinfo.emplace(25,     KolbergInfo("Mazowsze II",                                                   "Mazovia II",                                                           1,  26, {}));
+		//              26:     Mazowsze III/Mazovia III: no music                                                                                                                                                                       
+		m_kinfo.emplace(27,     KolbergInfo("Mazowsze IV",                                                   "Mazovia IV",                                                         115, 134, {}));
+		m_kinfo.emplace(28,     KolbergInfo("Mazowsze V",                                                    "Mazovia V",                                                           64,  83, {}));
+		m_kinfo.emplace(29,     KolbergInfo("Pokucie I",                                                     "Pokuttia I",                                                          90, 122, {}));
+		m_kinfo.emplace(30,     KolbergInfo("Pokucie II",                                                    "Pokuttia II",                                                          1,  14, {}));
+		m_kinfo.emplace(31,     KolbergInfo("Pokucie III",                                                   "Pokuttia III",                                                        10,  31, {}));
+		//              32:     Pokucie IV/Pokuttia IV: no music                                                                                                                                                                       
+		m_kinfo.emplace(33,     KolbergInfo("Chełmskie I",                                                   "Chełm Voivodeship I",                                                114, 150, {163, 164, 175, 176, 177, 178}));
+		m_kinfo.emplace(34,     KolbergInfo("Chełmskie II",                                                  "Chełm Voivodeship II",                                                 4,  21, {}));
+		m_kinfo.emplace(35,     KolbergInfo("Przemyskie",                                                    "Przemyśl Voivodeship",                                                11,  47, {93, 94, 115, 116, 167, 168}));
+		//              36:     Wołyń/Volhynia: complications                                                                                                                                                                                                                                                                                                                                              
+		//              37:     Miscellanea I/Miscellanea I: no music                                                                                                                                                                       
+		//              38,     Miscellanea II/Miscellanea II: no music                                                                                                                                                                       
+		m_kinfo.emplace(39,     KolbergInfo("Pomorze",                                                       "Pomerania",                                                           67, 115, {129, 130, 147, 148}));
+		m_kinfo.emplace(40,     KolbergInfo("Mazury Pruskie",                                                "Prussian Masuria",                                                    96, 155, {356, 357, 358, 359, 464, 465, 482, 483}));
+                                                                                                                                                                                                
+		m_kinfo.emplace(41,     KolbergInfo("Mazowsze VI",                                                   "Mazovia VI",                                                          20, 95,  {108, 109, 126, 127, 288, 289, 306, 307, 388, 389, 406, 407}));
+		m_kinfo.emplace(42,     KolbergInfo("Mazowsze VII",                                                  "Mazovia VII",                                                          6,  15, {}));
+		m_kinfo.emplace(43,     KolbergInfo("Śląsk",                                                         "Silesia",                                                             21,  62, {74, 75}));
+		m_kinfo.emplace(44,     KolbergInfo("Góry i Podgórze I",                                             "Mountains and Foothills I",                                           64, 110, {111, 112, 129, 130, 195, 196, 213, 214, 343, 344, 361, 362}));
+		m_kinfo.emplace(45,     KolbergInfo("Góry i Podgórze II",                                            "Mountains and Foothills II",                                           1,  11, {91, 92, 109, 110, 335, 336, 353, 354, 499, 500}));
+		m_kinfo.emplace(46,     KolbergInfo("Kaliskie i Sieradzkie",                                         "Kalisz Region and Sieradz Voivodeship",                                3,  29, {43, 44, 61, 62, 175, 176, 193, 194}));
+		m_kinfo.emplace(47,     KolbergInfo("Podole",                                                        "Podolia",                                                             59, 105, {151, 152, 153, 154, 155, 156, 157, 158}));
+		m_kinfo.emplace(48,     KolbergInfo("Tarnowskie-Rzeszowskie",                                        "Tarnów-Rzeszów Voivodeship",                                          65, 103, {119, 120, 233, 234, 251, 252}));
+		m_kinfo.emplace(49,     KolbergInfo("Sanockie-Krośnieńskie I",                                       "Sanok-Krosno Voivodeship I",                                         109, 185, {189, 190, 239, 240, 257, 258, 387, 388, 405, 406, 455, 456, 473, 474}));
+		m_kinfo.emplace(50,     KolbergInfo("Sanockie-Krośnieńskie II",                                      "Sanok-Krosno Voivodeship II",                                          1,  14, {30, 31, 48, 49, 114, 115, 132, 133, 198, 199, 216 ,217, 282, 283, 300, 301, 366, 367, 384, 385}));
+		//              51:     Sanockie-Krośnieńskie III/Sanok-Krosno Voivodeship III: no music                                                                                                                                                                       
+		m_kinfo.emplace(52,     KolbergInfo("Białoruś-Polesie",                                              "Belarus-Polesia",                                                    116, 169, {182, 183, 200, 201, 266, 267, 284, 285, 382, 383, 400, 401, 530, 531, 548, 549}));
+		m_kinfo.emplace(53,     KolbergInfo("Litwa",                                                         "Lithuania",                                                          142, 176, {195, 196, 325, 326, 359, 360, 441, 442, 459, 460}));
+		m_kinfo.emplace(54,     KolbergInfo("Ruś karpacka I",                                                "Carpathian Ruthenia I",                                              267, 365, {371, 372}));
+		m_kinfo.emplace(55,     KolbergInfo("Ruś karpacka II",                                               "Carpathian Ruthenia II",                                              22,  37, {48, 49, 146, 147, 164, 165, 214, 215, 232, 233, 426, 427, 444, 445}));
+		m_kinfo.emplace(56,     KolbergInfo("Ruś czerwona I",                                                "Red Ruthenia I",                                                      61, 157, {173, 174, 191, 192, 209, 210, 259, 260, 27, 278, 311, 312, 329, 330, 443, 444, 461, 462}));
+		//              57:     Ruś czerwona II/Red Ruthenia II, 14, 19, {70, 71, 88, 89}: complications                                                                                                          
+		//              58:     Materiały do etnografii Słowian wschodnich/Materials for the ethnography of the Eastern Slavs                                                                                              
+		//              59/I,   Materiały do etnografii Słowian zachodnich i południowych. Cz. I Łużyce/Materials for the ethnography of western and southern Slavs. Part I Lusatia                                                                                                                                                                       
+		//              59/II,  Materiały do etnografii Słowian zachodnich i południowych. Cz. II Czechy, Słowacja/Materials for the ethnography of western and southern Slavs. Part II Czech Republic, Slovakia                                                                                                                                                                       
+		//              59/III, Materiały do etnografii Słowian zachodnich i południowych. Cz. III Słowiańszczyzna południowa/Materials for the ethnography of western and southern Slavs. Part III Southern Slavs                                                                                                                                                                       
+		//              60:     Przysłowia/Proverbs: no music                                                                                                                                                                       
+		//              61,     Pisma muzyczne, cz. I/Musical writings, part I: no music                                                                                                                                                                       
+		//              62,     Pisma muzyczne, cz. II/"Musical writings, part II, 25, 33: not in EsAC                                                                                                                                                                       
+		//              63,     Studia, rozprawy i artykuły/Studies, dissertations and articles", 55, 113: not in EsAC                                                                                                                                                                       
+		m_kinfo.emplace(64,     KolbergInfo("Korespondencja Oskara Kolberga, cz. I (1837-1876)",             "Correspondence of Oskar Kolberg, Part I (1837-1876)",                216, 261, {}));                                                                                                                                                                       
+		//              65:     Korespondencja Oskara Kolberga, cz. II (1877-1882)/Correspondence of Oskar Kolberg, Part II (1877-1882): no music                                                                                                                                                                       
+		//              66:     Korespondencja Oskara Kolberga, cz. III (1883-1890)/Correspondence of Oskar Kolberg, Part III (1883-1890): no music                                                                                                                                                                       
+		///             67:     Pieśni i melodie ludowe w opracowaniu fortepianowym, cz. I-II/Folk songs and melodies in piano arrangement, part I-II, 3, 22, not in EsAC                                                                                                                                                                       
+		//              68:     Kompozycje wokalno-instrumentalne/Vocal and instrumental compositions, 3, 49, not in EsAC                                                                                                                                                                       
+		//              69:     Kompozycje fortepianowe/Piano compositions: 3, 39, not in EsAC                                                                                                                                                                       
+		//              70:     Pieśni ludu polskiego. Supl. do t.1/Polish folk songs: Supplement to Volume 1: no music                                                                                                                                                                       
+		m_kinfo.emplace(71,     KolbergInfo("Sandomierskie. Suplement do t. 2 Dzieła Wszystkie",             "Sandomierz Voivodeship. Supplement to vol. 2 of The Complete Works",   3,  40, {116, 117, 134, 135}));
+		m_kinfo.emplace(72.1,   KolbergInfo("Kujawy. Suplement do t. 3 i 4, cz. I, Kuyavia",                 "Supplement to vol. 3 and 4, part I",                                   3,  30, {292, 293, 310, 311}));
+		//              72.2,   Kujawy. Suplement do t. 3 i 4, cz. II, Kuyavia/Supplement to vol. 3 and 4, part II,: missing information about pages?
+		m_kinfo.emplace(73,     KolbergInfo("Krakowsike. Suplement do T. 5-8",                               "Cracow: Supplement to Volumes 5-8",                                   39, 163, {297, 298, 407, 408}));
+		//              74:     Wielkie Księstwo Poznańskie. Suplement do t. 9-15/The Grand Duchy of Poznan. Supplement to vol. 9-15: no music                                                                                                                                                                       
+		m_kinfo.emplace(75,     KolbergInfo("Lubelskie. Supplement do tomów 16-17",                          "Lublin: Supplement to volumes 16-17",                                  4,  60, {281, 282, 283, 284, 285, 286, 287, 288, 289, 290, 291, 292, 293, 294, 295, 296, 297, 298, 299, 300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316, 317, 318, 319, 320, 321, 322, 323, 324}));
+		m_kinfo.emplace(76,     KolbergInfo("Kieleckie. Supplement do T. 18-19",                             "Kielce: Supplement to Volumes 18-19",                                  5,  41, {}));
+		//              77:     Radomskie. Suplement do t. 20 i 21. I/Radomskie: Supplement to Volumes 20-21. I: complications                                                                              
+		m_kinfo.emplace(78,     KolbergInfo("Łęczyckie. Suplement do t. 22",                                 "Łęczyca Voivodeship: Supplement to Volume 22",                         3,   1, {}));
+		m_kinfo.emplace(79,     KolbergInfo("Kaliskie. Suplement do t. 23",                                  "Kalisz Region. Supplement to vol. 23",                                 3,  38, {}));
+		m_kinfo.emplace(80,     KolbergInfo("Mazowsze. Suplement do t. 24-28, cz. I",                        "Mazovia. Supplement to vol. 24-28, part I",                            7,  89, {}));
+		m_kinfo.emplace(81,     KolbergInfo("Pokucie. Suplement do tomów 29-32",                             "Corrections: Supplement to Volumes 29-32",                             3,  73, {121, 122, 139, 140}));
+		m_kinfo.emplace(82,     KolbergInfo("Chełmskie. Suplement do T. 33 i 34",                            "Chełm supplement to Volumes 33 and 34",                                7, 105, {}));
+		m_kinfo.emplace(83,     KolbergInfo("Przemyskie. Suplement do tomu 35 DWOK",                         "Przemyśl Voivodeship: Supplement to Volume 35 DWOK",                   9, 112, {380, 381, 382, 383, 384, 385, 386, 387}));
+		m_kinfo.emplace(84,     KolbergInfo("Wołyń. Suplement do t. 36., Volhynia",                          "Supplement to Volume 36",                                             35,  97, {313, 314, 315, 316, 317, 318, 319, 320}));
+
+
 	}
 
-
-    auto it = m_kinfo.find(volume);
-    if (it != m_kinfo.end()) {
-        return it->second;
-    } else {
-        return KolbergInfo();
-    }
+	auto it = m_kinfo.find(volume);
+	if (it != m_kinfo.end()) {
+		return it->second;
+	} else {
+		return KolbergInfo();
+	}
 }
 
 
