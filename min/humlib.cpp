@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Sep  8 22:16:39 PDT 2024
+// Last Modified: Sun Sep  8 23:07:16 PDT 2024
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -79371,7 +79371,7 @@ void Tool_esac2hum::Score::calculateKeyInformation(void) {
 		} else if (m_keydesignation == "*e-:") {
 			m_keysignature = "*k[b-e-a-d-g-c-]";
 		} else if (m_keydesignation == "*a-:") {
-			m_keysignature = "*k[b-e-a-d-g-f-]";
+			m_keysignature = "*k[b-e-a-d-g-c-f-]";
 		} else {
 			m_errors.push_back("ERROR: invalid/exotic key signature required.");
 		}

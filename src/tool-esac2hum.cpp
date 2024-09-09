@@ -1377,7 +1377,7 @@ void Tool_esac2hum::Score::calculateKeyInformation(void) {
 		} else if (m_keydesignation == "*e-:") {
 			m_keysignature = "*k[b-e-a-d-g-c-]";
 		} else if (m_keydesignation == "*a-:") {
-			m_keysignature = "*k[b-e-a-d-g-f-]";
+			m_keysignature = "*k[b-e-a-d-g-c-f-]";
 		} else {
 			m_errors.push_back("ERROR: invalid/exotic key signature required.");
 		}
