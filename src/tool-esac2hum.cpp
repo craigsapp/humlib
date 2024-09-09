@@ -1355,15 +1355,15 @@ void Tool_esac2hum::Score::calculateKeyInformation(void) {
 		} else if (m_keydesignation == "*b:") {
 			m_keysignature = "*k[f#c#]";
 		} else if (m_keydesignation == "*f#:") {
-			m_keysignature = "*k[f#c#g$]";
+			m_keysignature = "*k[f#c#g#]";
 		} else if (m_keydesignation == "*c#:") {
-			m_keysignature = "*k[f#c#g$d#]";
+			m_keysignature = "*k[f#c#g#d#]";
 		} else if (m_keydesignation == "*g#:") {
-			m_keysignature = "*k[f#c#g$d#a#]";
+			m_keysignature = "*k[f#c#g#d#a#]";
 		} else if (m_keydesignation == "*d#:") {
-			m_keysignature = "*k[f#c#g$d#a#e#]";
+			m_keysignature = "*k[f#c#g#d#a#e#]";
 		} else if (m_keydesignation == "*a#:") {
-			m_keysignature = "*k[f#c#g$d#a#e#b#]";
+			m_keysignature = "*k[f#c#g#d#a#e#b#]";
 		} else if (m_keydesignation == "*d:") {
 			m_keysignature = "*k[b-]";
 		} else if (m_keydesignation == "*g:") {
