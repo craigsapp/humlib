@@ -2361,7 +2361,11 @@ void Tool_esac2hum::embedAnalyses(ostream& output) {
 //
 
 void Tool_esac2hum::printPdfLinks(ostream& output) {
-	output << "!!!URL: http://webesac.pcss.pl WebEsAC" << endl;
+	if (m_dwokQ) {
+		output << "!!!URL: https://kolberg.ispan.pl/webesac Kolberg WebEsAC" << endl;
+	} else {
+		output << "!!!URL: http://webesac.pcss.pl WebEsAC" << endl;
+	}
 
 	if (!m_dwokQ) {
 		return;
@@ -2972,7 +2976,7 @@ string Tool_esac2hum::getKolbergUrl(int volume) {
 		if (pageinfo.find("-") != string::npos) {
 			url += "p";
 		}
-		url += "." + pageinfo;
+		url += ". " + pageinfo;
 		url += "}";
 	}
 

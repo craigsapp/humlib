@@ -94,6 +94,7 @@
 #include "tool-trillspell.h"
 #include "tool-tspos.h"
 #include "tool-vcross.h"
+#include "tool-1520ify.h"
 
 #include "HumRegex.h"
 
@@ -386,6 +387,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(trillspell, infile, commands[i].second, status);
 		} else if (commands[i].first == "vcross") {
 			RUNTOOL(vcross, infile, commands[i].second, status);
+		} else if (commands[i].first == "1520ify") {
+			RUNTOOL(1520ify, infile, commands[i].second, status);
 
 		// filters with aliases:
 
