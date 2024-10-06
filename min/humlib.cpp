@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Sep 12 14:59:38 PDT 2024
+// Last Modified: Sun Oct  6 10:03:46 PDT 2024
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -45496,8 +45496,8 @@ char& MuseRecordBasic::getColumn(int columnNumber) {
 	int length = (int)m_recordString.size();
 	// originally the limit for data columns was 80:
 	// if (realindex < 0 || realindex >= 80) {
-	// the new limit is somewhere above 900, but limit to 180
-	if (realindex < 0 || realindex >= 180) {
+	// the new limit is somewhere above 900, but limit to 1024
+	if (realindex < 0 || realindex >= 1024) {
 		cerr << "Error trying to access column: " << columnNumber  << endl;
 		cerr << "CURRENT DATA: ===============================" << endl;
 		cerr << (*this);
@@ -126392,6 +126392,9 @@ void Tool_shed::processFile(HumdrumFile& infile) {
 	if (m_modified) {
 		infile.createLinesFromTokens();
 	}
+
+	// needed only for command-line version of tool?:
+	m_humdrum_text << infile;
 }
 
 
