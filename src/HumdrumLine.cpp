@@ -1300,7 +1300,7 @@ int HumdrumLine::createTokensFromLine(void) {
 		token = new HumdrumToken();
 		token->setOwner(this);
 		m_tokens.push_back(token);
-		m_tokens.push_back(0);
+		m_tabs.push_back(0);
 	} else if (this->compare(0, 2, "!!") == 0) {
 		token = new HumdrumToken(this->c_str());
 		token->setOwner(this);
@@ -2266,6 +2266,191 @@ void HumdrumLine::clearTokenLinkInfo(void) {
 			cerr << "Warning: non-existent token at field " << (i+1) << " on line " << (m_lineindex+1) << endl;
 		}
 	}
+}
+
+
+//////////////////////////////
+//
+// HumdrumLine::isKeySignature -- Returns 0 if no key signature on line, otherwise returns
+//     the field index + 1 of the first key signature found in the given range.  If startTrack == 0,
+//     then start at first field, if stopTrack == 0, then end at last field.
+//     Default values:
+//        startTrack = 0
+//        stopTrack  = 0
+//
+
+int HumdrumLine::isKeySignature(int startTrack, int stopTrack) {
+	HumdrumLine& line = *this;
+	if (!line.isInterpretation()) {
+		return 0;
+	}
+	for (int i=0; i<line.getFieldCount(); i++) {
+		HTp token = line.token(i);
+		int track = token->getTrack();
+		if ((startTrack == 0) || (track >= startTrack)) {
+			if ((stopTrack == 0) || (track <= stopTrack)) {
+				if (token->isKeySignature()) {
+					return i+1;
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::isKeyDesignation -- Returns 0 if no key designation on line, otherwise returns
+//     the field index + 1 of the first key designation found in the given range.  If startTrack == 0,
+//     then start at first field, if stopTrack == 0, then end at last field.
+//     Default values:
+//        startTrack = 0
+//        stopTrack  = 0
+//
+
+int HumdrumLine::isKeyDesignation(int startTrack, int stopTrack) {
+	HumdrumLine& line = *this;
+	if (!line.isInterpretation()) {
+		return 0;
+	}
+	for (int i=0; i<line.getFieldCount(); i++) {
+		HTp token = line.token(i);
+		int track = token->getTrack();
+		if ((startTrack == 0) || (track >= startTrack)) {
+			if ((stopTrack == 0) || (track <= stopTrack)) {
+				if (token->isKeyDesignation()) {
+					return i+1;
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::isTempo -- Returns 0 if no tempo on line, otherwise returns
+//     the field index + 1 of the first tempo found in the given range.  If startTrack == 0,
+//     then start at first field, if stopTrack == 0, then end at last field.
+//     Default values:
+//        startTrack = 0
+//        stopTrack  = 0
+//
+
+int HumdrumLine::isTempo(int startTrack, int stopTrack) {
+	HumdrumLine& line = *this;
+	if (!line.isInterpretation()) {
+		return 0;
+	}
+	for (int i=0; i<line.getFieldCount(); i++) {
+		HTp token = line.token(i);
+		int track = token->getTrack();
+		if ((startTrack == 0) || (track >= startTrack)) {
+			if ((stopTrack == 0) || (track <= stopTrack)) {
+				if (token->isTempo()) {
+					return i+1;
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::isTimeSignature -- Returns 0 if no time signature on line, otherwise returns
+//     the field index + 1 of the first time signature found in the given range.  If startTrack == 0,
+//     then start at first field, if stopTrack == 0, then end at last field.
+//     Default values:
+//        startTrack = 0
+//        stopTrack  = 0
+//
+
+int HumdrumLine::isTimeSignature(int startTrack, int stopTrack) {
+	HumdrumLine& line = *this;
+	if (!line.isInterpretation()) {
+		return 0;
+	}
+	for (int i=0; i<line.getFieldCount(); i++) {
+		HTp token = line.token(i);
+		int track = token->getTrack();
+		if ((startTrack == 0) || (track >= startTrack)) {
+			if ((stopTrack == 0) || (track <= stopTrack)) {
+				if (token->isTimeSignature()) {
+					return i+1;
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::isLabel -- Returns 0 if no label on line, otherwise returns
+//     the field index + 1 of the first label found in the given range.  If startTrack == 0,
+//     then start at first field, if stopTrack == 0, then end at last field.
+//     Default values:
+//        startTrack = 0
+//        stopTrack  = 0
+//
+
+int HumdrumLine::isExpansionLabel(int startTrack, int stopTrack) {
+	HumdrumLine& line = *this;
+	if (!line.isInterpretation()) {
+		return 0;
+	}
+	for (int i=0; i<line.getFieldCount(); i++) {
+		HTp token = line.token(i);
+		int track = token->getTrack();
+		if ((startTrack == 0) || (track >= startTrack)) {
+			if ((stopTrack == 0) || (track <= stopTrack)) {
+				if (token->isExpansionLabel()) {
+					return i+1;
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::isLabelExpansionList -- Returns 0 if no label expansion list on line, otherwise returns
+//     the field index + 1 of the first label expansion list found in the given range.  If startTrack == 0,
+//     then start at first field, if stopTrack == 0, then end at last field.
+//     Default values:
+//        startTrack = 0
+//        stopTrack  = 0
+//
+
+int HumdrumLine::isExpansionList(int startTrack, int stopTrack) {
+	HumdrumLine& line = *this;
+	if (!line.isInterpretation()) {
+		return 0;
+	}
+	for (int i=0; i<line.getFieldCount(); i++) {
+		HTp token = line.token(i);
+		int track = token->getTrack();
+		if ((startTrack == 0) || (track >= startTrack)) {
+			if ((stopTrack == 0) || (track <= stopTrack)) {
+				if (token->isExpansionList()) {
+					return i+1;
+				}
+			}
+		}
+	}
+	return 0;
 }
 
 

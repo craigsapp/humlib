@@ -101,6 +101,9 @@ class Convert {
 				{ return kernToBase7          ((std::string)*token); }
 		static std::string  kernToRecip     (const std::string& kerndata);
 		static std::string  kernToRecip     (HTp token);
+      static std::string base12ToKern     (int aPitch);
+      static std::string base12ToPitch    (int aPitch);
+      static int         base12ToBase40   (int aPitch);
 		static int     kernToMidiNoteNumber (const std::string& kerndata);
 		static int     kernToMidiNoteNumber(HTp token)
 				{ return kernToMidiNoteNumber((std::string)*token); }
@@ -128,8 +131,12 @@ class Convert {
 		static int     transToBase40        (const std::string& input);
 		static int     base40IntervalToLineOfFifths(int trans);
 		static std::string  keyNumberToKern (int number);
+      static int     kernKeyToNumber      (const std::string& aKernString);
+
 		static int     base7ToBase40        (int base7);
+      static int     base7ToBase12        (int aPitch, int alter = 0);
 		static int     base40IntervalToDiatonic(int base40interval);
+      static HumNum  kernToDuration       (const std::string& aKernString);
 
 
 		// **mens, mensual notation, defiend in Convert-mens.cpp
@@ -157,39 +164,36 @@ class Convert {
 		static HumNum mensToDuration        (HTp menstok);
 
 		// older functions to enhance or remove:
-		static HumNum  mensToDuration       (const std::string& mensdata,
-		                                     HumNum scale = 4,
+		static HumNum  mensToDuration       (const std::string& mensdata, HumNum scale = 4,
 		                                     const std::string& separator = " ");
-		static std::string  mensToRecip     (const std::string& mensdata,
-		                                     HumNum scale = 4,
+		static std::string  mensToRecip     (const std::string& mensdata, HumNum scale = 4,
 		                                     const std::string& separator = " ");
-		static HumNum  mensToDurationNoDots(const std::string& mensdata,
-		                                     HumNum scale = 4,
+		static HumNum  mensToDurationNoDots (const std::string& mensdata, HumNum scale = 4,
 		                                     const std::string& separator = " ");
 
 		// MuseData conversions in Convert-musedata.cpp
-      static int       museToBase40        (const std::string& pitchString);
-      static std::string musePitchToKernPitch(const std::string& museInput);
-		static std::string museClefToKernClef(const std::string& mclef);
-		static std::string museKeySigToKernKeySig(const std::string& mkeysig);
-		static std::string museTimeSigToKernTimeSig(const std::string& mtimesig);
-		static std::string museMeterSigToKernMeterSig(const std::string& mtimesig);
+      static int         museToBase40                    (const std::string& pitchString);
+      static std::string musePitchToKernPitch            (const std::string& museInput);
+		static std::string museClefToKernClef              (const std::string& mclef);
+		static std::string museKeySigToKernKeySig          (const std::string& mkeysig);
+		static std::string museTimeSigToKernTimeSig        (const std::string& mtimesig);
+		static std::string museMeterSigToKernMeterSig      (const std::string& mtimesig);
 		static std::string museFiguredBassToKernFiguredBass(const std::string& mfb);
 
 		// Harmony processing, defined in Convert-harmony.cpp
 		static std::vector<int> minorHScaleBase40(void);
 		static std::vector<int> majorScaleBase40 (void);
-		static int         keyToInversion   (const std::string& harm);
-		static int         keyToBase40      (const std::string& key);
+		static int              keyToInversion   (const std::string& harm);
+		static int              keyToBase40      (const std::string& key);
 		static std::vector<int> harmToBase40     (HTp harm, const std::string& key) {
-		                                        return harmToBase40(*harm, key); }
+		                                          return harmToBase40(*harm, key); }
 		static std::vector<int> harmToBase40     (HTp harm, HTp key) {
-		                                        return harmToBase40(*harm, *key); }
+		                                          return harmToBase40(*harm, *key); }
 		static std::vector<int> harmToBase40     (const std::string& harm, const std::string& key);
 		static std::vector<int> harmToBase40     (const std::string& harm, int keyroot, int keymode);
-		static void        makeAdjustedKeyRootAndMode(const std::string& secondary,
-		                                     int& keyroot, int& keymode);
-		static int         chromaticAlteration(const std::string& content);
+		static void             makeAdjustedKeyRootAndMode(const std::string& secondary,
+		                                          int& keyroot, int& keymode);
+		static int              chromaticAlteration(const std::string& content);
 
 		// data-type specific (other than pitch/rhythm),
 		// defined in Convert-kern.cpp
@@ -204,35 +208,33 @@ class Convert {
 		static bool isKernSecondaryTiedNote (const std::string& kerndata);
 		static std::string getKernPitchAttributes(const std::string& kerndata);
 
-		static int  getKernSlurStartElisionLevel(const std::string& kerndata, int index);
-		static int  getKernSlurEndElisionLevel  (const std::string& kerndata, int index);
+		static int  getKernSlurStartElisionLevel  (const std::string& kerndata, int index);
+		static int  getKernSlurEndElisionLevel    (const std::string& kerndata, int index);
 		static int  getKernPhraseStartElisionLevel(const std::string& kerndata, int index);
-		static int  getKernPhraseEndElisionLevel(const std::string& kerndata, int index);
-
-		static int  getKernBeamStartElisionLevel(const std::string& kerndata, int index);
-		static int  getKernBeamEndElisionLevel  (const std::string& kerndata, int index);
-
-
+		static int  getKernPhraseEndElisionLevel  (const std::string& kerndata, int index);
+		static int  getKernBeamStartElisionLevel  (const std::string& kerndata, int index);
+		static int  getKernBeamEndElisionLevel    (const std::string& kerndata, int index);
 
 		// String processing, defined in Convert-string.cpp
 		static std::vector<std::string> splitString   (const std::string& data,
-		                                     char separator = ' ');
-		static void    replaceOccurrences   (std::string& source,
-		                                     const std::string& search,
-		                                     const std::string& replace);
+		                                               char separator = ' ');
+		static void    replaceOccurrences        (std::string& source,
+		                                          const std::string& search,
+		                                          const std::string& replace);
 		static std::string  repeatString         (const std::string& pattern, int count);
 		static std::string  encodeXml            (const std::string& input);
 		static std::string  getHumNumAttributes  (const HumNum& num);
 		static std::string  trimWhiteSpace       (const std::string& input);
-		static bool    startsWith           (const std::string& input,
-		                                     const std::string& searchstring);
+		static std::string  generateRandomId     (int length);
+		static bool    startsWith                (const std::string& input,
+		                                          const std::string& searchstring);
 		static bool    contains(const std::string& input, const std::string& pattern);
 		static bool    contains(const std::string& input, char pattern);
 		static bool    contains(std::string* input, const std::string& pattern);
 		static bool    contains(std::string* input, char pattern);
-		static void    makeBooleanTrackList(std::vector<bool>& spinelist,
-		                                     const std::string& spinestring,
-		                                     int maxtrack);
+		static void    makeBooleanTrackList      (std::vector<bool>& spinelist,
+		                                          const std::string& spinestring,
+		                                          int maxtrack);
 		static std::vector<int> extractIntegerList(const std::string& input, int maximum);
 		// private functions for extractIntegerList:
 		static void processSegmentEntry(std::vector<int>& field, const std::string& astring, int maximum);

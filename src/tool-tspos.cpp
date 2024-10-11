@@ -26,6 +26,7 @@
 #include "HumRegex.h"
 
 #include <iomanip>
+#include <cmath>
 
 using namespace std;
 
@@ -1386,6 +1387,10 @@ int Tool_tspos::getToolCounter(HumdrumFile& infile) {
 // Tool_tspos::logisticColorMap -- Increase sensitivity of color mapping
 //    around 40%.
 //
+
+#ifndef M_E
+#define M_E 2.71828182845904523536
+#endif
 
 int Tool_tspos::logisticColorMap(double input, double max) {
 	double center = max * 0.40;

@@ -36,6 +36,10 @@ class MuseRecord : public MuseRecordBasic {
 		MuseRecord& operator=                   (MuseRecord& aRecord);
 
 
+	// MuseData part header information:
+		std::string getPartName();
+
+
 	//////////////////////////////
 	//
 	// functions which process regular notes (A-G), cue notes (c), grace notes (g),
@@ -350,7 +354,7 @@ class MuseRecord : public MuseRecordBasic {
 	//     in MuseRecord-suggestions.cpp.
 	//
 
-		void            addPrintSuggestion            (int deltaIndex);
+		void             addPrintSuggestion           (int deltaIndex);
 		bool             hasPrintSuggestions          (void);
 		void             getAllPrintSuggestions       (std::vector<std::string>& suggestions);
 		void             getPrintSuggestions          (std::vector<std::string>& suggestions, int column);

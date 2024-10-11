@@ -50,7 +50,7 @@ Tool_deg::Tool_deg(void) {
 	define("kern=b",                                     "prefix composite rhythm **kern spine with -I option");
 	define("k|kern-tracks=s",                            "process only the specified kern spines");
 	define("kd|dk|key-default|default-key=s",            "default (initial) key if none specified in data");
-	define("kf|fk|key-force|force-key=s",                "use the given key for analysing deg data (ignore modulations)");
+	define("kf|fk|key-force|force-key|forced-key=s",     "use the given key for analysing deg data (ignore modulations)");
 	define("o|octave|octaves|degree=b",                  "encode octave information int **degree spines");
 	define("r|recip=b",                                  "prefix output data with **recip spine with -I option");
 	define("t|ties=b",                                   "include scale degrees for tied notes");

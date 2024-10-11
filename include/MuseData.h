@@ -58,7 +58,6 @@ class MuseData {
 
 		void              setFilename         (const std::string& filename);
 		std::string       getFilename         (void);
-		std::string       getPartName         (void);
 		int               isMember            (const std::string& mstring);
 		int               getMembershipPartNumber(const std::string& mstring);
 		void              selectMembership    (const std::string& selectstring);
@@ -79,6 +78,10 @@ class MuseData {
 		int               readFile            (const std::string& filename);
 		void              analyzeLayers       (void);
 		int               analyzeLayersInMeasure(int startindex);
+		std::string       getMeasureNumber    (int index);
+		bool              measureHasData      (int index);
+		bool              hasMeasureData      (int index) { return measureHasData(index); }
+		int               getNextMeasureIndex (int index);
 
 		// aliases for access to MuseRecord objects based on line indexes:
 		std::string       getLine             (int index);
@@ -103,6 +106,7 @@ class MuseData {
 		std::string       getEncoder          (void);
 		std::string       getEncoderDate      (void);
 		std::string       getEncoderName      (void);
+		std::string       getPartName         (void);
 		std::string       getId               (void);
 		std::string       getMovementTitle    (void);
 		std::string       getSource           (void);
@@ -127,6 +131,7 @@ class MuseData {
 		HumNum            getTiedDuration     (int lindex);
 
 		HumNum            getAbsBeat         (int lindex);
+		HumNum            getQStamp          (int lindex);
 		HumNum            getFileDuration    (void);
 
 		int               getLineTickDuration (int lindex);
@@ -163,7 +168,6 @@ class MuseData {
 		void         constructTimeSequence(void);
 		void         insertEventBackwards (HumNum atime, MuseRecord* arecord);
 		int          getPartNameIndex     (void);
-		std::string  getPartName          (int index);
 		void         assignHeaderBodyState(void);
 		void         linkPrintSuggestions (void);
 		void         linkMusicDirections  (void);

@@ -21,6 +21,7 @@
 
 #include <cstdarg>
 #include <iostream>
+#include <map>
 #include <vector>
 
 
@@ -161,10 +162,12 @@ class MuseRecordBasic {
 		void              append             (const char* format, ...);
 
 		// mark-up accessor functions:
-
 		void              setAbsBeat         (HumNum value);
+		void              setQStamp          (HumNum value);
 		void              setAbsBeat         (int topval, int botval = 1);
+		void              setQStamp          (int topval, int botval = 1);
 		HumNum            getAbsBeat         (void);
+		HumNum            getQStamp          (void);
 
 		void              setLineDuration    (HumNum value);
 		void              setLineDuration    (int topval, int botval = 1);
@@ -187,23 +190,29 @@ class MuseRecordBasic {
 		int               getNextTiedNoteLineIndex(void);
 		void              setLastTiedNoteLineIndex(int index);
 		void              setNextTiedNoteLineIndex(int index);
+		int               hasTieGroupStart        (void);
+		int               isNoteAttack            (void);
+		/* HumNum            getTiedNoteDuration     (void); */
 
 		std::string       getLayoutVis       (void);
 
 		// boolean type fuctions:
 		bool              isAnyNote          (void);
+		bool              isRest             (void);
 		bool              isAnyNoteOrRest    (void);
-		bool              isAttributes       (void);
+		bool              isAttributes       (void); // starts with $
+		bool              isAttribute        (void) { return isAttributes(); }
 		bool              isBackup           (void);
 		bool              isBarline          (void);
+		bool              isMeasure          (void) { return isBarline(); }
 		bool              isBodyRecord       (void);
 		bool              isChordGraceNote   (void);
 		bool              isChordNote        (void);
 		bool              isDirection        (void); // starts with "*"
 		bool              isMusicalDirection (void); // starts with "*"
-		bool              isAnyComment       (void);
-		bool              isLineComment      (void);
-		bool              isBlockComment     (void);
+		bool              isAnyComment       (void); // starts with "@" or between lines starting with &.
+		bool              isLineComment      (void); // starts with "@"
+		bool              isBlockComment     (void); // lines between lines starting with &.
 		bool              isCopyright        (void); // 1st non-comment line in file
 		bool              isCueNote          (void); // starts with "c"
 		bool              isEncoder          (void); // 4th non-comment line in file
@@ -249,7 +258,7 @@ class MuseRecordBasic {
 		// mark-up data for the line:
 		int               m_lineindex;        // index into original file
 		int               m_type;             // category of MuseRecordBasic record
-		HumNum            m_absbeat;          // dur in quarter notes from start
+		HumNum            m_qstamp;           // dur in quarter notes from start
 		HumNum            m_lineduration;     // duration of line
 		HumNum            m_noteduration;     // duration of note
 

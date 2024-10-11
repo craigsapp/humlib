@@ -60,7 +60,7 @@ void HumdrumFileStructure::analyzeStropheMarkers(void) {
 					// Store the new strophe.
 					laststrophe[spineinfo] = token;
 				}
-			} else if (*token == "*Xstrophe") {
+			} else if ((*token == "*Xstrophe") || (*token == "*S-")) {
 				string spineinfo = token->getSpineInfo();
 	 			HTp lastone = laststrophe[spineinfo];
 				if (lastone) {

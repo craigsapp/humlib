@@ -11,7 +11,9 @@
 //
 
 #include "Convert.h"
+
 #include <cmath>
+#include <cstdint>
 
 using namespace std;
 

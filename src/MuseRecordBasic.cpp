@@ -33,7 +33,7 @@ MuseRecordBasic::MuseRecordBasic(void) {
 	setType(E_muserec_unknown);
 	m_owner        = NULL;
 	m_lineindex    =   -1;
-	m_absbeat      =    0;
+	m_qstamp      =    0;
 	m_lineduration =    0;
 	m_noteduration =    0;
 	m_b40pitch     = -100;
@@ -52,7 +52,7 @@ MuseRecordBasic::MuseRecordBasic(const string& aLine, int index) {
 	setType(E_muserec_unknown);
 	m_lineindex = index;
 	m_owner        = NULL;
-	m_absbeat      =    0;
+	m_qstamp      =    0;
 	m_lineduration =    0;
 	m_noteduration =    0;
 	m_b40pitch     = -100;
@@ -79,7 +79,7 @@ MuseRecordBasic::~MuseRecordBasic() {
 	m_recordString.resize(0);
 	m_owner        = NULL;
 	m_lineindex    =   -1;
-	m_absbeat      =    0;
+	m_qstamp      =    0;
 	m_lineduration =    0;
 	m_noteduration =    0;
 	m_b40pitch     = -100;
@@ -99,7 +99,7 @@ MuseRecordBasic::~MuseRecordBasic() {
 void MuseRecordBasic::clear(void) {
 	m_recordString.clear();
 	m_owner        = NULL;
-	m_absbeat      =    0;
+	m_qstamp      =    0;
 	m_lineindex    =   -1;
 	m_lineduration =    0;
 	m_noteduration =    0;
@@ -166,8 +166,8 @@ char& MuseRecordBasic::getColumn(int columnNumber) {
 	int length = (int)m_recordString.size();
 	// originally the limit for data columns was 80:
 	// if (realindex < 0 || realindex >= 80) {
-	// the new limit is somewhere above 900, but limit to 180
-	if (realindex < 0 || realindex >= 180) {
+	// the new limit is somewhere above 900, but limit to 1024
+	if (realindex < 0 || realindex >= 1024) {
 		cerr << "Error trying to access column: " << columnNumber  << endl;
 		cerr << "CURRENT DATA: ===============================" << endl;
 		cerr << (*this);
@@ -282,7 +282,7 @@ MuseRecordBasic& MuseRecordBasic::operator=(MuseRecordBasic& aRecord) {
 	setType(aRecord.getType());
 	m_lineindex = aRecord.m_lineindex;
 
-	m_absbeat = aRecord.m_absbeat;
+	m_qstamp = aRecord.m_qstamp;
 	m_lineduration = aRecord.m_lineduration;
 	m_noteduration = aRecord.m_noteduration;
 
@@ -305,7 +305,7 @@ MuseRecordBasic& MuseRecordBasic::operator=(const string& aLine) {
 	setType(aLine[0]);
 
 	m_lineindex    =   -1;
-	m_absbeat      =    0;
+	m_qstamp      =    0;
 	m_lineduration =    0;
 	m_noteduration =    0;
 	m_b40pitch     = -100;
@@ -557,24 +557,39 @@ void MuseRecordBasic::setString(string& astring) {
 
 
 void MuseRecordBasic::setAbsBeat(HumNum value) {
-	m_absbeat = value;
+	m_qstamp = value;
+}
+
+
+void MuseRecordBasic::setQStamp(HumNum value) {
+	m_qstamp = value;
 }
 
 
 // default value botval = 1
 void MuseRecordBasic::setAbsBeat(int topval, int botval) {
-	m_absbeat.setValue(topval, botval);
+	m_qstamp.setValue(topval, botval);
+}
+
+
+void MuseRecordBasic::setQStamp(int topval, int botval) {
+	m_qstamp.setValue(topval, botval);
 }
 
 
 
 //////////////////////////////
 //
-// MuseRecordBasic::getAbsBeat --
+// MuseRecordBasic::getAbsBeat -- Quarter notes from the
+//     start of the music.
 //
 
 HumNum MuseRecordBasic::getAbsBeat(void) {
-	return m_absbeat;
+	return m_qstamp;
+}
+
+HumNum MuseRecordBasic::getQStamp(void) {
+	return m_qstamp;
 }
 
 
@@ -697,6 +712,48 @@ int MuseRecordBasic::getLastTiedNoteLineIndex(void) {
 
 int MuseRecordBasic::getNextTiedNoteLineIndex(void) {
 	return m_nexttiednote;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::hasTieGroupStart -- Return true if note is
+//    at the start of a tied group.
+//
+
+int MuseRecordBasic::hasTieGroupStart(void) {
+	if (getLastTiedNoteLineIndex() > 0) {
+		// Note is in the middle of a tie group.
+		return 0;
+	}
+	if (getNextTiedNoteLineIndex() > 0) {
+		return 1;
+	} else {
+		// no tie on note.
+		return 0;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isNoteAttack -- Return true if note is
+//    at the start of a tied group or is a regular note.
+//
+
+int MuseRecordBasic::isNoteAttack(void) {
+	if (getLastTiedNoteLineIndex() > 0) {
+		// Note is in the middle of a tie group.
+		return 0;
+	}
+	if (getNextTiedNoteLineIndex() > 0) {
+		return 1;
+	} else {
+		// no tie on note.
+		return 1;
+	}
 }
 
 

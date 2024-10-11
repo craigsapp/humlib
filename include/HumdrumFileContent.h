@@ -44,6 +44,17 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		bool   analyzeMensAccidentals     (void);
 		bool   analyzeRScale              (void);
 
+		// in HumdrumFileContent-hand.cpp
+		bool   doHandAnalysis             (bool attacksOnlyQ = false);
+		bool   doHandAnalysis             (HTp startSpine, bool attacksOnlyQ = false);
+
+		// in HumdrumFileContent-kern.cpp
+		std::vector<int> getTrackToKernIndex (void);
+
+		// in HumdrumFileContent-midi.cpp
+		void fillMidiInfo(std::vector<std::vector<std::vector<std::pair<HTp, int>>>>& trackMidi);
+		void processStrandNotesForMidi(HTp sstart, HTp send, std::vector<std::vector<std::pair<HTp, int>>>& trackInfo);
+
 		// in HumdrumFileContent-rest.cpp
 		void  analyzeRestPositions                  (void);
 		void  assignImplicitVerticalRestPositions   (HTp kernstart);

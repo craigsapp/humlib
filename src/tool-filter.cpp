@@ -40,6 +40,7 @@
 #include "tool-gasparize.h"
 #include "tool-grep.h"
 #include "tool-half.h"
+#include "tool-hands.h"
 #include "tool-homorhythm.h"
 #include "tool-homorhythm2.h"
 #include "tool-hproof.h"
@@ -62,11 +63,14 @@
 #include "tool-myank.h"
 #include "tool-nproof.h"
 #include "tool-ordergps.h"
+#include "tool-pbar.h"
 #include "tool-phrase.h"
 #include "tool-pline.h"
+#include "tool-prange.h"
 #include "tool-recip.h"
 #include "tool-restfill.h"
 #include "tool-rid.h"
+#include "tool-rphrase.h"
 #include "tool-sab2gs.h"
 #include "tool-satb2gs.h"
 #include "tool-scordatura.h"
@@ -79,6 +83,7 @@
 #include "tool-strophe.h"
 #include "tool-synco.h"
 #include "tool-tabber.h"
+#include "tool-tandeminfo.h"
 #include "tool-tassoize.h"
 #include "tool-textdur.h"
 #include "tool-thru.h"
@@ -89,6 +94,7 @@
 #include "tool-trillspell.h"
 #include "tool-tspos.h"
 #include "tool-vcross.h"
+#include "tool-1520ify.h"
 
 #include "HumRegex.h"
 
@@ -281,6 +287,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(gasparize, infile, commands[i].second, status);
 		} else if (commands[i].first == "half") {
 			RUNTOOL(half, infile, commands[i].second, status);
+		} else if (commands[i].first == "hands") {
+			RUNTOOL(hands, infile, commands[i].second, status);
 		} else if (commands[i].first == "homorhythm") {
 			RUNTOOL(homorhythm, infile, commands[i].second, status);
 		} else if (commands[i].first == "homorhythm2") {
@@ -319,14 +327,20 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(nproof, infile, commands[i].second, status);
 		} else if (commands[i].first == "ordergps") {
 			RUNTOOL(ordergps, infile, commands[i].second, status);
+		} else if (commands[i].first == "pbar") {
+			RUNTOOL(pbar, infile, commands[i].second, status);
 		} else if (commands[i].first == "phrase") {
 			RUNTOOL(phrase, infile, commands[i].second, status);
 		} else if (commands[i].first == "pline") {
 			RUNTOOL(pline, infile, commands[i].second, status);
+		} else if (commands[i].first == "prange") {
+			RUNTOOL(prange, infile, commands[i].second, status);
 		} else if (commands[i].first == "recip") {
 			RUNTOOL(recip, infile, commands[i].second, status);
 		} else if (commands[i].first == "restfill") {
 			RUNTOOL(restfill, infile, commands[i].second, status);
+		} else if (commands[i].first == "rphrase") {
+			RUNTOOL(rphrase, infile, commands[i].second, status);
 		} else if (commands[i].first == "sab2gs") {
 			RUNTOOL(sab2gs, infile, commands[i].second, status);
 		} else if (commands[i].first == "scordatura") {
@@ -351,6 +365,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(synco, infile, commands[i].second, status);
 		} else if (commands[i].first == "tabber") {
 			RUNTOOL(tabber, infile, commands[i].second, status);
+		} else if (commands[i].first == "tandeminfo") {
+			RUNTOOL(tandeminfo, infile, commands[i].second, status);
 		} else if (commands[i].first == "tassoize") {
 			RUNTOOL(tassoize, infile, commands[i].second, status);
 		} else if (commands[i].first == "tassoise") {
@@ -371,6 +387,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(trillspell, infile, commands[i].second, status);
 		} else if (commands[i].first == "vcross") {
 			RUNTOOL(vcross, infile, commands[i].second, status);
+		} else if (commands[i].first == "1520ify") {
+			RUNTOOL(1520ify, infile, commands[i].second, status);
 
 		// filters with aliases:
 

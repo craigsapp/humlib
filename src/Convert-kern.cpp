@@ -10,10 +10,12 @@
 // Description:   Conversions related to strings.
 //
 
+#include "Convert.h"
+#include "HumRegex.h"
+
 #include <sstream>
 #include <cctype>
-
-#include "Convert.h"
+#include <cmath>
 
 using namespace std;
 
@@ -487,6 +489,162 @@ string Convert::kernToRecip(HTp token) {
 	return Convert::kernToRecip((string)*token);
 }
 
+
+
+//////////////////////////////
+//
+// Convert::kernKeyToNumber -- convert a kern key signature into an integer.
+//      For example: *k[f#] == +1, *k[b-e-] == -2, *k[] == 0
+//      Input string is expected to be in the form *k[] with the
+//      accidentals inside the brackets with no spaces.
+//
+
+int Convert::kernKeyToNumber(const string& aKernString) {
+	int count = 0;
+	int length = (int)aKernString.size();
+	int start = 0;
+	int sign = 1;
+
+	if ((length == 0) || (aKernString.find("[]") != std::string::npos)) {
+		return 0;
+	}
+
+	for (int i=0; i<length; i++) {
+		if (start) {
+			if (aKernString[i] == ']') {
+				break;
+			} else if (aKernString[i] == '-') {
+				sign = -1;
+			}
+			count++;
+		}
+		else if (aKernString[i] == '[') {
+			start = 1;
+		}
+	}
+
+	return sign * count/2;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::kernToDuration -- returns the kern rhythm's duration, using
+//	1.0 as the duration of a quarter note (rhythm=4).
+// if the kern token has a "q" then assume that it is a grace note
+// and return a duration of zero.
+//
+
+HumNum Convert::kernToDuration(const string& aKernString) {
+	HumNum zero(0,1);
+	HumRegex hre;
+
+	// check for grace notes
+	if ((aKernString.find('q') != std::string::npos) ||
+			(aKernString.find('Q') != std::string::npos)) {
+		return zero;
+	}
+
+	// check for dots to modify rhythm
+	// also add an exit if a space is found, so that dots
+	// from multiple notes in chord notes do not get accidentally
+	// get counted together (input to this function should be a
+	// single note, but chords may accidentally be sent to this
+	// function instead).
+	int dotcount = 0;
+	for (int i=0; i<(int)aKernString.size(); i++) {
+		if (aKernString[i] == '.') {
+			dotcount++;
+		}
+		if (aKernString[i] == ' ') {
+			break;
+		}
+	}
+
+	// parse special rhythms which can't be represented in
+	// classical **kern definition.  A non-standard rhythm
+	// consists of two numbers separated by any character.
+	if (hre.search(aKernString, "(\\d+)[^\\d](\\d+)")) {
+		int rtop = stoi(hre.getMatch(1));
+		int rbot = stoi(hre.getMatch(2));
+		HumNum original(rbot, rtop);  // duration is inverse
+		HumNum output(rbot, rtop);    // duration is inverse
+		original *= 4;  // adjust to quarter note count;
+		output *= 4;    // adjust to quarter note count;
+		for (int i=0; i<dotcount; i++) {
+			output += original / (int)(pow(2.0, (double)(i+1)));
+		}
+		return output;
+	}
+
+	int index = 0;
+	while ((index < (int)aKernString.size()) && !isdigit(aKernString[index])) {
+		index++;
+	}
+	if (index >= (int)aKernString.size()) {
+		// no rhythm data found
+		return zero;
+	}
+
+	// should now be at start of kern rhythm
+	int orhythm = 0;
+	while ((index < (int)aKernString.size()) && isdigit(aKernString[index])) {
+		orhythm *= 10;
+		orhythm += aKernString[index] - '0';
+		index++;
+	}
+
+	HumNum oduration(0,1);
+	if ((aKernString.find('0') != std::string::npos) &&
+		 (aKernString.find('1') == std::string::npos) &&
+		 (aKernString.find('2') == std::string::npos) &&
+		 (aKernString.find('3') == std::string::npos) &&
+		 (aKernString.find('4') == std::string::npos) &&
+		 (aKernString.find('5') == std::string::npos) &&
+		 (aKernString.find('6') == std::string::npos) &&
+		 (aKernString.find('7') == std::string::npos) &&
+		 (aKernString.find('8') == std::string::npos) &&
+		 (aKernString.find('9') == std::string::npos)    ) {
+		if (aKernString.find("0000000000") != std::string::npos) { // exotic rhythm
+			oduration = 4096;
+		} else if (aKernString.find("000000000") != std::string::npos) { // exotic rhythm
+			oduration = 2048;
+		} else if (aKernString.find("00000000") != std::string::npos) { // exotic rhythm
+			oduration = 1024;
+		} else if (aKernString.find("0000000") != std::string::npos) { // exotic rhythm
+			oduration = 512;
+		} else if (aKernString.find("000000") != std::string::npos) { // exotic rhythm
+			oduration = 256;
+		} else if (aKernString.find("00000") != std::string::npos) { // exotic rhythm
+			oduration = 128;
+		} else if (aKernString.find("0000") != std::string::npos) { // exotic rhythm
+			oduration = 64;
+		} else if (aKernString.find("000") != std::string::npos) { // 000 = maxima
+			oduration = 32;
+		} else if (aKernString.find("00") != std::string::npos) {  // 00 = long
+			oduration = 16;
+		} else { // 0 == breve
+			oduration = 8;
+		}
+
+	} else {
+		// now know everything to create a duration
+		if (orhythm == 0) {
+			oduration = 8;
+		} else {
+			oduration = 4;
+			oduration /= orhythm;
+		}
+	}
+
+	HumNum duration = oduration;
+	for (int i=0; i<dotcount; i++) {
+		duration += oduration / (int)(pow(2.0, (double)(i+1)));
+	}
+
+	return duration;
+}
 
 
 // END_MERGE

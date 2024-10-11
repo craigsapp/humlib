@@ -1255,6 +1255,36 @@ int Convert::base7ToBase40(int base7) {
 
 //////////////////////////////
 //
+// Convert::base7ToBase12 -- convert diatonic pitch class with optional
+//    chromatic alteration into Base-12 (MIDI note number).
+//
+
+int Convert::base7ToBase12(int aPitch, int alter) {
+	if (aPitch <= 0) {
+		return -1;
+	}
+
+	int octave = aPitch / 7;
+	int chroma = aPitch % 7;
+	int output = 0;
+	switch (chroma) {
+		case 0:  output =  0;  break;   // 0 = C -> 0
+		case 1:  output =  2;  break;   // 1 = D -> 2
+		case 2:  output =  4;  break;   // 2 = E -> 4
+		case 3:  output =  5;  break;   // 3 = F -> 5
+		case 4:  output =  7;  break;   // 4 = G -> 7
+		case 5:  output =  9;  break;   // 5 = A -> 9
+		case 6:  output = 11;  break;   // 6 = B -> 11
+		default: output = 0;
+	}
+	// need to add 1 to octave since C4 is MIDI note 60 which is 5 * 12:
+	return output + 12 * (octave+1) + alter;
+}
+
+
+
+//////////////////////////////
+//
 // Convert::kernToStaffLocation -- 0 = bottom line of staff, 1 = next space higher,
 //     2 = second line of staff, etc.  -1 = space below bottom line.
 //
@@ -1309,6 +1339,143 @@ int Convert::kernToStaffLocation(const string& token, const string& clef) {
 }
 
 
+
+//////////////////////////////
+//
+// Convert::base12ToKern -- Convert MIDI note numbers to Kern pitches.
+//     It might be nice to also add a reference key to minimize
+//     diatonic pitch errors (for example 61 in A-flat major is probably
+//     a D-flat, but in B-major it is probably a C-sharp.
+//
+
+string Convert::base12ToKern(int aPitch) {
+	int octave = aPitch / 12 - 1;
+	if (octave > 12 || octave < -1) {
+		cerr << "Error: unreasonable octave value: " << octave << endl;
+		cerr << "For base-12 input pitch " << aPitch << endl;
+		return "c";
+	}
+	int chroma = aPitch % 12;
+	string output;
+
+	switch (chroma) {
+		case 0:  output = "c";  break;
+		case 1:  output = "c#"; break;
+		case 2:  output = "d";  break;
+		case 3:  output = "e-"; break;
+		case 4:  output = "e";  break;
+		case 5:  output = "f";  break;
+		case 6:  output = "f#"; break;
+		case 7:  output = "g";  break;
+		case 8:  output = "g#"; break;
+		case 9:  output = "a";  break;
+		case 10: output = "b-"; break;
+		case 11: output = "b";  break;
+	}
+
+	if (octave >= 4) {
+		output[0] = std::tolower(output[0]);
+	} else {
+		output[0] = std::toupper(output[0]);
+	}
+	int repeat = 0;
+	switch (octave) {
+		case 4:  repeat = 0; break;
+		case 5:  repeat = 1; break;
+		case 6:  repeat = 2; break;
+		case 7:  repeat = 3; break;
+		case 8:  repeat = 4; break;
+		case 9:  repeat = 5; break;
+		case 3:  repeat = 0; break;
+		case 2:  repeat = 1; break;
+		case 1:  repeat = 2; break;
+		case 0:  repeat = 3; break;
+		case -1: repeat = 4; break;
+		default:
+			cerr << "Error: unknown octave value: " << octave << endl;
+			cerr << "for base-12 pitch: " << aPitch << endl;
+			return "c";
+	}
+	if (repeat == 0) {
+		return output;
+	}
+
+	string rstring;
+	for (int i=0; i<repeat; i++) {
+		rstring += output[0];
+	}
+	output = rstring + output;
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::base12ToPitch -- Convert MIDI note numbers to **pitch format.
+//     This is a diatonic pitch class followed by an octave number.
+//     It might be nice to also add a reference key to minimize
+//     diatonic pitch errors (for example 61 in A-flat major is probably
+//     a D-flat, but in B-major it is probably a C-sharp.
+//
+
+string Convert::base12ToPitch(int aPitch) {
+	int octave = aPitch / 12 - 1;
+	if (octave > 12 || octave < -1) {
+		cerr << "Error: unreasonable octave value: " << octave << endl;
+		cerr << "For base-12 input pitch: " << aPitch << endl;
+		return "C4";
+	}
+	int chroma = aPitch % 12;
+	string output;
+	switch (chroma) {
+		case 0:  output = "C";  break;
+		case 1:  output = "C#"; break;
+		case 2:  output = "D";  break;
+		case 3:  output = "E-"; break;
+		case 4:  output = "E";  break;
+		case 5:  output = "F";  break;
+		case 6:  output = "F#"; break;
+		case 7:  output = "G";  break;
+		case 8:  output = "G#"; break;
+		case 9:  output = "A";  break;
+		case 10: output = "B-"; break;
+		case 11: output = "B";  break;
+	}
+	output += to_string(octave);
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::base12ToBase40 -- assume fixed accidentals.
+//
+
+int Convert::base12ToBase40(int aPitch) {
+	int octave = aPitch / 12 - 1;
+	int chroma = aPitch % 12;
+
+	int output = 0;
+	switch (chroma) {
+		case  0: output =  2;  break;   // 0  = C
+		case  1: output =  3;  break;   // 1  = C#
+		case  2: output =  8;  break;   // 2  = D
+		case  3: output = 13;  break;   // 3  = E-
+		case  4: output = 14;  break;   // 4  = E
+		case  5: output = 19;  break;   // 5  = F
+		case  6: output = 20;  break;   // 6  = F#
+		case  7: output = 25;  break;   // 7  = G
+		case  8: output = 30;  break;   // 8  = A-
+		case  9: output = 31;  break;   // 9  = A
+		case 10: output = 36;  break;   // 10 = B-
+		case 11: output = 37;  break;   // 11 = B
+		default: output =  2;  break;   // give up and set to C
+	}
+	output = output + 40 * octave;
+	return output;
+}
 
 
 // END_MERGE

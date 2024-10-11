@@ -465,13 +465,14 @@ void Tool_composite::addCoincidenceMarks(HumdrumFile& infile) {
 			if (token->isNull()) {
 				continue;
 			}
-			if (token->isRest()) {
-				continue;
-			}
-			if (token->isNoteAttack()) {
-				string text = *token;
-				text += m_coinMark;
-				token->setText(text);
+			for (int i=0; i<token->getSubtokenCount(); i++) {
+				string subtok = token->getSubtoken(i);
+				if (subtok.find("r") != string::npos) {
+					continue;
+				}
+				subtok += m_coinMark;
+				token->replaceSubtoken(i, subtok);
+				// Maybe highlight only if note attack?
 			}
 		}
 	}
@@ -869,6 +870,11 @@ void Tool_composite::getAnalysisOutputLine(ostream& output, HumdrumFile& infile,
 		if (m_upstemQ) {
 			if (value.find("R") != string::npos) {
 				tempout << "/";
+			}
+		}
+		if (m_coinMarkQ) {
+			if (value.find("R") != string::npos) {
+				tempout << m_coinMark;
 			}
 		}
 		if (processedQ) {
@@ -1353,9 +1359,9 @@ void Tool_composite::analyzeFullCompositeRhythm(HumdrumFile& infile) {
 		durations[i] = infile[i].getDuration();
 	}
 
-	vector<bool> isRest(infile.getLineCount(), false);
-	vector<bool> isNull(infile.getLineCount(), false);
-	vector<bool> isSustain(infile.getLineCount(), false);
+	vector<int> isRest(infile.getLineCount(), false);
+	vector<int> isNull(infile.getLineCount(), false);
+	vector<int> isSustain(infile.getLineCount(), false);
 
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (durations[i] == 0) {
@@ -1853,8 +1859,8 @@ void Tool_composite::analyzeGroupCompositeRhythms(HumdrumFile& infile) {
 		durations[i] = infile[i].getDuration();
 	}
 
-	vector<bool> isRest(infile.getLineCount(), false);
-	vector<bool> isNull(infile.getLineCount(), false);
+	vector<int> isRest(infile.getLineCount(), false);
+	vector<int> isNull(infile.getLineCount(), false);
 
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (durations[i] == 0) {
@@ -2181,7 +2187,7 @@ void Tool_composite::getGroupStates(vector<vector<int>>& groupstates, HumdrumFil
 //    0 if the line only contains nulls.  Also add the duration of any subsequent
 //    lines that are null lines before any data content lines.
 
-HumNum Tool_composite::getLineDuration(HumdrumFile& infile, int index, vector<bool>& isNull) {
+HumNum Tool_composite::getLineDuration(HumdrumFile& infile, int index, vector<int>& isNull) {
 	if (isNull[index]) {
 		return 0;
 	}
@@ -3147,7 +3153,7 @@ void Tool_composite::addMeterSignatureChanges(HumdrumFile& output, HumdrumFile& 
 
 //////////////////////////////
 //
-// adjustBadCoincidenceRests --  Sometimes coincidence rests are not so great, particularly
+// adjustBadCoincidenceRests -- Sometimes coincidence rests are not so great, particularly
 //    when they are long and there is a small note that will add to it to fill in a measure
 //    (such as a 5 eighth-note rest in 6/8).  Try to simplify such case in this function
 //    (more can be added on a case-by-case basis).

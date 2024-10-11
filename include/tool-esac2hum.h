@@ -1,120 +1,221 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
-// Creation Date: Tue Mar  5 21:32:27 PST 2002
-// Last Modified: Tue Jun  6 10:07:14 CEST 2017
+// Creation Date: Thu Aug 22 18:30:37 PDT 2024
+// Last Modified: Sun Aug 25 08:53:35 PDT 2024
 // Filename:      tool-esac2hum.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-esac2hum.h
 // Syntax:        C++11; humlib
-// vim:           syntax=cpp ts=3 noexpandtab nowrap
+// vim:           ts=3 noexpandtab
 //
-// Description:   Interface for esac2hum tool.
+// Description:   Convert newer EsAC data into Humdrum data.
 //
 
-#ifndef _TOOL_ESAC2HUM_H_INCLUDED
-#define _TOOL_ESAC2HUM_H_INCLUDED
+#ifndef _TOOL_ESAC2HUM_H
+#define _TOOL_ESAC2HUM_H
 
 #include "HumTool.h"
 #include "HumdrumFile.h"
 
 #include <iostream>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace hum {
 
 // START_MERGE
 
-
-#define ND_NOTE 0  /* notes or rests + text and phrase markings */
-#define ND_BAR  1  /* explicit barlines */
-
-
-class NoteData {
-	public:
-		NoteData(void) { clear(); }
-		void clear(void) { bar = pitch = phstart = phend = 0;
-							  phnum = -1;
-							  lyricerr = lyricnum = 0;
-							  tiestart = tiecont = tieend = 0;
-							  slstart = slend = 0;
-							  num = denom = barnum = 0;
-							  barinterp = 0; bardur = 0.0;
-							  duration = 0.0; text = ""; }
-		double duration;
-		int    bar;       int    num;
-		int    denom;     int    barnum;
-		double bardur;    int    barinterp;
-		int    pitch;     int    lyricerr;
-		int    phstart;   int    phend;    int phnum;
-		int    slstart;   int    slend;    int lyricnum;
-		int    tiestart;  int    tiecont;  int tieend;
-		std::string text;
-};
-
-
-
 class Tool_esac2hum : public HumTool {
 	public:
-		         Tool_esac2hum         (void);
-		        ~Tool_esac2hum         () {};
 
-		bool    convertFile          (std::ostream& out, const std::string& filename);
-		bool    convert              (std::ostream& out, const std::string& input);
-		bool    convert              (std::ostream& out, std::istream& input);
+		class Note {
+			public:
+				std::vector<std::string> m_errors;
+				std::string esac;
+				int    m_dots        = 0;
+				int    m_underscores = 0;
+				int    m_octave      = 0;
+				int    m_degree      = 0;  // scale degree (wrt major key)
+				int    m_b40degree   = 0;  // scale degree as b40 interval
+				int    m_alter       = 0;  // chromatic alteration of degree (flats/sharp from major scale degrees)
+				double m_ticks       = 0.0;
+				bool   m_tieBegin    = false;
+				bool   m_tieEnd      = false;
+				bool   m_phraseBegin = false;
+				bool   m_phraseEnd   = false;
+				std::string m_humdrum; // **kern conversion of EsAC note
+				int    m_b40         = 0;  // absolute b40 pitch (-1000 = rest);
+				int    m_b12         = 0;  // MIDI note number (-1000 = rest);
+				HumNum m_factor      = 1;  // for triplet which is 2/3 duration
+
+				void calculateRhythms(int minrhy);
+				void calculatePitches(int tonic);
+				bool parseNote(const std::string& note, HumNum factor);
+				void generateHumdrum(int minrhy, int b40tonic);
+				bool isPitch(void);
+				bool isRest(void);
+				std::string getScaleDegree(void);
+		};
+
+		class Measure : public std::vector<Tool_esac2hum::Note> {
+			public:
+				std::vector<std::string> m_errors;
+				std::string esac;
+				int m_barnum = -1000; // -1000 == unassigned bar number for this measure
+				// m_barnum = -1 == invisible barline (between two partial measures)
+				// m_barnum =  0 == pickup measure (partial measure at start of music)
+				double m_ticks = 0.0;
+				double m_tsticks = 0.0;
+				// m_measureTimeSignature is a **kern time signature
+				// (change) to display in the converted score.
+				std::string m_measureTimeSignature = "";
+				bool m_partialBegin = false;  // start of an incomplete measure
+				bool m_partialEnd = false;    // end of an incomplete measure (pickup)
+				bool m_complete = false;      // a complste measure
+				void calculateRhythms(int minrhy);
+				void calculatePitches(int tonic);
+				bool parseMeasure(const std::string& measure);
+				bool isUnassigned(void);
+				void setComplete(void);
+				bool isComplete(void);
+				void setPartialBegin(void);
+				bool isPartialBegin(void);
+				void setPartialEnd(void);
+				bool isPartialEnd(void);
+		};
+
+		class Phrase : public std::vector<Tool_esac2hum::Measure> {
+			public:
+				std::vector<std::string> m_errors;
+				double m_ticks = 0.0;
+				std::string esac;
+				void calculateRhythms(int minrhy);
+				void calculatePitches(int tonic);
+				bool parsePhrase(const std::string& phrase);
+				std::string getLastScaleDegree();
+				void getNoteList(std::vector<Tool_esac2hum::Note*>& notelist);
+				std::string getNO_REP(void);
+				int getFullMeasureCount(void);
+		};
+
+		class Score : public std::vector<Tool_esac2hum::Phrase> {
+			public:
+				int m_b40tonic = 0;
+				int m_minrhy   = 0;
+				std::string m_clef;
+				std::string m_keysignature;
+				std::string m_keydesignation;
+				std::string m_timesig;
+				std::map<std::string, std::string> m_params;
+				std::vector<std::string> m_errors;
+				bool m_finalBarline = false;
+				bool hasFinalBarline(void) { return m_finalBarline; }
+				void calculateRhythms(int minrhy);
+				void calculatePitches(int tonic);
+				bool parseMel(const std::string& mel);
+				void analyzeTies(void);
+				void analyzePhrases(void);
+				void getNoteList(std::vector<Tool_esac2hum::Note*>& notelist);
+				void getMeasureList(std::vector<Tool_esac2hum::Measure*>& measurelist);
+				void getPhraseNoteList(std::vector<Tool_esac2hum::Note*>& notelist, int index);
+				void generateHumdrumNotes(void);
+				void calculateClef(void);
+				void calculateKeyInformation(void);
+				void calculateTimeSignatures(void);
+				void setAllTimesigTicks(double ticks);
+				void assignFreeMeasureNumbers(void);
+				void assignSingleMeasureNumbers(void);
+				void prepareMultipleTimeSignatures(const std::string& ts);
+
+				void doAnalyses(void);
+				void analyzeMEL_SEM(void);
+				void analyzeMEL_RAW(void);
+				void analyzeNO_REP(void);
+				void analyzeRTM(void);
+				void analyzeSCL_DEG(void);
+				void analyzeSCL_SEM(void);
+				void analyzePHR_NO(void);
+				void analyzePHR_BARS(void);
+				void analyzePHR_CAD(void);
+				void analyzeACC(void);
+		};
+
+		            Tool_esac2hum    (void);
+		           ~Tool_esac2hum    () {};
+
+		bool       convertFile          (std::ostream& out, const std::string& filename);
+		bool       convert              (std::ostream& out, const std::string& input);
+		bool       convert              (std::ostream& out, std::istream& input);
+
 
 	protected:
-		bool      initialize            (void);
-		void      checkOptions          (Options& opts, int argc, char** argv);
-		void      example               (void);
-		void      usage                 (const std::string& command);
-		void      convertEsacToHumdrum  (std::ostream& out, std::istream& input);
-		bool      getSong               (std::vector<std::string>& song, std::istream& infile,
-		                                int init);
-		void      convertSong           (std::vector<std::string>& song, std::ostream& out);
-		bool      getKeyInfo            (std::vector<std::string>& song, std::string& key,
-		                                 double& mindur, int& tonic, std::string& meter,
-		                                 std::ostream& out);
-		void      printNoteData         (NoteData& data, int textQ, std::ostream& out);
-		bool      getNoteList           (std::vector<std::string>& song,
-		                                 std::vector<NoteData>& songdata, double mindur,
-		                                 int tonic);
-		void      getMeterInfo          (std::string& meter, std::vector<int>& numerator,
-		                                 std::vector<int>& denominator);
-		void      postProcessSongData   (std::vector<NoteData>& songdata,
-		                                 std::vector<int>& numerator,std::vector<int>& denominator);
-		void      printKeyInfo          (std::vector<NoteData>& songdata, int tonic,
-		                                 int textQ, std::ostream& out);
-		int       getAccidentalMax      (int a, int b, int c);
-		bool      printTitleInfo        (std::vector<std::string>& song, std::ostream& out);
-		void      getLineRange          (std::vector<std::string>& song, const std::string& field,
-		                                 int& start, int& stop);
-		void      printChar             (unsigned char c, std::ostream& out);
-		void      printBibInfo          (std::vector<std::string>& song, std::ostream& out);
-		void      printString           (const std::string& string, std::ostream& out);
-		void      printSpecialChars     (std::ostream& out);
-		bool      placeLyrics           (std::vector<std::string>& song,
-		                                 std::vector<NoteData>& songdata);
-		bool      placeLyricPhrase      (std::vector<NoteData>& songdata,
-		                                 std::vector<std::string>& lyrics, int line);
-		void      getLyrics             (std::vector<std::string>& lyrics, const std::string& buffer);
-		void      cleanupLyrics         (std::vector<std::string>& lyrics);
-		bool      getFileContents       (std::vector<std::string>& array, const std::string& filename);
-		void      chopExtraInfo         (std::string& buffer);
-		void      printHumdrumHeaderInfo(std::ostream& out, std::vector<std::string>& song);
-		void      printHumdrumFooterInfo(std::ostream& out, std::vector<std::string>& song);
+		void        initialize          (void);
+
+		void        convertEsacToHumdrum(std::ostream& output, std::istream& infile);
+		bool        getSong             (std::vector<std::string>& song, std::istream& infile);
+		void        convertSong         (std::ostream& output, std::vector<std::string>& infile);
+		static std::string trimSpaces   (const std::string& input);
+		void        printHeader         (std::ostream& output);
+		void        printFooter         (std::ostream& output, std::vector<std::string>& infile);
+		void        printConversionDate (std::ostream& output);
+		void        printPdfLinks       (std::ostream& output);
+		void        printParameters     (void);
+		void        printPageNumbers    (std::ostream& output);
+		void        getParameters       (std::vector<std::string>& infile);
+		void        cleanText           (std::string& buffer);
+		std::string createFilename      (void);
+		void        printBemComment     (std::ostream& output);
+		void        processSong         (void);
+		void        printScoreContents  (std::ostream& output);
+		void        embedAnalyses       (std::ostream& output);
+		void        printPdfUrl         (std::ostream& output);
+		std::string getKolbergUrl       (int volume);
+      void        printKolbergPdfUrl  (std::ostream& output);
 
 	private:
-		int            debugQ = 0;        // used with --debug option
-		int            verboseQ = 0;      // used with -v option
-		int            splitQ = 0;        // used with -s option
-		int            firstfilenum = 1;  // used with -f option
-		std::vector<std::string> header;            // used with -h option
-		std::vector<std::string> trailer;           // used with -t option
-		std::string         fileextension;     // used with -x option
-		std::string         namebase;          // used with -s option
+		bool        m_debugQ     = false;  // used with --debug option
+		bool        m_verboseQ   = false;  // used with --verbose option
+		std::string m_verbose;             //    p = print EsAC phrases, m = print measures, n = print notes.
+		                                   //    t after p, m, or n means print tick info
+		bool        m_embedEsacQ = true;   // used with -E option
+		bool        m_dwokQ      = false;  // true if source is Oskar Kolberg: Dzieła Wszystkie
+		                                   // (Oskar Kolberg: Complete Works)
+		                                   // determined automatically if header line or TRD source contains "DWOK" string.
+		bool        m_analysisQ  = false;  // used with -a option
 
-		std::vector<int>    chartable;  // used printChars() & printSpecialChars()
-		int inputline = 0;
+		int         m_inputline = 0;       // used to keep track if the EsAC input line.
+
+		std::string m_filePrefix;
+		std::string m_filePostfix = ".krn";
+		bool m_fileTitleQ = false;
+
+		std::string m_prevline;
+		std::string m_cutline;
+		std::vector<std::string> m_globalComments;
+
+		bool m_initialized = false;
+		int m_minrhy = 0;
+
+		Tool_esac2hum::Score m_score;
+
+		class KolbergInfo {
+			public:
+				std::string titlePL;
+				std::string titleEN;
+				int firstPrintPage;
+				int firstScanPage;
+				std::vector<int> plates;
+
+				KolbergInfo(void) { firstPrintPage = 0; firstScanPage = 0; }
+				KolbergInfo(
+					const std::string& pl, const std::string& en, int fpp, int fsp, const std::vector<int>& plts)
+        				: titlePL(pl), titleEN(en), firstPrintPage(fpp), firstScanPage(fsp), plates(plts) {}
+		};
+		std::map<int, KolbergInfo> m_kinfo;
+		KolbergInfo getKolbergInfo(int volume);
+		std::string getKolbergUrl(int volume, int printPage);
+		int calculateScanPage(int inputPrintPage, int printPage, int scanPage, const std::vector<int>& platePages);
+
 
 };
 
@@ -122,7 +223,7 @@ class Tool_esac2hum : public HumTool {
 
 } // end namespace hum
 
-#endif /* _TOOL_ESAC2HUM_H_INCLUDED */
+#endif /* _TOOL_ESAC2HUM_H */
 
 
 
