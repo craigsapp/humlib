@@ -1191,7 +1191,7 @@ tool-filter.o: tool-filter.cpp tool-filter.h \
   GridPart.h GridStaff.h GridSide.h \
   GridVoice.h tool-melisma.h tool-mens2kern.h \
   tool-meter.h tool-metlev.h tool-modori.h \
-  tool-msearch.h Convert.h tool-myank.h \
+  tool-msearch.h Convert.h tool-myank.h tool-notemark.h \
   tool-nproof.h tool-ordergps.h tool-phrase.h \
   tool-pline.h tool-recip.h tool-restfill.h \
   tool-rid.h tool-sab2gs.h tool-satb2gs.h \
