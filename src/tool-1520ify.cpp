@@ -17,6 +17,8 @@
 #include "HumRegex.h"
 
 #include <algorithm>
+#include <chrono>
+#include <iomanip>
 
 using namespace std;
 
