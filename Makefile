@@ -1464,6 +1464,15 @@ tool-myank.o: tool-myank.cpp tool-myank.h HumTool.h \
   HumParamSet.h HumdrumFileStream.h HumRegex.h \
   Convert.h
 
+tool-notemark.o: tool-notemark.cpp tool-notemark.h HumTool.h \
+  Options.h HumdrumFileSet.h HumdrumFile.h \
+  HumdrumFileContent.h HumdrumFileStructure.h \
+  HumdrumFileBase.h HumSignifiers.h \
+  HumSignifier.h HumdrumLine.h HumdrumToken.h \
+  HumNum.h HumAddress.h HumHash.h \
+  HumParamSet.h HumdrumFileStream.h NoteGrid.h \
+  NoteCell.h Convert.h HumRegex.h
+
 tool-nproof.o: tool-nproof.cpp tool-nproof.h \
   HumTool.h Options.h HumdrumFileSet.h \
   HumdrumFile.h HumdrumFileContent.h \

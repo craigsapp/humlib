@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fr 11 Okt 2024 00:16:02 CEST
+// Last Modified: Mo 14 Okt 2024 23:10:24 CEST
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -10035,6 +10035,39 @@ class Tool_myank : public HumTool {
 		bool m_hideStarting;                  // used with --hide-starting option
 		bool m_hideEnding;                    // used with --hide-ending option
 
+};
+
+
+class Tool_notemark : public HumTool {
+
+	public:
+		     Tool_notemark (void);
+		     ~Tool_notemark() {};
+
+		bool run           (HumdrumFileSet& infiles);
+		bool run           (HumdrumFile& infile);
+		bool run           (const string& indata, ostream& out);
+		bool run           (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void               initialize         (void);
+        void               processFile        (HumdrumFile& infile);
+		int                getStartLineNumber (void);
+		int                getEndLineNumber   (void);
+		std::vector<int>   setupSpineInfo     (HumdrumFile& infile);
+
+	private:
+		// m_kernSpines: list of all **kern spines found in file.
+		std::vector<HTp> m_kernSpines;
+
+		// m_selectedKernSpines: list of only the **kern spines that will be analyzed.
+		std::vector<HTp> m_selectedKernSpines;
+
+		std::string m_kernTracks;  // used with -s option
+		std::string m_spineTracks; // used with -k option
+		std::string m_lineRange;   // used with -l option
+		std::string m_signifier;   // used with --signifier option
+		std::string m_color;       // used with --color option
 };
 
 
