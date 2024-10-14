@@ -140,7 +140,7 @@ set(HDRS
 	include/NoteGrid.h
 	include/Options.h
 	include/humlib.h
-	include/pugiconfig.hpp
+	include/pugixml/pugiconfig.hpp
 	include/pugixml/pugixml.hpp
 	include/tool-autobeam.h
 	include/tool-autostem.h
