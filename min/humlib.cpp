@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mo 14 Okt 2024 23:28:35 CEST
+// Last Modified: Di 15 Okt 2024 23:09:44 CEST
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -115683,8 +115683,7 @@ void Tool_notemark::processFile(HumdrumFile& infile) {
 			if (line->isData()) {
 				vector<HTp> tokens;
 				line->getTokens(tokens);
-				for (int j = 0; j < tokens.size(); j++) {
-					HTp token = tokens[j];
+				for (HTp& token : tokens) {
 					if (token->isNonNullData()) {
 						if (std::find(selectedSpineIndices.begin(), selectedSpineIndices.end(), token->getSpineIndex()) != selectedSpineIndices.end() || selectedSpineIndices.size() == 0) {
 							token->setText(token->getText() + m_signifier);
