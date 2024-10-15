@@ -122,7 +122,7 @@ void Tool_notemark::processFile(HumdrumFile& infile) {
 			if (line->isData()) {
 				vector<HTp> tokens;
 				line->getTokens(tokens);
-				for (int j = 0; j < tokens.size(); j++) {
+				for (auto j = 0; j < tokens.size(); j++) {
 					HTp token = tokens[j];
 					if (token->isNonNullData()) {
 						if (std::find(selectedSpineIndices.begin(), selectedSpineIndices.end(), token->getSpineIndex()) != selectedSpineIndices.end() || selectedSpineIndices.size() == 0) {
