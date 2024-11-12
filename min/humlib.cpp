@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Nov  6 07:59:27 PST 2024
+// Last Modified: Mon Nov 11 18:01:40 PST 2024
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -101239,6 +101239,9 @@ void Tool_melisma::extractWordlist(vector<WordInfo>& wordinfo, map<string, int>&
 		mincount = 2;
 	}
 	string word;
+	vector<HumNum> lastTimes;
+	lastTimes.resize(infile.getMaxTrack() + 1);
+	std::fill(lastTimes.begin(), lastTimes.end(), -1);
 	WordInfo winfo;
 	for (int i=0; i<(int)notecount.size(); i++) {
 		for (int j=0; j<(int)notecount[i].size(); j++) {
@@ -101247,8 +101250,13 @@ void Tool_melisma::extractWordlist(vector<WordInfo>& wordinfo, map<string, int>&
 			}
 			HTp token = infile.token(i, j);
 			word = extractWord(winfo, token, notecount);
-			wordlist[word]++;
 			int track = token->getTrack();
+			if (winfo.starttime == lastTimes.at(track)) {
+				// Exclude duplicate entries of words (multiple melismas in same word).
+				continue;
+			}
+			lastTimes.at(track) = winfo.starttime;
+			wordlist[word]++;
 			winfo.name = m_names[track];
 			winfo.abbreviation = m_abbreviations[track];
 			winfo.partnum = m_partnums[track];
