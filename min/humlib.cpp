@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Nov 13 13:06:46 PST 2024
+// Last Modified: Wed Nov 13 13:08:51 PST 2024
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -87253,6 +87253,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(autobeam, infile, commands[i].second, status);
 		} else if (commands[i].first == "autostem") {
 			RUNTOOL(autostem, infile, commands[i].second, status);
+		} else if (commands[i].first == "bardash") {
+			RUNTOOL(bardash, infile, commands[i].second, status);
 		} else if (commands[i].first == "binroll") {
 			RUNTOOL(binroll, infile, commands[i].second, status);
 		} else if (commands[i].first == "chantize") {
