@@ -2,26 +2,26 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Wed Nov 13 09:08:06 PST 2024
 // Last Modified: Wed Nov 13 09:08:09 PST 2024
-// Filename:      tool-bardash.cpp
-// URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-bardash.cpp
+// Filename:      tool-bstyle.cpp
+// URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-bstyle.cpp
 // Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Notate hypermeters.
-//							*bar:dash=3
+//							*bstyl:dash=3
 //                      solid bar every three barlines, dashes for other two
-//							*bar:dash=2
+//							*bstyle:dash=2
 //                      solid bar every two barlines, dashes for other one
-//							*bar:dot=2
+//							*bstyle:dot=2
 //                      solid bar every two barlines, dots for other one
-//							*bar:invis=2
+//							*bstyle:invis=2
 //                      solid bar every two barlines, invisible for other one
-//                   *bar:stop
-//                      stop applying given hyper meter.
+//                   *bstyle:stop
+//                      stop applying given hypermeter.
 //
 //
 
-#include "tool-bardash.h"
+#include "tool-bstyle.h"
 #include "HumRegex.h"
 
 using namespace std;
@@ -33,10 +33,10 @@ namespace hum {
 
 /////////////////////////////////
 //
-// Tool_bardash::Tool_bardash -- Set the recognized options for the tool.
+// Tool_bstyle::Tool_bstyle -- Set the recognized options for the tool.
 //
 
-Tool_bardash::Tool_bardash(void) {
+Tool_bstyle::Tool_bstyle(void) {
 	define("r|remove=b",    "remove any dot/dash/invisible barline stylings");
 }
 
@@ -44,10 +44,10 @@ Tool_bardash::Tool_bardash(void) {
 
 ///////////////////////////////
 //
-// Tool_bardash::run -- Primary interfaces to the tool.
+// Tool_bstyle::run -- Primary interfaces to the tool.
 //
 
-bool Tool_bardash::run(HumdrumFileSet& infiles) {
+bool Tool_bstyle::run(HumdrumFileSet& infiles) {
 	bool status = true;
 	for (int i=0; i<infiles.getCount(); i++) {
 		status &= run(infiles[i]);
@@ -56,20 +56,20 @@ bool Tool_bardash::run(HumdrumFileSet& infiles) {
 }
 
 
-bool Tool_bardash::run(const string& indata, ostream& out) {
+bool Tool_bstyle::run(const string& indata, ostream& out) {
 	HumdrumFile infile(indata);
 	return run(infile, out);
 }
 
 
-bool Tool_bardash::run(HumdrumFile& infile, ostream& out) {
+bool Tool_bstyle::run(HumdrumFile& infile, ostream& out) {
 	bool status = run(infile);
 	out << m_free_text.str();
 	return status;
 }
 
 
-bool Tool_bardash::run(HumdrumFile& infile) {
+bool Tool_bstyle::run(HumdrumFile& infile) {
    initialize();
 	processFile(infile);
 	return true;
@@ -79,10 +79,10 @@ bool Tool_bardash::run(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_bardash::initialize --
+// Tool_bstyle::initialize --
 //
 
-void Tool_bardash::initialize(void) {
+void Tool_bstyle::initialize(void) {
 	m_removeQ = getBoolean("remove");
 }
 
@@ -90,10 +90,10 @@ void Tool_bardash::initialize(void) {
 
 //////////////////////////////
 //
-// Tool_bardash::processFile --
+// Tool_bstyle::processFile --
 //
 
-void Tool_bardash::processFile(HumdrumFile& infile) {
+void Tool_bstyle::processFile(HumdrumFile& infile) {
 	if (m_removeQ) {
 		removeBarStylings(infile);
 	} else {
@@ -107,10 +107,10 @@ void Tool_bardash::processFile(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_bardash::removeBarStylings --
+// Tool_bstyle::removeBarStylings --
 //
 
-void Tool_bardash::removeBarStylings(HumdrumFile& infile) {
+void Tool_bstyle::removeBarStylings(HumdrumFile& infile) {
 	vector<HTp> kstarts = infile.getKernSpineStartList();
 	for (int i=0; i<(int)kstarts.size(); i++) {
 		removeBarStylings(kstarts.at(i));
@@ -121,10 +121,10 @@ void Tool_bardash::removeBarStylings(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_bardash::removeBarStylings --
+// Tool_bstyle::removeBarStylings --
 //
 
-void Tool_bardash::removeBarStylings(HTp spine) {
+void Tool_bstyle::removeBarStylings(HTp spine) {
 
 	HTp current = spine->getNextToken();
 	bool activeQ = false;
@@ -134,7 +134,7 @@ void Tool_bardash::removeBarStylings(HTp spine) {
 	HumRegex hre;
 	while (current) {
 		if (current->isInterpretation()) {
-			if (hre.search(current, "^\\*bar:")) {
+			if (hre.search(current, "^\\*bstyle:")) {
 				if (hre.search(current, "stop")) {
 					activeQ = false;
 					dashQ  = false;
@@ -142,15 +142,15 @@ void Tool_bardash::removeBarStylings(HTp spine) {
 					invisQ = false;
 				} else {
 					activeQ = true;
-					if (hre.search(current, "^\\*bar:.*dash=(\\d+)")) {
+					if (hre.search(current, "^\\*bstyle:.*dash=(\\d+)")) {
 						dashQ  = true;
 						dotQ   = false;
 						invisQ = false;
-					} else if (hre.search(current, "^\\*bar:.*dot=(\\d+)")) {
+					} else if (hre.search(current, "^\\*bstyle:.*dot=(\\d+)")) {
 						dashQ  = false;
 						dotQ   = true;
 						invisQ = false;
-					} else if (hre.search(current, "^\\*bar:.*invis=(\\d+)")) {
+					} else if (hre.search(current, "^\\*bstyle:.*invis=(\\d+)")) {
 						dashQ  = false;
 						dotQ   = false;
 						invisQ = true;
@@ -195,10 +195,10 @@ void Tool_bardash::removeBarStylings(HTp spine) {
 
 //////////////////////////////
 //
-// Tool_bardash::applyBarStylings --
+// Tool_bstyle::applyBarStylings --
 //
 
-void Tool_bardash::applyBarStylings(HumdrumFile& infile) {
+void Tool_bstyle::applyBarStylings(HumdrumFile& infile) {
 	vector<HTp> kstarts = infile.getKernSpineStartList();
 	for (int i=0; i<(int)kstarts.size(); i++) {
 		applyBarStylings(kstarts.at(i));
@@ -209,10 +209,10 @@ void Tool_bardash::applyBarStylings(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_bardash::applyBarStylings --
+// Tool_bstyle::applyBarStylings --
 //
 
-void Tool_bardash::applyBarStylings(HTp spine) {
+void Tool_bstyle::applyBarStylings(HTp spine) {
 
 	HTp current = spine->getNextToken();
 	bool activeQ = false;
@@ -226,7 +226,7 @@ void Tool_bardash::applyBarStylings(HTp spine) {
 	HumRegex hre;
 	while (current) {
 		if (current->isInterpretation()) {
-			if (hre.search(current, "^\\*bar:")) {
+			if (hre.search(current, "^\\*bstyle:")) {
 				if (hre.search(current, "stop")) {
 					activeQ = false;
 					dashQ   = false;
@@ -237,19 +237,19 @@ void Tool_bardash::applyBarStylings(HTp spine) {
 					invis   = 0;
 				} else {
 					activeQ = true;
-					if (hre.search(current, "^\\*bar:.*dash=(\\d+)")) {
+					if (hre.search(current, "^\\*bstyle:.*dash=(\\d+)")) {
 						dashQ  = true;
 						dotQ   = false;
 						invisQ = false;
 						dash   = hre.getMatchInt(1);
 						counter = 0;
-					} else if (hre.search(current, "^\\*bar:.*dot=(\\d+)")) {
+					} else if (hre.search(current, "^\\*bstyle:.*dot=(\\d+)")) {
 						dashQ  = false;
 						dotQ   = true;
 						invisQ = false;
 						dot    = hre.getMatchInt(1);
 						counter = 0;
-					} else if (hre.search(current, "^\\*bar:.*invis=(\\d+)")) {
+					} else if (hre.search(current, "^\\*bstyle:.*invis=(\\d+)")) {
 						dashQ  = false;
 						dotQ   = false;
 						invisQ = true;

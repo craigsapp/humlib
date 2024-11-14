@@ -2,24 +2,26 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Wed Nov 13 09:02:20 PST 2024
 // Last Edited:   Wed Nov 13 09:02:24 PST 2024
-// Filename:      tool-bardash.h
-// URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-bardash.h
+// Filename:      tool-bstyle.h
+// URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-bstyle.h
 // Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Notate hypermeters.
-//							*bar:dash=3
+//							*bstyle:dash=3
 //                      solid bar every three barlines, dashes for other two
-//							*bar:dash=2
+//							*bstyle:dash=2
 //                      solid bar every two barlines, dashes for other one
-//							*bar:dot=2
+//							*bstyle:dot=2
 //                      solid bar every two barlines, dots for other one
-//							*bar:invis=2
+//							*bstyle:invis=2
 //                      solid bar every two barlines, invisible for other one
+//                   *bstyle:stop
+//                      turn off last styling message
 //
 
-#ifndef _TOOL_BARDASH_H
-#define _TOOL_BARDASH_H
+#ifndef _TOOL_BSTYLE_H
+#define _TOOL_BSTYLE_H
 
 #include "HumTool.h"
 #include "HumdrumFile.h"
@@ -28,11 +30,11 @@ namespace hum {
 
 // START_MERGE
 
-class Tool_bardash : public HumTool {
+class Tool_bstyle : public HumTool {
 
 	public:
-		     Tool_bardash (void);
-		     ~Tool_bardash() {};
+		     Tool_bstyle (void);
+		     ~Tool_bstyle() {};
 
 		bool run     (HumdrumFileSet& infiles);
 		bool run     (HumdrumFile& infile);
@@ -56,7 +58,7 @@ class Tool_bardash : public HumTool {
 
 } // end namespace hum
 
-#endif /* _TOOL_BARDASH_H */
+#endif /* _TOOL_BSTYLE_H */
 
 
 
