@@ -36,6 +36,7 @@ class Tool_shed : public HumTool {
 
 	protected:
 		void    processFile                      (HumdrumFile& infile);
+		void    processExpression                (HumdrumFile& infile);
 		void    searchAndReplaceInterpretation   (HumdrumFile& infile);
 		void    searchAndReplaceExinterp         (HumdrumFile& infile);
 		void    searchAndReplaceData             (HumdrumFile& infile);
