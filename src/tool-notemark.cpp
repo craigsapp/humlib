@@ -126,8 +126,11 @@ void Tool_notemark::processFile(HumdrumFile& infile) {
 					HTp resolvedToken = token->resolveNull();
 					if (resolvedToken->isNonNullData()) {
 						if (std::find(selectedSpineIndices.begin(), selectedSpineIndices.end(), resolvedToken->getSpineIndex()) != selectedSpineIndices.end() || selectedSpineIndices.size() == 0) {
-							resolvedToken->resolveNull()->setText(resolvedToken->getText() + m_signifier);
-							hasMarkers = true;
+							std::string tokenText = resolvedToken->getText();
+							if (m_signifier.size() > tokenText.size() || tokenText.compare(tokenText.size() - m_signifier.size(), m_signifier.size(), m_signifier) != 0) {
+								resolvedToken->resolveNull()->setText(tokenText + m_signifier);
+								hasMarkers = true;
+							}
 						}
 					}
 				}
