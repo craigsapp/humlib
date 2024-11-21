@@ -156,6 +156,9 @@ int Tool_notemark::getStartLineNumber(void) {
 	if (hre.search(m_lineRange, "^(\\d+)\\-(\\d+)$")) {
 		return hre.getMatchInt(1);
 	}
+	if (hre.search(m_lineRange, "^(\\d+)$")) {
+		return hre.getMatchInt(1);
+	}
 	return -1;
 }
 
@@ -170,6 +173,9 @@ int Tool_notemark::getEndLineNumber(void) {
 	HumRegex hre;
 	if (hre.search(m_lineRange, "^(\\d+)\\-(\\d+)$")) {
 		return hre.getMatchInt(2);
+	}
+	if (hre.search(m_lineRange, "^(\\d+)$")) {
+		return hre.getMatchInt(1);
 	}
 	return -1;
 }
