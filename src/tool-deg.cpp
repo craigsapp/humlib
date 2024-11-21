@@ -56,6 +56,7 @@ Tool_deg::Tool_deg(void) {
 	define("t|ties=b",                                   "include scale degrees for tied notes");
 	define("s|spine-tracks|spine|spines|track|tracks=s", "process only the specified spines");
 	define("0|O|z|zero|zeros=b",                         "show rests as scale degree 0");
+	define("resolve-null=b",                             "show scale degrees for tokens without attack");
 }
 
 
@@ -131,6 +132,7 @@ void Tool_deg::initialize(void) {
 		m_recipQ = true;
 	}
 	m_degTiesQ = getBoolean("ties");
+	m_resolveNullQ = getBoolean("resolve-null");
 	Tool_deg::ScaleDegree::setShowOctaves(getBoolean("octave"));
 
 	if (getBoolean("spine-tracks")) {
@@ -1489,7 +1491,7 @@ void Tool_deg::prepareDegSpine(vector<vector<ScaleDegree>>& degspine, HTp kernst
 		int line = current->getLineIndex();
 		if (!current->getOwner()->hasSpines()) {
 			degspine.at(line).resize(1);
-			degspine.at(line).back().setLinkedKernToken(current, mode, b40tonic, isUnpitched);
+			degspine.at(line).back().setLinkedKernToken(current, mode, b40tonic, isUnpitched, m_resolveNullQ);
 			current = current->getNextToken();
 			continue;
 		}
@@ -1512,7 +1514,7 @@ void Tool_deg::prepareDegSpine(vector<vector<ScaleDegree>>& degspine, HTp kernst
 				break;
 			}
 			degspine.at(line).resize((int)degspine.at(line).size() + 1);
-			degspine.at(line).back().setLinkedKernToken(curr, mode, b40tonic, isUnpitched);
+			degspine.at(line).back().setLinkedKernToken(curr, mode, b40tonic, isUnpitched, m_resolveNullQ);
 			curr = curr->getNextFieldToken();
 		}
 		current = current->getNextToken();
@@ -1608,8 +1610,8 @@ Tool_deg::ScaleDegree::~ScaleDegree () {
 //    Unpitched scale degrees will be output as null data tokens.
 //
 
-void Tool_deg::ScaleDegree::setLinkedKernToken(HTp token, const string& mode, int b40tonic, bool unpitched) {
-	m_linkedKernToken = token;
+void Tool_deg::ScaleDegree::setLinkedKernToken(HTp token, const string& mode, int b40tonic, bool unpitched, bool resolveNull) {
+	m_linkedKernToken = resolveNull ? token->resolveNull() : token;
 	m_unpitched = unpitched;
 	if (!unpitched) {
 		if (mode == "major") {
