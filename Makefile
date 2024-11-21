@@ -1191,7 +1191,7 @@ tool-filter.o: tool-filter.cpp tool-filter.h \
   GridPart.h GridStaff.h GridSide.h \
   GridVoice.h tool-melisma.h tool-mens2kern.h \
   tool-meter.h tool-metlev.h tool-modori.h \
-  tool-msearch.h Convert.h tool-myank.h \
+  tool-msearch.h Convert.h tool-myank.h tool-notemark.h \
   tool-nproof.h tool-ordergps.h tool-phrase.h \
   tool-pline.h tool-recip.h tool-restfill.h \
   tool-rid.h tool-sab2gs.h tool-satb2gs.h \
@@ -1463,6 +1463,15 @@ tool-myank.o: tool-myank.cpp tool-myank.h HumTool.h \
   HumNum.h HumAddress.h HumHash.h \
   HumParamSet.h HumdrumFileStream.h HumRegex.h \
   Convert.h
+
+tool-notemark.o: tool-notemark.cpp tool-notemark.h HumTool.h \
+  Options.h HumdrumFileSet.h HumdrumFile.h \
+  HumdrumFileContent.h HumdrumFileStructure.h \
+  HumdrumFileBase.h HumSignifiers.h \
+  HumSignifier.h HumdrumLine.h HumdrumToken.h \
+  HumNum.h HumAddress.h HumHash.h \
+  HumParamSet.h HumdrumFileStream.h NoteGrid.h \
+  NoteCell.h Convert.h HumRegex.h
 
 tool-nproof.o: tool-nproof.cpp tool-nproof.h \
   HumTool.h Options.h HumdrumFileSet.h \
