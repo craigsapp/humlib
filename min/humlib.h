@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Do 21 Nov 2024 21:59:25 CET
+// Last Modified: Do 21 Nov 2024 23:37:38 CET
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -6994,7 +6994,7 @@ class Tool_deg : public HumTool {
 				ScaleDegree (void);
 				~ScaleDegree ();
 
-				void            setLinkedKernToken       (hum::HTp token, const std::string& mode, int b40tonic, bool unpitched = false);
+				void            setLinkedKernToken       (hum::HTp token, const std::string& mode, int b40tonic, bool unpitched = false, bool resolveNull = false);
 				hum::HTp        getLinkedKernToken       (void) const;
 				std::string     getDegToken              (void) const;
 
@@ -7203,6 +7203,7 @@ class Tool_deg : public HumTool {
 		bool m_recipQ          = false;   // used with -r option
 		bool m_kernQ           = false;   // used with --kern option
 		bool m_degTiesQ        = false;   // used with -t option
+		bool m_resolveNullQ    = false;   // used with --resolve-null option
 		bool m_forceKeyQ       = false;   // used with -K option
 
 		std::string m_defaultKey  = "";    // used with --default-key option

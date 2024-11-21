@@ -41,7 +41,7 @@ class Tool_deg : public HumTool {
 				ScaleDegree (void);
 				~ScaleDegree ();
 
-				void            setLinkedKernToken       (hum::HTp token, const std::string& mode, int b40tonic, bool unpitched = false);
+				void            setLinkedKernToken       (hum::HTp token, const std::string& mode, int b40tonic, bool unpitched = false, bool resolveNull = false);
 				hum::HTp        getLinkedKernToken       (void) const;
 				std::string     getDegToken              (void) const;
 
@@ -250,6 +250,7 @@ class Tool_deg : public HumTool {
 		bool m_recipQ          = false;   // used with -r option
 		bool m_kernQ           = false;   // used with --kern option
 		bool m_degTiesQ        = false;   // used with -t option
+		bool m_resolveNullQ    = false;   // used with --resolve-null option
 		bool m_forceKeyQ       = false;   // used with -K option
 
 		std::string m_defaultKey  = "";    // used with --default-key option
