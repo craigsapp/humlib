@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Wed Nov 30 01:02:57 PST 2016
-// Last Modified: Thu Apr 18 08:58:38 PDT 2024
+// Last Modified: Thu Nov 14 07:42:26 PST 2024
 // Filename:      tool-filter.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-filter.cpp
 // Syntax:        C++11; humlib
@@ -21,6 +21,7 @@
 #include "tool-autoaccid.h"
 #include "tool-autobeam.h"
 #include "tool-autostem.h"
+#include "tool-bstyle.h"
 #include "tool-binroll.h"
 #include "tool-chantize.h"
 #include "tool-chint.h"
@@ -260,6 +261,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(autobeam, infile, commands[i].second, status);
 		} else if (commands[i].first == "autostem") {
 			RUNTOOL(autostem, infile, commands[i].second, status);
+		} else if (commands[i].first == "bstyle") {
+			RUNTOOL(bstyle, infile, commands[i].second, status);
 		} else if (commands[i].first == "binroll") {
 			RUNTOOL(binroll, infile, commands[i].second, status);
 		} else if (commands[i].first == "chantize") {

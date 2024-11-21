@@ -258,17 +258,16 @@ Tool_esac2hum::Tool_esac2hum(void) {
 
 //////////////////////////////
 //
-// Tool_esac2hum::convert -- Convert a MusicXML file into
-//     Humdrum content.
+// Tool_esac2hum::convert -- Convert an EsAC data into Humdrum data.
 //
 
 bool Tool_esac2hum::convertFile(ostream& out, const string& filename) {
 	initialize();
-   ifstream file(filename);
-   if (file) {
-      return convert(out, file);
-   }
-   return false;
+	ifstream file(filename);
+	if (file) {
+		return convert(out, file);
+	}
+	return false;
 }
 
 
@@ -405,6 +404,8 @@ bool Tool_esac2hum::getSong(vector<string>& song, istream& infile) {
 
 	bool expectingCloseQ = false;
 
+	// Now collect lines for the song until another CUT[] is found
+	// (do not store previous line above CUT[] which is the source edition label.)
 	while (!infile.eof()) {
 		getline(infile, buffer);
 
@@ -451,13 +452,12 @@ bool Tool_esac2hum::getSong(vector<string>& song, istream& infile) {
 		if (hre.search(buffer, "^[A-Za-z][^\\[\\]]*$")) {
 			// collection line
 			m_prevline = buffer;
-			continue;
+			return true;
 		}
 
 		if (hre.search(buffer, "^[A-Za-z]+\\s*\\[[^\\]]*\\s*$")) {
 			// parameter with opening [
 			expectingCloseQ = true;
-		} else {
 		}
 
 		song.push_back(buffer);
@@ -795,7 +795,7 @@ bool Tool_esac2hum::Score::parseMel(const string& mel) {
 
 	analyzeTies();
 	analyzePhrases();
- 	generateHumdrumNotes();
+	generateHumdrumNotes();
 	calculateClef();
 	calculateKeyInformation();
 	calculateTimeSignatures();
@@ -1091,11 +1091,11 @@ void Tool_esac2hum::Score::prepareMultipleTimeSignatures(const string& ts) {
 	for (int i=0; i<(int)size()-1; i++) {
 		Tool_esac2hum::Phrase& phrase = at(i);
 		Tool_esac2hum::Phrase& nextphrase = at(i+1);
-      if (phrase.size() < 2) {
+		if (phrase.size() < 2) {
 			// deal with phrases with a single measure later
 			continue;
 		}
-      if (nextphrase.size() < 2) {
+		if (nextphrase.size() < 2) {
 			// deal with phrases with a single measure later
 			continue;
 		}
@@ -1889,7 +1889,7 @@ bool Tool_esac2hum::Note::parseNote(const string& note, HumNum factor) {
 	}
 
 	m_alter = s - b;
- 	m_octave = plus - minus;
+	m_octave = plus - minus;
 
 	m_factor = factor;
 
@@ -2230,9 +2230,9 @@ void Tool_esac2hum::getParameters(vector<string>& infile) {
 void Tool_esac2hum::printParameters(void) {
 	cerr << endl;
 	cerr << "========================================" << endl;
-    for (const auto& [key, value] : m_score.m_params) {
-        cerr << "Key: " << key << ", Value: " << value << endl;
-    }
+	for (const auto& [key, value] : m_score.m_params) {
+		cerr << "Key: " << key << ", Value: " << value << endl;
+	}
 	cerr << "========================================" << endl;
 	cerr << endl;
 }
@@ -2249,6 +2249,8 @@ void Tool_esac2hum::printBemComment(ostream& output) {
 	if (bem.empty()) {
 		return;
 	}
+	HumRegex hre;
+	hre.replaceDestructive(bem, " ", "\n", "g");
 	output << "!!!ONB: " << bem << endl;
 }
 
