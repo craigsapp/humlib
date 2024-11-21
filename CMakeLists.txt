@@ -99,7 +99,7 @@ set(SRCS
 	src/tool-msearch.cpp
 	src/tool-musicxml2hum.cpp
 	src/tool-myank.cpp
-    src/tool-notemark.cpp
+	src/tool-notemark.cpp
 	src/tool-recip.cpp
 	src/tool-restfill.cpp
 	src/tool-ruthfix.cpp
