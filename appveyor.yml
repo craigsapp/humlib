@@ -1,48 +1,38 @@
 version: 1.0.{build}
 
-image: Visual Studio 2017
+image: Visual Studio 2019
 
 environment:
   matrix:
-  - generator: "Visual Studio 15"
+  - generator: "Visual Studio 16"
     config: Release
-    arch: vs2017-x86
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    arch: x86
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
 
-  - generator: "Visual Studio 15 Win64"
+  - generator: "Visual Studio 16 Win64"
     config: Release
-    arch: vs2017-x64
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-
-  - generator: "Visual Studio 14"
-    config: Release
-    arch: vs2015-x86
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-
-  - generator: "Visual Studio 14 Win64"
-    config: Release
-    arch: vs2015-x64
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+    arch: x64
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
 
 init:
   - git config --global core.autocrlf input
 
 build_script:
-  - cmake -G"%generator%" -H. -Bbuild
-  #- cmake --build build --config "%config%"
-  - msbuild build\humlib.sln /t:build /p:Configuration="%config%" /m /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  - cmake -G"%generator%" -H. -Bbuild -DCMAKE_BUILD_TYPE="%config%"
+  - cmake --build build --config "%config%" --parallel
 
 after_build:
-  - ps: $env:git_hash = $env:appveyor_repo_commit.Substring(0, 8)
-  - ps: $env:my_version = "$env:appveyor_build_version-$env:git_hash"
-  - set package_name=humlib-%my_version%-%arch%
+  - ps: |
+      $git_hash = $env:APPVEYOR_REPO_COMMIT.Substring(0, 8)
+      $my_version = "$($env:APPVEYOR_BUILD_VERSION)-$git_hash"
+      $env:PACKAGE_NAME = "humlib-$my_version-$($env:arch)"
   - mkdir lib
-  - copy "build\%config%\humlib.lib" lib
-  - 7z a %package_name%.zip include lib README.md LICENSE.txt
+  - mkdir -p include/pugixml
+  - mkdir -p arc/pugixml
+  - copy "build\\%config%\\humlib.lib" lib
+  - 7z a "%PACKAGE_NAME%.zip" include include/pugixml arc/pugixml lib README.md LICENSE.txt
 
 artifacts:
-  - path: $(package_name).zip
-    name: $(arch)
-
-
+  - path: "%PACKAGE_NAME%.zip"
+    name: "%arch"
 
