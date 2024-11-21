@@ -1356,6 +1356,15 @@ tool-kernview.o: tool-kernview.cpp tool-kernview.h \
   HumHash.h HumParamSet.h HumdrumFileStream.h \
   Convert.h HumRegex.h
 
+tool-lnnr.o: tool-lnnr.cpp tool-lnnr.h HumTool.h \
+  Options.h HumdrumFileSet.h HumdrumFile.h \
+  HumdrumFileContent.h HumdrumFileStructure.h \
+  HumdrumFileBase.h HumSignifiers.h \
+  HumSignifier.h HumdrumLine.h HumdrumToken.h \
+  HumNum.h HumAddress.h HumHash.h \
+  HumParamSet.h HumdrumFileStream.h NoteGrid.h \
+  NoteCell.h Convert.h HumRegex.h
+
 tool-mei2hum.o: tool-mei2hum.cpp tool-mei2hum.h \
   Options.h HumTool.h HumdrumFileSet.h \
   HumdrumFile.h HumdrumFileContent.h \

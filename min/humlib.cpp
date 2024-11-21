@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Do 21 Nov 2024 21:59:25 CET
+// Last Modified: Do 21 Nov 2024 22:17:33 CET
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -86302,7 +86302,7 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 	lastNumbers.resize((int)grid.getVoiceCount());
 	vector<vector<int>> currentNumbers = {};
 
-	// Interate through the NoteGrid and fill the numbers vector with
+	// Iterate through the NoteGrid and fill the numbers vector with
 	// all generated FiguredBassNumbers
 	for (int i=0; i<(int)grid.getSliceCount(); i++) {
 		currentNumbers.clear();
@@ -86391,7 +86391,7 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 			continue;
 		}
 
-		// Interate through each voice
+		// Iterate through each voice
 		for (int j=0; j<(int)grid.getVoiceCount(); j++) {
 			NoteCell* targetCell = grid.cell(j, i);
 
@@ -96247,6 +96247,110 @@ void Tool_kernview::processFile(HumdrumFile& infile) {
 	int line = kernish[0]->getLineIndex();
 	infile[line].createLineFromTokens();
 
+}
+
+
+
+
+//////////////////////////////
+//
+// Tool_lnnr::Tool_lnnr -- Set the recognized options for the tool.
+//
+
+Tool_lnnr::Tool_lnnr(void) {
+	define("i|index=b", "output line indices instead of line numbers");
+	define("p|prepend=b", "add **lnnr spine as first spine");
+}
+
+
+
+//////////////////////////////
+//
+// Tool_lnnr::run -- Do the main work of the tool.
+//
+
+bool Tool_lnnr::run(HumdrumFileSet &infiles) {
+	bool status = true;
+	for (int i = 0; i < infiles.getCount(); i++) {
+		status &= run(infiles[i]);
+	}
+	return status;
+}
+
+bool Tool_lnnr::run(const string &indata, ostream &out) {
+	HumdrumFile infile(indata);
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+bool Tool_lnnr::run(HumdrumFile &infile, ostream &out) {
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+bool Tool_lnnr::run(HumdrumFile &infile) {
+	initialize();
+	processFile(infile);
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_lnnr::initialize --
+//
+
+void Tool_lnnr::initialize(void) {
+	m_indexQ = getBoolean("index");
+	m_prependQ = getBoolean("prepend");
+}
+
+
+
+//////////////////////////////
+//
+// Tool_lnnr::processFile --
+//
+
+void Tool_lnnr::processFile(HumdrumFile& infile) {
+	vector<string> trackData = getTrackData(infile);
+	string exinterp = m_indexQ ? "**lnidx" : "**lnnr";
+	if (m_prependQ) {
+		infile.insertDataSpineBefore(1, trackData, ".", exinterp);
+	} else {
+		infile.appendDataSpine(trackData, ".", exinterp);
+	}
+	m_humdrum_text << infile;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_lnnr::getTrackData --
+//
+
+vector<string> Tool_lnnr::getTrackData(HumdrumFile& infile) {
+	vector<string> trackData;
+	trackData.resize(infile.getLineCount());
+
+	for (int i = 0; i < infile.getLineCount(); i++) {
+		HLp line = infile.getLine(i);
+		trackData[i] = m_indexQ ? to_string(line->getLineIndex()) : to_string(line->getLineNumber());
+	}
+
+	return trackData;
 }
 
 
