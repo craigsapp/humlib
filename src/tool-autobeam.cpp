@@ -100,6 +100,7 @@ bool Tool_autobeam::run(HumdrumFile& infile) {
 	}
 	// Re-load the text for each line from their tokens.
 	infile.createLinesFromTokens();
+	m_humdrum_text << infile;
 	return true;
 }
 
@@ -928,9 +929,9 @@ void Tool_autobeam::processMeasure(vector<HTp>& measure) {
 			if ((current.first % 3 == 0) && (current.first != 3)) {
 				// compound meter, so shift the beat to 3x the demoniator
 				beatdur *= 3;
-			} else if (current.first == 3 && (current.second > 4)) {
+			} else if (current.first == 3 && (current.second < 4)) {
 				// time signatures such as 3/8 and 3/16 which should
-				// beam together at the measure level (3/4 not included).
+				// beam together at the measure level (3/4 and 3/2 not included).
 				beatdur *= 3;
 			}
 		}

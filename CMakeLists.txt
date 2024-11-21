@@ -107,7 +107,7 @@ set(SRCS
 	src/tool-tassoize.cpp
 	src/tool-transpose.cpp
 	src/tool-trillspell.cpp
-	src/pugixml.cpp
+	src/pugixml/pugixml.cpp
 )
 
 set(HDRS
@@ -141,8 +141,8 @@ set(HDRS
 	include/NoteGrid.h
 	include/Options.h
 	include/humlib.h
-	include/pugiconfig.hpp
-	include/pugixml.hpp
+	include/pugixml/pugiconfig.hpp
+	include/pugixml/pugixml.hpp
 	include/tool-autobeam.h
 	include/tool-autostem.h
 	include/tool-binroll.h

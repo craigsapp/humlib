@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Wed Nov 30 01:02:57 PST 2016
-// Last Modified: Thu Apr 18 08:58:38 PDT 2024
+// Last Modified: Thu Nov 14 07:42:26 PST 2024
 // Filename:      tool-filter.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-filter.cpp
 // Syntax:        C++11; humlib
@@ -21,6 +21,7 @@
 #include "tool-autoaccid.h"
 #include "tool-autobeam.h"
 #include "tool-autostem.h"
+#include "tool-bstyle.h"
 #include "tool-binroll.h"
 #include "tool-chantize.h"
 #include "tool-chint.h"
@@ -70,6 +71,7 @@
 #include "tool-recip.h"
 #include "tool-restfill.h"
 #include "tool-rid.h"
+#include "tool-rphrase.h"
 #include "tool-sab2gs.h"
 #include "tool-satb2gs.h"
 #include "tool-scordatura.h"
@@ -82,6 +84,7 @@
 #include "tool-strophe.h"
 #include "tool-synco.h"
 #include "tool-tabber.h"
+#include "tool-tandeminfo.h"
 #include "tool-tassoize.h"
 #include "tool-textdur.h"
 #include "tool-thru.h"
@@ -92,6 +95,7 @@
 #include "tool-trillspell.h"
 #include "tool-tspos.h"
 #include "tool-vcross.h"
+#include "tool-1520ify.h"
 
 #include "HumRegex.h"
 
@@ -256,6 +260,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(autobeam, infile, commands[i].second, status);
 		} else if (commands[i].first == "autostem") {
 			RUNTOOL(autostem, infile, commands[i].second, status);
+		} else if (commands[i].first == "bstyle") {
+			RUNTOOL(bstyle, infile, commands[i].second, status);
 		} else if (commands[i].first == "binroll") {
 			RUNTOOL(binroll, infile, commands[i].second, status);
 		} else if (commands[i].first == "chantize") {
@@ -336,6 +342,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(recip, infile, commands[i].second, status);
 		} else if (commands[i].first == "restfill") {
 			RUNTOOL(restfill, infile, commands[i].second, status);
+		} else if (commands[i].first == "rphrase") {
+			RUNTOOL(rphrase, infile, commands[i].second, status);
 		} else if (commands[i].first == "sab2gs") {
 			RUNTOOL(sab2gs, infile, commands[i].second, status);
 		} else if (commands[i].first == "scordatura") {
@@ -360,6 +368,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(synco, infile, commands[i].second, status);
 		} else if (commands[i].first == "tabber") {
 			RUNTOOL(tabber, infile, commands[i].second, status);
+		} else if (commands[i].first == "tandeminfo") {
+			RUNTOOL(tandeminfo, infile, commands[i].second, status);
 		} else if (commands[i].first == "tassoize") {
 			RUNTOOL(tassoize, infile, commands[i].second, status);
 		} else if (commands[i].first == "tassoise") {
@@ -380,6 +390,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(trillspell, infile, commands[i].second, status);
 		} else if (commands[i].first == "vcross") {
 			RUNTOOL(vcross, infile, commands[i].second, status);
+		} else if (commands[i].first == "1520ify") {
+			RUNTOOL(1520ify, infile, commands[i].second, status);
 
 		// filters with aliases:
 

@@ -423,6 +423,9 @@ void Tool_shed::processFile(HumdrumFile& infile) {
 	if (m_modified) {
 		infile.createLinesFromTokens();
 	}
+
+	// needed only for command-line version of tool?:
+	m_humdrum_text << infile;
 }
 
 

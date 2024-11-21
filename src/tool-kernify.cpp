@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Tue Mar 21 14:41:24 PDT 2023
-// Last Modified: Tue Mar 21 14:41:30 PDT 2023
+// Last Modified: Fri Aug  2 21:29:19 PDT 2024
 // Filename:      tool-kernify.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-kernify.cpp
 // Syntax:        C++11; humlib
@@ -72,6 +72,7 @@ bool Tool_kernify::run(HumdrumFile& infile, ostream& out) {
 
 bool Tool_kernify::run(HumdrumFile& infile) {
 	initialize();
+	m_hasDataInterpretations = prepareDataSpines(infile);
 	processFile(infile);
 	return true;
 }
@@ -99,6 +100,71 @@ void Tool_kernify::initialize(void) {
 
 void Tool_kernify::processFile(HumdrumFile& infile) {
 	generateDummyKernSpine(infile);
+}
+
+
+
+//////////////////////////////
+//
+// Tool_kernify::prepareDataSpines --
+// 
+
+bool Tool_kernify::prepareDataSpines(HumdrumFile& infile) {
+	vector<HTp> spinestarts;
+	infile.getSpineStartList(spinestarts);
+	bool output = false;
+	for (int i=0; i<(int)spinestarts.size(); i++) {
+		output |= prepareDataSpine(spinestarts[i]);
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_kernify::prepareDataSpine -- check to see if *[abcv]data interpretation and if so process
+//    and return true;
+//
+
+bool Tool_kernify::prepareDataSpine(HTp spinestart) {
+	HumRegex hre;
+	if (hre.search(spinestart, "^\\*\\*[abcv]data-")) {
+		return false;
+	}
+
+	string prefix;
+	HTp current = spinestart->getNextToken();
+	while (current && !current->isData()) {
+		if (current->isInterpretation()) {
+			if (*current == "*adata") {
+				prefix = "adata";
+				break;
+			} else if (*current == "*bdata") {
+				prefix = "bdata";
+				break;
+			} else if (*current == "*cdata") {
+				prefix = "cdata";
+				break;
+			} else if (*current == "*vdata") {
+				prefix = "vdata";
+				break;
+			}
+		}
+		current = current->getNextToken();
+	}
+
+	if (prefix.empty()) {
+		return false;
+	}
+
+	string text = "**";
+	text += prefix;
+	text += "-";
+	text += spinestart->substr(2);
+	spinestart->setText(text);
+
+	return true;
 }
 
 
@@ -176,18 +242,22 @@ void Tool_kernify::generateDummyKernSpine(HumdrumFile& infile) {
 				} else if (token->find("**kern") != std::string::npos) {
 					string value = *token;
 					hre.replaceDestructive(value, "nrek", "kern", "g");
-					hre.replaceDestructive(value, "**cdata-", "^\\*\\*");
+					hre.replaceDestructive(value, "**zcdata-", "^\\*\\*");
 					m_humdrum_text << "\t" << value;
 				} else if (token->find("**mens") != std::string::npos) {
 					string value = *token;
 					hre.replaceDestructive(value, "snem", "mens", "g");
-					hre.replaceDestructive(value, "**cdata-", "^\\*\\*");
+					hre.replaceDestructive(value, "**ycdata-", "^\\*\\*");
 					m_humdrum_text << "\t" << value;
 				} else if (token->find("**cdata") == std::string::npos) {
-					string value = token->substr(2);
-					hre.replaceDestructive(value, "nrek", "kern", "g");
-					hre.replaceDestructive(value, "snem", "snem", "g");
-					m_humdrum_text << "\t**cdata-" << value;
+					if (!m_hasDataInterpretations) {
+						string value = token->substr(2);
+						hre.replaceDestructive(value, "nrek", "kern", "g");
+						hre.replaceDestructive(value, "snem", "snem", "g");
+						m_humdrum_text << "\t**xcdata-" << value;
+					} else {
+						m_humdrum_text << "\t" << token;
+					}
 				} else {
 					m_humdrum_text << "\t" << token;
 				}
@@ -242,7 +312,12 @@ void Tool_kernify::generateDummyKernSpine(HumdrumFile& infile) {
 					m_humdrum_text << "*clefXyy" << "\t" << makeReverseLine(infile[i]);
 					clefIndex = -1;
 				} else {
-					m_humdrum_text << "*" << "\t" << makeReverseLine(infile[i]);
+					HTp token = infile[i].token(0);
+					if (token->compare(0, 2, "*>") == 0) {
+						m_humdrum_text << token << "\t" << makeReverseLine(infile[i]);
+					} else {
+						m_humdrum_text << "*" << "\t" << makeReverseLine(infile[i]);
+					}
 				}
 		} else {
 			m_humdrum_text << "!!UNKNONWN LINE TYPE FOR LINE " << i+1 << ":\t" << infile[i];

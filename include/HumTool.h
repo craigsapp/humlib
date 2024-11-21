@@ -100,6 +100,7 @@ int main(int argc, char** argv) {                      \
 		infile.readNoRhythm(std::cin);                   \
 	}                                                   \
 	int status = interface.run(infile, std::cout);      \
+	interface.finally();                                \
 	if (interface.hasWarning()) {                       \
 		interface.getWarning(std::cerr);                 \
 		return 0;                                        \
@@ -108,7 +109,6 @@ int main(int argc, char** argv) {                      \
 		interface.getError(std::cerr);                   \
 		return -1;                                       \
 	}                                                   \
-	interface.finally();                                \
 	return !status;                                     \
 }
 
@@ -132,24 +132,24 @@ int main(int argc, char** argv) {                                          \
 	bool status = true;                                                     \
 	while (instream.readSingleSegment(infiles)) {                           \
 		status &= interface.run(infiles);                                    \
-		if (interface.hasWarning()) {                                        \
-			interface.getWarning(std::cerr);                                  \
-		}                                                                    \
-		if (interface.hasAnyText()) {                                        \
-		   interface.getAllText(std::cout);                                  \
-		}                                                                    \
-		if (interface.hasError()) {                                          \
-			interface.getError(std::cerr);                                    \
-         return -1;                                                        \
-		}                                                                    \
-		if (!interface.hasAnyText()) {                                       \
-			for (int i=0; i<infiles.getCount(); i++) {                        \
-				cout << infiles[i];                                            \
-			}                                                                 \
-		}                                                                    \
-		interface.clearOutput();                                             \
 	}                                                                       \
 	interface.finally();                                                    \
+	if (interface.hasWarning()) {                                           \
+		interface.getWarning(std::cerr);                                     \
+	}                                                                       \
+	if (interface.hasAnyText()) {                                           \
+	   interface.getAllText(std::cout);                                     \
+	}                                                                       \
+	if (interface.hasError()) {                                             \
+		interface.getError(std::cerr);                                       \
+        return -1;                                                         \
+	}                                                                       \
+	if (!interface.hasAnyText()) {                                          \
+		for (int i=0; i<infiles.getCount(); i++) {                           \
+			cout << infiles[i];                                               \
+		}                                                                    \
+	}                                                                       \
+	interface.clearOutput();                                                \
 	return !status;                                                         \
 }
 
@@ -171,6 +171,7 @@ int main(int argc, char** argv) {                                          \
 	}                                                                       \
 	hum::HumdrumFileStream instream(static_cast<hum::Options&>(interface)); \
 	bool status = interface.run(instream);                                  \
+	interface.finally();                                                    \
 	if (interface.hasWarning()) {                                           \
 		interface.getWarning(std::cerr);                                     \
 	}                                                                       \
@@ -181,7 +182,6 @@ int main(int argc, char** argv) {                                          \
 		interface.getError(std::cerr);                                       \
         return -1;                                                         \
 	}                                                                       \
-	interface.finally();                                                    \
 	interface.clearOutput();                                                \
 	return !status;                                                         \
 }
@@ -205,6 +205,7 @@ int main(int argc, char** argv) {                                          \
 	hum::HumdrumFileSet infiles;                                            \
 	instream.read(infiles);                                                 \
 	bool status = interface.run(infiles);                                   \
+	interface.finally();                                                    \
 	if (interface.hasWarning()) {                                           \
 		interface.getWarning(std::cerr);                                     \
 	}                                                                       \
@@ -220,7 +221,6 @@ int main(int argc, char** argv) {                                          \
 			std::cout << infiles[i];                                          \
 		}                                                                    \
 	}                                                                       \
-	interface.finally();                                                    \
 	interface.clearOutput();                                                \
 	return !status;                                                         \
 }

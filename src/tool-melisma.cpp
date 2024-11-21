@@ -371,6 +371,9 @@ void Tool_melisma::extractWordlist(vector<WordInfo>& wordinfo, map<string, int>&
 		mincount = 2;
 	}
 	string word;
+	vector<HumNum> lastTimes;
+	lastTimes.resize(infile.getMaxTrack() + 1);
+	std::fill(lastTimes.begin(), lastTimes.end(), -1);
 	WordInfo winfo;
 	for (int i=0; i<(int)notecount.size(); i++) {
 		for (int j=0; j<(int)notecount[i].size(); j++) {
@@ -379,8 +382,13 @@ void Tool_melisma::extractWordlist(vector<WordInfo>& wordinfo, map<string, int>&
 			}
 			HTp token = infile.token(i, j);
 			word = extractWord(winfo, token, notecount);
-			wordlist[word]++;
 			int track = token->getTrack();
+			if (winfo.starttime == lastTimes.at(track)) {
+				// Exclude duplicate entries of words (multiple melismas in same word).
+				continue;
+			}
+			lastTimes.at(track) = winfo.starttime;
+			wordlist[word]++;
 			winfo.name = m_names[track];
 			winfo.abbreviation = m_abbreviations[track];
 			winfo.partnum = m_partnums[track];
