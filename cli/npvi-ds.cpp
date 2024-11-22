@@ -169,7 +169,7 @@ double calculateNpviRhythm(HumdrumFile& infile, Options& options) {
 	}
 	if (options.getBoolean("debug")) {
 		cerr << "\nDURATIONS =";
-		for (int i=0; i<durations.size(); i++) {
+		for (int i=0; i<(int)durations.size(); i++) {
 			cerr << " " << durations[i];
 		}
 		cerr << endl;
@@ -235,7 +235,7 @@ double calculateCvPitch(HumdrumFile& infile, Options& options) {
 
 	if (options.getBoolean("debug")) {
 		cerr << "INTERVALS =";
-		for (int i=0; i<intervals.size(); i++) {
+		for (int i=0; i<(int)intervals.size(); i++) {
 			cerr << " " << intervals[i];
 		}
 		cerr << endl;

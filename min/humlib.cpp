@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Nov 21 15:27:49 PST 2024
+// Last Modified: Fri Nov 22 09:29:17 AM PST 2024
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -120419,8 +120419,10 @@ void Tool_prange::assignHorizontalPosition(vector<_VoiceInfo>& voiceInfo, int mi
 	}
 
 	vector<double> hpos(count, 0);
-	hpos[0] = maxval;
-	hpos.back() = minval;
+	if (count >= 2) {
+		hpos[0] = maxval;
+		hpos.back() = minval;
+	}
 
 	if (hpos.size() > 2) {
 		for (int i=1; i<(int)hpos.size()-1; i++) {

@@ -1041,8 +1041,10 @@ void Tool_prange::assignHorizontalPosition(vector<_VoiceInfo>& voiceInfo, int mi
 	}
 
 	vector<double> hpos(count, 0);
-	hpos[0] = maxval;
-	hpos.back() = minval;
+	if (count >= 2) {
+		hpos[0] = maxval;
+		hpos.back() = minval;
+	}
 
 	if (hpos.size() > 2) {
 		for (int i=1; i<(int)hpos.size()-1; i++) {
