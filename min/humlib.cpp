@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Nov 22 09:29:17 AM PST 2024
+// Last Modified: Fr 13 Dez 2024 22:27:49 CET
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -102498,7 +102498,7 @@ void Tool_meter::processFile(HumdrumFile& infile) {
 
 void Tool_meter::analyzePickupMeasures(HumdrumFile& infile) {
 	vector<HTp> sstarts;
-	infile.getKernSpineStartList(sstarts);
+	infile.getKernLikeSpineStartList(sstarts);
 	for (int i=0; i<(int)sstarts.size(); i++) {
 		analyzePickupMeasures(sstarts[i]);
 	}
@@ -102568,6 +102568,14 @@ void Tool_meter::analyzePickupMeasures(HTp sstart) {
 			if (bardur.at(i) + bardur.at(i+1) == tsigdur.at(i)) {
 				pickup.at(i+1) = true;
 				i++;
+				continue;
+			}
+		}
+		if (bardur.at(i) < tsigdur.at(i)) {
+			HumRegex hre;
+			HTp barlineToken = barandtime.at(i).at(0);
+			if (barlineToken->isBarline() && hre.search(barlineToken, "\\|\\||:?\\|?!\\|?:?")) {
+				pickup.at(i) = true;
 				continue;
 			}
 		}
@@ -102717,7 +102725,7 @@ void Tool_meter::printLabelLine(HumdrumLine& line) {
 	bool printLabels = true;
 	for (int i=0; i<line.getFieldCount(); i++) {
 		HTp token = line.token(i);
-		if (token->isKern()) {
+		if (token->isKernLike()) {
 			i = printKernAndAnalysisSpine(line, i, printLabels, forceInterpretation);
 		} else {
 			m_humdrum_text << "*";
@@ -102740,7 +102748,7 @@ void Tool_meter::printHumdrumLine(HumdrumLine& line, bool printLabels) {
 
 	for (int i=0; i<line.getFieldCount(); i++) {
 		HTp token = line.token(i);
-		if (token->isKern()) {
+		if (token->isKernLike()) {
 			i = printKernAndAnalysisSpine(line, i, printLabels);
 		} else {
 			m_humdrum_text << token;
@@ -102914,6 +102922,9 @@ int Tool_meter::printKernAndAnalysisSpine(HumdrumLine& line, int index, bool pri
 				meter = "*-";
 			} else if (token->isTimeSignature()) {
 				analysis = *token;
+				numerator = *token;
+				denominator = *token;
+				meter = *token;
 			} else {
 				analysis = "*";
 				numerator = "*";
@@ -103046,7 +103057,7 @@ void Tool_meter::processLine(HumdrumLine& line, vector<HumNum>& curNum,
 	if (line.isBarline()) {
 		for (int i=0; i<fieldCount; i++) {
 			HTp token = line.token(i);
-			if (!token->isKern()) {
+			if (!token->isKernLike()) {
 				continue;
 			}
 			if (hre.search(token, "-")) {
@@ -103064,7 +103075,7 @@ void Tool_meter::processLine(HumdrumLine& line, vector<HumNum>& curNum,
 		// check for time signatures
 		for (int i=0; i<fieldCount; i++) {
 			HTp token = line.token(i);
-			if (!token->isKern()) {
+			if (!token->isKernLike()) {
 				continue;
 			}
 			if (hre.search(token, "^\\*M(\\d+)/(\\d+)")) {
@@ -103087,7 +103098,7 @@ void Tool_meter::processLine(HumdrumLine& line, vector<HumNum>& curNum,
 		// check for time signatures
 		for (int i=0; i<fieldCount; i++) {
 			HTp token = line.token(i);
-			if (!token->isKern()) {
+			if (!token->isKernLike()) {
 				continue;
 			}
 			if (token->isNull()) {
