@@ -195,7 +195,7 @@ void Tool_meter::processFile(HumdrumFile& infile) {
 
 void Tool_meter::analyzePickupMeasures(HumdrumFile& infile) {
 	vector<HTp> sstarts;
-	infile.getKernSpineStartList(sstarts);
+	infile.getKernLikeSpineStartList(sstarts);
 	for (int i=0; i<(int)sstarts.size(); i++) {
 		analyzePickupMeasures(sstarts[i]);
 	}

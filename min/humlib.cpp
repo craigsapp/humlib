@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fr 13 Dez 2024 22:20:34 CET
+// Last Modified: Fr 13 Dez 2024 22:27:49 CET
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -102498,7 +102498,7 @@ void Tool_meter::processFile(HumdrumFile& infile) {
 
 void Tool_meter::analyzePickupMeasures(HumdrumFile& infile) {
 	vector<HTp> sstarts;
-	infile.getKernSpineStartList(sstarts);
+	infile.getKernLikeSpineStartList(sstarts);
 	for (int i=0; i<(int)sstarts.size(); i++) {
 		analyzePickupMeasures(sstarts[i]);
 	}
