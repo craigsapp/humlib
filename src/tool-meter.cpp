@@ -268,6 +268,14 @@ void Tool_meter::analyzePickupMeasures(HTp sstart) {
 				continue;
 			}
 		}
+		if (bardur.at(i) < tsigdur.at(i)) {
+			HumRegex hre;
+			HTp barlineToken = barandtime.at(i).at(0);
+			if (barlineToken->isBarline() && hre.search(barlineToken, "\\|\\||:?\\|?!\\|?:?")) {
+				pickup.at(i) = true;
+				continue;
+			}
+		}
 	}
 
 	// check for first-measure pickup

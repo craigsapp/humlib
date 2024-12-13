@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fr 13 Dez 2024 10:53:41 CET
+// Last Modified: Fr 13 Dez 2024 22:20:34 CET
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -102568,6 +102568,14 @@ void Tool_meter::analyzePickupMeasures(HTp sstart) {
 			if (bardur.at(i) + bardur.at(i+1) == tsigdur.at(i)) {
 				pickup.at(i+1) = true;
 				i++;
+				continue;
+			}
+		}
+		if (bardur.at(i) < tsigdur.at(i)) {
+			HumRegex hre;
+			HTp barlineToken = barandtime.at(i).at(0);
+			if (barlineToken->isBarline() && hre.search(barlineToken, "\\|\\||:?\\|?!\\|?:?")) {
+				pickup.at(i) = true;
 				continue;
 			}
 		}
