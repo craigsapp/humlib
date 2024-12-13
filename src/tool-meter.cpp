@@ -611,6 +611,9 @@ int Tool_meter::printKernAndAnalysisSpine(HumdrumLine& line, int index, bool pri
 				meter = "*-";
 			} else if (token->isTimeSignature()) {
 				analysis = *token;
+				numerator = *token;
+				denominator = *token;
+				meter = *token;
 			} else {
 				analysis = "*";
 				numerator = "*";

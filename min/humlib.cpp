@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fr 13 Dez 2024 10:28:28 CET
+// Last Modified: Fr 13 Dez 2024 10:53:41 CET
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -102914,6 +102914,9 @@ int Tool_meter::printKernAndAnalysisSpine(HumdrumLine& line, int index, bool pri
 				meter = "*-";
 			} else if (token->isTimeSignature()) {
 				analysis = *token;
+				numerator = *token;
+				denominator = *token;
+				meter = *token;
 			} else {
 				analysis = "*";
 				numerator = "*";
