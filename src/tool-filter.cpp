@@ -395,6 +395,11 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 
 		// filters with aliases:
 
+		} else if (commands[i].first == "beat") { // humlib version of Humdrum Toolkit beat tool
+			RUNTOOL(deg, infile, commands[i].second, status);
+		} else if (commands[i].first == "beatx") { // humlib cli name
+			RUNTOOL(deg, infile, commands[i].second, status);
+
 		} else if (commands[i].first == "colortriads") {
 			RUNTOOL(colortriads, infile, commands[i].second, status);
 		} else if (commands[i].first == "colourtriads") {

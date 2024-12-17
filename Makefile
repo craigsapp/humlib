@@ -1015,6 +1015,15 @@ tool-autostem.o: tool-autostem.cpp tool-autostem.h \
   HumHash.h HumParamSet.h HumdrumFileStream.h \
   HumRegex.h Convert.h
 
+tool-beat.o: tool-beat.cpp tool-beat.h HumTool.h \
+  Options.h HumdrumFileSet.h HumdrumFile.h \
+  HumdrumFileContent.h HumdrumFileStructure.h \
+  HumdrumFileBase.h HumSignifiers.h \
+  HumSignifier.h HumdrumLine.h HumdrumToken.h \
+  HumNum.h HumAddress.h HumHash.h \
+  HumParamSet.h HumdrumFileStream.h NoteGrid.h \
+  NoteCell.h Convert.h HumRegex.h
+
 tool-binroll.o: tool-binroll.cpp tool-binroll.h \
   HumTool.h Options.h HumdrumFileSet.h \
   HumdrumFile.h HumdrumFileContent.h \
@@ -1172,8 +1181,8 @@ tool-filter.o: tool-filter.cpp tool-filter.h \
   HumdrumToken.h HumNum.h HumAddress.h \
   HumHash.h HumParamSet.h HumdrumFileStream.h \
   tool-addic.h tool-addkey.h tool-addlabels.h \
-  tool-addtempo.h tool-autoaccid.h \
-  tool-autobeam.h tool-autostem.h tool-binroll.h \
+  tool-addtempo.h tool-autoaccid.h tool-autobeam.h \
+  tool-autostem.h tool-beat.h tool-binroll.h \
   tool-chantize.h tool-chooser.h tool-chord.h \
   tool-cint.h NoteGrid.h NoteCell.h \
   HumRegex.h tool-cmr.h tool-colorgroups.h \
