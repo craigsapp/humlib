@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Di 17 Dez 2024 02:47:47 CET
+// Last Modified: Di 17 Dez 2024 10:30:25 CET
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -58777,7 +58777,7 @@ void Tool_autostem::countBeamStuff(const string& token, int& start, int& stop,
 //
 
 Tool_beat::Tool_beat(void) {
-	define("s|spine-tracks|spine|spines|track|tracks=s", "Process only the specified spines");
+	define("s|spine-tracks|spine|spines|track|tracks=s", "process only the specified spines");
 	define("k|kern-tracks=s",                            "process only the specified kern spines");
 	define("d|duration|dur=b",                           "display duration for each slice");
 	define("u|beatsize|rhythm=s:4",                      "beatsize (recip rhythmic value); default=4");

@@ -25,7 +25,7 @@ namespace hum {
 //
 
 Tool_beat::Tool_beat(void) {
-	define("s|spine-tracks|spine|spines|track|tracks=s", "Process only the specified spines");
+	define("s|spine-tracks|spine|spines|track|tracks=s", "process only the specified spines");
 	define("k|kern-tracks=s",                            "process only the specified kern spines");
 	define("d|duration|dur=b",                           "display duration for each slice");
 	define("u|beatsize|rhythm=s:4",                      "beatsize (recip rhythmic value); default=4");
