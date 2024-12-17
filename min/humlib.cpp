@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Di 17 Dez 2024 10:30:25 CET
+// Last Modified: Di 17 Dez 2024 10:43:30 CET
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -87616,9 +87616,9 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 		// filters with aliases:
 
 		} else if (commands[i].first == "beat") { // humlib version of Humdrum Toolkit beat tool
-			RUNTOOL(deg, infile, commands[i].second, status);
+			RUNTOOL(beat, infile, commands[i].second, status);
 		} else if (commands[i].first == "beatx") { // humlib cli name
-			RUNTOOL(deg, infile, commands[i].second, status);
+			RUNTOOL(beat, infile, commands[i].second, status);
 
 		} else if (commands[i].first == "colortriads") {
 			RUNTOOL(colortriads, infile, commands[i].second, status);

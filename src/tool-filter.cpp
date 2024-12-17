@@ -21,6 +21,7 @@
 #include "tool-autoaccid.h"
 #include "tool-autobeam.h"
 #include "tool-autostem.h"
+#include "tool-beat.h"
 #include "tool-bstyle.h"
 #include "tool-binroll.h"
 #include "tool-chantize.h"
@@ -396,9 +397,9 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 		// filters with aliases:
 
 		} else if (commands[i].first == "beat") { // humlib version of Humdrum Toolkit beat tool
-			RUNTOOL(deg, infile, commands[i].second, status);
+			RUNTOOL(beat, infile, commands[i].second, status);
 		} else if (commands[i].first == "beatx") { // humlib cli name
-			RUNTOOL(deg, infile, commands[i].second, status);
+			RUNTOOL(beat, infile, commands[i].second, status);
 
 		} else if (commands[i].first == "colortriads") {
 			RUNTOOL(colortriads, infile, commands[i].second, status);
