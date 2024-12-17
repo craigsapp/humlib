@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Nov 22 09:29:17 AM PST 2024
+// Last Modified: Di 17 Dez 2024 10:43:30 CET
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -5954,6 +5954,37 @@ class Tool_autostem : public HumTool {
 		int    notlongQ      = 0;       // used with -L option
 		bool   m_quit        = false;
 
+};
+
+
+class Tool_beat : public HumTool {
+
+	public:
+		     Tool_beat (void);
+		     ~Tool_beat() {};
+
+		bool run           (HumdrumFileSet& infiles);
+		bool run           (HumdrumFile& infile);
+		bool run           (const string& indata, ostream& out);
+		bool run           (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void               initialize  (void);
+        void               processFile (HumdrumFile& infile);
+		vector<string>     getTrackData(HumdrumFile& infile, int track);
+
+	private:
+		bool        m_floatQ;               // used with -f option
+		int         m_digits = 0;           // used with -D option
+		bool        m_commaQ;               // used with -c option
+		bool        m_durationQ;            // used with -d option
+		bool        m_restQ;                // used with -r option
+		bool        m_tiedQ;                // used with -t option
+		bool        m_fullQ;                // used with --full option
+		string      m_beatsize;             // used with -u option
+		string      m_spineTracks = "";     // used with -s option
+		string      m_kernTracks = "";      // used with -k option
+		vector<bool> m_selectedKernSpines;  // used with -k and -s option
 };
 
 

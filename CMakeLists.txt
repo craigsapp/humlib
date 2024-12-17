@@ -83,6 +83,7 @@ set(SRCS
 	src/Options.cpp
 	src/tool-autobeam.cpp
 	src/tool-autostem.cpp
+	src/tool-beat.cpp
 	src/tool-binroll.cpp
 	src/tool-chord.cpp
 	src/tool-cint.cpp
@@ -144,6 +145,7 @@ set(HDRS
 	include/pugixml/pugixml.hpp
 	include/tool-autobeam.h
 	include/tool-autostem.h
+	include/tool-beat.h
 	include/tool-binroll.h
 	include/tool-chord.h
 	include/tool-cint.h
