@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Nov 22 09:29:17 AM PST 2024
+// Last Modified: Thu Dec 26 00:57:48 PST 2024
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -81415,10 +81415,36 @@ void Tool_esac2hum::getParameters(vector<string>& infile) {
 	if (hre.search(trd, "^\\s*(.*)\\ss\\.")) {
 		m_score.m_params["_source_trd"] = hre.getMatch(1);
 	}
-	if (hre.search(trd, "\\bs\\.\\s*(\\d+)\\s*-\\s*(\\d+)?")) {
+
+	// Search for page number in TRD[] record.   The canonical form is:
+	//     s. #
+	// or multipage:
+   //     s. #-#
+   // or multipage alternate:
+   //     s. # - #
+	// There are variants to also handle, however:
+	//     s.#
+   //     str. #     (particularly DWOK16)
+   //     str.#
+   //     s #
+   //     .s #
+   //     S.#
+   //     s, #
+
+	if (hre.search(trd, "\\bs\\.?\\s*(\\d+)\\s*-\\s*(\\d+)?", "i")) {
+		// s.   #-#
+		// s    #-#
+		// str. #-#
 		m_score.m_params["_page"] = hre.getMatch(1) + "-" + hre.getMatch(2);
-	} else if (hre.search(trd, "\\bs\\.\\s*(\\d+)")) {
+	} else if (hre.search(trd, "\\bs\\.?\\s*(\\d+)", "i")) {
+		// s. #
+		// s #
+		// str. #
 		m_score.m_params["_page"] = hre.getMatch(1);
+	} else if (hre.search(trd, "\\bs,\\s*(\\d+)\\s*-\\s*(\\d+)?", "i")) {
+		// s, #-#
+	} else if (hre.search(trd, "\\bs,\\s*(\\d+)", "i")) {
+		// s, #
 	} else {
 		cerr << "CANNOT FIND PAGE NUMBER IN " << trd << endl;
 	}
