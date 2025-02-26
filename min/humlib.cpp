@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Feb 26 01:54:24 PST 2025
+// Last Modified: Wed Feb 26 02:08:25 PST 2025
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -57325,7 +57325,7 @@ void Tool_autobeam::processMeasure(vector<HTp>& measure) {
 	// Force 4/4 time signature if no time siguature (perhaps refine the 
 	// top number of the time signature to the duration of the measure, but
 	// currently this is probably not necessary.
-	for (int i=0; i<timesig.size(); i++) {
+	for (int i=0; i<(int)timesig.size(); i++) {
 		if (timesig[i].first == 0) {
 			timesig[i].first = 4;
 		}
