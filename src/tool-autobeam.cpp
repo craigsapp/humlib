@@ -921,7 +921,7 @@ void Tool_autobeam::processMeasure(vector<HTp>& measure) {
 	// Force 4/4 time signature if no time siguature (perhaps refine the 
 	// top number of the time signature to the duration of the measure, but
 	// currently this is probably not necessary.
-	for (int i=0; i<timesig.size(); i++) {
+	for (int i=0; i<(int)timesig.size(); i++) {
 		if (timesig[i].first == 0) {
 			timesig[i].first = 4;
 		}
