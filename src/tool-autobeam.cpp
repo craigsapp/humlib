@@ -927,7 +927,7 @@ void Tool_autobeam::processMeasure(vector<HTp>& measure) {
 			beatdur /= current.second;
 			beatdur *= 4; // convert to quarter-notes units from whole-notes.
 			if ((current.first % 3 == 0) && (current.first != 3)) {
-				// compound meter, so shift the beat to 3x the demoniator
+				// compound meter, so shift the beat to 3x the denominator
 				beatdur *= 3;
 			} else if (current.first == 3 && (current.second < 4)) {
 				// time signatures such as 3/8 and 3/16 which should
