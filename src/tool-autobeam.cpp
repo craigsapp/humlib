@@ -918,6 +918,18 @@ void Tool_autobeam::processMeasure(vector<HTp>& measure) {
 
 	// First, get the beat positions of all notes in the measure:
 	vector<pair<int, HumNum> >& timesig = m_timesigs[measure[0]->getTrack()];
+	// Force 4/4 time signature if no time siguature (perhaps refine the 
+	// top number of the time signature to the duration of the measure, but
+	// currently this is probably not necessary.
+	for (int i=0; i<timesig.size(); i++) {
+		if (timesig[i].first == 0) {
+			timesig[i].first = 4;
+		}
+		if (timesig[i].second == 0) {
+			timesig[i].second = 4;
+		}
+	}
+
 	for (int i=0; i<(int)measure.size(); i++) {
 		int line = measure[i]->getLineIndex();
 		if ((current.first != timesig.at(line).first) ||

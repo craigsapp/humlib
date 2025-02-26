@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Dec 26 00:57:48 PST 2024
+// Last Modified: Wed Feb 26 01:54:24 PST 2025
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -57322,6 +57322,18 @@ void Tool_autobeam::processMeasure(vector<HTp>& measure) {
 
 	// First, get the beat positions of all notes in the measure:
 	vector<pair<int, HumNum> >& timesig = m_timesigs[measure[0]->getTrack()];
+	// Force 4/4 time signature if no time siguature (perhaps refine the 
+	// top number of the time signature to the duration of the measure, but
+	// currently this is probably not necessary.
+	for (int i=0; i<timesig.size(); i++) {
+		if (timesig[i].first == 0) {
+			timesig[i].first = 4;
+		}
+		if (timesig[i].second == 0) {
+			timesig[i].second = 4;
+		}
+	}
+
 	for (int i=0; i<(int)measure.size(); i++) {
 		int line = measure[i]->getLineIndex();
 		if ((current.first != timesig.at(line).first) ||
@@ -57331,7 +57343,7 @@ void Tool_autobeam::processMeasure(vector<HTp>& measure) {
 			beatdur /= current.second;
 			beatdur *= 4; // convert to quarter-notes units from whole-notes.
 			if ((current.first % 3 == 0) && (current.first != 3)) {
-				// compound meter, so shift the beat to 3x the demoniator
+				// compound meter, so shift the beat to 3x the denominator
 				beatdur *= 3;
 			} else if (current.first == 3 && (current.second < 4)) {
 				// time signatures such as 3/8 and 3/16 which should
@@ -81431,12 +81443,12 @@ void Tool_esac2hum::getParameters(vector<string>& infile) {
    //     S.#
    //     s, #
 
-	if (hre.search(trd, "\\bs\\.?\\s*(\\d+)\\s*-\\s*(\\d+)?", "i")) {
+	if (hre.search(trd, "\\bs(?:tr)?\\.?\\s*(\\d+)\\s*-\\s*(\\d+)?", "i")) {
 		// s.   #-#
 		// s    #-#
 		// str. #-#
 		m_score.m_params["_page"] = hre.getMatch(1) + "-" + hre.getMatch(2);
-	} else if (hre.search(trd, "\\bs\\.?\\s*(\\d+)", "i")) {
+	} else if (hre.search(trd, "\\bs(?:tr)?\\.?\\s*(\\d+)", "i")) {
 		// s. #
 		// s #
 		// str. #
