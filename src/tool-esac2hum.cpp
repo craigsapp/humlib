@@ -2216,12 +2216,12 @@ void Tool_esac2hum::getParameters(vector<string>& infile) {
    //     S.#
    //     s, #
 
-	if (hre.search(trd, "\\bs\\.?\\s*(\\d+)\\s*-\\s*(\\d+)?", "i")) {
+	if (hre.search(trd, "\\bs(?:tr)?\\.?\\s*(\\d+)\\s*-\\s*(\\d+)?", "i")) {
 		// s.   #-#
 		// s    #-#
 		// str. #-#
 		m_score.m_params["_page"] = hre.getMatch(1) + "-" + hre.getMatch(2);
-	} else if (hre.search(trd, "\\bs\\.?\\s*(\\d+)", "i")) {
+	} else if (hre.search(trd, "\\bs(?:tr)?\\.?\\s*(\\d+)", "i")) {
 		// s. #
 		// s #
 		// str. #
