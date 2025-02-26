@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Feb 26 02:08:25 PST 2025
+// Last Modified: Wed Feb 26 14:55:15 PST 2025
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -1660,6 +1660,7 @@ class HumdrumToken : public std::string, public HumHash {
 		bool     equalChar                 (int index, char ch) const;
 
 		HTp      resolveNull               (void);
+		HTp      resolveNullToken          (void) { return resolveNull(); }
 		void     setNullResolution         (HTp resolution);
 		int      getLineIndex              (void) const;
 		int      getLineNumber             (void) const;
@@ -5864,6 +5865,30 @@ class Tool_autobeam : public HumTool {
 		std::vector<bool> m_tracks;
 		bool        m_includerests = false;
 		int         m_splitcount = 0;
+
+};
+
+
+class Tool_autocadence : public HumTool {
+	public:
+		            Tool_autocadence    (void);
+		           ~Tool_autocadence    () {};
+
+		bool        run                 (HumdrumFileSet& infiles);
+		bool        run                 (HumdrumFile& infile);
+		bool        run                 (const std::string& indata, std::ostream& out);
+		bool        run                 (HumdrumFile& infile, std::ostream& out);
+		void        initialize          (void);
+
+	protected:
+		void        processFile         (HumdrumFile& infile);
+		void        generateModules     (std::vector<std::string>& modules, HTp lowerPartIndex,
+                                       HTp upperPartIndex);
+      void        printModules        (std::vector<std::string>& modules, int lowerPart, int upperPart);
+		void        fillNotes           (std::vector<HTp>& voice, HTp exinterp);
+		std::string generateModuleEntry (std::vector<std::vector<HTp>>& pairings, int startIndex, int length);
+
+	private:
 
 };
 

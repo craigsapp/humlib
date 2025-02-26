@@ -223,6 +223,7 @@ class HumdrumToken : public std::string, public HumHash {
 		bool     equalChar                 (int index, char ch) const;
 
 		HTp      resolveNull               (void);
+		HTp      resolveNullToken          (void) { return resolveNull(); }
 		void     setNullResolution         (HTp resolution);
 		int      getLineIndex              (void) const;
 		int      getLineNumber             (void) const;

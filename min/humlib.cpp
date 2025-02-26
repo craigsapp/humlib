@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Feb 26 02:08:25 PST 2025
+// Last Modified: Wed Feb 26 14:55:15 PST 2025
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -57507,6 +57507,258 @@ void Tool_autobeam::removeEdgeRests(HTp& startnote, HTp& endnote) {
 	}
 
 }
+
+
+
+
+
+/////////////////////////////////
+//
+// Tool_autocadence::Tool_autocadence -- Set the recognized options for the tool.
+//
+
+Tool_autocadence::Tool_autocadence(void) {
+	// option definitions go here
+}
+
+
+
+/////////////////////////////////
+//
+// Tool_autocadence::run -- Do the main work of the tool.
+//
+
+bool Tool_autocadence::run(HumdrumFileSet& infiles) {
+	bool status = true;
+	for (int i=0; i<infiles.getCount(); i++) {
+		status &= run(infiles[i]);
+	}
+	return status;
+}
+
+
+bool Tool_autocadence::run(const string& indata, ostream& out) {
+	HumdrumFile infile(indata);
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_autocadence::run(HumdrumFile& infile, ostream& out) {
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_autocadence::run(HumdrumFile& infile) {
+	initialize();
+	processFile(infile);
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::initialize --  Initializations that only have to be done once
+//    for all HumdrumFile segments.
+//
+
+void Tool_autocadence::initialize(void) {
+	// options setting goes here
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::processFile --
+//
+
+void Tool_autocadence::processFile(HumdrumFile& infile) {
+	vector<HTp> kspines = infile.getKernSpineStartList();
+	for (int i=0; i<(int)kspines.size()-1; i++) {
+		for (int j=i+1; j<(int)kspines.size(); j++) {
+			vector<string> modules;
+			generateModules(modules, kspines.at(i), kspines.at(j));
+			printModules(modules, i, j);
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::generateModules -- Calculate counterpoint modules for
+//    a pair of voices.
+//
+
+void Tool_autocadence::generateModules(vector<string>& modules, HTp lowerPart, HTp upperPart) {
+	modules.clear();
+
+	vector<vector<HTp>> pairings(2);
+	pairings[0].reserve(10000);
+	pairings[1].reserve(10000);
+	fillNotes(pairings[0], lowerPart);
+	fillNotes(pairings[1], upperPart);
+	if (pairings[0].size() != pairings[1].size()) {
+		cerr << "Error: length of each note sequence is not equal: "
+		     << pairings[0].size() << " compared to " << pairings[1].size() << endl;
+		return;
+	}
+
+	for (int i=0; i<(int)pairings[0].size(); i++) {
+		if (!(pairings[0][i]->isNoteAttack() || pairings[1][i]->isNoteAttack())) {
+			// both notes are sustaining in this slice.
+			continue;
+		}
+		string entry = generateModuleEntry(pairings, i, 6);
+		modules.push_back(entry);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::generateModuleEntry --
+//
+
+string Tool_autocadence::generateModuleEntry(vector<vector<HTp>>& pairings, int startIndex, int length) {
+	int count = 0;
+	vector<string> pieces;
+
+	// 0 = rest; negative values = sustained pitch
+	vector<int> pitchL;
+	vector<int> pitchU;
+
+	// HTp lastNoteL = NULL;
+	// HTp lastNoteU = NULL;
+	
+	int b7L = 0;
+	int b7U = 0;
+
+	for (int i=startIndex; (i<pairings[0].size()) && (i < startIndex + length); i++) {
+		HTp lower = pairings[0][i];
+		HTp upper = pairings[1][i];
+		if (!(lower->isNoteAttack() && upper->isNoteAttack())) {
+			// sustained or resting slice.
+			cerr << "Strange case here" << endl;
+			continue;
+		}
+		b7L = 0;
+		b7U = 0;
+		if (lower->isNull()) {
+			lower = lower->resolveNullToken();
+		}
+		if (upper->isNull()) {
+			upper = upper->resolveNullToken();
+		}
+		if (lower && !lower->isRest()) {
+			b7L = Convert::kernToBase7(lower);
+			if (!lower->isNoteAttack()) {
+				b7L *= -1;
+			}
+		}
+		if (upper && !upper->isRest()) {
+			b7U = Convert::kernToBase7(upper);
+			if (!upper->isNoteAttack()) {
+				b7U *= -1;
+			}
+		}
+		string hint = "";
+
+		if ((lower == 0) || (upper == 0)) {
+			hint = "Rest";
+		} else {
+			int interval = abs(b7U) - abs(b7L);
+			if (interval > 7) {
+				interval = interval % 8;
+				if (interval == 0) {
+					interval = 8;
+				} else {
+					interval++;
+				}
+			} else if (interval < -7) {
+				interval = -interval % 8;
+				if (interval == 0) {
+					interval = -8;
+				} else {
+					interval = -interval -1;
+				}
+			} else {
+				interval++;
+			}
+			hint = to_string(interval);
+		}
+
+		string piece = hint;
+		piece += "(";
+		piece += *lower;
+		piece += " TO ";
+		piece += *upper;
+		piece += ")";
+		pieces.push_back(piece);
+		count++;
+		if (count >= length) {
+			break;
+		}
+	}
+
+	string output;
+	if (!pieces.empty()) {
+		output = pieces[0];
+	}
+	for (int i=1; i<(int)pieces.size(); i++) {
+		output += " ";
+		output += pieces[i];
+	}
+
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::fillNotes --
+//
+
+void Tool_autocadence::fillNotes(vector<HTp>& voice, HTp exinterp) {
+	HTp current = exinterp->getNextToken();
+	while (current) {
+		if (current->isData()) {
+			voice.push_back(current);
+		}
+		current = current->getNextToken();
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::printModules -- Print modules for a pair of parts.
+//
+
+void Tool_autocadence::printModules(vector<string>& modules, int lowerPartIndex, int upperPartIndex) {
+	cout << "\n\n# MODULES FOR " << lowerPartIndex << " TO " << upperPartIndex << endl;
+	for (int i=0; i<(int)modules.size(); i++) {
+		cout << modules[i] << endl;
+	}
+}
+
 
 
 
