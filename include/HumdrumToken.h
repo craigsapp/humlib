@@ -44,7 +44,9 @@ class HumdrumToken : public std::string, public HumHash {
 		        ~HumdrumToken              ();
 
 		bool     isNull                    (void) const;
+		bool     isNullToken               (void) const { return isNull(); }
 		bool     isManipulator             (void) const;
+		bool     isSpineManipulator        (void) const { return isManipulator(); }
 
 		bool     isExclusiveInterpretation (void) const;
 		bool     isSplitInterpretation     (void) const;
