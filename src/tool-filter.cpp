@@ -20,6 +20,7 @@
 #include "tool-addtempo.h"
 #include "tool-autoaccid.h"
 #include "tool-autobeam.h"
+#include "tool-autocadence.h"
 #include "tool-autostem.h"
 #include "tool-bstyle.h"
 #include "tool-binroll.h"
@@ -258,6 +259,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(autoaccid, infile, commands[i].second, status);
 		} else if (commands[i].first == "autobeam") {
 			RUNTOOL(autobeam, infile, commands[i].second, status);
+		} else if (commands[i].first == "autocadence") {
+			RUNTOOL(autocadence, infile, commands[i].second, status);
 		} else if (commands[i].first == "autostem") {
 			RUNTOOL(autostem, infile, commands[i].second, status);
 		} else if (commands[i].first == "bstyle") {
