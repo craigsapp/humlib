@@ -442,7 +442,7 @@ void Tool_autocadence::addMatchToScore(HumdrumFile& infile, int matchIndex) {
 		return;
 	}
 	
-	cerr << "ENDING LOWER: " << endL << "\tENDING UPPER: " << endU << endl;
+	// cerr << "ENDING LOWER: " << endL << "\tENDING UPPER: " << endU << endl;
 
 	if (m_colorQ) {
 		colorNotes(startL, endL);
@@ -531,7 +531,6 @@ bool Tool_autocadence::getCadenceEndSliceNotes(HTp& endL, HTp& endU, int count,
 			continue;
 		}
 		string& interval = get<0>(m_intervals.at(lineIndex).at(vindex).at(pindex));
-cerr << "INTERVAL = " << interval << endl;
 		if (!interval.empty()) {
 			counter++;
 			if (counter == count) {
@@ -611,9 +610,7 @@ cerr << "INTERVAL = " << interval << endl;
 //
 
 int Tool_autocadence::getRegexSliceCount(const string& regex) {
-cerr << "REGEX " << regex << endl;
 	int count = (int)std::count(regex.begin(), regex.end(), ',');
-cerr << "COUNT IS " << count << endl;
 	return count + 1;
 
 }
@@ -673,14 +670,14 @@ void Tool_autocadence::searchIntervalSequences(void) {
 				for (int m=0; m<(int)m_definitions.size(); m++) {
 					if (hre.search(feature, m_definitions.at(m).m_regex)) {
 						vector<int>& matches = get<3>(m_sequences.at(i).at(j).at(k));
-						// cerr << "FOUND MATCH: " << k << endl;
-						matches.push_back(k);
+						// cerr << "FOUND MATCH: " << m << endl;
+						matches.push_back(m);
 						m_matches.emplace_back(vector<int>{i, j, k});
 					}
 				}
 			}
 		}
-	}
+	} 
 }
 
 
@@ -707,10 +704,14 @@ void Tool_autocadence::searchIntervalSequences(void) {
 //    1: first note of sequence in score (lower voice)
 //    2: first note of sequence in score (upper voice)
 //    3: vector of ints: int is the m_definitions cadence index
+// std::vector<std::vector<int>> m_matches;
 
 void Tool_autocadence::printSequenceMatches(void) {
 	for (int i=0; i<(int)m_matches.size(); i++) {
-		auto& info = m_sequences.at(m_matches[i][0]).at(m_matches[i][1]).at(m_matches[i][2]);
+		int& vindex = m_matches.at(i).at(0);
+		int& pindex = m_matches.at(i).at(1);
+		int& nindex = m_matches.at(i).at(2);
+		auto& info = m_sequences.at(vindex).at(pindex).at(nindex);
 		vector<int>& matches = get<3>(info);
 		if (matches.empty()) {
 			continue;
@@ -723,7 +724,8 @@ void Tool_autocadence::printSequenceMatches(void) {
 		}
 		m_humdrum_text << "\t";
 		for (int m=0; m<(int)matches.size(); m++) {
-			auto& cinfo = m_definitions.at(matches[m]);
+			int dindex = matches.at(m);
+			auto& cinfo = m_definitions.at(dindex);
 			string& name = cinfo.m_name;
 			m_humdrum_text << name;
 			if (m<(int)matches.size() - 1) {
