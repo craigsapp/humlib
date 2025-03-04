@@ -459,11 +459,11 @@ void Tool_autocadence::printRegexTable(void) {
 	m_humdrum_text << "!! <table class=regex>" << endl;
 
 	m_humdrum_text << "!! <tr>" << endl;
-	m_humdrum_text << "!! <th title='cadence enumeration'>Index</th>" << endl;
-	m_humdrum_text << "!! <th title='lower counterpoint vocal function'>LCVF</th>" << endl;
-	m_humdrum_text << "!! <th title='upper counterpoint vocal function'>UCVF</th>" << endl;
-	m_humdrum_text << "!! <th title='cadence name'>Name</th>" << endl;
-	m_humdrum_text << "!! <th title='regular expression for cadence'>Cadence formula</th>" << endl;
+	m_humdrum_text << "!! <th class=lcvf title='lower counterpoint vocal function'>LCVF</th>" << endl;
+	m_humdrum_text << "!! <th class=ucvf title='upper counterpoint vocal function'>UCVF</th>" << endl;
+	m_humdrum_text << "!! <th class=name title='cadence name (abbreviation)'>Name</th>" << endl;
+	m_humdrum_text << "!! <th class='index' title='cadence enumeration'>Index</th>" << endl;
+	m_humdrum_text << "!! <th title='regular expression definition for cadence formula'>Cadence formula</th>" << endl;
 	m_humdrum_text << "!! </tr>" << endl;
 
 	for (int index : definitionList) {
@@ -492,10 +492,10 @@ void Tool_autocadence::printDefinitionRow(int index) {
 
 	m_humdrum_text << "!! <tr>" << endl;
 
-	m_humdrum_text << "!! <td>" << index       << "</td>" << endl;
-	m_humdrum_text << "!! <td>" << def.m_funcL << "</td>" << endl;
-	m_humdrum_text << "!! <td>" << def.m_funcU << "</td>" << endl;
-	m_humdrum_text << "!! <td>" << def.m_name  << "</td>" << endl;
+	m_humdrum_text << "!! <td class=lcvf>" << def.m_funcL << "</td>" << endl;
+	m_humdrum_text << "!! <td class=ucvf>" << def.m_funcU << "</td>" << endl;
+	m_humdrum_text << "!! <td class=name>" << def.m_name  << "</td>" << endl;
+	m_humdrum_text << "!! <td class=index>" << index << "</td>" << endl;
 	m_humdrum_text << "!! <td class=definition>" << def.m_regex << "</td>" << endl;
 
 	m_humdrum_text << "!! </tr>" << endl;
@@ -505,22 +505,33 @@ void Tool_autocadence::printDefinitionRow(int index) {
 !! table.regex {
 !!    border-collapse: collapse;
 !!    border: 1px solid orange;
-!!    margin: 10px;
-!!    max-width: 1000px;
+!!    margin-top: 40px;
+!!    margin-left: auto;
+!!    margin-right: auto;
+!!    max-width: 800px;
 !! }
 !! table.regex td.definition {
 !!    word-spacing: 5px;
+!!    padding-left: 30px;
+!!    text-indent: -30px;
+!! }
+!! table.regex td.lcvf,
+!! table.regex td.ucvf,
+!! table.regex td.name {
+!!    text-align:center;
 !! }
 !! table.regex th {
+!!    vertical-align: top;
 !!    background-color: bisque;
 !!    padding-right: 10px;
 !!    text-align: left;
 !! }
 !! table.regex td {
+!!    vertical-align: top;
 !!    text-align: left;
 !!    padding-right: 20px;
 !! }
-!! table.regex td:first-child, table.regex th:first-child {
+!! table.regex td.index, table.regex th.index {
 !!    text-align: right;
 !! }
 !! </style>)";
@@ -1369,7 +1380,9 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile, int index
 			if (labels[i].empty()) {
 				m_humdrum_text << "!";
 			} else {
-				m_humdrum_text << "!LO:TX:a:B:cvf:t=" << labels[i];
+				m_humdrum_text << "!LO:TX:a:B:cvf";
+				m_humdrum_text << ":color=" << m_color;
+				m_humdrum_text << ":t=" << labels[i];
 			}
 			if (i <(int)labels.size() - 1) {
 				m_humdrum_text << "\t";
