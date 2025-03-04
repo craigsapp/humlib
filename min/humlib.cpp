@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Mar  3 23:50:50 PST 2025
+// Last Modified: Tue Mar  4 00:00:30 PST 2025
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -58169,13 +58169,13 @@ string Tool_autocadence::generateSequenceString(HumdrumFile& infile, int lindex,
 			continue;
 		}
 		pieces.push_back(interval);
-		if (pieces.size() >= m_sequenceLength) {
+		if ((int)pieces.size() >= m_sequenceLength) {
 			break;
 		}
 	}
 
 	string output;
-	for (int i=0; i<pieces.size(); i++) {
+	for (int i=0; i<(int)pieces.size(); i++) {
 		output += pieces[i];
 		if (i < (int)pieces.size() - 1) {
 			output += ", ";
@@ -58701,7 +58701,7 @@ string Tool_autocadence::generateCounterpointString(vector<vector<HTp>>& pairing
 	string mintL = "R";
 	string mintU = "R";
 	string hint  = getDiatonicIntervalString(b7L, b7U);
-	if (index < pairings[0].size() - 1){
+	if (index < (int)pairings[0].size() - 1){
 		mintL = getDiatonicIntervalString(b7L, b7Ln);
 		mintU = getDiatonicIntervalString(b7U, b7Un);
 	}
@@ -58782,41 +58782,6 @@ void Tool_autocadence::fillNotes(vector<HTp>& voice, HTp exinterp) {
 			voice.push_back(current);
 		}
 		current = current->getNextToken();
-	}
-}
-
-
-
-//////////////////////////////
-//
-// Tool_autocadence::printModules -- Print modules for a pair of parts.
-//
-
-void Tool_autocadence::printModules(vector<string>& modules, int lowerPartIndex, int upperPartIndex) {
-	cout << "\n\n# MODULES FOR " << lowerPartIndex << " TO " << upperPartIndex << endl;
-
-	vector<vector<int>> matches;
-	matches.resize(modules.size());
-
-	HumRegex hre;
-	for (int i=0; i<modules.size(); i++) {
-		for (int j=0; j<(int)m_definitions.size(); j++) {
-			if (hre.search(modules[i], m_definitions.at(j).m_regex)) {
-				matches[i].push_back(j);
-			}
-		}
-	}
-
-	for (int i=0; i<(int)modules.size(); i++) {
-		for (int j=0; j<(int)matches.at(i).size(); j++) {
-			cout << matches[i][j];
-			if (j < (int)matches[i].size() - 1) {
-				cout << " ";
-			}
-		}
-
-		cout << "\t";
-		cout << modules[i] << endl;
 	}
 }
 
