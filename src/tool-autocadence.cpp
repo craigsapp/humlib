@@ -1254,7 +1254,7 @@ void Tool_autocadence::printIntervalManipulatorLine(HumdrumFile& infile, int ind
 		}
 		int track = token->getTrack();
 		int ntrack = 0;
-		if (i < fcount) {
+		if (i < fcount - 1) {
 			ntrack = infile.token(index, i+1)->getTrack();
 		}
 		if (track == ntrack) {
@@ -1304,7 +1304,7 @@ void Tool_autocadence::printIntervalDataLine(HumdrumFile& infile, int index, int
 		}
 		int track = token->getTrack();
 		int ntrack = 0;
-		if (i < fcount) {
+		if (i < fcount - 1) {
 			ntrack = infile.token(index, i+1)->getTrack();
 		}
 		if (track == ntrack) {
@@ -1356,7 +1356,7 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile, int index
 		}
 		int track = token->getTrack();
 		int ntrack = 0;
-		if (i < fcount) {
+		if (i < fcount - 1) {
 			ntrack = infile.token(index, i+1)->getTrack();
 		}
 		if (track == ntrack) {
@@ -1415,7 +1415,7 @@ void Tool_autocadence::printIntervalLine(HumdrumFile& infile, int index, int kco
 		}
 		int track = token->getTrack();
 		int ntrack = 0;
-		if (i < fcount) {
+		if (i < fcount - 1) {
 			ntrack = infile.token(index, i+1)->getTrack();
 		}
 		if (track == ntrack) {
