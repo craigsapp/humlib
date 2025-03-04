@@ -18,6 +18,7 @@
 
 // #include <algorithm>
 #include <ostream>
+#include <set>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -74,6 +75,7 @@ class Tool_autocadence : public HumTool {
 		void        prepareTrackToVoiceIndex   (HumdrumFile& infile, std::vector<HTp> kspines);
 		void        printIntervalManipulatorLine(HumdrumFile& infile, int index, int kcount);
 		void        printIntervalDataLine      (HumdrumFile& infile, int index, int kcount);
+		void        printIntervalDataLineScore (HumdrumFile& infile, int index, int kcount);
 		void        printIntervalLine          (HumdrumFile& infile, int index, int kcount, const std::string& tok);
 		void        prepareAbbreviations       (HumdrumFile& infile);
 		void        prepareIntervalSequences   (HumdrumFile& infile);
@@ -89,6 +91,9 @@ class Tool_autocadence : public HumTool {
 		void        addMatchToScore            (HumdrumFile& infile, int matchIndex);
 		int         getRegexSliceCount         (const std::string& regex);
 		void        colorNotes                 (HTp startTok, HTp endTok);
+		void        prepareDefinitionList      (std::set<int>& list);
+		void        printRegexTable            (void);
+		void        printDefinitionRow         (int index);
 		bool        getCadenceEndSliceNotes    (HTp& endL, HTp& endU, int count, HumdrumFile& infile,
 		                                        int lindex, int vindex, int pindex);
 
@@ -149,16 +154,19 @@ class Tool_autocadence : public HumTool {
 		std::vector<std::string> m_abbr;
 
 		// options:
-		// bool m_pitchesQ              = false; // -p: show only extracted diatonic pitches
 		bool m_intervalsQ               = false; // -i: show counterpoint interval infomation
-		// bool m_intervalsOnlyQ        = false; // -I: show counterpoint interval infomation but
+		bool m_intervalsOnlyQ           = false; // -I: show counterpoint interval infomation but
 		                                         // do not do cadence analysis
-		bool m_printRawDiatonicPitchesQ = false; // -r: display m_pitches after filling
+		bool m_printRawDiatonicPitchesQ = false; // -p: display m_pitches after filling
 		int  m_sequenceLength           = 7;     // maximum regex interval sequence length
-		bool m_matchesQ                 = false; // -m: display sequences that match to cadence formula(s).
+		bool m_matchesQ                 = false; // -m: display sequences that match to cadence formula(s)
 		bool m_printSequenceInfoQ       = false; // -s: print list of interval sequences
 		bool m_countQ                   = false; // --count: print number of cadences found
 		bool m_colorQ                   = false; // -c: color matched cadence formula
+		std::string m_color      = "dodgerblue"; // --color "string" to set matched notes to a specific color
+		bool m_showFormulaIndexQ        = false; // -f: show formulation index after CVF label
+		bool m_evenNoteSpacingQ         = false; // -e: compress notation (verovio option evenNoteSpacing)
+		bool m_regexQ                   = false; // -r: show table of matched regular expressions
 
 };
 
