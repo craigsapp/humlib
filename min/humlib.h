@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Mar  4 09:02:49 PST 2025
+// Last Modified: Fri Mar  7 12:03:08 PST 2025
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -5906,7 +5906,7 @@ class Tool_autocadence : public HumTool {
 		void        fillNotes           (std::vector<HTp>& voice, HTp exinterp);
 		std::string getDiatonicIntervalString  (int lower, int upper);
 		int         getDiatonicInterval        (int lower, int upper);
-		void        fillCadenceDefinitions     (void);
+		void        prepareCadenceDefinitions  (void);
 		void        addCadenceDefinition       (const std::string& funcL, const std::string& funcU,
 		                                        const std::string& name, const std::string& regex);
 		void        prepareLowestPitches       (void);
@@ -5938,6 +5938,8 @@ class Tool_autocadence : public HumTool {
 		void        prepareDefinitionList      (std::set<int>& list);
 		void        printRegexTable            (void);
 		void        printDefinitionRow         (int index);
+		void        prepareCvfNames            (void);
+		std::string getFunctionNames           (const std::string& input);
 		bool        getCadenceEndSliceNotes    (HTp& endL, HTp& endU, int count, HumdrumFile& infile,
 		                                        int lindex, int vindex, int pindex);
 
@@ -5997,6 +5999,9 @@ class Tool_autocadence : public HumTool {
 		// Indexed by voice (lowest = 0).
 		std::vector<std::string> m_abbr;
 
+		// m_functionNames: mapping from CVF abbreviation to full name of CFV.
+		std::map<std::string, std::string> m_functionNames;
+
 		// options:
 		bool m_intervalsQ               = false; // -i: show counterpoint interval infomation
 		bool m_intervalsOnlyQ           = false; // -I: show counterpoint interval infomation but
@@ -6011,6 +6016,7 @@ class Tool_autocadence : public HumTool {
 		bool m_showFormulaIndexQ        = false; // -f: show formulation index after CVF label
 		bool m_evenNoteSpacingQ         = false; // -e: compress notation (verovio option evenNoteSpacing)
 		bool m_regexQ                   = false; // -r: show table of matched regular expressions
+		bool m_popupQ                   = true;
 
 };
 

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Mar  4 09:02:49 PST 2025
+// Last Modified: Fri Mar  7 12:03:08 PST 2025
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -57596,7 +57596,8 @@ void Tool_autocadence::initialize(void) {
 	m_evenNoteSpacingQ         = getBoolean("even-note-spacing");
 	m_regexQ                   = getBoolean("regex");
 
-	fillCadenceDefinitions();
+	prepareCadenceDefinitions();
+	prepareCvfNames();
 }
 
 
@@ -57721,8 +57722,8 @@ void Tool_autocadence::printRegexTable(void) {
 	m_humdrum_text << "!! <table class=regex>" << endl;
 
 	m_humdrum_text << "!! <tr>" << endl;
-	m_humdrum_text << "!! <th class=lcvf title='lower counterpoint vocal function'>LCVF</th>" << endl;
-	m_humdrum_text << "!! <th class=ucvf title='upper counterpoint vocal function'>UCVF</th>" << endl;
+	m_humdrum_text << "!! <th class=lcvf title='lower cadence vocal function'>LCVF</th>" << endl;
+	m_humdrum_text << "!! <th class=ucvf title='upper cadence vocal function'>UCVF</th>" << endl;
 	m_humdrum_text << "!! <th class=name title='cadence name (abbreviation)'>Name</th>" << endl;
 	m_humdrum_text << "!! <th class='index' title='cadence enumeration'>Index</th>" << endl;
 	m_humdrum_text << "!! <th title='regular expression definition for cadence formula'>Cadence formula</th>" << endl;
@@ -57754,8 +57755,22 @@ void Tool_autocadence::printDefinitionRow(int index) {
 
 	m_humdrum_text << "!! <tr>" << endl;
 
-	m_humdrum_text << "!! <td class=lcvf>" << def.m_funcL << "</td>" << endl;
-	m_humdrum_text << "!! <td class=ucvf>" << def.m_funcU << "</td>" << endl;
+	string nameL = m_functionNames[def.m_funcL];
+	string nameU = m_functionNames[def.m_funcU];
+
+	m_humdrum_text << "!! <td class=lcvf";
+	if (!nameL.empty()) {
+		m_humdrum_text << " title='" << nameL << "'";
+	}
+	m_humdrum_text << ">" << def.m_funcL << "</td>" << endl;
+
+
+	m_humdrum_text << "!! <td class=ucvf";
+	if (!nameU.empty()) {
+		m_humdrum_text << " title='" << nameU << "'";
+	}
+	m_humdrum_text << ">" << def.m_funcU << "</td>" << endl;
+
 	m_humdrum_text << "!! <td class=name>" << def.m_name  << "</td>" << endl;
 	m_humdrum_text << "!! <td class=index>" << index << "</td>" << endl;
 	m_humdrum_text << "!! <td class=definition>" << def.m_regex << "</td>" << endl;
@@ -57780,7 +57795,8 @@ void Tool_autocadence::printDefinitionRow(int index) {
 !! table.regex td.lcvf,
 !! table.regex td.ucvf,
 !! table.regex td.name {
-!!    text-align:center;
+!!    text-align: center;
+!!    cursor: help;
 !! }
 !! table.regex th {
 !!    vertical-align: top;
@@ -58185,13 +58201,8 @@ void Tool_autocadence::printSequenceMatches(void) {
 		if (matches.empty()) {
 			continue;
 		}
-		for (int m=0; m<(int)matches.size(); m++) {
-			m_humdrum_text << matches[m];
-			if (m<(int)matches.size() - 1) {
-				m_humdrum_text << ",";
-			}
-		}
-		m_humdrum_text << "\t";
+
+
 		for (int m=0; m<(int)matches.size(); m++) {
 			int dindex = matches.at(m);
 			auto& cinfo = m_definitions.at(dindex);
@@ -58201,6 +58212,16 @@ void Tool_autocadence::printSequenceMatches(void) {
 				m_humdrum_text << ",";
 			}
 		}
+
+		m_humdrum_text << "\t";
+
+		for (int m=0; m<(int)matches.size(); m++) {
+			m_humdrum_text << matches[m];
+			if (m<(int)matches.size() - 1) {
+				m_humdrum_text << ",";
+			}
+		}
+
 		m_humdrum_text << "\t";
 		string& sequence = get<0>(info);
 		m_humdrum_text << sequence << endl;
@@ -58645,6 +58666,13 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile, int index
 				m_humdrum_text << "!LO:TX:a:B:cvf";
 				m_humdrum_text << ":color=" << m_color;
 				m_humdrum_text << ":t=" << labels[i];
+				if (m_popupQ) {
+					string fname = getFunctionNames(labels[i]);
+cerr << "POPUP: " << fname << " FOR LABEL " << labels[i] << endl;
+					if (!fname.empty()) {
+						m_humdrum_text << ":pop=" << fname;
+					}
+				}
 			}
 			if (i <(int)labels.size() - 1) {
 				m_humdrum_text << "\t";
@@ -58654,6 +58682,45 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile, int index
 	}
 
 	m_humdrum_text << dataline.str() << endl;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::getFunctionNames -- convert CVF name list into a popup title string.
+//     The names can be postfixed with the cadence formula index number.
+//        Example: C73,C29
+//     In this case the output will be "Cantizans".  
+//        Example: C73,T29
+//     In this case the output will be "Cantizans, Tenorzans".
+//
+
+string Tool_autocadence::getFunctionNames(const string& input) {
+	HumRegex hre;
+	string output;
+	vector<string> pieces;
+	hre.split(pieces, input, "[^A-Za-z]");
+	map<string, bool> found;
+	int counter = 0;
+	for (int i=0; i<(int)pieces.size(); i++) {
+		if (pieces[i].empty()) {
+			continue;
+		}
+		if (found[pieces[i]] == true) {
+			continue;
+		}
+		found[pieces[i]] = true;
+		string name = m_functionNames[pieces[i]];
+		if (name.empty()) {
+			name = pieces[i];
+		}
+		if (counter > 0) {
+			output += ", ";
+		}
+		output += name;
+	}
+	return output;
 }
 
 
@@ -59074,10 +59141,10 @@ void Tool_autocadence::fillNotes(vector<HTp>& voice, HTp exinterp) {
 
 //////////////////////////////
 //
-// Tool_autocadence::fillCadenceDefinitions --
+// Tool_autocadence::prepareCadenceDefinitions --
 //
 
-void Tool_autocadence::fillCadenceDefinitions(void) {
+void Tool_autocadence::prepareCadenceDefinitions(void) {
 	m_definitions.clear();
 	m_definitions.reserve(200);
 
@@ -59254,6 +59321,37 @@ void Tool_autocadence::prepareAbbreviations(HumdrumFile& infile) {
 	}
 }
 
+
+//////////////////////////////
+//
+// Tool_autocadence::prepareCvfNames --
+//
+
+void Tool_autocadence::prepareCvfNames(void) {
+	m_functionNames.clear();
+
+	// Realized Cadential Voice Functions (uppercase letters):
+	m_functionNames.emplace("C", "Cantizans");
+	m_functionNames.emplace("A", "Altizans");
+	m_functionNames.emplace("T", "Tenorizans");
+	m_functionNames.emplace("B", "Bassizans");
+	m_functionNames.emplace("L", "Leaping Contratenor");
+	m_functionNames.emplace("P", "Plagal Bassizans");
+	m_functionNames.emplace("S", "Sestizans");
+	m_functionNames.emplace("Q", "Quintizans");
+
+	// Evaded Cadential Voice Functions (lowercase letters):
+	m_functionNames.emplace("c", "Evaded Cantizans");
+	m_functionNames.emplace("a", "Evaded Altizans");
+	m_functionNames.emplace("t", "Evaded Tenorizans");
+	m_functionNames.emplace("b", "Evaded Bassizans");
+
+	// Abandoned Cadential Voice Functions (also lowercase letters):
+	m_functionNames.emplace("x", "Abandoned Bassizans");
+	m_functionNames.emplace("y", "Abandoned Cantizans");
+	m_functionNames.emplace("z", "Abandoned Tenorizans");
+
+}
 
 
 
