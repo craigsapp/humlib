@@ -325,6 +325,7 @@ bool Tool_autocadence::run(HumdrumFile& infile) {
 void Tool_autocadence::initialize(void) {
 	m_printRawDiatonicPitchesQ = getBoolean("pitches");
 	m_intervalsOnlyQ           = getBoolean("intervals-only");
+	m_intervalsQ               = getBoolean("include-intervals");
 	m_matchesQ                 = getBoolean("matches");
 	m_printSequenceInfoQ       = getBoolean("sequences");
 	m_countQ                   = getBoolean("match-count");
@@ -434,6 +435,7 @@ void Tool_autocadence::printScore(HumdrumFile& infile) {
 		printRegexTable();
 	}
 }
+
 
 
 //////////////////////////////
@@ -585,6 +587,7 @@ void Tool_autocadence::addMatchToScore(HumdrumFile& infile, int matchIndex) {
 	// get<0> is the sequence string.
 	HTp startL = get<1>(info);  // starting token of cadence formula, lower voice
 	HTp startU = get<2>(info);  // starting token of cadence formula, upper voice
+
 	if (startL == NULL) {
 		cerr << "WARNING: startL is NULL" << endl;
 		return;
@@ -593,6 +596,7 @@ void Tool_autocadence::addMatchToScore(HumdrumFile& infile, int matchIndex) {
 		cerr << "WARNING: startU is NULL" << endl;
 		return;
 	}
+
 	int lindex = startL->getLineIndex();
 	vector<int>& dindexes = get<3>(info);
 	if (dindexes.empty()) {
@@ -628,6 +632,8 @@ void Tool_autocadence::addMatchToScore(HumdrumFile& infile, int matchIndex) {
 	if (m_showFormulaIndexQ) {
 		valueL += to_string(dindex);
 	}
+valueL += "V" + to_string(vindex);
+valueL += "P" + to_string(pindex);
 	endL->setValue("auto", "cvf", valueL);
 
 	string valueU = endU->getValue("auto", "cvf");
@@ -663,6 +669,14 @@ void Tool_autocadence::colorNotes(HTp startTok, HTp endTok) {
 	if (endTok == NULL) {
 		cerr << "Warning: endTok is null" << endl;
 	}
+	int startTrack = startTok->getTrack();
+	int endTrack = startTok->getTrack();
+	if (startTrack != endTrack) {
+		cerr << "Start and ending tracks are not the same: " << startTrack << " and " << endTrack << endl;
+		return;
+	}
+	// cerr << "\n\tcolor notes startLine = " << startTok->getLineIndex() << endl;
+	// cerr << "\tcolor notes endLine   = " << endTok->getLineIndex() << endl;
 	HTp current = startTok;
 	while (current) {
 		if (!current->isData()) {
@@ -673,10 +687,10 @@ void Tool_autocadence::colorNotes(HTp startTok, HTp endTok) {
 			current = current->getNextToken();
 			continue;
 		}
-		if (current->isRest()) {
-			current = current->getNextToken();
-			continue;
-		}
+		//	if (current->isRest()) {
+		//		current = current->getNextToken();
+		//		continue;
+		//	}
 		string text = *current;
 		text += "@";
 		current->setText(text);
@@ -1355,12 +1369,17 @@ void Tool_autocadence::printIntervalDataLine(HumdrumFile& infile, int index, int
 //     markers for CFV if present.
 //
 
-void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile, int index, int kcount) {
+void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
+		int index, int kcount) {
+
 	vector<string> labels(infile[index].getFieldCount());
 	bool foundLabelQ = false;
 
 	stringstream dataline;
+	stringstream labelline;
+
 	int fcount = infile[index].getFieldCount();
+
 	for (int i=0; i<fcount; i++) {
 		HTp token = infile.token(index, i);
 		if (i != 0) {
@@ -1394,32 +1413,46 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile, int index
 				dataline << "\t" << value;
 			}
 		}
+
 	}
 
 	if (foundLabelQ) {
-		for (int i=0; i<(int)labels.size(); i++) {
-			if (labels[i].empty()) {
-				m_humdrum_text << "!";
+		for (int i=0; i<fcount; i++) {
+			HTp token = infile.token(index, i);
+			int track = token->getTrack();
+			int vindex = m_trackToVoiceIndex.at(track);
+			if (i != 0) {
+				labelline << "\t";
+			}
+			string label = labels.at(i);
+			if (label.empty()) {
+				labelline << "!";
 			} else {
-				m_humdrum_text << "!LO:TX:a:B:cvf";
-				m_humdrum_text << ":color=" << m_color;
-				m_humdrum_text << ":t=" << labels[i];
+				labelline << "!LO:TX:a:B:cvf";
+				labelline << ":color=" << m_color;
+				labelline << ":t=" << label;
 				if (m_popupQ) {
-					string fname = getFunctionNames(labels[i]);
-cerr << "POPUP: " << fname << " FOR LABEL " << labels[i] << endl;
-					if (!fname.empty()) {
-						m_humdrum_text << ":pop=" << fname;
-					}
+				 	string fname = getFunctionNames(label);
+				 	if (!fname.empty()) {
+				 		labelline << ":pop=" << fname;
+				 	}
 				}
 			}
-			if (i <(int)labels.size() - 1) {
-				m_humdrum_text << "\t";
+			if ((kcount > 0) && (vindex >= 0))  {
+				int tcount = kcount - vindex - 1;
+				for (int j=0; j<tcount; j++) {
+					labelline << "\t!Z" << to_string(tcount) << ":" << to_string(j);
+				}
 			}
 		}
-		m_humdrum_text << endl;
 	}
 
-	m_humdrum_text << dataline.str() << endl;
+	if (!labelline.str().empty()) {
+		m_humdrum_text << labelline.str() << endl;
+	}
+	if (!dataline.str().empty()) {
+		m_humdrum_text << dataline.str() << endl;
+	}
 }
 
 
