@@ -97,6 +97,7 @@ class Tool_autocadence : public HumTool {
 		void        printDefinitionRow         (int index);
 		void        prepareCvfNames            (void);
 		std::string getFunctionNames           (const std::string& input);
+		void        highlightNoteAttack        (HTp startTok);
 		bool        getCadenceEndSliceNotes    (HTp& endL, HTp& endU, int count, HumdrumFile& infile,
 		                                        int lindex, int vindex, int pindex);
 
@@ -173,7 +174,9 @@ class Tool_autocadence : public HumTool {
 		bool m_showFormulaIndexQ        = false; // -f: show formulation index after CVF label
 		bool m_evenNoteSpacingQ         = false; // -e: compress notation (verovio option evenNoteSpacing)
 		bool m_regexQ                   = false; // -r: show table of matched regular expressions
-		bool m_popupQ                   = true;
+		bool m_popupQ                   = true;  // --pop: show popup when hoving over CFV lables (to be implemented)
+		bool m_nobackQ                  = false; // -B: don't highlight start of sustain at start of cadence definition
+		std::string m_marker = "@";
 
 };
 
