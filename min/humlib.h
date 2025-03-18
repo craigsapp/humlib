@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Mar 10 11:43:34 PDT 2025
+// Last Modified: Mon Mar 17 20:28:51 PDT 2025
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -5939,10 +5939,14 @@ class Tool_autocadence : public HumTool {
 		void        printRegexTable            (void);
 		void        printDefinitionRow         (int index);
 		void        prepareCvfNames            (void);
+		void        prepareDissonanceNames     (void);
 		std::string getFunctionNames           (const std::string& input);
+		std::string getDissonanceNames         (const std::string& input);
 		void        highlightNoteAttack        (HTp startTok);
 		bool        getCadenceEndSliceNotes    (HTp& endL, HTp& endU, int count, HumdrumFile& infile,
 		                                        int lindex, int vindex, int pindex);
+		void        prepareDissonances         (HumdrumFile& infile);
+		void        prepareDissonancesForLine  (HumdrumLine& iline, HumdrumLine& dline);
 
 	private:
 
@@ -6003,6 +6007,11 @@ class Tool_autocadence : public HumTool {
 		// m_functionNames: mapping from CVF abbreviation to full name of CFV.
 		std::map<std::string, std::string> m_functionNames;
 
+		// m_dissonanceNames: mapping from dissonance abbreviation to full name of dissonance.
+		std::map<std::string, std::string> m_dissonanceNames;
+
+		bool m_hasSuspensionMarkersQ = false;
+
 		// options:
 		bool m_intervalsQ               = false; // -i: show counterpoint interval infomation
 		bool m_intervalsOnlyQ           = false; // -I: show counterpoint interval infomation but
@@ -6019,7 +6028,10 @@ class Tool_autocadence : public HumTool {
 		bool m_regexQ                   = false; // -r: show table of matched regular expressions
 		bool m_popupQ                   = true;  // --pop: show popup when hoving over CFV lables (to be implemented)
 		bool m_nobackQ                  = false; // -B: don't highlight start of sustain at start of cadence definition
+		bool m_suspensionsQ             = true;  // -S: don't use suspension analysis
 		std::string m_marker = "@";
+		std::string m_suspensionMarker = "N";
+		std::string m_suspensionColor  = "crimson";
 
 };
 

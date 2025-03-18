@@ -47,8 +47,8 @@ Tool_dissonant::Tool_dissonant(void) {
 	define("u|undirected=b",                 "use undirected dissonance labels");
 	define("c|count=b",                      "count dissonances by category");
 	define("i|x|e|exinterp=s:**cdata-rdiss", "specify exinterp for **diss spines");
-	define("color|color-by-rhythm=b",        "color dissonant notes by beat level");
-	define("color2|color-by-interval=b",     "color dissonant notes by dissonant interval");
+	define("color|colorize|color-by-rhythm=b",        "color dissonant notes by beat level");
+	define("color2|colorize2|color-by-interval=b",    "color dissonant notes by dissonant interval");
 }
 
 

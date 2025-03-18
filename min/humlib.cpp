@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Mar 10 11:43:34 PDT 2025
+// Last Modified: Mon Mar 17 20:28:51 PDT 2025
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -57530,6 +57530,7 @@ Tool_autocadence::Tool_autocadence(void) {
 	define("color=s:dodgerblue",      "Color cadence formula notes with given color");
 	define("count|match-count=b",     "Return number of cadence formulas that match");
 	define("B|no-back-highlight=b",   "Do not color start of sustain note at start of cadence definition");
+	define("S|no-suspensions=b",      "Do not use suspensions from dissonance analysis");
 }
 
 
@@ -57598,9 +57599,11 @@ void Tool_autocadence::initialize(void) {
 	m_evenNoteSpacingQ         =  getBoolean("even-note-spacing");
 	m_regexQ                   =  getBoolean("regex");
 	m_nobackQ                  = !getBoolean("no-back-highlight");
+	m_suspensionsQ             = !getBoolean("no-suspensions");
 
 	prepareCadenceDefinitions();
 	prepareCvfNames();
+	prepareDissonanceNames();
 }
 
 
@@ -57612,11 +57615,17 @@ void Tool_autocadence::initialize(void) {
 
 void Tool_autocadence::processFile(HumdrumFile& infile) {
 
+
 	// fill m_pitches and m_lowestPitch
 	preparePitchInfo(infile);
 	if (m_printRawDiatonicPitchesQ) {
 		printExtractedPitchInfo(infile);
 		return;
+	}
+
+	// identify dissonances
+	if (m_suspensionsQ) {
+		prepareDissonances(infile);
 	}
 
 	// fill m_intervals
@@ -57690,6 +57699,9 @@ void Tool_autocadence::printScore(HumdrumFile& infile) {
 
 	if (m_colorQ) {
 		m_humdrum_text << "!!!RDF**kern: " << m_marker << " = marked note, color=" << m_color << endl;
+	}
+	if (m_hasSuspensionMarkersQ) {
+		m_humdrum_text << "!!!RDF**kern: " << m_suspensionMarker << " = marked note, color=" << m_suspensionColor << endl;
 	}
 	if (m_evenNoteSpacingQ) {
 		m_humdrum_text << "!!!verovio: evenNoteSpacing" << endl;
@@ -58710,11 +58722,12 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 	vector<string> labels(infile[index].getFieldCount());
 	bool foundLabelQ = false;
 
-	stringstream dataline;
-	stringstream labelline;
+	vector<string> dissonances(infile[index].getFieldCount());
+	bool foundDissonanceQ = false; // just for suspensions
 
 	int fcount = infile[index].getFieldCount();
 
+	stringstream dataline;
 	for (int i=0; i<fcount; i++) {
 		HTp token = infile.token(index, i);
 		if (i != 0) {
@@ -58728,6 +58741,13 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 		if (!label.empty()) {
 			labels.at(i) = label;
 			foundLabelQ = true;
+		}
+		string dissonance = token->getValue("auto", "dissonance");
+		if ((dissonance == "s") || (dissonance == "S") || (dissonance == "g") || (dissonance == "G")) {
+			if (!dissonance.empty()) {
+				dissonances.at(i) = dissonance;
+				foundDissonanceQ = true;
+			}
 		}
 		int track = token->getTrack();
 		int ntrack = 0;
@@ -58751,6 +58771,7 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 
 	}
 
+	stringstream labelline;
 	if (foundLabelQ) {
 		for (int i=0; i<fcount; i++) {
 			HTp token = infile.token(index, i);
@@ -58776,18 +58797,87 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 			if ((kcount > 0) && (vindex >= 0))  {
 				int tcount = kcount - vindex - 1;
 				for (int j=0; j<tcount; j++) {
-					labelline << "\t!Z" << to_string(tcount) << ":" << to_string(j);
+					labelline << "\t!";
 				}
 			}
 		}
 	}
 
+	stringstream dissonanceline;
+	if (foundDissonanceQ) {
+		for (int i=0; i<fcount; i++) {
+			HTp token = infile.token(index, i);
+			int track = token->getTrack();
+			int vindex = m_trackToVoiceIndex.at(track);
+			if (i != 0) {
+				dissonanceline << "\t";
+			}
+			string dissonance = dissonances.at(i);
+			if (dissonance.empty()) {
+				dissonanceline << "!";
+			} else {
+				dissonanceline << "!LO:TX:a:diss";
+				dissonanceline << ":color=" << m_suspensionColor;
+				dissonanceline << ":t=" << dissonance;
+				if (m_popupQ) {
+				 	string dname = getDissonanceNames(dissonance);
+				 	if (!dname.empty()) {
+				 		dissonanceline << ":pop=" << dname;
+				 	}
+				}
+			}
+			if ((kcount > 0) && (vindex >= 0))  {
+				int tcount = kcount - vindex - 1;
+				for (int j=0; j<tcount; j++) {
+					dissonanceline << "\t!";
+				}
+			}
+		}
+	}
+
+	if (!dissonanceline.str().empty()) {
+		m_humdrum_text << dissonanceline.str() << endl;
+	}
 	if (!labelline.str().empty()) {
 		m_humdrum_text << labelline.str() << endl;
 	}
 	if (!dataline.str().empty()) {
 		m_humdrum_text << dataline.str() << endl;
 	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cadence::getDissonanceNames --
+//
+
+string Tool_autocadence::getDissonanceNames(const string& input) {
+	HumRegex hre;
+	string output;
+	vector<string> pieces;
+	hre.split(pieces, input, "[^A-Za-z]");
+	map<string, bool> found;
+	int counter = 0;
+	for (int i=0; i<(int)pieces.size(); i++) {
+		if (pieces[i].empty()) {
+			continue;
+		}
+		if (found[pieces[i]] == true) {
+			continue;
+		}
+		found[pieces[i]] = true;
+		string name = m_dissonanceNames[pieces[i]];
+		if (name.empty()) {
+			name = pieces[i];
+		}
+		if (counter > 0) {
+			output += ", ";
+		}
+		output += name;
+	}
+	return output;
 }
 
 
@@ -59156,6 +59246,14 @@ string Tool_autocadence::generateCounterpointString(vector<vector<HTp>>& pairing
 		dissonant4 = "D";
 	}
 
+	string dissonanceU;
+	string dissonanceL;
+	if (m_suspensionsQ) {
+		dissonanceL = lower->getValue("auto", "dissonance");
+		dissonanceU = upper->getValue("auto", "dissonance");
+cerr << "DISSONANCES: " << dissonanceL << "\t" << dissonanceU << endl;
+	}
+
 	string mintL = "R";
 	string mintU = "R";
 
@@ -59163,6 +59261,10 @@ string Tool_autocadence::generateCounterpointString(vector<vector<HTp>>& pairing
 	if (index < (int)pairings[0].size() - 1){
 		mintL = getDiatonicIntervalString(b7L, b7Ln);
 		mintU = getDiatonicIntervalString(b7U, b7Un);
+	}
+
+	if ((mintL == "R") || (mintU == "R")) {
+		dissonant4 = "";
 	}
 
 	string output = hint;
@@ -59429,9 +59531,26 @@ void Tool_autocadence::prepareAbbreviations(HumdrumFile& infile) {
 }
 
 
+
 //////////////////////////////
 //
-// Tool_autocadence::prepareCvfNames --
+// Tool_autocadence::prepareDissonanceNames -- Only labeling suspensions for now.
+//
+
+void Tool_autocadence::prepareDissonanceNames(void) {
+	m_dissonanceNames.clear();
+
+	m_dissonanceNames.emplace("s", "binary suspension");
+	m_dissonanceNames.emplace("S", "ternary suspension");
+	m_dissonanceNames.emplace("g", "binary suspension agent");
+	m_dissonanceNames.emplace("G", "ternary suspension agent");
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::prepareCvfNames -- Counterpoint voice function names and abbreviations.
 //
 
 void Tool_autocadence::prepareCvfNames(void) {
@@ -59460,6 +59579,72 @@ void Tool_autocadence::prepareCvfNames(void) {
 	m_functionNames.emplace("z", "Abandoned Tenorizans");
 
 }
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::prepareDissonances --
+//
+
+void Tool_autocadence::prepareDissonances(HumdrumFile& infile) {
+	HumdrumFile dfile;
+	stringstream ss;
+	ss << infile;
+	dfile.readString(ss.str());
+   hum::Tool_dissonant dissonant;
+	dissonant.run(dfile);
+	// cout << dfile;
+	int dsize = dfile.getLineCount();
+	int isize = infile.getLineCount();
+	if (dsize != isize) {
+		// number of lines in input/output are expected to be the same.
+		cerr << "LINE COUNTS OF FILES FOR DISSONANCE ANALYSIS DO NOT MATCH." << endl;
+		m_suspensionsQ = false;
+		return;
+	}
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (infile[i].isData()) {
+			prepareDissonancesForLine(infile[i], dfile[i]);
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::prepareDissonancesForLine -- Transfer dissonance analysis to
+//     input file for a single data line.
+//
+
+void Tool_autocadence::prepareDissonancesForLine(HumdrumLine& iline, HumdrumLine& dline) {
+	vector<HTp> ikern;
+	for (int i=0; i<iline.getFieldCount(); i++) {
+		HTp token = iline.token(i);
+		if (token->isKern()) {
+			ikern.push_back(token);
+		}
+	}
+
+	int kindex = -1;
+	for (int i=0; i<dline.getFieldCount(); i++) {
+		HTp token = dline.token(i);
+		if (token->isKern()) {
+			kindex++;
+			continue;
+		}
+		if (token->isDataType("**cdata-rdiss")) {
+			if (kindex >= 0) {
+				string text = token->getText();
+				if (text != ".") {
+					ikern.at(kindex)->setValue("auto", "dissonance", text);
+				}
+			}
+		}
+	}
+}
+
 
 
 
@@ -78605,8 +78790,8 @@ Tool_dissonant::Tool_dissonant(void) {
 	define("u|undirected=b",                 "use undirected dissonance labels");
 	define("c|count=b",                      "count dissonances by category");
 	define("i|x|e|exinterp=s:**cdata-rdiss", "specify exinterp for **diss spines");
-	define("color|color-by-rhythm=b",        "color dissonant notes by beat level");
-	define("color2|color-by-interval=b",     "color dissonant notes by dissonant interval");
+	define("color|colorize|color-by-rhythm=b",        "color dissonant notes by beat level");
+	define("color2|colorize2|color-by-interval=b",    "color dissonant notes by dissonant interval");
 }
 
 
