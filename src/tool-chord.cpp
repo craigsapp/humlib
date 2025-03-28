@@ -84,6 +84,7 @@ bool Tool_chord::run(HumdrumFile& infile) {
 	initialize();
 	processFile(infile, m_direction);
 	infile.createLinesFromTokens();
+	m_humdrum_text << infile;
 	return true;
 }
 

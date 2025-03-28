@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Mar 17 20:28:51 PDT 2025
+// Last Modified: Fri Mar 28 11:08:41 PDT 2025
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -63120,6 +63120,7 @@ bool Tool_chord::run(HumdrumFile& infile) {
 	initialize();
 	processFile(infile, m_direction);
 	infile.createLinesFromTokens();
+	m_humdrum_text << infile;
 	return true;
 }
 
