@@ -175,7 +175,7 @@ void Tool_compositeold::analyzeComposite(HumdrumFile& infile) {
 	// inserted into them.  The tracks vector also is used to prevent
 	// composite rhythms from being includeded in the numerical analyses
 	// for note onsets, accents, ornaments and slurs.
-	vector<bool> tracks(infile.getMaxTrack() + 1, false);;
+	vector<bool> tracks(infile.getMaxTrack() + 1, false);
 	for (int i=0; i<(int)groups.size(); i++) {
 		if (groups[i] == NULL) {
 			continue;

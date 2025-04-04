@@ -4,7 +4,7 @@
 // Last Modified: Wed Jul  3 21:00:36 CEST 2024
 // Filename:      tool-extract.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-extract.h
-// Syntax:        C++11;; humlib
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   C++ implementation of the Humdrum Toolkit extract command.

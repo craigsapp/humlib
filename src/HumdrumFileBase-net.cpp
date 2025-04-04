@@ -69,7 +69,7 @@ string HumdrumFileBase::getUriToUrlMapping(const string& uri) {
 			// no files in root directory, but no reperoties either
 			repertoryQ = true;
 		}
-		string output = "http://";;
+		string output = "http://";
 		output += "kern.ccarh.org";
 		output += "/data?";
 		if (repertoryQ) {

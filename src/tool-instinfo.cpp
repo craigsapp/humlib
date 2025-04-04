@@ -214,7 +214,7 @@ void Tool_instinfo::processFile(HumdrumFile& infile) {
 	initialize(infile);
 	vector<HTp> kspines;
 	kspines = infile.getKernSpineStartList();
-	vector<int> ktracks(kspines.size(), -1);;
+	vector<int> ktracks(kspines.size(), -1);
 	for (int i=0; i<(int)kspines.size(); i++) {
 		ktracks[i] = kspines[i]->getTrack();
 	}

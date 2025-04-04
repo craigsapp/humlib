@@ -2298,7 +2298,7 @@ void Tool_esac2hum::printFooter(ostream& output, vector<string>& infile) {
 
 	if (m_embedEsacQ) {
 		output << "!!@@BEGIN: ESAC" << endl;
-		output << "!!@CONTENTS:" << endl;;
+		output << "!!@CONTENTS:" << endl;
 		for (int i=0; i<(int)infile.size(); i++) {
 			output << "!!" << infile[i] << endl;
 		}

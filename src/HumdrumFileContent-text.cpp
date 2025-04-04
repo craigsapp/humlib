@@ -54,7 +54,7 @@ bool HumdrumFileContent::analyzeTextRepetition(void) {
 		while (current) {
 			if (current->isNull()) {
 				current = current->getNextToken();
-				continue;;
+				continue;
 			}
 			if (current->isInterpretation()) {
 				if ((*current == "*ij") || (*current == "*edit") || (*current == "*italic")) {

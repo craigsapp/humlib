@@ -213,7 +213,7 @@ void Convert::makeBooleanTrackList(vector<bool>& spinelist,
 	}
 	fill(spinelist.begin(), spinelist.end(), false);
 
-   string buffer = spinestring;;
+   string buffer = spinestring;
 	vector<string> entries;
 	string separator = "[^\\d\\$-]+";
    HumRegex hre;

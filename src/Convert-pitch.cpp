@@ -497,7 +497,7 @@ int Convert::kernToBase7(const string& kerndata) {
 		return diatonic;
 	}
 	int octave = Convert::kernToOctaveNumber(kerndata);
-	return diatonic + 7 * octave;;
+	return diatonic + 7 * octave;
 }
 
 

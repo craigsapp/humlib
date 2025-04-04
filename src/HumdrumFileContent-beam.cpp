@@ -472,7 +472,7 @@ void HumdrumFileContent::markBeamSpanMembers(HTp beamstart, HTp beamend) {
 	int endindex = beamend->getLineIndex();
 	beamstart->setValue("auto", "inBeamSpan", beamstart);
 	beamend->setValue("auto", "inBeamSpan", beamstart);
-	HTp current = beamstart->getNextToken();;
+	HTp current = beamstart->getNextToken();
 	while (current) {
       int line = current->getLineIndex();
 		if (line > endindex) {

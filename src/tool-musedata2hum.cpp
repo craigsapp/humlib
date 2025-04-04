@@ -442,7 +442,7 @@ int Tool_musedata2hum::convertMeasure(HumGrid& outdata, MuseData& part, int part
 	HumNum diff = filedur - starttime;
 	if (diff == 0) {
 		// last barline in score, so ignore
-		return startindex + 1;;
+		return startindex + 1;
 	}
 
 	GridMeasure* gm = getMeasure(outdata, starttime);

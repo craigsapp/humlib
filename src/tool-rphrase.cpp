@@ -594,7 +594,7 @@ void Tool_rphrase::printVoiceInfo(Tool_rphrase::VoiceInfo& voiceInfo) {
 
 void Tool_rphrase::printEmbeddedVoiceInfo(vector<Tool_rphrase::VoiceInfo>& voiceInfo, Tool_rphrase::VoiceInfo& compositeInfo, HumdrumFile& infile) {
 
-	m_humdrum_text << "!!@@BEGIN: PREHTML" << endl;;
+	m_humdrum_text << "!!@@BEGIN: PREHTML" << endl;
 
 	m_humdrum_text << "!!@SCRIPT:" << endl;
 	m_humdrum_text << "!!   function rphraseGotoMeasure(measure) {" << endl;

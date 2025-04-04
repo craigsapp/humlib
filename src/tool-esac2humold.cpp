@@ -1149,7 +1149,7 @@ void Tool_esac2humold::getMeterInfo(string& meter, vector<int>& numerator,
 
 void Tool_esac2humold::getLineRange(vector<string>& song, const string& field,
 		int& start, int& stop) {
-	string searchstring = field;;
+	string searchstring = field;
 	searchstring += "[";
 	start = stop = -1;
 	for (int i=0; i<(int)song.size(); i++) {

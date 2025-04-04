@@ -1889,7 +1889,7 @@ void Tool_cmr::prepareHtmlReport(void) {
 !!   output += '<th>Measure(s)</th>';
 !!   output += '</tr>';
 !!   for (let i=0; i<numbers.length; i++) {
-!!      let direction = parseInt(directions[i].value) == 1 ? "+" : "-";;
+!!      let direction = parseInt(directions[i].value) == 1 ? "+" : "-";
 !!      output += '<tr>';
 !!      output += `<td>${numbers[i].value}</td>`;
 !!      output += `<td>${count[i].value}</td>`;

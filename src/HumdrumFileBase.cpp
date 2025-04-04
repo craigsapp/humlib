@@ -1563,7 +1563,7 @@ bool HumdrumFileBase::analyzeLinks(void) {
 			}
 		}
 	}
-	return isValid();;
+	return isValid();
 }
 
 

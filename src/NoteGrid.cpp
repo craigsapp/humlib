@@ -650,7 +650,7 @@ HumNum NoteGrid::getNoteDuration(int vindex, int sindex) {
 	if (attacki >= 0) {
 		starttime = cell(vindex, attacki)->getDurationFromStart();
 	}
-	HumNum endtime = m_infile->getScoreDuration();;
+	HumNum endtime = m_infile->getScoreDuration();
 	if (nexti >= 0) {
 		endtime = cell(vindex, nexti)->getDurationFromStart();
 	}

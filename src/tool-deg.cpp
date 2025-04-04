@@ -1893,7 +1893,7 @@ string Tool_deg::ScaleDegree::generateDegDataToken(void) const {
 		return "ERROR3";
 	}
 
-	vector<string> subtokens(subtokenCount);;
+	vector<string> subtokens(subtokenCount);
 	for (int i=0; i<subtokenCount; i++) {
 		subtokens.at(i) = generateDegDataSubtoken(i);
 	}

@@ -317,8 +317,8 @@ void Tool_tandeminfo::printEntriesHtml(HumdrumFile& infile) {
 	if (!m_closeQ) {
 		m_humdrum_text << "open";
 	}
-	m_humdrum_text << ">" << endl;;
-	m_humdrum_text << "!!<summary class='tandeminfo'>Tandem interpretation information</summary>" << endl;;
+	m_humdrum_text << ">" << endl;
+	m_humdrum_text << "!!<summary class='tandeminfo'>Tandem interpretation information</summary>" << endl;
 	if (!m_entries.empty()) {
 		m_humdrum_text << "!!<table class='tandeminfo'>" << endl;
 

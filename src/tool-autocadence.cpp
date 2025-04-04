@@ -463,7 +463,7 @@ void Tool_autocadence::printRegexTable(void) {
 
 	// pair::first: index into m_definitions;
 	// pair::second: occurrence count for given cadence in score.
-	set<int> definitionList;;
+	set<int> definitionList;
 	prepareDefinitionList(definitionList);
 
 	if (definitionList.empty()) {

@@ -177,7 +177,7 @@ void Tool_homorhythm2::processFile(HumdrumFile& infile) {
 	}
 
 
-	vector<string> color(infile.getLineCount());;
+	vector<string> color(infile.getLineCount());
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (!infile[i].isData()) {
 			continue;

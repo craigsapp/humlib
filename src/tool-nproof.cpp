@@ -407,7 +407,7 @@ void Tool_nproof::checkReferenceRecords(HumdrumFile& infile) {
 		}
 		if (hre.search(key, "^EEV\\d*$")) {
 			if (key == "EEV") {
-				foundEEV.push_back(i);;
+				foundEEV.push_back(i);
 			}
 			string value = infile[i].getReferenceValue();
 			if (!hre.search(value, "^\\d\\d\\d\\d-\\d\\d-\\d\\d")) {
