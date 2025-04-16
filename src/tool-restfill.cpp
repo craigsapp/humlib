@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sun Jul 14 01:03:07 CEST 2019
-// Last Modified: Sun Jul 14 01:03:12 CEST 2019
+// Last Modified: Wed Apr 16 14:27:51 CEST 2025
 // Filename:      tool-restfill.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-restfill.cpp
 // Syntax:        C++11; humlib
@@ -110,7 +110,6 @@ void Tool_restfill::initialize(void) {
 //
 
 void Tool_restfill::processFile(HumdrumFile& infile) {
-
 	vector<HTp> starts;
 	infile.getSpineStartList(starts, m_exinterp);
 	vector<bool> process(starts.size(), false);
@@ -128,6 +127,8 @@ void Tool_restfill::processFile(HumdrumFile& infile) {
 		starts[i]->setText("**kern");
 		fillInRests(starts[i]);
 	}
+	infile.generateLinesFromTokens();
+	m_humdrum_text << infile;
 }
 
 
@@ -203,7 +204,7 @@ void Tool_restfill::fillInRests(HTp start) {
 			current = current->getNextToken();
 			continue;
 		}
-		if (current->getDuration() == 0) {
+		if (current->getLine()->getDuration() == 0) {
 			// grace-note line, so ignore
 			current = current->getNextToken();
 			continue;
