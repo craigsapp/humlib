@@ -104,6 +104,7 @@ class Tool_autocadence : public HumTool {
 		                                        int lindex, int vindex, int pindex);
 		void        prepareDissonances         (HumdrumFile& infile);
 		void        prepareDissonancesForLine  (HumdrumLine& iline, HumdrumLine& dline);
+		void        identifySuspensionsAndAgents(HumdrumFile& infile);
 
 	private:
 
@@ -185,11 +186,11 @@ class Tool_autocadence : public HumTool {
 		bool m_regexQ                   = false; // -r: show table of matched regular expressions
 		bool m_popupQ                   = true;  // --pop: show popup when hoving over CFV lables (to be implemented)
 		bool m_nobackQ                  = false; // -B: don't highlight start of sustain at start of cadence definition
-		bool m_suspensionsQ             = true;  // -S: don't use suspension analysis
+		bool m_autoSuspensionsQ         = true;  // -S: don't use automatic suspension analysis (negated)
+		bool m_embeddedSuspensionsQ     = false; // -e: use embedded suspension analyses (could autodetect)
 		std::string m_marker = "@";
 		std::string m_suspensionMarker = "N";
 		std::string m_suspensionColor  = "crimson";
-
 };
 
 // END_MERGE

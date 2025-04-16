@@ -238,6 +238,7 @@ Ngram,LowerCVF,UpperCVF
  */
 
 #include "tool-autocadence.h"
+#include "tool-dissonant.h"
 #include "Convert.h"
 #include "HumRegex.h"
 #include "tool-dissonant.h"
@@ -258,19 +259,20 @@ namespace hum {
 //
 
 Tool_autocadence::Tool_autocadence(void) {
-	define("c|color-cadence-notes=b", "Color cadence formula notes that match");
-	define("d|show-formula-index=b",  "Append formula index after CVF label");
-	define("e|even-note-spacing=b",   "Compress notation as much as possible");
-	define("i|include-intervals=b",   "Display interval strings for notes in score (no further analysis)");
-	define("m|matches=b",             "Give list of matching sequences only");
-	define("p|pitches=b",             "Display extracted base-7 pitches only");
-	define("r|regex=b",               "Display table of cadence formula regexes");
-	define("s|sequences=b",           "Give list of extracted sequences only");
-	define("I|intervals-only=b",      "Display interval strings for notes in score (no further analysis)");
-	define("color=s:dodgerblue",      "Color cadence formula notes with given color");
-	define("count|match-count=b",     "Return number of cadence formulas that match");
-	define("B|no-back-highlight=b",   "Do not color start of sustain note at start of cadence definition");
-	define("S|no-suspensions=b",      "Do not use suspensions from dissonance analysis");
+	define("c|color-cadence-notes=b",      "Color cadence formula notes that match");
+	define("d|show-formula-index=b",       "Append formula index after CVF label");
+	define("e|even-note-spacing=b",        "Compress notation as much as possible");
+	define("i|include-intervals=b",        "Display interval strings for notes in score (no further analysis)");
+	define("m|matches=b",                  "Give list of matching sequences only");
+	define("p|pitches=b",                  "Display extracted base-7 pitches only");
+	define("r|regex=b",                    "Display table of cadence formula regexes");
+	define("s|sequences=b",                "Give list of extracted sequences only");
+	define("I|intervals-only=b",           "Display interval strings for notes in score (no further analysis)");
+	define("color=s:dodgerblue",           "Color cadence formula notes with given color");
+	define("count|match-count=b",          "Return number of cadence formulas that match");
+	define("B|no-back-highlight=b",        "Do not color start of sustain note at start of cadence definition");
+	define("E|embedded-suspensions=b",     "Use dissonance analysis suspensions embedded in score");
+	define("S|no-automatic-suspensions=b", "Do not automatically analyze suspensions and agents");
 }
 
 
@@ -339,7 +341,8 @@ void Tool_autocadence::initialize(void) {
 	m_evenNoteSpacingQ         =  getBoolean("even-note-spacing");
 	m_regexQ                   =  getBoolean("regex");
 	m_nobackQ                  = !getBoolean("no-back-highlight");
-	m_suspensionsQ             = !getBoolean("no-suspensions");
+	m_autoSuspensionsQ         = !getBoolean("no-automatic-suspensions");
+	m_embeddedSuspensionsQ      =  getBoolean("embedded-suspensions");
 
 	prepareCadenceDefinitions();
 	prepareCvfNames();
@@ -355,6 +358,9 @@ void Tool_autocadence::initialize(void) {
 
 void Tool_autocadence::processFile(HumdrumFile& infile) {
 
+	if (m_autoSuspensionsQ) {
+		identifySuspensionsAndAgents(infile);
+	}
 
 	// fill m_pitches and m_lowestPitch
 	preparePitchInfo(infile);
@@ -364,7 +370,7 @@ void Tool_autocadence::processFile(HumdrumFile& infile) {
 	}
 
 	// identify dissonances
-	if (m_suspensionsQ) {
+	if (m_embeddedSuspensionsQ && !m_autoSuspensionsQ) {
 		prepareDissonances(infile);
 	}
 
@@ -1968,30 +1974,25 @@ string Tool_autocadence::generateCounterpointString(vector<vector<HTp>>& pairing
 
 	// Determine if there is a fourth above the lowest sounding note
 	// for the current pair of voices:
-	int lowL = 0;
 	int lowU = 0;
 	int lowest = m_lowestPitch.at(lineIndex);
 	if (lowest == 0) {
 		// do nothing
 	} else {
-		if (b7L != 0) {
-			lowL = getDiatonicInterval(lowest, b7L);
-		}
 		if (b7U != 0) {
 			lowU = getDiatonicInterval(lowest, b7U);
 		}
 	}
 	string dissonant4;
-	if ((lowL == 4) || (lowU == 4)) {
+	if (lowU == 4) {
 		dissonant4 = "D";
 	}
 
 	string dissonanceU;
 	string dissonanceL;
-	if (m_suspensionsQ) {
+	if (m_embeddedSuspensionsQ || m_autoSuspensionsQ) {
 		dissonanceL = lower->getValue("auto", "dissonance");
 		dissonanceU = upper->getValue("auto", "dissonance");
-cerr << "DISSONANCES: " << dissonanceL << "\t" << dissonanceU << endl;
 	}
 
 	string mintL = "R";
@@ -2340,7 +2341,7 @@ void Tool_autocadence::prepareDissonances(HumdrumFile& infile) {
 	if (dsize != isize) {
 		// number of lines in input/output are expected to be the same.
 		cerr << "LINE COUNTS OF FILES FOR DISSONANCE ANALYSIS DO NOT MATCH." << endl;
-		m_suspensionsQ = false;
+		m_embeddedSuspensionsQ = false;
 		return;
 	}
 	for (int i=0; i<infile.getLineCount(); i++) {
@@ -2383,6 +2384,25 @@ void Tool_autocadence::prepareDissonancesForLine(HumdrumLine& iline, HumdrumLine
 			}
 		}
 	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::identifySuspensionsAndAgents -- Mark suspensions and agents in score.
+//    These will be used rather than a fourth from the upper voice to the lowest pitch.
+//
+
+void Tool_autocadence::identifySuspensionsAndAgents(HumdrumFile& infile) {
+	HumdrumFile tempfile;
+	stringstream ss;
+	ss << infile;
+	tempfile.readString(ss.str());
+	Tool_dissonant dissonant;
+	dissonant.run(tempfile);
+
+
 }
 
 

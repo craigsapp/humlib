@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Mar 28 11:08:41 PDT 2025
+// Last Modified: Wed Apr 16 14:26:44 CEST 2025
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -3063,7 +3063,7 @@ int Convert::kernToBase7(const string& kerndata) {
 		return diatonic;
 	}
 	int octave = Convert::kernToOctaveNumber(kerndata);
-	return diatonic + 7 * octave;;
+	return diatonic + 7 * octave;
 }
 
 
@@ -5585,7 +5585,7 @@ void Convert::makeBooleanTrackList(vector<bool>& spinelist,
 	}
 	fill(spinelist.begin(), spinelist.end(), false);
 
-   string buffer = spinestring;;
+   string buffer = spinestring;
 	vector<string> entries;
 	string separator = "[^\\d\\$-]+";
    HumRegex hre;
@@ -19830,7 +19830,7 @@ string HumdrumFileBase::getUriToUrlMapping(const string& uri) {
 			// no files in root directory, but no reperoties either
 			repertoryQ = true;
 		}
-		string output = "http://";;
+		string output = "http://";
 		output += "kern.ccarh.org";
 		output += "/data?";
 		if (repertoryQ) {
@@ -21757,7 +21757,7 @@ bool HumdrumFileBase::analyzeLinks(void) {
 			}
 		}
 	}
-	return isValid();;
+	return isValid();
 }
 
 
@@ -24198,7 +24198,7 @@ void HumdrumFileContent::markBeamSpanMembers(HTp beamstart, HTp beamend) {
 	int endindex = beamend->getLineIndex();
 	beamstart->setValue("auto", "inBeamSpan", beamstart);
 	beamend->setValue("auto", "inBeamSpan", beamstart);
-	HTp current = beamstart->getNextToken();;
+	HTp current = beamstart->getNextToken();
 	while (current) {
       int line = current->getLineIndex();
 		if (line > endindex) {
@@ -26669,7 +26669,7 @@ bool HumdrumFileContent::analyzeTextRepetition(void) {
 		while (current) {
 			if (current->isNull()) {
 				current = current->getNextToken();
-				continue;;
+				continue;
 			}
 			if (current->isInterpretation()) {
 				if ((*current == "*ij") || (*current == "*edit") || (*current == "*italic")) {
@@ -51377,7 +51377,7 @@ HumNum NoteGrid::getNoteDuration(int vindex, int sindex) {
 	if (attacki >= 0) {
 		starttime = cell(vindex, attacki)->getDurationFromStart();
 	}
-	HumNum endtime = m_infile->getScoreDuration();;
+	HumNum endtime = m_infile->getScoreDuration();
 	if (nexti >= 0) {
 		endtime = cell(vindex, nexti)->getDurationFromStart();
 	}
@@ -57518,19 +57518,20 @@ void Tool_autobeam::removeEdgeRests(HTp& startnote, HTp& endnote) {
 //
 
 Tool_autocadence::Tool_autocadence(void) {
-	define("c|color-cadence-notes=b", "Color cadence formula notes that match");
-	define("d|show-formula-index=b",  "Append formula index after CVF label");
-	define("e|even-note-spacing=b",   "Compress notation as much as possible");
-	define("i|include-intervals=b",   "Display interval strings for notes in score (no further analysis)");
-	define("m|matches=b",             "Give list of matching sequences only");
-	define("p|pitches=b",             "Display extracted base-7 pitches only");
-	define("r|regex=b",               "Display table of cadence formula regexes");
-	define("s|sequences=b",           "Give list of extracted sequences only");
-	define("I|intervals-only=b",      "Display interval strings for notes in score (no further analysis)");
-	define("color=s:dodgerblue",      "Color cadence formula notes with given color");
-	define("count|match-count=b",     "Return number of cadence formulas that match");
-	define("B|no-back-highlight=b",   "Do not color start of sustain note at start of cadence definition");
-	define("S|no-suspensions=b",      "Do not use suspensions from dissonance analysis");
+	define("c|color-cadence-notes=b",      "Color cadence formula notes that match");
+	define("d|show-formula-index=b",       "Append formula index after CVF label");
+	define("e|even-note-spacing=b",        "Compress notation as much as possible");
+	define("i|include-intervals=b",        "Display interval strings for notes in score (no further analysis)");
+	define("m|matches=b",                  "Give list of matching sequences only");
+	define("p|pitches=b",                  "Display extracted base-7 pitches only");
+	define("r|regex=b",                    "Display table of cadence formula regexes");
+	define("s|sequences=b",                "Give list of extracted sequences only");
+	define("I|intervals-only=b",           "Display interval strings for notes in score (no further analysis)");
+	define("color=s:dodgerblue",           "Color cadence formula notes with given color");
+	define("count|match-count=b",          "Return number of cadence formulas that match");
+	define("B|no-back-highlight=b",        "Do not color start of sustain note at start of cadence definition");
+	define("E|embedded-suspensions=b",     "Use dissonance analysis suspensions embedded in score");
+	define("S|no-automatic-suspensions=b", "Do not automatically analyze suspensions and agents");
 }
 
 
@@ -57599,7 +57600,8 @@ void Tool_autocadence::initialize(void) {
 	m_evenNoteSpacingQ         =  getBoolean("even-note-spacing");
 	m_regexQ                   =  getBoolean("regex");
 	m_nobackQ                  = !getBoolean("no-back-highlight");
-	m_suspensionsQ             = !getBoolean("no-suspensions");
+	m_autoSuspensionsQ         = !getBoolean("no-automatic-suspensions");
+	m_embeddedSuspensionsQ      =  getBoolean("embedded-suspensions");
 
 	prepareCadenceDefinitions();
 	prepareCvfNames();
@@ -57615,6 +57617,9 @@ void Tool_autocadence::initialize(void) {
 
 void Tool_autocadence::processFile(HumdrumFile& infile) {
 
+	if (m_autoSuspensionsQ) {
+		identifySuspensionsAndAgents(infile);
+	}
 
 	// fill m_pitches and m_lowestPitch
 	preparePitchInfo(infile);
@@ -57624,7 +57629,7 @@ void Tool_autocadence::processFile(HumdrumFile& infile) {
 	}
 
 	// identify dissonances
-	if (m_suspensionsQ) {
+	if (m_embeddedSuspensionsQ && !m_autoSuspensionsQ) {
 		prepareDissonances(infile);
 	}
 
@@ -57723,7 +57728,7 @@ void Tool_autocadence::printRegexTable(void) {
 
 	// pair::first: index into m_definitions;
 	// pair::second: occurrence count for given cadence in score.
-	set<int> definitionList;;
+	set<int> definitionList;
 	prepareDefinitionList(definitionList);
 
 	if (definitionList.empty()) {
@@ -59228,30 +59233,25 @@ string Tool_autocadence::generateCounterpointString(vector<vector<HTp>>& pairing
 
 	// Determine if there is a fourth above the lowest sounding note
 	// for the current pair of voices:
-	int lowL = 0;
 	int lowU = 0;
 	int lowest = m_lowestPitch.at(lineIndex);
 	if (lowest == 0) {
 		// do nothing
 	} else {
-		if (b7L != 0) {
-			lowL = getDiatonicInterval(lowest, b7L);
-		}
 		if (b7U != 0) {
 			lowU = getDiatonicInterval(lowest, b7U);
 		}
 	}
 	string dissonant4;
-	if ((lowL == 4) || (lowU == 4)) {
+	if (lowU == 4) {
 		dissonant4 = "D";
 	}
 
 	string dissonanceU;
 	string dissonanceL;
-	if (m_suspensionsQ) {
+	if (m_embeddedSuspensionsQ || m_autoSuspensionsQ) {
 		dissonanceL = lower->getValue("auto", "dissonance");
 		dissonanceU = upper->getValue("auto", "dissonance");
-cerr << "DISSONANCES: " << dissonanceL << "\t" << dissonanceU << endl;
 	}
 
 	string mintL = "R";
@@ -59600,7 +59600,7 @@ void Tool_autocadence::prepareDissonances(HumdrumFile& infile) {
 	if (dsize != isize) {
 		// number of lines in input/output are expected to be the same.
 		cerr << "LINE COUNTS OF FILES FOR DISSONANCE ANALYSIS DO NOT MATCH." << endl;
-		m_suspensionsQ = false;
+		m_embeddedSuspensionsQ = false;
 		return;
 	}
 	for (int i=0; i<infile.getLineCount(); i++) {
@@ -59643,6 +59643,25 @@ void Tool_autocadence::prepareDissonancesForLine(HumdrumLine& iline, HumdrumLine
 			}
 		}
 	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::identifySuspensionsAndAgents -- Mark suspensions and agents in score.
+//    These will be used rather than a fourth from the upper voice to the lowest pitch.
+//
+
+void Tool_autocadence::identifySuspensionsAndAgents(HumdrumFile& infile) {
+	HumdrumFile tempfile;
+	stringstream ss;
+	ss << infile;
+	tempfile.readString(ss.str());
+	Tool_dissonant dissonant;
+	dissonant.run(tempfile);
+
+
 }
 
 
@@ -67979,7 +67998,7 @@ void Tool_cmr::prepareHtmlReport(void) {
 !!   output += '<th>Measure(s)</th>';
 !!   output += '</tr>';
 !!   for (let i=0; i<numbers.length; i++) {
-!!      let direction = parseInt(directions[i].value) == 1 ? "+" : "-";;
+!!      let direction = parseInt(directions[i].value) == 1 ? "+" : "-";
 !!      output += '<tr>';
 !!      output += `<td>${numbers[i].value}</td>`;
 !!      output += `<td>${count[i].value}</td>`;
@@ -72766,7 +72785,7 @@ void Tool_compositeold::analyzeComposite(HumdrumFile& infile) {
 	// inserted into them.  The tracks vector also is used to prevent
 	// composite rhythms from being includeded in the numerical analyses
 	// for note onsets, accents, ornaments and slurs.
-	vector<bool> tracks(infile.getMaxTrack() + 1, false);;
+	vector<bool> tracks(infile.getMaxTrack() + 1, false);
 	for (int i=0; i<(int)groups.size(); i++) {
 		if (groups[i] == NULL) {
 			continue;
@@ -78172,7 +78191,7 @@ string Tool_deg::ScaleDegree::generateDegDataToken(void) const {
 		return "ERROR3";
 	}
 
-	vector<string> subtokens(subtokenCount);;
+	vector<string> subtokens(subtokenCount);
 	for (int i=0; i<subtokenCount; i++) {
 		subtokens.at(i) = generateDegDataSubtoken(i);
 	}
@@ -83662,7 +83681,7 @@ void Tool_esac2hum::printFooter(ostream& output, vector<string>& infile) {
 
 	if (m_embedEsacQ) {
 		output << "!!@@BEGIN: ESAC" << endl;
-		output << "!!@CONTENTS:" << endl;;
+		output << "!!@CONTENTS:" << endl;
 		for (int i=0; i<(int)infile.size(); i++) {
 			output << "!!" << infile[i] << endl;
 		}
@@ -85549,7 +85568,7 @@ void Tool_esac2humold::getMeterInfo(string& meter, vector<int>& numerator,
 
 void Tool_esac2humold::getLineRange(vector<string>& song, const string& field,
 		int& start, int& stop) {
-	string searchstring = field;;
+	string searchstring = field;
 	searchstring += "[";
 	start = stop = -1;
 	for (int i=0; i<(int)song.size(); i++) {
@@ -93271,7 +93290,7 @@ void Tool_homorhythm2::processFile(HumdrumFile& infile) {
 	}
 
 
-	vector<string> color(infile.getLineCount());;
+	vector<string> color(infile.getLineCount());
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (!infile[i].isData()) {
 			continue;
@@ -96994,7 +97013,7 @@ void Tool_instinfo::processFile(HumdrumFile& infile) {
 	initialize(infile);
 	vector<HTp> kspines;
 	kspines = infile.getKernSpineStartList();
-	vector<int> ktracks(kspines.size(), -1);;
+	vector<int> ktracks(kspines.size(), -1);
 	for (int i=0; i<(int)kspines.size(); i++) {
 		ktracks[i] = kspines[i]->getTrack();
 	}
@@ -109430,7 +109449,7 @@ int Tool_musedata2hum::convertMeasure(HumGrid& outdata, MuseData& part, int part
 	HumNum diff = filedur - starttime;
 	if (diff == 0) {
 		// last barline in score, so ignore
-		return startindex + 1;;
+		return startindex + 1;
 	}
 
 	GridMeasure* gm = getMeasure(outdata, starttime);
@@ -118456,7 +118475,7 @@ void Tool_nproof::checkReferenceRecords(HumdrumFile& infile) {
 		}
 		if (hre.search(key, "^EEV\\d*$")) {
 			if (key == "EEV") {
-				foundEEV.push_back(i);;
+				foundEEV.push_back(i);
 			}
 			string value = infile[i].getReferenceValue();
 			if (!hre.search(value, "^\\d\\d\\d\\d-\\d\\d-\\d\\d")) {
@@ -125011,7 +125030,7 @@ void Tool_rphrase::printVoiceInfo(Tool_rphrase::VoiceInfo& voiceInfo) {
 
 void Tool_rphrase::printEmbeddedVoiceInfo(vector<Tool_rphrase::VoiceInfo>& voiceInfo, Tool_rphrase::VoiceInfo& compositeInfo, HumdrumFile& infile) {
 
-	m_humdrum_text << "!!@@BEGIN: PREHTML" << endl;;
+	m_humdrum_text << "!!@@BEGIN: PREHTML" << endl;
 
 	m_humdrum_text << "!!@SCRIPT:" << endl;
 	m_humdrum_text << "!!   function rphraseGotoMeasure(measure) {" << endl;
@@ -131685,8 +131704,8 @@ void Tool_tandeminfo::printEntriesHtml(HumdrumFile& infile) {
 	if (!m_closeQ) {
 		m_humdrum_text << "open";
 	}
-	m_humdrum_text << ">" << endl;;
-	m_humdrum_text << "!!<summary class='tandeminfo'>Tandem interpretation information</summary>" << endl;;
+	m_humdrum_text << ">" << endl;
+	m_humdrum_text << "!!<summary class='tandeminfo'>Tandem interpretation information</summary>" << endl;
 	if (!m_entries.empty()) {
 		m_humdrum_text << "!!<table class='tandeminfo'>" << endl;
 
