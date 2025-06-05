@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Apr 16 15:07:19 CEST 2025
+// Last Modified: Sat Apr 19 15:20:26 CEST 2025
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -6016,7 +6016,7 @@ class Tool_autocadence : public HumTool {
 		// options:
 		bool m_intervalsQ               = false; // -i: show counterpoint interval infomation
 		bool m_intervalsOnlyQ           = false; // -I: show counterpoint interval infomation but
-		                                         // do not do cadence analysis
+		                                         //     do not do cadence analysis
 		bool m_printRawDiatonicPitchesQ = false; // -p: display m_pitches after filling
 		int  m_sequenceLength           = 7;     // maximum regex interval sequence length
 		bool m_matchesQ                 = false; // -m: display sequences that match to cadence formula(s)
@@ -6029,8 +6029,8 @@ class Tool_autocadence : public HumTool {
 		bool m_regexQ                   = false; // -r: show table of matched regular expressions
 		bool m_popupQ                   = true;  // --pop: show popup when hoving over CFV lables (to be implemented)
 		bool m_nobackQ                  = false; // -B: don't highlight start of sustain at start of cadence definition
-		bool m_autoSuspensionsQ         = true;  // -S: don't use automatic suspension analysis (negated)
-		bool m_embeddedSuspensionsQ     = false; // -e: use embedded suspension analyses (could autodetect)
+		bool m_showSuspensionsQ         = true;  // !-S: show suspension/agent labels in output score
+		bool m_lowestQ                  = false; // -l: use lowest note to define suspensions instead of dissonance analysis
 		std::string m_marker = "@";
 		std::string m_suspensionMarker = "N";
 		std::string m_suspensionColor  = "crimson";

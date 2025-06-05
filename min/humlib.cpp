@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Apr 16 15:07:19 CEST 2025
+// Last Modified: Sat Apr 19 15:20:26 CEST 2025
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -57522,16 +57522,16 @@ Tool_autocadence::Tool_autocadence(void) {
 	define("d|show-formula-index=b",       "Append formula index after CVF label");
 	define("e|even-note-spacing=b",        "Compress notation as much as possible");
 	define("i|include-intervals=b",        "Display interval strings for notes in score (no further analysis)");
+	define("l|lowest=b",                   "Use fourth above lowest note for dissonance label instead of suspensions");
 	define("m|matches=b",                  "Give list of matching sequences only");
 	define("p|pitches=b",                  "Display extracted base-7 pitches only");
 	define("r|regex=b",                    "Display table of cadence formula regexes");
 	define("s|sequences=b",                "Give list of extracted sequences only");
+	define("B|no-back-highlight=b",        "Do not color start of sustain note at start of cadence definition");
 	define("I|intervals-only=b",           "Display interval strings for notes in score (no further analysis)");
+	define("S|do-not-show-suspensions=b",  "Do not show suspensions/agents");
 	define("color=s:dodgerblue",           "Color cadence formula notes with given color");
 	define("count|match-count=b",          "Return number of cadence formulas that match");
-	define("B|no-back-highlight=b",        "Do not color start of sustain note at start of cadence definition");
-	define("E|embedded-suspensions=b",     "Use dissonance analysis suspensions embedded in score");
-	define("S|no-automatic-suspensions=b", "Do not automatically analyze suspensions and agents");
 }
 
 
@@ -57588,20 +57588,21 @@ bool Tool_autocadence::run(HumdrumFile& infile) {
 //
 
 void Tool_autocadence::initialize(void) {
-	m_printRawDiatonicPitchesQ =  getBoolean("pitches");
+
+	m_color                    =  getString("color");
+	m_colorQ                   =  getBoolean("color-cadence-notes");
+	m_countQ                   =  getBoolean("match-count");
+	m_evenNoteSpacingQ         =  getBoolean("even-note-spacing");
 	m_intervalsOnlyQ           =  getBoolean("intervals-only");
 	m_intervalsQ               =  getBoolean("include-intervals");
 	m_matchesQ                 =  getBoolean("matches");
-	m_printSequenceInfoQ       =  getBoolean("sequences");
-	m_countQ                   =  getBoolean("match-count");
-	m_colorQ                   =  getBoolean("color-cadence-notes");
-	m_color                    =  getString("color");
-	m_showFormulaIndexQ        =  getBoolean("show-formula-index");
-	m_evenNoteSpacingQ         =  getBoolean("even-note-spacing");
-	m_regexQ                   =  getBoolean("regex");
 	m_nobackQ                  = !getBoolean("no-back-highlight");
-	m_autoSuspensionsQ         = !getBoolean("no-automatic-suspensions");
-	m_embeddedSuspensionsQ      =  getBoolean("embedded-suspensions");
+	m_printRawDiatonicPitchesQ =  getBoolean("pitches");
+	m_printSequenceInfoQ       =  getBoolean("sequences");
+	m_regexQ                   =  getBoolean("regex");
+	m_showFormulaIndexQ        =  getBoolean("show-formula-index");
+   m_lowestQ                  =  getBoolean("lowest");
+   m_showSuspensionsQ         = !getBoolean("do-not-show-suspensions");
 
 	prepareCadenceDefinitions();
 	prepareCvfNames();
@@ -57617,10 +57618,6 @@ void Tool_autocadence::initialize(void) {
 
 void Tool_autocadence::processFile(HumdrumFile& infile) {
 
-	if (m_autoSuspensionsQ) {
-		identifySuspensionsAndAgents(infile);
-	}
-
 	// fill m_pitches and m_lowestPitch
 	preparePitchInfo(infile);
 	if (m_printRawDiatonicPitchesQ) {
@@ -57629,9 +57626,7 @@ void Tool_autocadence::processFile(HumdrumFile& infile) {
 	}
 
 	// identify dissonances
-	if (m_embeddedSuspensionsQ && !m_autoSuspensionsQ) {
-		prepareDissonances(infile);
-	}
+	prepareDissonances(infile);
 
 	// fill m_intervals
 	prepareIntervalInfo(infile);
@@ -58809,7 +58804,7 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 	}
 
 	stringstream dissonanceline;
-	if (foundDissonanceQ) {
+	if (m_showSuspensionsQ && foundDissonanceQ) {
 		for (int i=0; i<fcount; i++) {
 			HTp token = infile.token(index, i);
 			int track = token->getTrack();
@@ -59083,7 +59078,7 @@ void Tool_autocadence::prepareIntervalInfo(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_autocadence::prepareDiatonicPitches -- Extra the absolute diatonic pitches
+// Tool_autocadence::prepareDiatonicPitches -- Extract the absolute diatonic pitches
 //      from the score.  These are stored in m_pitches which is a 2-D array that
 //      matches the dimentions of the score.  Middle C is number 28 (7 * 4), rests
 //      are 0, and sustained notes are negative pitches.
@@ -59178,25 +59173,40 @@ void Tool_autocadence::generateCounterpointStrings(vector<HTp>& kspines, int vin
 		return;
 	}
 
-	int track = partLstart->getTrack();
-	int voiceIndex = m_trackToVoiceIndex.at(track);
-	int pairIndex = getPairIndex(kspines.at(vindexL), kspines.at(vindexU));
-
+	// Remove cases where there is not at least one note attack in the pairings.
+	vector<vector<HTp>> newpairings(2);
+	newpairings[0].reserve(10000);
+	newpairings[1].reserve(10000);
 	for (int i=0; i<(int)pairings[0].size(); i++) {
+		if (pairings[0][i]->isNullToken() && pairings[1][i]->isNullToken()) {
+			continue;
+		}
 		if (!(pairings[0][i]->isNoteAttack() || pairings[1][i]->isNoteAttack())) {
 			// both notes are sustaining in this slice.
 			// deal with rests here as well, allowing one rest slice between note pairings.
 			continue;
 		}
+		//if (pairings[0][i]->isRest() || pairings[1][i]->isRest()) {
+		//	continue;
+		//}
+		newpairings[0].push_back(pairings[0][i]);
+		newpairings[1].push_back(pairings[1][i]);
+	}
 
-		string entry = generateCounterpointString(pairings, i);
+	int track = partLstart->getTrack();
+	int voiceIndex = m_trackToVoiceIndex.at(track);
+	int pairIndex = getPairIndex(kspines.at(vindexL), kspines.at(vindexU));
 
-		int lineIndex = pairings[0][i]->getLineIndex();
+	for (int i=0; i<(int)newpairings[0].size(); i++) {
+		string entry = generateCounterpointString(newpairings, i);
+
+		int lineIndex = newpairings[0][i]->getLineIndex();
 
 		std::get<0>(m_intervals.at(lineIndex).at(voiceIndex).at(pairIndex)) = entry;
-		std::get<1>(m_intervals.at(lineIndex).at(voiceIndex).at(pairIndex)) = pairings[0].at(i);
-		std::get<2>(m_intervals.at(lineIndex).at(voiceIndex).at(pairIndex)) = pairings[1].at(i);
+		std::get<1>(m_intervals.at(lineIndex).at(voiceIndex).at(pairIndex)) = newpairings[0].at(i);
+		std::get<2>(m_intervals.at(lineIndex).at(voiceIndex).at(pairIndex)) = newpairings[1].at(i);
 	}
+
 }
 
 
@@ -59247,13 +59257,6 @@ string Tool_autocadence::generateCounterpointString(vector<vector<HTp>>& pairing
 		dissonant4 = "D";
 	}
 
-	string dissonanceU;
-	string dissonanceL;
-	if (m_embeddedSuspensionsQ || m_autoSuspensionsQ) {
-		dissonanceL = lower->getValue("auto", "dissonance");
-		dissonanceU = upper->getValue("auto", "dissonance");
-	}
-
 	string mintL = "R";
 	string mintU = "R";
 
@@ -59267,8 +59270,35 @@ string Tool_autocadence::generateCounterpointString(vector<vector<HTp>>& pairing
 		dissonant4 = "";
 	}
 
+	if (!m_lowestQ) {
+		// Use suspension information instead of lowest note to label dissonance.
+		string dissL = lower->getValue("auto", "dissonance");
+		string dissU = upper->getValue("auto", "dissonance");
+		if (!dissU.empty()) {
+			if ((dissU.find("s") != string::npos) || (dissU.find("S") != string::npos)) {
+				dissU = "s";
+			}
+		}
+		if (!dissL.empty()) {
+			if ((dissL.find("g") != string::npos) || (dissL.find("G") != string::npos)) {
+				dissL = "g";
+			}
+		}
+
+		if ((dissU == "s") && (dissL == "g")) {
+			dissonant4 = "D";
+		} else if ((dissU == "g") && (dissL == "s")) {
+			dissonant4 = "D";
+		} else {
+			dissonant4 = "";
+		}
+	}
+
 	string output = hint;
-	output += dissonant4;
+	if (hint == "4") {
+		// only marking dissonances for 4
+		output += dissonant4;
+	}
 	output += "_";
 	output += mintL;
 	output += ":";
@@ -59431,21 +59461,21 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/*  70 */ addCadenceDefinition("T", "A",	"TA5",	R"(^(?:R_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:-2, 2_1:2, 3_-2:2, 5_)");
 	/*  71 */ addCadenceDefinition("T", "A",	"TA6",	R"(^(?:R_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:-2, 2_1:2, 3_1:1, 3_-2:2, 5_)");
 	/*  72 */ addCadenceDefinition("T", "A",	"TA7",	R"(^(?:R_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:1, 3_1:-2, 2_-2:3, 5_)");
-	/*  73 */ addCadenceDefinition("T", "C",	"TC1",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7_1:-2, 6_-2:2, 8_)");
-	/*  74 */ addCadenceDefinition("T", "C",	"TC2",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7_1:-2, 6_1:-2, 5_-2:3, 8_)");
-	/*  75 */ addCadenceDefinition("T", "C",	"TC3",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7_1:-2, 6_1:-2, 5_1:2, 6_-2:2, 8_)");
-	/*  76 */ addCadenceDefinition("T", "C",	"TC4",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7_1:-2, 6_1:-2, 5_1:2, 6_1:1, 6_-2:2, 8_)");
-	/*  77 */ addCadenceDefinition("T", "C",	"TC5",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7_1:-2, 6_1:1, 6_-2:2, 8_)");
-	/*  78 */ addCadenceDefinition("T", "C",	"TC6",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7_1:-2, 6_1:1, 6_1:-2, 5_-2:3, 8_)");
-	/*  79 */ addCadenceDefinition("T", "C",	"TC7",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7_1:-2, 6_1:1, 6_1:-2, 5_1:2, 6_-2:2, 8_)");
-	/*  80 */ addCadenceDefinition("T", "C",	"TC8",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7_1:-2, 6_1:2, 7_1:-2, 6_1:-2, 5_-2:3, 8_)");
-	/*  81 */ addCadenceDefinition("T", "C",	"TC9",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7_1:-2, 6_1:2, 7_1:2, 8_1:-3, 6_-2:2, 8_)");
-	/*  82 */ addCadenceDefinition("T", "C",	"TC10",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7_1:-2, 6_1:2, 7_1:2, 8_1:-3, 6_1:-2, 5_-2:3, 8_)");
-	/*  83 */ addCadenceDefinition("T", "C",	"TC11",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7_1:-2, 6_1:3, 8_1:-3, 6_-2:2, 8_)");
-	/*  84 */ addCadenceDefinition("T", "C",	"TC12",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7_1:-3, 5_1:2, 6_-2:2, 8_)");
-	/*  85 */ addCadenceDefinition("T", "C",	"TC13",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7_1:2, 8_1:-3, 6_-2:2, 8_)");
-	/*  86 */ addCadenceDefinition("T", "C",	"TC14",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7_1:2, 8_1:-3, 6_1:-2, 5_-2:3, 8_)");
-	/*  87 */ addCadenceDefinition("T", "C",	"TC15",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7_1:2, 8_1:-3, 6_1:1, 6_-2:2, 8_)");
+	/*  73 */ addCadenceDefinition("T", "C",	"TC1",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7?_1:-2, 6_-2:2, 8_)");
+	/*  74 */ addCadenceDefinition("T", "C",	"TC2",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7?_1:-2, 6_1:-2, 5_-2:3, 8_)");
+	/*  75 */ addCadenceDefinition("T", "C",	"TC3",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7?_1:-2, 6_1:-2, 5_1:2, 6_-2:2, 8_)");
+	/*  76 */ addCadenceDefinition("T", "C",	"TC4",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7?_1:-2, 6_1:-2, 5_1:2, 6_1:1, 6_-2:2, 8_)");
+	/*  77 */ addCadenceDefinition("T", "C",	"TC5",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7?_1:-2, 6_1:1, 6_-2:2, 8_)");
+	/*  78 */ addCadenceDefinition("T", "C",	"TC6",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7?_1:-2, 6_1:1, 6_1:-2, 5_-2:3, 8_)");
+	/*  79 */ addCadenceDefinition("T", "C",	"TC7",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7?_1:-2, 6_1:1, 6_1:-2, 5_1:2, 6_-2:2, 8_)");
+	/*  80 */ addCadenceDefinition("T", "C",	"TC8",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7?_1:-2, 6_1:2, 7_1:-2, 6_1:-2, 5_-2:3, 8_)");
+	/*  81 */ addCadenceDefinition("T", "C",	"TC9",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7?_1:-2, 6_1:2, 7_1:2, 8_1:-3, 6_-2:2, 8_)");
+	/*  82 */ addCadenceDefinition("T", "C",	"TC10",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7?_1:-2, 6_1:2, 7_1:2, 8_1:-3, 6_1:-2, 5_-2:3, 8_)");
+	/*  83 */ addCadenceDefinition("T", "C",	"TC11",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7?_1:-2, 6_1:3, 8_1:-3, 6_-2:2, 8_)");
+	/*  84 */ addCadenceDefinition("T", "C",	"TC12",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7?_1:-3, 5_1:2, 6_-2:2, 8_)");
+	/*  85 */ addCadenceDefinition("T", "C",	"TC13",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7?_1:2, 8_1:-3, 6_-2:2, 8_)");
+	/*  86 */ addCadenceDefinition("T", "C",	"TC14",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7?_1:2, 8_1:-3, 6_1:-2, 5_-2:3, 8_)");
+	/*  87 */ addCadenceDefinition("T", "C",	"TC15",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7?_1:2, 8_1:-3, 6_1:1, 6_-2:2, 8_)");
 	/*  88 */ addCadenceDefinition("T", "C",	"TC16",	R"(^(?:R_1|-?\d+_-?[^1]):1, -2_1:-2, -3_-2:2, (?:1|-8)_)");
 	/*  89 */ addCadenceDefinition("T", "C",	"TC17",	R"(^(?:R_1|-?\d+_-?[^1]):1, -2_1:-2, -3_1:-2, -4D?_-2:3, (?:1|-8)_)");
 	/*  90 */ addCadenceDefinition("T", "C",	"TC18",	R"(^(?:R_1|-?\d+_-?[^1]):1, -2_1:-2, -3_1:-2, -4D?_1:2, -3_-2:2, (?:1|-8)_)");
@@ -59466,7 +59496,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/* 105 */ addCadenceDefinition("c", "T",	"cT1",	R"(^(?:-?\d+|R)_1:-?\d+, 2_-2:1, 3_-2:-2, 3_)");
 	/* 106 */ addCadenceDefinition("c", "T",	"cT2",	R"(^[^R]_1, 7_1:-2, 6_-2:4, 3_)");
 	/* 107 */ addCadenceDefinition("p", "C",	"pC1",	R"(^(?:R_1|-?\d+_-?[^1]):1, 7_1:-2, 6_(?:5|-4):2, 3_)");
-	/* 108 */ addCadenceDefinition("s", "",		"s_1",	R"(^(?:R_1|-?\d+_-?[^1]):1, 2_1:-2, 8_-2:2, 3_)");
+	/* 108 */ addCadenceDefinition("s", "",	"s_1",	R"(^(?:R_1|-?\d+_-?[^1]):1, 2_1:-2, 8_-2:2, 3_)");
 	/* 109 */ addCadenceDefinition("t", "C",	"tC1",	R"(^(?:R_1|-?\d+_-?[^1]):1, -2_1:-2, -3_1:-2, -4D?_1:2, -3_2:2, -3_)");
 	/* 110 */ addCadenceDefinition("t", "C",	"tC2",	R"(^(?:R_1|-?\d+_-?[^1]):1, -2_1:-2, -3_2:2, -3_)");
 	/* 111 */ addCadenceDefinition("t", "C",	"tC3",	R"(^(?:R_1|-?\d+_-?[^1]):1, 7_1:-2, 6_1:1, 6_1:-2, 5_1:2, 6_2:2, 6_)");
@@ -59600,7 +59630,6 @@ void Tool_autocadence::prepareDissonances(HumdrumFile& infile) {
 	if (dsize != isize) {
 		// number of lines in input/output are expected to be the same.
 		cerr << "LINE COUNTS OF FILES FOR DISSONANCE ANALYSIS DO NOT MATCH." << endl;
-		m_embeddedSuspensionsQ = false;
 		return;
 	}
 	for (int i=0; i<infile.getLineCount(); i++) {
@@ -59643,25 +59672,6 @@ void Tool_autocadence::prepareDissonancesForLine(HumdrumLine& iline, HumdrumLine
 			}
 		}
 	}
-}
-
-
-
-//////////////////////////////
-//
-// Tool_autocadence::identifySuspensionsAndAgents -- Mark suspensions and agents in score.
-//    These will be used rather than a fourth from the upper voice to the lowest pitch.
-//
-
-void Tool_autocadence::identifySuspensionsAndAgents(HumdrumFile& infile) {
-	HumdrumFile tempfile;
-	stringstream ss;
-	ss << infile;
-	tempfile.readString(ss.str());
-	Tool_dissonant dissonant;
-	dissonant.run(tempfile);
-
-
 }
 
 
