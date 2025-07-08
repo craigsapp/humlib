@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Apr 19 15:20:26 CEST 2025
+// Last Modified: Tue Jul  8 20:40:08 CEST 2025
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -5916,6 +5916,1869 @@ int Convert::tempoNameToMm (const string& name, int bot, int top) {
 	}
 
 	return output;
+}
+
+
+
+
+
+//////////////////////////////
+//
+// GotScore::Measure::print -- Print contents of Measure object.  This
+//   is useful for debugging, and also this function is used to print
+//   the measure contents when there is a parsing error when converting
+//   to **kern data.
+//
+
+ostream& GotScore::Measure::print(ostream& output) {
+	output << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+	output << "!!!BAR:\t" << m_barnum << endl;
+	if (!m_error.empty()) {
+		output << "!!!ERROR: " << m_error << endl;
+	}
+	if (!m_text.empty()) {
+		output << "!!!TEXT:\t" << m_text << endl;
+	}
+
+	for (int v=0; v<(int)m_rhythms.size(); v++) {
+		output << "!!!rhythms-voice-" << v+1 << ":";
+		for (int b=0; b<(int)m_rhythms.at(v).size(); b++) {
+			output << "\t";
+			output << m_rhythms.at(v).at(b);
+		}
+		output << endl;
+	}
+
+	for (int v=0; v<(int)m_pitches.size(); v++) {
+		output << "!!!pitches-voice-" << v+1 << ":";
+		for (int b=0; b<(int)m_pitches.at(v).size(); b++) {
+			output << "\t";
+			output << m_pitches.at(v).at(b);
+		}
+		output << endl;
+	}
+
+	for (int v=0; v<(int)m_splitRhythms.size(); v++) {
+		output << "!!!kern-rhythms-voice-" << v+1 << ":";
+		for (int b=0; b<(int)m_splitRhythms.at(v).size(); b++) {
+			output << "\t";
+			for (int p=0; p<(int)m_splitRhythms.at(v).at(b).size(); p++) {
+				output << " " << m_splitRhythms.at(v).at(b).at(p);
+			}
+		}
+		output << endl;
+	}
+
+	for (int v=0; v<(int)m_splitPitches.size(); v++) {
+		output << "!!!kern-pitches-voice-" << v+1 << ":";
+		for (int b=0; b<(int)m_splitPitches.at(v).size(); b++) {
+			output << "\t";
+			for (int p=0; p<(int)m_splitPitches.at(v).at(b).size(); p++) {
+				if (p != 0) {
+					output << " ";
+				}
+				output << m_splitPitches.at(v).at(b).at(p);
+			}
+		}
+		output << endl;
+	}
+
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::GotScore -- Constructor: reads all lines from the
+//     input stream or string, trims trailing whitespace, and
+//     prepares internal TSV‐cell structures.
+//
+
+GotScore::GotScore(void) {
+	// do nothing
+}
+
+GotScore::GotScore(stringstream& ss) {
+	loadLines(ss);
+}
+
+
+GotScore::GotScore(const string& s) {
+	stringstream ss(s);
+	loadLines(ss);
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::~GotScore -- Destructor: no special cleanup required.
+//
+
+GotScore::~GotScore() {
+	// do nothing
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::clear -- Resets all internal vectors and cached output
+//    strings to empty (used when starting a new conversion).
+//
+
+void GotScore::clear(void) {
+	m_lines.clear();
+	m_cells.clear();
+	m_measures.clear();
+	m_got.clear();
+	m_kern.clear();
+	m_error.str("");
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::printInputFile -- Prints the input data from m_lines
+//    (with trailing whitespace removed).
+//
+
+ostream& GotScore::printInputFile(ostream& out) {
+	for (int i=0; i<(int)m_lines.size(); i++) {
+		out << (i+1) << ":\t" << m_lines[i] << endl;
+	}
+	return out;
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::printCells -- Print cells extracted from lines (for debugging
+//      purposes to verify input TSV data).
+//
+
+ostream& GotScore::printCells(ostream& out) {
+	for (int i=0; i<(int)m_cells.size(); i++) {
+		for (int j=0; j<(int)m_cells[i].size(); j++) {
+			out << i << "," << j << ":\t" << m_cells[i][j] << endl;
+		}
+	}
+	return out;
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::printMeasures -- Print contenst of Measure objects (for debugging).
+//
+
+ostream& GotScore::printMeasures(ostream& out) {
+	for (int i=0; i<(int)m_measures.size(); i++) {
+		m_measures[i].print(out);
+	}
+	return out;
+}
+
+
+//////////////////////////////
+//
+// GotScore::loadLines -- Input data is split vector of strings
+//    and then 2D vector of TSV cells.
+//
+
+void GotScore::loadLines(const string& s) {
+	stringstream ss(s);
+	loadLines(ss);
+}
+
+
+void GotScore::loadLines(stringstream& ss) {
+	clear();
+	string line;
+	while (getline(ss, line)) {
+		// Remove trailing spaces and tabs
+		size_t end = line.find_last_not_of(" \t");
+		if (end != string::npos) {
+			line.erase(end + 1);
+		} else {
+			line.clear();
+		}
+		m_lines.push_back(line);
+	}
+
+	prepareCells();
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::prepareCells -- Convert from a vector of lines
+//   into a 2D vector of TSV values.
+//
+
+void GotScore::prepareCells() {
+	m_cells.clear();
+	m_cells.resize(m_lines.size());
+	for (int i=0; i<(int)m_lines.size(); ++i) {
+		const string& line = m_lines[i];
+		vector<string> fields;
+		size_t start = 0;
+		size_t end;
+		while ((end = line.find('\t', start)) != string::npos) {
+			fields.emplace_back(line.substr(start, end - start));
+			start = end + 1;
+		}
+		fields.emplace_back(line.substr(start));
+		m_cells[i] = std::move(fields);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::prepareMeasures -- Store m_cells data into m_measures.  Iterate
+//     through all rows in the m_cells matrix, processing system data line groups
+//     as they are found.  Systems start with "s# bar" in the first column
+//     of m_cells.
+//
+
+bool GotScore::prepareMeasures(ostream& out) {
+	regex re("^s(\\d+) bar");
+	regex rebaronly("^\\s*bar\\s*$");
+	smatch match;
+	bool status = true;
+
+	// Search for lines starting with "s# bar" which incidates system #.
+	for (int i=0; i<(int)m_cells.size(); i++) {
+		if (regex_search(m_cells[i][0], rebaronly)) {
+			// Measure number lines should start with "s# bar" not "bar".
+			out << "Error on line: " << (i+1) << ": " << " No system info for bar line." << endl;
+			return false;
+		}
+		if (!regex_search(m_cells[i][0], match, re)) {
+			// Skip lines that do not start with "s# bar"
+			continue;
+		}
+		int system = stoi(match[1]);
+		if (m_debugQ) {
+			cerr << ">>>>>>>>>>>>>>>>>>> PROCESSING SYSTEM = " << system << endl;
+		}
+		status = processSystemMeasures(i, system, out);
+		if (!status) {
+			cerr << "Problems parsing system " << system << endl;
+			return status;
+		}
+	}
+	return status;
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::processSystemMeasures --  Helper for prepareMeasures:
+//   for each system, locate the pitch/rhythm for each voice and any
+//   optional text lines and store in a new Measure object.
+//
+//   barIndex = index of the measure number line for the system.
+//   system   = system number (should start at 1).
+//   out      = where the conversion contents will be sent.
+//
+// Example data (tab separated cells), first two measures ownly
+//    s1 bar       0                1
+//    s1 v1 r      *met(C|) 1       22    1
+//    s1 v1 p      *        g/      b/c// d//
+//    s1 v2 r      *met(C|) 1       1     1
+//    s1 v2 p      *        r       r     b/
+//    s1 v3 r      *met(C|) 1       1     1
+//    s1 v3 p      *        r       r     G
+//    s1 text      E-               -go flos
+//
+
+bool GotScore::processSystemMeasures(int barIndex, int system, ostream& out) {
+	vector<int> rIndex;
+	vector<int> pIndex;
+	int textIndex = -1;
+
+	regex re("^s(\\d+)");
+	regex rev("v(\\d+)");
+	regex rer("r\\s*$");
+	regex rep("p\\s*$");
+	smatch match;
+
+	// Identify the lines for each type of data for one system:
+	// * line index for the bar numbers
+	// * line index for each pair of rhythm/pitch
+	// * line index for the text (optional).
+	for (int i = barIndex + 1; i<(int)m_cells.size(); i++) {
+		if (!regex_search(m_cells[i][0], match, re)) {
+			continue;
+		}
+		int tsys = stoi(match[1]);
+		if (system != tsys) {
+			break;
+		}
+		if (m_cells[i][0].find("text") != string::npos) {
+			textIndex = i;
+			m_textQ = true;
+			continue;
+		}
+		if (!regex_search(m_cells[i][0], match, rev)) {
+			continue;
+		}
+		int voiceNumber = stoi(match[1]);
+		if (voiceNumber > m_voices) {
+			m_voices = voiceNumber;
+		}
+		int voiceIndex = voiceNumber - 1;
+		if (regex_search(m_cells[i][0], rer)) {
+			if ((int)rIndex.size() != voiceIndex) {
+				out << "INVALID VOICE NUMBER FOR RHYTHMS ON ROW " << (i+1) << endl;
+				return false;
+			}
+			rIndex.push_back(i);
+		} else if (regex_search(m_cells[i][0], rep)) {
+			if ((int)pIndex.size() != voiceIndex) {
+				out << "INVALID VOICE NUMBER FOR PITCHES ON ROW " << (i+1) << endl;
+				return false;
+			}
+			pIndex.push_back(i);
+		}
+	}
+
+	if (m_debugQ) {
+		cerr << "SYSTEM " << system << endl;
+		if (rIndex.size() != pIndex.size()) {
+			out << "\tRhythms and Pitches are not equal" << endl;
+			return false;
+		}
+		cerr << "\tBARINDEX: " << barIndex << endl;
+		if (textIndex >= 0) {
+			cerr << "\tTEXTINDEX: " << textIndex << endl;
+		}
+		for (int j=0; j<(int)rIndex.size(); j++) {
+			cerr << "\tVOICE " << j+1 << " RINDEX: " << rIndex[j] << " PINDEX: " << pIndex[j] << endl;
+		}
+	}
+
+	// Now process the bar line and prepare measures for any bar
+	// line cell that contains a number.
+
+	regex renum("(\\d+)");
+
+	for (int i=1; i<(int)m_cells[barIndex].size(); i++) {
+		if (!regex_search(m_cells.at(barIndex).at(i), match, renum)) {
+			continue;
+		}
+		int barnum = stoi(match[1]);
+
+		if (m_debugQ) {
+			cerr << "PROCESSING MEASURE " << barnum << endl;
+		}
+
+		// Add a new measure to the end of the list:
+		m_measures.resize(m_measures.size()+1);
+		GotScore::Measure& lm = m_measures.back();
+
+		// Store the bar number for the measure:
+		lm.m_barnum = m_cells[barIndex].at(i);
+
+		// Store the text for the measure:
+		if (textIndex >= 0) {
+			if (i < (int)m_cells[textIndex].size()) {
+				lm.m_text = m_cells[textIndex].at(i);
+			} else {
+				lm.m_text = "";
+			}
+		}
+
+		lm.m_rhythms.resize(rIndex.size());
+		lm.m_pitches.resize(rIndex.size());
+		for (int j=0; j<(int)rIndex.size(); j++) {
+			lm.m_rhythms.at(j) = splitBySpaces(m_cells.at(rIndex.at(j)).at(i));
+		}
+		for (int j=0; j<(int)pIndex.size(); j++) {
+			lm.m_pitches.at(j) = splitBySpaces(m_cells.at(pIndex.at(j)).at(i));
+		}
+	}
+
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::splitBySpaces -- Split a single TSV cell (string) into
+//     an array by spaces.  Pitches and Rhytyms are groups into beats
+//     by spaces (either 2 or 3 groupings per measure).
+//
+
+
+vector<string> GotScore::splitBySpaces(const string& input) {
+	// 1) split on whitespace
+	vector<string> parts;
+	{
+		istringstream stream(input);
+		string word;
+		while (stream >> word) {
+			parts.push_back(word);
+		}
+	}
+
+	// 2) merge any "." + digit-leading token into single ".<whatever>"
+	vector<string> result;
+	result.reserve(parts.size());
+	for (size_t i = 0; i < parts.size(); ++i) {
+		if (parts[i] == "." &&
+			i + 1 < parts.size() &&
+			!parts[i+1].empty() &&
+			isdigit(static_cast<unsigned char>(parts[i+1][0])))
+		{
+			// merge "." and the next token
+			result.push_back(parts[i] + parts[i+1]);
+			++i;  // skip the next one
+		} else {
+			result.push_back(parts[i]);
+		}
+	}
+
+	return result;
+}
+
+
+
+
+//////////////////////////////
+//
+// GotScore::getGotHumdrum -- Print input data by measure into
+//   **gotr/**gotp (GOT rhythm/GOT pitch) columns, which is an
+//   intermediate step before splitting into individual notes
+//   on the way to **kern data.
+//
+
+string GotScore::getGotHumdrum(void) {
+	if (!m_got.empty()) {
+		return m_got;
+	}
+
+	stringstream out;
+
+	string header = getHeaderInfo(0);
+	out << header;
+
+	// Print exclusive interpretation line:
+	for (int i=0; i<m_voices; i++) {
+		if (i>0) {
+			out << "\t";
+		}
+		out << "**gotr\t**gotp";
+	}
+	if (m_textQ) {
+		out << "\t**cdata";
+	}
+	out << "\n";
+
+	// Print staff/part info:
+	for (int i=0; i<m_voices; i++) {
+		if (i>0) {
+			out << "\t";
+		}
+		out << "*staff" << (i+1);
+		out << "\t*staff" << (i+1);
+	}
+	if (m_textQ) {
+		out << "\t*";
+	}
+	out << "\n";
+
+	for (int i=0; i<(int)m_measures.size(); i++) {
+		out << getGotHumdrumMeasure(m_measures.at(i));
+	}
+
+	// Print final barline:
+	for (int i=0; i<m_voices; i++) {
+		if (i>0) {
+			out << "\t";
+		}
+		out << "==\t==";
+	}
+	if (m_textQ) {
+		out << "\t==";
+	}
+	out << "\n";
+
+	// Print termination interpretation:
+	for (int i=0; i<m_voices; i++) {
+		if (i>0) {
+			out << "\t";
+		}
+		out << "*-\t*-";
+	}
+	if (m_textQ) {
+		out << "\t*-";
+	}
+	out << "\n";
+
+	string footer = getFooterInfo();
+	out << footer;
+
+	m_got = out.str();
+	return m_got;
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::getHeaderInfo -- Extract bibliographic information from the start of the data.
+//
+
+string GotScore::getHeaderInfo(int index) {
+	stringstream out;
+	for (int i=index; i<(int)m_cells.size(); ++i) {
+		if (m_cells[i].empty()) {
+			continue;
+		}
+		if (m_cells[i][0].compare(0, 2, "!!") == 0) {
+			if (m_cells[i][0].compare(0, 3, "!!!") == 0) {
+				if (m_cells[i][0].back() != ':') {
+					out << m_cells[i][0] << ":";
+				} else {
+					out << m_cells[i][0];
+				}
+				if (m_cells[i].size() > 1) {
+					out << " " << m_cells[i][1];
+				}
+				for (int j=2; j<(int)m_cells[i].size(); ++j) {
+					out << "\t" << m_cells[i][j];
+				}
+				out << endl;
+			} else {
+				for (int j=0; j<(int)m_cells[i].size(); ++j) {
+					if (j > 0) {
+						out << "\t";
+					}
+					out << m_cells[i][j];
+				}
+				out << endl;
+			}
+		} else {
+			break;
+		}
+	}
+	return out.str();
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::getFooterInfo -- Extract bibliographic information from the end of the data.
+//
+
+string GotScore::getFooterInfo(void) {
+	stringstream out;
+	out << "!!!RDF**kern: l = terminal long" << endl;
+
+	if (m_cautionary) {
+		out << "!!!RDF**kern: i = editorial accidental, paren" << endl;
+	}
+
+	int startIndex = -1;
+	for (int i=(int)m_cells.size() - 1; i>=0; --i) {
+		if (m_cells[i].empty()) {
+			continue;
+		} else if (m_cells[i][0].compare(0, 2, "!!") == 0) {
+			startIndex = i;
+			continue;
+		} else if (m_cells[i][0] == "") {
+			continue;
+		} else {
+			break;
+		}
+	}
+	if (startIndex < 0) {
+		return out.str();
+	}
+	out << getHeaderInfo(startIndex);
+	return out.str();
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::getGotHumdrumMeasure -- Print GOT system measure,
+//   one **gotr/**gotp column for each voice from top to bottom
+//   of system, also **cdata if lyrics are present.
+//
+
+string GotScore::getGotHumdrumMeasure(GotScore::Measure& mdata) {
+	stringstream out;
+	int mincount = -1;
+	int maxcount = -1;
+
+	for (int i=0; i<(int)mdata.m_rhythms.size(); i++) {
+		if (mincount < 0) {
+			mincount = (int)mdata.m_rhythms.at(i).size();
+		}
+		if (maxcount < 0) {
+			maxcount = (int)mdata.m_rhythms.at(i).size();
+		}
+		if (mincount > (int)mdata.m_rhythms.at(i).size()) {
+			mincount = (int)mdata.m_rhythms.at(i).size();
+		}
+		if (maxcount < (int)mdata.m_rhythms.at(i).size()) {
+			maxcount = (int)mdata.m_rhythms.at(i).size();
+		}
+	}
+
+	for (int i=0; i<(int)mdata.m_pitches.size(); i++) {
+		if (mincount < 0) {
+			mincount = (int)mdata.m_pitches.at(i).size();
+		}
+		if (maxcount < 0) {
+			maxcount = (int)mdata.m_pitches.at(i).size();
+		}
+		if (mincount > (int)mdata.m_pitches.at(i).size()) {
+			mincount = (int)mdata.m_pitches.at(i).size();
+		}
+		if (maxcount < (int)mdata.m_pitches.at(i).size()) {
+			maxcount = (int)mdata.m_pitches.at(i).size();
+		}
+	}
+
+	if (mincount != maxcount) {
+		out << "!!Problem with measure " << mdata.m_barnum << endl;
+		return "";
+	}
+
+	if (mdata.m_barnum != "0") {
+		// Print starting barline, as long as it is not a pickup measure.
+		for (int i=0; i<m_voices; i++) {
+			if (i>0) {
+				out << "\t";
+			}
+			out << "=" << mdata.m_barnum << "\t=" << mdata.m_barnum;
+		}
+		if (m_textQ) {
+			out << "\t=" << mdata.m_barnum;
+		}
+		out << "\n";
+	}
+
+	for (int i=0; i<maxcount; i++) {
+		for (int j=0; j<m_voices; j++) {
+			if (j > 0) {
+				out << "\t";
+			}
+			out << mdata.m_rhythms.at(j).at(i);
+			out << "\t";
+			out << mdata.m_pitches.at(j).at(i);
+		}
+
+		if (m_textQ) {
+			out << "\t";
+			if ((i>0) || mdata.m_text.empty()) {
+				out << ".";
+			} else {
+				out << mdata.m_text;
+			}
+		}
+		out << endl;
+	}
+
+	return out.str();
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::getKernHumdrum -- Convert GOT score into **kern data
+//     and **cdata for lyrics.  Splits GOT beat words into individual
+//     note/rest tokens, applies ties, and concatenates measures
+//     into a single string.
+//
+
+
+string GotScore::getKernHumdrum(void) {
+	if (!m_kern.empty()) {
+		return m_kern;   // return cached
+	}
+
+	// Tokenize each measure into individual rhythm & pitch tokens
+	splitMeasureTokens();
+
+	// Handle leading‐dot augmentation ties
+	pairLeadingDots();
+
+	// Handle half‐duration ties and pitch‐dot ties
+	processDotTiedNotes();
+
+	// Check for token alignment errors by measure, and then parse
+	// underscore ties.  Underscore ties are "_" attached to the end of
+	// a pitch that extends to the next note in the sequence.  "_" is converted
+	// into "[" on the first note, and "]" is added to the next note.
+	// Later when merging pitches and rhythms, if a pitch has both "[" and "]"
+	// then convert them into "_" for a **kern tie-continuation symbol.
+	vector<vector<string*>> pall;
+	pall.resize(m_measures[0].m_splitRhythms.size());
+	for (int i=0; i<(int)pall.size(); i++) {
+		pall[i].reserve(m_measures.size() * 20);
+	}
+
+	// Apply underscore ties _ -> [ ... ] for each measure and voice
+	for (auto& M : m_measures) {
+		for (size_t v = 0; v < M.m_splitRhythms.size(); ++v) {
+			// flatten all non‐interpretation rhythm tokens
+			vector<string*> rr;
+			for (auto& beat : M.m_splitRhythms[v]) {
+				for (auto& tok : beat) {
+					if (!tok.empty() && tok[0] != '*') {
+						rr.push_back(&tok);
+					}
+				}
+			}
+			// flatten all non‐interpretation pitch tokens
+			vector<string*> pp;
+			for (auto& beat : M.m_splitPitches[v]) {
+				for (auto& tok : beat) {
+					if (!tok.empty() && tok[0] != '*') {
+						pp.push_back(&tok);
+                  pall.at(v).push_back(&tok);
+					}
+				}
+			}
+
+			// If rhythms.size() and pitches.size() are not equal then
+			// generate an error for the measure.
+			if (rr.size() != pp.size()) {
+				string message = "Measure " + M.m_barnum;
+				message += " voice " + to_string(v+1);
+				message += ": pitch and rhythm token counts are not the same.";
+				M.m_error = message;
+			}
+		}
+	}
+
+	// Handle underscore ties.
+	for (int i=0; i<(int)pall.size(); i++) {
+		processUnderscoreTies(pall[i]);
+	}
+
+	// Add accidental analysis
+	prepareAccidentals();
+
+
+	// Build timed events (timestamps and durations)
+	buildVoiceEvents();
+
+	// Emit **kern interpretation & data
+	stringstream out;
+
+	string header = getHeaderInfo(0);
+	out << header;
+
+	// Exclusive interpretation line
+	for (int i = 0; i < m_voices; ++i) {
+		if (i > 0) out << "\t";
+		out << "**kern";
+	}
+	if (m_textQ) out << "\t**cdata";
+	out << "\n";
+
+	// Staff/part info (reverse order for **kern)
+	for (int i = 0; i < m_voices; ++i) {
+		if (i > 0) out << "\t";
+		out << "*staff" << (m_voices - i);
+	}
+	if (m_textQ) out << "\t*";
+	out << "\n";
+
+	// Data rows, by measure
+	for (auto& M : m_measures) {
+		out << getKernHumdrumMeasure(M);
+	}
+
+	// Final barline
+	for (int i = 0; i < m_voices; ++i) {
+		if (i > 0) out << "\t";
+		out << "==";
+	}
+	if (m_textQ) out << "\t==";
+	out << "\n";
+
+	// Termination line
+	for (int i = 0; i < m_voices; ++i) {
+		if (i > 0) out << "\t";
+		out << "*-";
+	}
+	if (m_textQ) out << "\t*-";
+	out << "\n";
+
+	string footer = getFooterInfo();
+	out << footer;
+
+	m_kern = out.str();
+	return m_kern;
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::getKernHumdrumMeasure -- Formats one Measure
+//     into kern columns (aligning by timestamp), and inserting
+//     lyrics column if present.
+//
+
+string GotScore::getKernHumdrumMeasure(GotScore::Measure& mdata) {
+	stringstream out;
+
+	// Avoid barline at start of pickup measure.
+	if (mdata.m_barnum != "0") {
+		  mdata.printKernBarline(out, m_textQ);
+	}
+
+	// Print parsing error message and Measure contents
+	// when there is a problem somewhere in the measure.
+	if (!mdata.m_error.empty()) {
+		mdata.print(out);
+		return out.str();
+	}
+
+	auto aligned = alignEventsByTimestamp(mdata);
+	bool textPrinted = false;
+
+	for (const auto& e : aligned) {
+		  // 1) print the **kern** columns
+		  for (int i = (int)e.rhythms.size() - 1; i >= 0; --i) {
+				if (i < (int)e.rhythms.size() - 1) out << "\t";
+				const string& r = e.rhythms[i];
+				const string& p = e.pitches[i];
+
+				if (r.empty() || r == ".") {
+					 out << ".";
+				}
+				else if (r[0] == '*') {
+					 // interpretation token: only print r
+					 out << r;
+				}
+				else {
+					 // normal note
+					 out << mergeRhythmAndPitchIntoNote(r, p);
+				}
+		  }
+
+		  // 2) figure out if this row is an interpretation line
+		  bool isInterpRow = false;
+		  for (auto& r : e.rhythms) {
+				if (!r.empty() && r[0] == '*') {
+					 isInterpRow = true;
+					 break;
+				}
+		  }
+
+		  // 3) print the text spine
+		  if (m_textQ) {
+				out << "\t";
+				if (isInterpRow) {
+					 // always null-interpretation on met/measuresig rows
+					 out << "*";
+				}
+				else if (!textPrinted && !mdata.m_text.empty()) {
+					 // first real data row gets the lyric
+					 out << mdata.m_text;
+					 textPrinted = true;
+				}
+				else {
+					 // all later rows null out
+					 out << ".";
+				}
+		  }
+
+		  out << "\n";
+	}
+
+	return out.str();
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::mergeRhythmAndPitchIntoNote --
+//
+
+string GotScore::mergeRhythmAndPitchIntoNote(const string& r, const string& p) {
+	string output;
+
+	size_t loc = p.find('[');
+	size_t loc2 = p.find(']');
+	if (loc != string::npos) {
+		if (loc2 == string::npos) {
+			output += "[";
+		}
+	}
+
+	bool hasFermata = false;
+	for (int i=0; i<(int)r.size(); i++) {
+		if (r[i] != '_') {
+			if (r[i] == ';') {
+				hasFermata = true;
+			} else {
+				output += r[i];
+			}
+		}
+	}
+
+	bool hasTieEnd = false;
+	if (p.find('[') != string::npos) {
+		hasTieEnd = true;
+	}
+	if (p.find('_') != string::npos) {
+		hasTieEnd = true;
+	}
+	if (loc2 != string::npos) {
+		hasTieEnd = true;
+	}
+
+	for (int i=0; i<(int)p.size(); i++) {
+		if ((p[i] != '[') && p[i] != ']') {
+			output += p[i];
+			if (p[i] == '#' || p[i] == '-') {
+				if (!hasTieEnd) {
+					output += "X";
+				}
+			}
+		}
+	}
+
+	if (loc != string::npos) {
+		if (loc2 != string::npos) {
+			output += "_";
+		}
+	} else {
+		if (loc2 != string::npos) {
+			output += "]";
+		}
+	}
+
+	if (hasFermata) {
+		output += ';';
+	}
+
+	return  output;
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::prepareAccidentals -- Mark notes that become natural
+//    within the measure with editorial accidentals (add the letter "i"
+//    after the note, and add !!!RDF**kern: i = editorial accidental
+//    in the footer later.
+//
+
+void GotScore::prepareAccidentals(void) {
+	if (m_measures.empty()) {
+		return;
+	}
+	if (m_measures.at(0).m_splitPitches.empty()) {
+		// This function should only be run after filling in m_splitPitches
+		// (as well as processing ties).
+		return;
+	}
+
+	if (!m_no_editorialQ) {
+		for (int i=0; i<(int)m_measures.size(); i++) {
+			m_measures[i].m_diatonic.resize(m_measures[i].m_splitPitches.size());
+			m_measures[i].m_accid.resize(m_measures[i].m_splitPitches.size());
+			m_measures[i].m_accidState.resize(m_measures[i].m_splitPitches.size());
+			m_measures[i].m_kerns.resize(m_measures[i].m_splitPitches.size());
+			for (int v=0; v<(int)m_measures[i].m_splitPitches.size(); v++) {
+				markEditorialAccidentals(m_measures[i], v);
+			}
+		}
+	}
+
+	if (m_cautionaryQ) {
+		for (int i=1; i<(int)m_measures.size(); i++) {
+			for (int v=0; v<(int)m_measures.at(0).m_splitPitches.size(); v++) {
+				checkForCautionaryAccidentals(i, v);
+			}
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::checkForCautionaryAccidentals --
+//
+
+void GotScore::checkForCautionaryAccidentals(int mindex, int vindex) {
+	if (mindex < 1) {
+		return;
+	}
+	vector<int> states = m_measures.at(mindex - 1).m_accidState.at(vindex);
+	Measure& measure = m_measures.at(mindex);
+	vector<string*>& kerns  = measure.m_kerns.at(vindex);
+	vector<int>& diatonic = measure.m_diatonic.at(vindex);
+	vector<int>& accid = measure.m_accid.at(vindex);
+
+	for (int i=0; i<(int)kerns.size(); i++) {
+		int dindex = diatonic.at(i);
+		if (dindex < 0) {
+			continue;
+		}
+		if (states.at(dindex) == 0) {
+			continue;
+		}
+		if (states.at(dindex) > 100) {
+			continue;
+		}
+		int acc = accid.at(i);
+		if ((states.at(dindex) != 0) && (acc == 0)) {
+			if (kerns.at(i)->find('i') == string::npos) {
+				if (kerns.at(i)->find('n') == string::npos) {
+					*kerns.at(i) += "nii";
+				} else {
+					*kerns.at(i) += "ii";
+				}
+			}
+			m_cautionary = true;
+		}
+		states.at(dindex) = 1000;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::markEditorialAccidentals --
+//
+//				std::vector<std::vector<std::vector<std::string>>> m_splitPitches;
+//				std:vector<std::vector<int>> m_diatonic;
+//				std:vector<std::vector<int>> m_accid;
+
+void GotScore::markEditorialAccidentals(GotScore::Measure& measure, int voice) {
+	vector<vector<string>>& pitches = measure.m_splitPitches.at(voice);
+	vector<int>& diatonic = measure.m_diatonic.at(voice);
+	vector<int>& accid = measure.m_accid.at(voice);
+	diatonic.clear();
+	accid.clear();
+	vector<string*>& kerns = measure.m_kerns.at(voice);
+	for (int i=0; i<(int)pitches.size(); i++) {
+		for (int j=0; j<(int)pitches.at(i).size(); j++) {
+			int d = -1;
+			int a = 0;
+			getDiatonicAccid(pitches.at(i).at(j), d, a);
+			diatonic.push_back(d);
+			accid.push_back(a);
+			kerns.push_back(&pitches.at(i).at(j));
+		}
+	}
+
+	// Now create the accidState for the voice, when the accid state changes
+	// from non-zero to zero, add the letter i to the m_splitPitches value at the
+	// same index to indicate a cautionary natural accidental.
+	vector<int>& accidState = measure.m_accidState.at(voice);
+	accidState.resize(7);
+	std::fill(accidState.begin(), accidState.end(), 0);
+	for (int i=0; i<(int)diatonic.size(); i++) {
+		int dindex = diatonic[i];
+		if (dindex < 0) {
+			continue;
+		}
+		int acc = accid[i];
+		if ((accidState.at(dindex) != 0) && (acc == 0)) {
+			if (kerns.at(i)->find('i') == string::npos) {
+				if (kerns.at(i)->find('n') == string::npos) {
+					*kerns.at(i) += "ni";
+				} else {
+					*kerns.at(i) += "i";
+				}
+			}
+			m_cautionary = true;
+		}
+		accidState.at(dindex) = acc;
+	}
+}
+
+
+
+/////////////////////////////
+//
+// GotScore::getDiatonicAccid -- Return the diatonic pitch class and accidental
+//       state of a **kern note.
+//
+
+void GotScore::getDiatonicAccid(const string& pitch, int& d, int& a) {
+	d = -1;
+	a = 0;
+	if (pitch.find('r') != string::npos) {
+		return;
+	}
+	for (int i=0; i<(int)pitch.size(); i++) {
+		char c = std::tolower(pitch[i]);
+		if (c >= 'a' && c <= 'g') {
+			d = c - 'a';
+		} else if (pitch[i] == '-') {
+			a = -1;
+		} else if (pitch[i] == '#') {
+			a = +1;
+		} else if (pitch[i] == 'n') {
+			a = 0;
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::splitMeasureTokens -- Iterates all measures and tokenizes
+//     each rhythm+pitch word into individual **kern tokens.
+//
+
+void GotScore::splitMeasureTokens(void) {
+	for (int i=0; i<(int)m_measures.size(); i++) {
+		splitMeasureTokens(m_measures[i]);
+	}
+
+}
+
+
+//
+// Splits one measure’s rhythm/pitch strings into per-note tokens,
+// converts GOT pitches to kern, and builds timed events for alignment
+// across voices.
+//
+
+void GotScore::splitMeasureTokens(GotScore::Measure& mdata) {
+	// --- rhythms --------------------------------------------------------
+	mdata.m_splitRhythms.clear();
+	mdata.m_splitRhythms.resize(mdata.m_rhythms.size());
+
+	for (size_t v = 0; v < mdata.m_rhythms.size(); ++v) {
+		mdata.m_splitRhythms[v].clear();
+		mdata.m_splitRhythms[v].resize(mdata.m_rhythms[v].size());
+
+		for (size_t w = 0; w < mdata.m_rhythms[v].size(); ++w) {
+			string raw = mdata.m_rhythms[v][w];
+
+			// handle leading dot
+			bool hadDot = false;
+			if (!raw.empty() && raw[0] == '.') {
+				hadDot = true;
+				raw.erase(0,1);
+			}
+
+			if (m_debugQ) {
+				cerr << "RHYTHM RAW ["<<v<<"]["<<w<<"] : \""
+						  << mdata.m_rhythms[v][w]
+						  << "\" → tokenizer input \"" << raw << "\"\n";
+			}
+
+			// tokenize the stripped word
+			vector<string> toks = tokenizeRhythmString(raw);
+
+			// re-insert the dot if needed
+			if (hadDot) toks.insert(toks.begin(), ".");
+
+			if (m_debugQ) {
+				cerr << "RHYTHM TOKENS["<<v<<"]["<<w<<"]:";
+				for (auto& t : toks) {
+					cerr << " \"" << t << "\"";
+				}
+				cerr << "\n";
+			}
+
+			mdata.m_splitRhythms[v][w] = std::move(toks);
+		}
+	}
+
+	// --- pitches -------------------------------------------------------
+	mdata.m_splitPitches.clear();
+	mdata.m_splitPitches.resize(mdata.m_pitches.size());
+
+	for (size_t v = 0; v < mdata.m_pitches.size(); ++v) {
+		mdata.m_splitPitches[v].clear();
+		mdata.m_splitPitches[v].resize(mdata.m_pitches[v].size());
+
+		for (size_t w = 0; w < mdata.m_pitches[v].size(); ++w) {
+			// 1) tokenize into GOT‐style pitch tokens
+			vector<string> gotTokens = tokenizePitchString(mdata.m_pitches[v][w]);
+
+			// 2) convert that lvalue into kern‐style pitches
+			vector<string> kernTokens = convertGotToKernPitches(gotTokens);
+
+			if (m_debugQ) {
+				cerr << "PITCH TOKENS["<<v<<"]["<<w<<"]:";
+				for (auto& t : kernTokens) cerr << " \"" << t << "\"";
+				cerr << "\n";
+			}
+
+			mdata.m_splitPitches[v][w] = std::move(kernTokens);
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::buildVoiceEvents --
+//
+
+void GotScore::buildVoiceEvents(void) {
+	for (auto& mdata : m_measures) {
+		mdata.m_voiceEvents.clear();
+		mdata.m_voiceEvents.resize(mdata.m_splitRhythms.size());
+
+		for (int v=0; v<(int)mdata.m_splitRhythms.size(); ++v) {
+			double time = 0.0;
+			auto& events = mdata.m_voiceEvents[v];
+			const auto& rWords = mdata.m_splitRhythms[v];
+			const auto& pWords = mdata.m_splitPitches[v];
+
+			for (int w=0; w<(int)rWords.size(); ++w) {
+				const auto& rhythms = rWords[w];
+				const auto& pitches = pWords[w];
+				for (int t=0; t<(int)rhythms.size(); ++t) {
+					GotScore::Measure::TimedEvent evt;
+					const string& r = rhythms[t];
+					const string& p = (t < (int)pitches.size()) ? pitches[t] : ".";
+					bool isInterp = (!r.empty() && r[0] == '*');
+
+					evt.isInterpretation = isInterp;
+					evt.rhythm           = r;
+					evt.pitch            = isInterp ? "*" : p;
+					evt.timestamp        = isInterp ? time - 0.0001 : time;
+					evt.duration         = isInterp ? 0.0 : durationFromRhythmToken(r);
+					events.push_back(evt);
+
+					if (!isInterp && r != "." && evt.duration > 0.0) {
+						time += evt.duration;
+					}
+				}
+			}
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::alignEventsByTimestamp -- Function to flatten all voices’
+//     events by timestamp.  Merges all voices’ timed events into a single
+//     time‐ordered list (EventAtTime), filling "." when a voice is silent.
+//
+
+vector<GotScore::EventAtTime> GotScore::alignEventsByTimestamp(const GotScore::Measure& mdata) {
+	vector<EventAtTime> result;
+	set<double> allTimes;
+
+	for (const auto& voice : mdata.m_voiceEvents) {
+		for (const auto& evt : voice) {
+			allTimes.insert(evt.timestamp);
+		}
+	}
+
+	for (double t : allTimes) {
+		// bool isInterpRow = false;
+		for (const auto& voice : mdata.m_voiceEvents) {
+			auto it = std::find_if(voice.begin(), voice.end(), [&](const GotScore::Measure::TimedEvent& e) {
+				return std::abs(e.timestamp - t) < 1e-6 && e.isInterpretation;
+			});
+			if (it != voice.end()) {
+				// isInterpRow = true;
+				break;
+			}
+		}
+
+		EventAtTime row;
+		row.timestamp = t;
+		for (const auto& voice : mdata.m_voiceEvents) {
+			auto it = std::find_if(voice.begin(), voice.end(), [&](const GotScore::Measure::TimedEvent& e) {
+				return std::abs(e.timestamp - t) < 1e-6;
+			});
+			if (it != voice.end()) {
+				row.rhythms.push_back(it->rhythm);
+				row.pitches.push_back(it->pitch);
+				// row.pitches.push_back(it->isInterpretation ? "*" : it->pitch);
+			} else {
+				row.rhythms.push_back(".");
+				row.pitches.push_back(".");
+			}
+		}
+		result.push_back(row);
+	}
+
+	return result;
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::processDotTiedNotes -- 2_ becomes [2, and the next note
+//     becomes #].  Also a "." by iteslf will change "." into *2 of the
+//     previous note duration (hopefully no "." augmentation dots, but
+//     check for those later), and then add '[' to the previous duration
+//     and ']' to the substitute duration.
+//
+
+void GotScore::processDotTiedNotes(void) {
+	// 0) Build flattened per-voice lists of pointers to every non-interpretation token
+	vector<vector<string*>> R(m_voices), P(m_voices);
+	for (auto& M : m_measures) {
+		for (int v = 0; v < m_voices; ++v) {
+			// collect rhythm tokens
+			for (auto& beat : M.m_splitRhythms[v]) {
+				for (auto& tok : beat) {
+					if (!tok.empty() && tok[0] != '*') {
+						R[v].push_back(&tok);
+					}
+				}
+			}
+			// collect pitch tokens
+			for (auto& beat : M.m_splitPitches[v]) {
+				for (auto& tok : beat) {
+					if (!tok.empty() && tok[0] != '*') {
+						P[v].push_back(&tok);
+					}
+				}
+			}
+		}
+	}
+
+	// 1) Half‐duration ties (rhythm dots):
+	for (int v = 0; v < m_voices; ++v) {
+		processRhythmTies(R[v], P[v]);
+	}
+
+	// 2) Pitch‐dot ties:
+	for (int v = 0; v < m_voices; ++v) {
+		processPitchDotsByVoice(P[v]);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::processPitchDotsByVoice -- Implements "." in the pitch stream:
+//     copy the previous pitch into a lone "." slot.
+//
+
+void GotScore::processPitchDotsByVoice(vector<string*>& pitches) {
+	for (int i=1; i<(int)pitches.size(); i++) {
+		if (*pitches.at(i) == ".") {
+			string& current = *pitches.at(i);
+			string& previous = *pitches.at(i-1);
+			current = previous;
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::processRhythmTies -- Implements "." in the rhythm stream:
+//     replace with half duration and append "]" to the corresponding pitch.
+//
+
+void GotScore::processRhythmTies(vector<string*>& rhythms, vector<string*>& pitches) {
+	for (int i=1; i<(int)rhythms.size(); ++i) {
+		  if (*rhythms[i] == ".") {
+				char d = (*rhythms[i-1])[0];
+				char half = (d=='1' ? '2': d=='2' ? '4': d=='4' ? '8': d);
+				*rhythms[i] = string(1, half);
+				*pitches[i] = *pitches[i-1] + "]";
+		  }
+	}
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::convertGotToKernPitches -- Converts a vector of GOT-style
+//     pitch tokens into **kern-style pitch strings.
+//
+
+vector<string> GotScore::convertGotToKernPitches(vector<string>& gotpitch) {
+	vector<string> output;
+	output.resize(gotpitch.size());
+	for (int i=0; i<(int)gotpitch.size(); i++) {
+		output[i] = convertGotToKernPitch(gotpitch[i]);
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::convertGotToKernPitch -- Converts one GOT pitch
+//     (such as “c//” or “D#”) into the appropriate **kern pitch
+//     (with octave markers).
+//
+//   GOT     PITCH   KERN
+//   --------------------
+//   C     = C2    = CC
+//   c     = C3    = C
+//   c/    = C4    = c
+//   c//   = C5    = cc
+//   c///  = C6    = ccc
+//
+
+string GotScore::convertGotToKernPitch(const string& gotpitch) {
+	if (gotpitch == ".") {
+		return ".";
+	}
+	if (gotpitch == "*") {
+		return "*";
+	}
+
+	// Strip trailing underscore if present and replace later
+	bool hasUnderscore = false;
+	string gp = gotpitch;
+	if (!gp.empty() && gp.back() == '_') {
+		gp.pop_back();
+		hasUnderscore = true;
+	}
+
+	int slashes  = 0;
+	int sharps   = 0;
+	int flats    = 0;
+	char letter  = '\0';
+	bool isUpper = false;
+	bool isLower = false;
+
+	// Gather slash‐count, accidentals, and base letter
+	for (char c : gp) {
+		if (c == '/') {
+			slashes++;
+		} else if (c >= 'a' && c <= 'h') {
+			letter = c;
+			isLower = true;
+			isUpper = false;
+		} else if (c >= 'A' && c <= 'H') {
+			letter = c;
+			isUpper = true;
+			isLower = false;
+		} else if (c == '#') {
+			sharps++;
+		} else if (c == 'r') {
+			// rest
+			return "r";
+		}
+	}
+
+	int octave = 8;
+	if (isUpper) {
+		octave = 2;
+	} else if (isLower) {
+		octave = 3 + slashes;
+	} else {
+		cerr << "STRANGE PITCH: " << gotpitch << "\n";
+		return "?";
+	}
+
+	if (octave == 3) {
+		letter = toupper(letter);
+	}
+
+	// Adjust accidentals: D#/d# -> E-/e-, B/b -> B-/b-, H/h -> B/b
+	if ((letter == 'D' || letter == 'd') && sharps) {
+		letter = (letter == 'D' ? 'E' : 'e');
+		sharps = 0; flats = 1;
+	} else if (letter == 'b' || letter == 'B') {
+		flats = 1;
+	} else if (letter == 'h') {
+		letter = 'b';
+	} else if (letter == 'H') {
+		letter = 'B';
+	}
+
+	// Build the **kern pitch by duplicating letters according to octave
+	string out;
+	int reps = (octave < 4 ? 3 - octave + 1 : octave - 4 + 1);
+	for (int i = 0; i < reps; ++i) {
+		out += letter;
+	}
+	if (sharps) {
+		out += '#';
+	} else if (flats) {
+		out += '-';
+	}
+
+	if (hasUnderscore) {
+		out += "_";
+	}
+
+	return out;
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::tokenizePitchString -- Convert a GOT pitch string into
+//      separate notes, such as:
+// ".c//rD_" into ".", "c//", "r", "D_".
+//
+
+vector<string> GotScore::tokenizePitchString(const string& input) {
+	vector<string> tokens;
+	size_t i = 0;
+	const size_t len = input.size();
+
+	if (!input.empty()) {
+		if (input[0] == '*') {
+			tokens.push_back(input);
+			return tokens;
+		}
+	}
+
+	// Optional standalone dot at the start
+	if (i < len && input[i] == '.') {
+		tokens.emplace_back(".");
+		++i;
+	}
+
+	string token;
+	while (i < len) {
+		char c = input[i];
+		if (isalpha(c) && tolower(c) >= 'a' && tolower(c) <= 'h') {
+			token += input[i++];  // add base letter
+
+			// Optional #
+			if (i < len && input[i] == '#') {
+				token += input[i++];
+			}
+
+			// Zero or more slashes
+			while (i < len && input[i] == '/') {
+				token += input[i++];
+			}
+
+			// Optional _
+			if (i < len && input[i] == '_') {
+				token += input[i++];
+			}
+
+			tokens.push_back(token);
+			token.clear();
+		} else if (c == 'r') {
+				token += input[i++];
+				tokens.push_back(token);
+				token.clear();
+		} else {
+			// Ignore all other characters
+			++i;
+
+		}
+	}
+
+	return tokens;
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::tokenizeRhythmString -- Convert GOT rhythm string into separate
+//      tokens.  Example "4.88888" -> "4.", "8", "8", "8", "8", "8".
+//                       ".4x3"    -> ".", "4", "4", "4".
+//
+
+vector<string> GotScore::tokenizeRhythmString(const string& input) {
+	if (m_debugQ) {
+		// Show the exact string about to be parse
+		cerr << "\nRHYTHM IN: \"" << input << "\"" << endl;
+	}
+
+	vector<string> tokens;
+	size_t i = 0;
+
+	// 1) Interpretation tokens pass through unchanged
+	if (!input.empty() && input[0] == '*') {
+		tokens.push_back(input);
+	} else {
+		while (i < input.size()) {
+			char c = input[i];
+
+			// Digit start: collect a number + any _ ; . suffixes, then handle xN
+			if (std::isdigit(c)) {
+				string tok;
+				tok += c;
+				++i;
+
+				// grab any trailing '_', ';', or '.' attached to this digit
+				while (i < input.size() && (input[i] == '_' || input[i] == ';' || input[i] == '.')) {
+					tok += input[i++];
+				}
+
+				// handle repeat pattern xN
+				if (i + 1 < input.size() && input[i] == 'x' && std::isdigit(input[i+1])) {
+					++i;  // skip 'x'
+					int rep = 0;
+					while (i < input.size() && std::isdigit(input[i])) {
+						rep = rep * 10 + (input[i++] - '0');
+					}
+					for (int r = 0; r < rep; ++r) {
+						tokens.push_back(tok);
+					}
+				} else {
+					tokens.push_back(tok);
+				}
+
+			// Dot always stands alone
+			} else if (c == '.') {
+				tokens.emplace_back(".");
+				++i;
+
+			// Anything else gets skipped
+			} else {
+				++i;
+			}
+		}
+	}
+
+	// Debug: show exactly what tokens we produced
+	if (m_debugQ) {
+		cerr << "RHYTHM OUT:";
+		for (auto& t : tokens) {
+			cerr << " \"" << t << "\"";
+		}
+		cerr << endl;
+	}
+
+	return tokens;
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::pairLeadingDots -- Leading dots in GOT data indicates a
+//     continuation of the previous note by 1/2 of the duration of the
+//     previous note.  These will be converted into tied notes when
+//     across barlines, but also possible across metric beats such as
+//     the half measure (or 1/3 measure in sesquialtera).
+//
+
+void GotScore::pairLeadingDots(void) {
+	for (int i=0; i<(int)m_measures.size(); i++) {
+		processDotsForMeasure(m_measures[i]);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::processDotsForMeasure --
+//     Either the rhythms or the pitches may have a leading dot, or both
+//     may have a leading dot.  If only one has a leading dot, then add a
+//     dot to the other data type.  Later the dots will be converted to
+//     tied notes.
+//
+//     Dots with time signatures (mensuration signs) before them in the
+//     measure will cause problems.
+//
+
+void GotScore::processDotsForMeasure(GotScore::Measure& mdata) {
+	for (int voice=0; voice<(int)mdata.m_splitRhythms.size(); voice++) {
+		for (int word=0; word<(int)mdata.m_splitRhythms.at(voice).size(); word++) {
+			if (mdata.m_splitRhythms.at(voice).at(word).at(0) == ".") {
+				if (mdata.m_splitPitches.at(voice).at(word).at(0) != ".") {
+					// Add a leading dot to splitPitches:
+					vector<string>& vec = mdata.m_splitPitches.at(voice).at(word);
+					vec.insert(vec.begin(), ".");
+				}
+			} else if (mdata.m_splitPitches.at(voice).at(word).at(0) == ".") {
+				// Add a leading dot to splitRhythms:
+				vector<string>& vec = mdata.m_splitRhythms.at(voice).at(word);
+				vec.insert(vec.begin(), ".");
+			}
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::Measure::printKernBarline -- Outputs a barline (e.g. "=1")
+//     in **kern format for every voice (and text column if present).
+//
+
+void GotScore::Measure::printKernBarline(ostream& out, bool textQ) {
+	int voices = (int)m_rhythms.size();
+	for (int i=0; i<voices; i++) {
+		if (i>0) {
+			out << "\t";
+		}
+		out << "=" << m_barnum;
+	}
+	if (textQ) {
+		out << "\t=" << m_barnum;
+	}
+	out << endl;
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::durationFromRhythmToken -- Parses a rhythm token such as "4." or
+//     "8" into a numeric duration in beats (handles augmentation dots).
+//
+
+double GotScore::durationFromRhythmToken(const std::string& token) {
+    if (token.empty() || token[0]=='*' || token == ".") {
+        return 0.0;
+    }
+
+    static const std::regex re(R"((\d+)(\.*))");
+    std::smatch m;
+    if (std::regex_search(token, m, re)) {
+        int base    = std::stoi(m[1].str());
+        double dur  = 1.0 / base;
+        for (char c : m[2].str()) {
+            if (c == '.') dur += dur/2.0;
+        }
+        return dur;
+    }
+
+    return 0.0;
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::processUnderscoreTies -- Implements "_" ties: wrap the current
+//     token with "[" and appends "]" to both rhythm and pitch on the next token.
+//     If the a token has both "[" and "]" present then convert to "_"; otherwise,
+//     "_" should be removed.
+//
+
+
+void GotScore::processUnderscoreTies(vector<string*>& pitches) {
+	if (pitches.empty()) {
+		return;
+	}
+
+	// Convert "_" into tie pairs
+	for (int i=0; i<(int)pitches.size(); i++) {
+		size_t loc = pitches[i]->find('_');
+		if (loc != string::npos) {
+			pitches[i]->at(loc) = '[';
+			if (i < (int)pitches.size() - 1) {
+				pitches[i+1]->push_back(']');
+			}
+		}
+	}
+
+	// Finish dealing with dot ties by opening the tie on the
+	// previous note.
+	for (int i=1; i<(int)pitches.size(); i++) {
+		size_t loc = pitches[i]->find(']');
+		if (loc != string::npos) {
+			size_t loc2 = pitches[i-1]->find('[');
+			if (loc2 == string::npos) {
+				pitches[i-1]->push_back('[');
+			}
+		}
+	}
+
+	// add terminal long marker
+	*pitches.back() += 'l';
+}
+
+
+///////////////////////////////////////////////////////////////////////////
+
+int main(int argc, char* argv[]) {
+	stringstream buffer;
+
+	if (argc > 1) {
+		ifstream file(argv[1]);
+		if (!file) {
+			cerr << "Error: Cannot open file '" << argv[1] << "'\n";
+			return 1;
+		}
+		buffer << file.rdbuf();
+	} else {
+		buffer << cin.rdbuf();
+	}
+
+	GotScore score(buffer);
+	// score.printInputFile(cout);
+	// score.printCells(cout);
+	score.prepareMeasures(cout);
+	cout << score.getKernHumdrum();
+	// cout << "\n\n\n";
+	// cout << score.getGotHumdrum();
+
+	return 0;
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::setNoEditorial -- do not display parentheses around natural signs that are
+//    not in the original scores (for example an "E" following an "E-flat" does not have an
+//    an explicit natural sign in the GOT notation.  With this option set, the natural will
+//    still be shown, but no parenthese around it.
+//
+
+void GotScore::setNoEditorial(void) { 
+	m_no_editorialQ = true;
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::setCautionary -- display cautionary accidentals based on accidental states
+//    states in the previous measure.
+//
+
+void GotScore::setCautionary(void) { 
+	m_cautionaryQ = true;
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::setNoForcedAccidentals -- Use modern accidental-style display by
+//    not showing all accidentals.
+//
+
+void GotScore::setNoForcedAccidentals(void) { 
+	m_modern_accQ = true;
 }
 
 
@@ -92155,6 +94018,98 @@ void Tool_gasparize::convertNextNoteToJAccidental(HTp current) {
 		break;
 	}
 	current = current->getNextToken();
+}
+
+
+
+
+
+/////////////////////////////////
+//
+// Tool_got2hum::Tool_got2hum -- Set the recognized options for the tool.
+//
+
+Tool_got2hum::Tool_got2hum(void) {
+	define("c|cautionary=b",   "display cautionary accidentals (based on previous measure accidental states");
+	define("E|no-editorial=b", "do not display parentheses around natural accidentals");
+	define("g|got=b",          "output **gotr/**gotp data rather than **kern data");
+	define("X|no-force-acc=b", "do not force all accidentals to be shown.");
+}
+
+
+
+/////////////////////////////////
+//
+// Tool_got2hum::run -- Do the main work of the tool.
+//
+
+bool Tool_got2hum::run(HumdrumFileSet& infiles) {
+	return false;
+}
+
+
+bool Tool_got2hum::run(const string& indata, ostream& out) {
+	initialize();
+	processFile(indata);
+	if (hasAnyText()) {
+		getAllText(out);
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
+bool Tool_got2hum::run(HumdrumFile& infile, ostream& out) {
+	return false;
+}
+
+
+bool Tool_got2hum::run(HumdrumFile& infile) {
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_got2hum::initialize --  Initializations that only have to be done once
+//    for all HumdrumFile segments.
+//
+
+void Tool_got2hum::initialize(void) {
+	m_editorialQ  = !getBoolean("no-editorial");
+	m_cautionaryQ = getBoolean("cautionary");
+	m_gotQ        = getBoolean("got");
+	m_modern_accQ = getBoolean("no-force-acc");
+}
+
+
+
+//////////////////////////////
+//
+// Tool_got2hum::processFile --
+//
+
+void Tool_got2hum::processFile(const string& instring) {
+	if (!m_editorialQ) {
+		m_gotscore.setNoEditorial();
+	}
+	if (m_cautionaryQ) {
+		m_gotscore.setCautionary();
+	}
+	if (m_modern_accQ) {
+		m_gotscore.setNoForcedAccidentals();
+	}
+
+	m_gotscore.loadLines(instring);
+	m_gotscore.prepareMeasures(cerr);
+
+	if (m_gotQ) {
+		m_humdrum_text << m_gotscore.getGotHumdrum();
+	} else {
+		m_humdrum_text << m_gotscore.getKernHumdrum();
+	}
 }
 
 

@@ -77,6 +77,53 @@ class HumTool : public Options {
 
 //////////////////////////////
 //
+// TEXT_INTERFACE -- Expects one text file, either from the
+//    first command-line argument (left over after options have been
+//    parsed out), or from standard input.
+//
+// function call that the interface must implement:
+//  .run(const string& instring, ostream& out)
+//
+//
+
+#define TEXT_INTERFACE(CLASS)                          \
+int main(int argc, char** argv) {                      \
+	hum::CLASS interface;                               \
+	if (!interface.process(argc, argv)) {               \
+		interface.getError(std::cerr);                   \
+		return -1;                                       \
+	}                                                   \
+	string instring;                                    \
+	if (interface.getArgCount() > 0) {                  \
+		ifstream input(interface.getArgument(1));        \
+		if (!input) {                                    \
+			throw std::runtime_error("Could not open file: " + interface.getArgument(1)); \
+		}                                                \
+		stringstream buf;                                \
+		buf << input.rdbuf();                            \
+		instring = buf.str();                            \
+	} else {                                            \
+		stringstream buf;                                \
+		buf << cin.rdbuf();                              \
+		instring = buf.str();                            \
+	}                                                   \
+	int status = interface.run(instring, std::cout);    \
+	interface.finally();                                \
+	if (interface.hasWarning()) {                       \
+		interface.getWarning(std::cerr);                 \
+		return 0;                                        \
+	}                                                   \
+	if (interface.hasError()) {                         \
+		interface.getError(std::cerr);                   \
+		return -1;                                       \
+	}                                                   \
+	return !status;                                     \
+}
+
+
+
+//////////////////////////////
+//
 // BASIC_INTERFACE -- Expects one Humdurm file, either from the
 //    first command-line argument (left over after options have been
 //    parsed out), or from standard input.

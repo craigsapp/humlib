@@ -51,7 +51,7 @@ TOOLDIR   = cli
 PUGIXML   = pugixml
 MIDIFILE  = midifile
 
-PREFLAGS  = -Wall
+PREFLAGS  = -Wall -Wsign-compare
 PREFLAGS += -O3
 PREFLAGS += -I$(MINDIR)
 PREFLAGS += -I$(INCDIR) -I$(INCDIR)/pugixml -I$(INCDIR)/midifile

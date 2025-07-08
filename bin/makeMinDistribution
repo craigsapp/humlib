@@ -82,7 +82,8 @@ sub createIncludeFile {
 		"NoteCell.h",
 		"NoteGrid.h",
 		"Convert.h",
-		"PixelColor.h"
+		"PixelColor.h",
+		"GotScore.h"
 	);
 
 	# musicxml2hum converter related files:
@@ -243,6 +244,7 @@ class MuseRecord;
 class MuseData;
 class MuseDataSet;
 class GridVoice;
+class GotScore;
 
 EOT
 
