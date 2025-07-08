@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Jul  8 20:40:08 CEST 2025
+// Last Modified: Tue Jul  8 23:07:13 CEST 2025
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -6315,6 +6315,24 @@ bool GotScore::processSystemMeasures(int barIndex, int system, ostream& out) {
 
 //////////////////////////////
 //
+// GotScore::cleanRhythmValues -- Convert "6" rhythms into "16" (sixteenths)
+//
+
+void GotScore::cleanRhythmValues(vector<vector<string>>& rhythms) {
+	for (int i=0; i<(int)rhythms.size(); i++) {
+		for (int j=0; j<(int)rhythms[i].size(); j++) {
+			size_t loc = rhythms.at(i).at(j).find("6");
+			if (loc != string::npos) {
+				rhythms.at(i).at(j).replace(loc, 1, "16");
+			}
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
 // GotScore::splitBySpaces -- Split a single TSV cell (string) into
 //     an array by spaces.  Pitches and Rhytyms are groups into beats
 //     by spaces (either 2 or 3 groupings per measure).
@@ -6676,7 +6694,6 @@ string GotScore::getKernHumdrum(void) {
 
 	// Add accidental analysis
 	prepareAccidentals();
-
 
 	// Build timed events (timestamps and durations)
 	buildVoiceEvents();
@@ -7108,6 +7125,9 @@ void GotScore::splitMeasureTokens(GotScore::Measure& mdata) {
 
 			mdata.m_splitRhythms[v][w] = std::move(toks);
 		}
+
+		// Expand "6" into "16" for rhythms:
+		cleanRhythmValues(mdata.m_splitRhythms.at(v));
 	}
 
 	// --- pitches -------------------------------------------------------

@@ -132,6 +132,7 @@ class GotScore {
 		void        prepareAccidentals(void);
 		void        markEditorialAccidentals(GotScore::Measure& measure, int voice);
 		void        checkForCautionaryAccidentals(int mindex, int vindex);
+		void        cleanRhythmValues(std::vector<std::vector<std::string>>& rhythms);
 
 		void        setNoEditorial(void);
 		void        setCautionary(void);

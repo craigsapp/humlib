@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Jul  8 20:40:08 CEST 2025
+// Last Modified: Tue Jul  8 23:07:13 CEST 2025
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -4457,6 +4457,7 @@ class GotScore {
 		void        prepareAccidentals(void);
 		void        markEditorialAccidentals(GotScore::Measure& measure, int voice);
 		void        checkForCautionaryAccidentals(int mindex, int vindex);
+		void        cleanRhythmValues(std::vector<std::vector<std::string>>& rhythms);
 
 		void        setNoEditorial(void);
 		void        setCautionary(void);
