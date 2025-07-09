@@ -107,7 +107,7 @@ ostream& GotScore::Measure::print(ostream& output) {
 		output << "4ryy";
 	}
 	if (m_owner && m_owner->m_textQ) {
-		output << "\t*";
+		output << "\t.";
 	}
 	output << endl;
 
