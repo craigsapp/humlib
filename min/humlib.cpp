@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Jul  9 08:24:07 CEST 2025
+// Last Modified: Wed Jul  9 11:12:27 CEST 2025
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -6101,7 +6101,7 @@ void GotScore::loadLines(stringstream& ss) {
 	string line;
 	while (getline(ss, line)) {
 		// Remove trailing spaces and tabs
-		size_t end = line.find_last_not_of(" \t");
+		size_t end = line.find_last_not_of(" \n\r\t");
 		if (end != string::npos) {
 			line.erase(end + 1);
 		} else {

@@ -207,7 +207,7 @@ void GotScore::loadLines(stringstream& ss) {
 	string line;
 	while (getline(ss, line)) {
 		// Remove trailing spaces and tabs
-		size_t end = line.find_last_not_of(" \t");
+		size_t end = line.find_last_not_of(" \n\r\t");
 		if (end != string::npos) {
 			line.erase(end + 1);
 		} else {
