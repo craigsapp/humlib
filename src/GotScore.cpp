@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Mon May  5 06:31:29 PDT 2025
-// Last Modified: Mon Jul  7 18:56:09 CEST 2025
+// Last Modified: Wed Jul  9 08:20:06 CEST 2025
 // Filename:      GotScore.cpp
 // URL:           http://github.com/craigsapp/humlib/blob/master/src/GotScore.cpp
 // Syntax:        C++17; humlib
@@ -13,6 +13,7 @@
 //
 
 #include "GotScore.h"
+#include "Convert.h"
 
 #include <algorithm>
 #include <cctype>
@@ -814,7 +815,9 @@ string GotScore::getKernHumdrum(void) {
 		if (i > 0) out << "\t";
 		out << "**kern";
 	}
-	if (m_textQ) out << "\t**cdata";
+	if (m_textQ) {
+		out << "\t**cdata";
+	}
 	out << "\n";
 
 	// Staff/part info (reverse order for **kern)
@@ -824,6 +827,20 @@ string GotScore::getKernHumdrum(void) {
 	}
 	if (m_textQ) out << "\t*";
 	out << "\n";
+
+	// Calculate optimal clefs for each voice
+	vector<string> clefs;
+	clefs = generateVoiceClefs();
+	for (int i=(int)clefs.size() - 1; i>= 0; --i) {
+		if (i != (int)clefs.size() - 1) {
+			out << "\t";
+		}
+		out << clefs[i];
+	}
+	if (m_textQ) {
+		out << "\t*";
+	}
+	out << endl;
 
 	// Data rows, by measure
 	for (auto& M : m_measures) {
@@ -851,6 +868,68 @@ string GotScore::getKernHumdrum(void) {
 
 	m_kern = out.str();
 	return m_kern;
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::generateVoiceClefs -- Calculate the clef that best fits the
+//    pitch ranges of each voice.
+//
+
+vector<string> GotScore::generateVoiceClefs(void) {
+	vector<double> psum(m_voices, 0);
+	vector<double> pcount(m_voices, 0);
+	vector<double> pmin(m_voices, 127);
+	vector<double> pmax(m_voices, 0);
+	for (int v=0; v<(int)m_pitch_hist.size(); ++v) {
+		for (int i=0; i<(int)m_pitch_hist[v].size(); ++i) {
+			double count = m_pitch_hist[v][i];
+			if (count == 0) {
+				continue;
+			}
+			psum[v] += i * count;
+			pcount[v] += count;
+			if (i < pmin[v]) {
+				pmin[v] = i;
+			}
+			if (i > pmax[v]) {
+				pmax[v] = i;
+			}
+		}
+	}
+
+	vector<double> pmean(m_voices, 0);
+	for (int v=0; v<(int)pmean.size(); ++v) {
+		pmean[v] = psum[v] / pcount[v];
+	}
+	vector<string> output(m_voices);;
+	for (int v=0; v<(int)output.size(); ++v) {
+		output[v] = chooseClef(pmean[v], pmin[v], pmax[v]);
+	}
+
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::chooseClef -- Chose the clef for a voice based on the
+//    mean pitch of the voice, and the min/max value.  Currently the
+//    algorithm is to use tenor clef if the mean pitch is between A-flat3
+//    and E4.
+//
+
+string GotScore::chooseClef(double mean, double min, double max) {
+	if (mean > 64) {
+		return "*clefG2";
+	} else if (mean > 56) {
+		return "*clefGv2";
+	} else {
+		return "*clefF4";
+	}
 }
 
 
@@ -937,7 +1016,8 @@ string GotScore::getKernHumdrumMeasure(GotScore::Measure& mdata) {
 
 //////////////////////////////
 //
-// GotScore::mergeRhythmAndPitchIntoNote --
+// GotScore::mergeRhythmAndPitchIntoNote -- Take the two separate streams of
+//    rhythms and pitches and merge into a single **kern token.
 //
 
 string GotScore::mergeRhythmAndPitchIntoNote(const string& r, const string& p) {
@@ -1046,7 +1126,10 @@ void GotScore::prepareAccidentals(void) {
 
 //////////////////////////////
 //
-// GotScore::checkForCautionaryAccidentals --
+// GotScore::checkForCautionaryAccidentals -- This is an optionally run function
+//     that adds cautionary accidentals (for natural notes) based on the previous
+//     measure.  Use the setCautionary() function to activate this function
+//     which converting to **kern data.
 //
 
 void GotScore::checkForCautionaryAccidentals(int mindex, int vindex) {
@@ -1089,11 +1172,12 @@ void GotScore::checkForCautionaryAccidentals(int mindex, int vindex) {
 
 //////////////////////////////
 //
-// GotScore::markEditorialAccidentals --
+// GotScore::markEditorialAccidentals -- When a natural pitch class follows an
+//    chromatically altered one in the measure, mark it as an editorial natural
+//    accidental.  This will add a parenthese around the note; otherwise, the
+//    natural visual accidental will be added automatically for modern accidental
+//    syntax.
 //
-//				std::vector<std::vector<std::vector<std::string>>> m_splitPitches;
-//				std:vector<std::vector<int>> m_diatonic;
-//				std:vector<std::vector<int>> m_accid;
 
 void GotScore::markEditorialAccidentals(GotScore::Measure& measure, int voice) {
 	vector<vector<string>>& pitches = measure.m_splitPitches.at(voice);
@@ -1368,10 +1452,12 @@ vector<GotScore::EventAtTime> GotScore::alignEventsByTimestamp(const GotScore::M
 //
 
 void GotScore::processDotTiedNotes(void) {
-	// 0) Build flattened per-voice lists of pointers to every non-interpretation token
-	vector<vector<string*>> R(m_voices), P(m_voices);
+	// Build flattened per-voice lists of pointers to every non-interpretation token
+	vector<vector<string*>> R(m_voices);
+	vector<vector<string*>> P(m_voices);
+
 	for (auto& M : m_measures) {
-		for (int v = 0; v < m_voices; ++v) {
+		for (int v=0; v<m_voices; ++v) {
 			// collect rhythm tokens
 			for (auto& beat : M.m_splitRhythms[v]) {
 				for (auto& tok : beat) {
@@ -1391,14 +1477,55 @@ void GotScore::processDotTiedNotes(void) {
 		}
 	}
 
-	// 1) Half‐duration ties (rhythm dots):
+	// Half‐duration ties (rhythm dots):
 	for (int v = 0; v < m_voices; ++v) {
 		processRhythmTies(R[v], P[v]);
 	}
 
-	// 2) Pitch‐dot ties:
+	// Pitch‐dot ties:
 	for (int v = 0; v < m_voices; ++v) {
 		processPitchDotsByVoice(P[v]);
+	}
+
+	// store pitches in histogram for later calculation of
+	// clefs for each voice.
+	storePitchHistograms(P);
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::storePitchHistograms -- Convert notes for each voice to MIDI
+//    pitches and store in pitch histograms by voice to be used later to calculate
+//    the optimal clef (bass, treble, or vocal-tenor).
+//
+
+void GotScore::storePitchHistograms(vector<vector<string*>>& P) {
+	m_pitch_hist.resize(P.size());
+	for (int v=0; v<(int)P.size(); ++v) {
+		m_pitch_hist.at(v).resize(127);
+		std::fill(m_pitch_hist[v].begin(), m_pitch_hist[v].end(), 0);
+	}
+
+	for (int v=0; v<(int)P.size(); ++v) {
+		for (int i=0; i<(int)P.at(v).size(); ++i) {
+			string& p = *P.at(v).at(i);
+			if (p.empty()) {
+				continue;
+			}
+			if (p == ".") {
+				continue;
+			}
+			if (p[0] == '*') {
+				continue;
+			}
+			int midi = Convert::kernToMidiNoteNumber(p);
+			if (midi < 0) {
+				continue;
+			}
+			m_pitch_hist.at(v).at(midi)++;
+		}
 	}
 }
 
@@ -1878,7 +2005,7 @@ int main(int argc, char* argv[]) {
 //    still be shown, but no parenthese around it.
 //
 
-void GotScore::setNoEditorial(void) { 
+void GotScore::setNoEditorial(void) {
 	m_no_editorialQ = true;
 }
 
@@ -1890,7 +2017,7 @@ void GotScore::setNoEditorial(void) {
 //    states in the previous measure.
 //
 
-void GotScore::setCautionary(void) { 
+void GotScore::setCautionary(void) {
 	m_cautionaryQ = true;
 }
 
@@ -1902,7 +2029,7 @@ void GotScore::setCautionary(void) {
 //    not showing all accidentals.
 //
 
-void GotScore::setNoForcedAccidentals(void) { 
+void GotScore::setNoForcedAccidentals(void) {
 	m_modern_accQ = true;
 }
 

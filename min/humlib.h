@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Jul  8 23:07:13 CEST 2025
+// Last Modified: Wed Jul  9 08:24:07 CEST 2025
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -4424,6 +4424,7 @@ class GotScore {
 
 				// m_voiceEvents: events per voice
 				std::vector<std::vector<TimedEvent>> m_voiceEvents;
+
 		};
 
 	public:
@@ -4478,6 +4479,9 @@ class GotScore {
 		std::vector<GotScore::EventAtTime> alignEventsByTimestamp(const GotScore::Measure& mdata);
 		std::vector<std::string> convertGotToKernPitches (std::vector<std::string>& gotpitch);
 		std::string convertGotToKernPitch (const std::string& gotpitch);
+		void     storePitchHistograms     (std::vector<std::vector<std::string*>>& P);
+		std::vector<std::string> generateVoiceClefs(void);
+		std::string chooseClef(double mean, double min, double max);
 
 		std::vector<std::string> tokenizeRhythmString (const std::string& input);
 		std::vector<std::string> tokenizePitchString  (const std::string& input);
@@ -4486,6 +4490,9 @@ class GotScore {
 	private:
 		// m_voices == number of voices in score
 		int m_voices = 0;
+
+		// m_pitch_hist == used to calculate the clef for each voice.
+		std::vector<std::vector<int>> m_pitch_hist;
 
 		// m_textQ == true if input data has lyric text.
 		bool m_textQ = false;
