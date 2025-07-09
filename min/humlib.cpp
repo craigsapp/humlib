@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Jul  9 13:31:54 CEST 2025
+// Last Modified: Wed Jul  9 13:48:18 CEST 2025
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -6173,7 +6173,7 @@ void GotScore::prepareCells() {
 bool GotScore::prepareMeasures(ostream& out) {
 	regex re("^s(\\d+) bar");
 	regex rebaronly("^\\s*bar\\s*$");
-	smatch match;
+	std::smatch match;
 	bool status = true;
 
 	// Search for lines starting with "s# bar" which incidates system #.
@@ -6232,7 +6232,7 @@ bool GotScore::processSystemMeasures(int barIndex, int system, ostream& out) {
 	regex rev("v(\\d+)");
 	regex rer("r\\s*$");
 	regex rep("p\\s*$");
-	smatch match;
+	std::smatch match;
 
 	// Identify the lines for each type of data for one system:
 	// * line index for the bar numbers
@@ -6369,7 +6369,7 @@ vector<string> GotScore::splitBySpaces(const string& input) {
 	// 1) split on whitespace
 	vector<string> parts;
 	{
-		istringstream stream(input);
+		stringstream stream(input);
 		string word;
 		while (stream >> word) {
 			parts.push_back(word);

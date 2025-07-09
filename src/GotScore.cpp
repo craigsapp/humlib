@@ -279,7 +279,7 @@ void GotScore::prepareCells() {
 bool GotScore::prepareMeasures(ostream& out) {
 	regex re("^s(\\d+) bar");
 	regex rebaronly("^\\s*bar\\s*$");
-	smatch match;
+	std::smatch match;
 	bool status = true;
 
 	// Search for lines starting with "s# bar" which incidates system #.
@@ -338,7 +338,7 @@ bool GotScore::processSystemMeasures(int barIndex, int system, ostream& out) {
 	regex rev("v(\\d+)");
 	regex rer("r\\s*$");
 	regex rep("p\\s*$");
-	smatch match;
+	std::smatch match;
 
 	// Identify the lines for each type of data for one system:
 	// * line index for the bar numbers
@@ -475,7 +475,7 @@ vector<string> GotScore::splitBySpaces(const string& input) {
 	// 1) split on whitespace
 	vector<string> parts;
 	{
-		istringstream stream(input);
+		stringstream stream(input);
 		string word;
 		while (stream >> word) {
 			parts.push_back(word);
