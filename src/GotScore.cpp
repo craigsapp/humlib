@@ -89,6 +89,28 @@ ostream& GotScore::Measure::print(ostream& output) {
 		output << endl;
 	}
 
+	output << "!!LO:TX:t=P:problem=";
+	for (int i=0; i<(int)m_error.size(); ++i) {
+		if (m_error[i] == ':') {
+			output << "&colon;";
+		} else {
+			output << m_error[i];
+		}
+
+	}
+	output << endl;
+	// Print out dummy rests to make empty measure visible.
+	for (int i=0; i<(int)m_pitches.size(); i++) {
+		if (i > 0) {
+			output << "\t";
+		}
+		output << "4ryy";
+	}
+	if (m_owner && m_owner->m_textQ) {
+		output << "\t*";
+	}
+	output << endl;
+
 	return output;
 }
 
@@ -391,6 +413,10 @@ bool GotScore::processSystemMeasures(int barIndex, int system, ostream& out) {
 		// Add a new measure to the end of the list:
 		m_measures.resize(m_measures.size()+1);
 		GotScore::Measure& lm = m_measures.back();
+
+		// Store the GotScore owner of the measure (for keeping
+		// track of text existence in measures:
+		lm.m_owner = this;
 
 		// Store the bar number for the measure:
 		lm.m_barnum = m_cells[barIndex].at(i);
@@ -1043,7 +1069,7 @@ string GotScore::mergeRhythmAndPitchIntoNote(const string& r, const string& p) {
 	}
 
 	bool hasTieEnd = false;
-	if (p.find('[') != string::npos) {
+	if (p.find(']') != string::npos) {
 		hasTieEnd = true;
 	}
 	if (p.find('_') != string::npos) {

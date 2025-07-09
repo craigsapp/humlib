@@ -53,6 +53,9 @@ class GotScore {
 				};
 
 			public:
+				// m_parent: A pointer to the GotScore object that the measure belongs to.
+				GotScore* m_owner = NULL;
+
 				// m_barnum: The measure number for the measure.
 				std::string m_barnum;
 
