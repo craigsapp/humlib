@@ -1994,34 +1994,6 @@ void GotScore::processUnderscoreTies(vector<string*>& pitches) {
 }
 
 
-///////////////////////////////////////////////////////////////////////////
-
-int main(int argc, char* argv[]) {
-	stringstream buffer;
-
-	if (argc > 1) {
-		ifstream file(argv[1]);
-		if (!file) {
-			cerr << "Error: Cannot open file '" << argv[1] << "'\n";
-			return 1;
-		}
-		buffer << file.rdbuf();
-	} else {
-		buffer << cin.rdbuf();
-	}
-
-	GotScore score(buffer);
-	// score.printInputFile(cout);
-	// score.printCells(cout);
-	score.prepareMeasures(cout);
-	cout << score.getKernHumdrum();
-	// cout << "\n\n\n";
-	// cout << score.getGotHumdrum();
-
-	return 0;
-}
-
-
 
 //////////////////////////////
 //
