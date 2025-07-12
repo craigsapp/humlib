@@ -63,7 +63,7 @@ class GotScore {
 				std::string m_text;
 
 				// m_error: Any parsing error message when converting to **kern
-				std::string m_error;
+				std::vector<std::string> m_error;
 
 				// m_rhythms: First dimension is voice (highest to lowest)
 				// Second dimension is rhythm "word" first to last in measure
@@ -160,6 +160,13 @@ class GotScore {
 		void     storePitchHistograms     (std::vector<std::vector<std::string*>>& P);
 		std::vector<std::string> generateVoiceClefs(void);
 		std::string chooseClef(double mean, double min, double max);
+
+		static int kernToBase40PC       (const std::string& kerndata);
+		static int kernToAccidentalCount(const std::string& kerndata);
+		static int kernToBase12PC       (const std::string& kerndata);
+		static int kernToOctaveNumber   (const std::string& kerndata);
+		static int kernToMidiNoteNumber (const std::string& kerndata);
+		static int kernToDiatonicPC     (const std::string& kerndata);
 
 		std::vector<std::string> tokenizeRhythmString (const std::string& input);
 		std::vector<std::string> tokenizePitchString  (const std::string& input);

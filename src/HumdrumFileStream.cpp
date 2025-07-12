@@ -382,7 +382,7 @@ restarting:
 			break;
 		}
 
-		int len = templine.length();
+		int len = (int)templine.length();
 		if ((len > 4) && (templine.compare(0, 4, "!!!!") == 0) &&
 		    (templine[4] != '!') &&
 		    (dataFoundQ == 0) &&

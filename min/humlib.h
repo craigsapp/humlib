@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Jul 10 05:31:52 CEST 2025
+// Last Modified: Sat Jul 12 18:06:54 CEST 2025
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -4388,7 +4388,7 @@ class GotScore {
 				std::string m_text;
 
 				// m_error: Any parsing error message when converting to **kern
-				std::string m_error;
+				std::vector<std::string> m_error;
 
 				// m_rhythms: First dimension is voice (highest to lowest)
 				// Second dimension is rhythm "word" first to last in measure
@@ -4485,6 +4485,13 @@ class GotScore {
 		void     storePitchHistograms     (std::vector<std::vector<std::string*>>& P);
 		std::vector<std::string> generateVoiceClefs(void);
 		std::string chooseClef(double mean, double min, double max);
+
+		static int kernToBase40PC       (const std::string& kerndata);
+		static int kernToAccidentalCount(const std::string& kerndata);
+		static int kernToBase12PC       (const std::string& kerndata);
+		static int kernToOctaveNumber   (const std::string& kerndata);
+		static int kernToMidiNoteNumber (const std::string& kerndata);
+		static int kernToDiatonicPC     (const std::string& kerndata);
 
 		std::vector<std::string> tokenizeRhythmString (const std::string& input);
 		std::vector<std::string> tokenizePitchString  (const std::string& input);

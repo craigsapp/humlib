@@ -105,7 +105,6 @@ void Tool_got2hum::processFile(const string& instring) {
 	}
 
 	m_gotscore.loadLines(instring);
-	m_gotscore.prepareMeasures(cerr);
 
 	if (m_gotQ) {
 		m_humdrum_text << m_gotscore.getGotHumdrum();

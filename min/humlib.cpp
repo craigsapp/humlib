@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Jul 10 05:31:52 CEST 2025
+// Last Modified: Sat Jul 12 18:06:54 CEST 2025
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -5823,7 +5823,7 @@ string Convert::generateRandomId(int length) {
     const string characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     std::random_device rd;  // Non-deterministic generator
     std::mt19937 gen(rd()); // Seed the generator
-    std::uniform_int_distribution<> distr(0, characters.size() - 1);
+    std::uniform_int_distribution<> distr(0, (int)characters.size() - 1);
     string randomId;
     std::generate_n(std::back_inserter(randomId), length, [&]() {
         return characters[distr(gen)];
@@ -5934,7 +5934,9 @@ ostream& GotScore::Measure::print(ostream& output) {
 	output << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
 	output << "!!!BAR:\t" << m_barnum << endl;
 	if (!m_error.empty()) {
-		output << "!!!ERROR: " << m_error << endl;
+		for (int i=0; i<m_error.size(); ++i) {
+			output << "!!!ERROR: " << m_error[i] << endl;
+		}
 	}
 	if (!m_text.empty()) {
 		output << "!!!TEXT:\t" << m_text << endl;
@@ -5983,16 +5985,17 @@ ostream& GotScore::Measure::print(ostream& output) {
 		output << endl;
 	}
 
-	output << "!!LO:TX:t=P:problem=";
-	for (int i=0; i<(int)m_error.size(); ++i) {
-		if (m_error[i] == ':') {
-			output << "&colon;";
-		} else {
-			output << m_error[i];
+	for (int i=0; i<m_error.size(); ++i) {
+		output << "!!LO:TX:t=P:problem=";
+		for (int j=0; j<(int)m_error[i].size(); ++j) {
+			if (m_error[i][j] == ':') {
+				output << "&colon;";
+			} else {
+				output << m_error[i][j];
+			}
 		}
-
+		output << endl;
 	}
-	output << endl;
 	// Print out dummy rests to make empty measure visible.
 	for (int i=0; i<(int)m_pitches.size(); i++) {
 		if (i > 0) {
@@ -6056,7 +6059,7 @@ void GotScore::clear(void) {
 	m_measures.clear();
 	m_got.clear();
 	m_kern.clear();
-	m_error.str("");
+	m_error.clear();
 }
 
 
@@ -6158,6 +6161,7 @@ void GotScore::prepareCells() {
 		fields.emplace_back(line.substr(start));
 		m_cells[i] = std::move(fields);
 	}
+	prepareMeasures(cerr);
 }
 
 
@@ -6189,11 +6193,11 @@ bool GotScore::prepareMeasures(ostream& out) {
 		}
 		int system = stoi(match[1]);
 		if (m_debugQ) {
-			cerr << ">>>>>>>>>>>>>>>>>>> PROCESSING SYSTEM = " << system << endl;
+			out << ">>>>>>>>>>>>>>>>>>> PROCESSING SYSTEM = " << system << endl;
 		}
 		status = processSystemMeasures(i, system, out);
 		if (!status) {
-			cerr << "Problems parsing system " << system << endl;
+			out << "Problems parsing system " << system << endl;
 			return status;
 		}
 	}
@@ -6228,11 +6232,15 @@ bool GotScore::processSystemMeasures(int barIndex, int system, ostream& out) {
 	vector<int> pIndex;
 	int textIndex = -1;
 
-	regex re("^s(\\d+)");
-	regex rev("v(\\d+)");
-	regex rer("r\\s*$");
-	regex rep("p\\s*$");
+	regex re("^s(\\d+)"); // system number
+	regex rev("v(\\d+)"); // voice number
+	regex rer("r\\s*$");  // rhythm information
+	regex rep("p\\s*$");  // pitch information
 	std::smatch match;
+
+	// error checking
+	regex badpitch("\\d"); // pitch cell cannot have a digit
+	regex badrhythm("[a-gA-GrR#-]"); // rhythm cell cannot have a pitch letter
 
 	// Identify the lines for each type of data for one system:
 	// * line index for the bar numbers
@@ -6326,11 +6334,43 @@ bool GotScore::processSystemMeasures(int barIndex, int system, ostream& out) {
 
 		lm.m_rhythms.resize(rIndex.size());
 		lm.m_pitches.resize(rIndex.size());
-		for (int j=0; j<(int)rIndex.size(); j++) {
-			lm.m_rhythms.at(j) = splitBySpaces(m_cells.at(rIndex.at(j)).at(i));
+		for (int j=0; j<(int)rIndex.size(); ++j) {
+			string& rhythm_cell = m_cells.at(rIndex.at(j)).at(i);
+			lm.m_rhythms.at(j) = splitBySpaces(rhythm_cell);
+			for (int k=0; k<(int)lm.m_rhythms.at(j).size(); ++k) {
+				string& value = lm.m_rhythms.at(j).at(k);
+				if (!value.empty()) {
+					if (value.at(0) == '*') {
+						continue;
+					}
+				}
+				if (regex_search(value, badrhythm)) {
+					stringstream ss;
+					ss << "Measure " << lm.m_barnum << ", voice ";
+					ss << j+1 << ": detected pitch characters in rhythm cell: " << value;
+					lm.m_error.push_back(ss.str());
+					break;
+				}
+			}
 		}
-		for (int j=0; j<(int)pIndex.size(); j++) {
-			lm.m_pitches.at(j) = splitBySpaces(m_cells.at(pIndex.at(j)).at(i));
+		for (int j=0; j<(int)pIndex.size(); ++j) {
+			string& pitch_cell = m_cells.at(pIndex.at(j)).at(i);
+			lm.m_pitches.at(j) = splitBySpaces(pitch_cell);
+			for (int k=0; k<(int)lm.m_pitches.at(j).size(); ++k) {
+				string& value = lm.m_pitches.at(j).at(k);
+				if (!value.empty()) {
+					if (value.at(0) == '*') {
+						continue;
+					}
+				}
+				if (regex_search(value, badpitch)) {
+					stringstream ss;
+					ss << "Measure " << lm.m_barnum << ", voice ";
+					ss << j+1 << ": detected rhythm characters in pitch cell: " << value;
+					lm.m_error.push_back(ss.str());
+					break;
+				}
+			}
 		}
 	}
 
@@ -6706,9 +6746,9 @@ string GotScore::getKernHumdrum(void) {
 			// generate an error for the measure.
 			if (rr.size() != pp.size()) {
 				string message = "Measure " + M.m_barnum;
-				message += " voice " + to_string(v+1);
+				message += ", voice " + to_string(v+1);
 				message += ": pitch and rhythm token counts are not the same.";
-				M.m_error = message;
+				M.m_error.push_back(message);
 			}
 		}
 	}
@@ -7274,6 +7314,9 @@ void GotScore::splitMeasureTokens(GotScore::Measure& mdata) {
 
 void GotScore::buildVoiceEvents(void) {
 	for (auto& mdata : m_measures) {
+		if (!mdata.m_error.empty()) {
+			continue;
+		}
 		mdata.m_voiceEvents.clear();
 		mdata.m_voiceEvents.resize(mdata.m_splitRhythms.size());
 
@@ -7377,6 +7420,9 @@ void GotScore::processDotTiedNotes(void) {
 	vector<vector<string*>> P(m_voices);
 
 	for (auto& M : m_measures) {
+		if (!M.m_error.empty()) {
+			continue;
+		}
 		for (int v=0; v<m_voices; ++v) {
 			// collect rhythm tokens
 			for (auto& beat : M.m_splitRhythms[v]) {
@@ -7440,7 +7486,7 @@ void GotScore::storePitchHistograms(vector<vector<string*>>& P) {
 			if (p[0] == '*') {
 				continue;
 			}
-			int midi = Convert::kernToMidiNoteNumber(p);
+			int midi = GotScore::kernToMidiNoteNumber(p);
 			if (midi < 0) {
 				continue;
 			}
@@ -7778,6 +7824,9 @@ void GotScore::pairLeadingDots(void) {
 //
 
 void GotScore::processDotsForMeasure(GotScore::Measure& mdata) {
+	if (!mdata.m_error.empty()) {
+		return;
+	}
 	for (int voice=0; voice<(int)mdata.m_splitRhythms.size(); voice++) {
 		for (int word=0; word<(int)mdata.m_splitRhythms.at(voice).size(); word++) {
 			if (mdata.m_splitRhythms.at(voice).at(word).at(0) == ".") {
@@ -7923,6 +7972,176 @@ void GotScore::setCautionary(void) {
 
 void GotScore::setNoForcedAccidentals(void) {
 	m_modern_accQ = true;
+}
+
+
+
+///////////////////////////////
+//
+// GotScore::kernToMidiNoteNumber -- Convert **kern to MIDI note number
+//    (middle C = 60).  Middle C is assigned to octave 5 rather than
+//    octave 4 for the kernToBase12() function.
+//
+
+int GotScore::kernToMidiNoteNumber(const string& kerndata) {
+	int pc = GotScore::kernToBase12PC(kerndata);
+	int octave = GotScore::kernToOctaveNumber(kerndata);
+	return pc + 12 * (octave + 1);
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::kernToOctaveNumber -- Convert a kern token into an octave number.
+//    Middle C is the start of the 4th octave. -1000 is returned if there
+//    is not pitch in the string.  Only the first subtoken in the string is
+//    considered.
+//
+
+int GotScore::kernToOctaveNumber(const string& kerndata) {
+	int uc = 0;
+	int lc = 0;
+	if (kerndata == ".") {
+		return -1000;
+	}
+	for (int i=0; i<(int)kerndata.size(); i++) {
+		if (kerndata[i] == ' ') {
+			break;
+		}
+		if (kerndata[i] == 'r') {
+			return -1000;
+		}
+		uc += ('A' <= kerndata[i]) && (kerndata[i] <= 'G') ? 1 : 0;
+		lc += ('a' <= kerndata[i]) && (kerndata[i] <= 'g') ? 1 : 0;
+	}
+	if ((uc > 0) && (lc > 0)) {
+		// invalid pitch description
+		return -1000;
+	}
+	if (uc > 0) {
+		return 4 - uc;
+	} else if (lc > 0) {
+		return 3 + lc;
+	} else {
+		return -1000;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::kernToBase12PC -- Convert **kern pitch to a base-12 pitch-class.
+//   C=0, C#/D-flat=1, D=2, etc.  Will return -1 instead of 11 for C-, and
+//   will return 12 instead of 0 for B#.
+//
+
+int GotScore::kernToBase12PC(const string& kerndata) {
+	int diatonic = GotScore::kernToDiatonicPC(kerndata);
+	if (diatonic < 0) {
+		return diatonic;
+	}
+	int accid    = GotScore::kernToAccidentalCount(kerndata);
+	int output = -1000;
+	switch (diatonic) {
+		case 0: output =  0; break;
+		case 1: output =  2; break;
+		case 2: output =  4; break;
+		case 3: output =  5; break;
+		case 4: output =  7; break;
+		case 5: output =  9; break;
+		case 6: output = 11; break;
+	}
+	output += accid;
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::kernToAccidentalCount -- Convert a kern token into a count
+//    of accidentals in the first subtoken.  Sharps are assigned to the
+//    value +1 and flats to -1.  So a double sharp is +2 and a double
+//    flat is -2.  Only the first subtoken in the string is considered.
+//    Cases such as "#-" should not exist, but in this case the return
+//    value will be 0.
+//
+
+int GotScore::kernToAccidentalCount(const string& kerndata) {
+	int output = 0;
+	for (int i=0; i<(int)kerndata.size(); i++) {
+		if (kerndata[i] == ' ') {
+			break;
+		}
+		if (kerndata[i] == '-') {
+			output--;
+		}
+		if (kerndata[i] == '#') {
+			output++;
+		}
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::kernToBase40PC -- Convert **kern pitch to a base-40 pitch class.
+//    Will ignore subsequent pitches in a chord.
+//
+
+int GotScore::kernToBase40PC(const string& kerndata) {
+	int diatonic = GotScore::kernToDiatonicPC(kerndata);
+	if (diatonic < 0) {
+		return diatonic;
+	}
+	int accid  = GotScore::kernToAccidentalCount(kerndata);
+	int output = -1000;
+	switch (diatonic) {
+		case 0: output =  0; break;
+		case 1: output =  6; break;
+		case 2: output = 12; break;
+		case 3: output = 17; break;
+		case 4: output = 23; break;
+		case 5: output = 29; break;
+		case 6: output = 35; break;
+	}
+	output += accid;
+	return output + 2;     // +2 to make c-flat-flat bottom of octave.
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::kernToDiatonicPC -- Convert a kern token into a diatonic
+//    note pitch-class where 0="C", 1="D", ..., 6="B".  -1000 is returned
+//    if the note is rest, and -2000 if there is no pitch information in the
+//    input string. Only the first subtoken in the string is considered.
+//
+
+int GotScore::kernToDiatonicPC(const string& kerndata) {
+	for (int i=0; i<(int)kerndata.size(); i++) {
+		if (kerndata[i] == ' ') {
+			break;
+		}
+		if (kerndata[i] == 'r') {
+			return -1000;
+		}
+		switch (kerndata[i]) {
+			case 'A': case 'a': return 5;
+			case 'B': case 'b': return 6;
+			case 'C': case 'c': return 0;
+			case 'D': case 'd': return 1;
+			case 'E': case 'e': return 2;
+			case 'F': case 'f': return 3;
+			case 'G': case 'g': return 4;
+		}
+	}
+	return -2000;
 }
 
 
@@ -29847,7 +30066,7 @@ restarting:
 			break;
 		}
 
-		int len = templine.length();
+		int len = (int)templine.length();
 		if ((len > 4) && (templine.compare(0, 4, "!!!!") == 0) &&
 		    (templine[4] != '!') &&
 		    (dataFoundQ == 0) &&
@@ -94247,7 +94466,6 @@ void Tool_got2hum::processFile(const string& instring) {
 	}
 
 	m_gotscore.loadLines(instring);
-	m_gotscore.prepareMeasures(cerr);
 
 	if (m_gotQ) {
 		m_humdrum_text << m_gotscore.getGotHumdrum();
@@ -124731,7 +124949,7 @@ void Tool_prange::assignHorizontalPosition(vector<_VoiceInfo>& voiceInfo, int mi
 
 	if (hpos.size() > 2) {
 		for (int i=1; i<(int)hpos.size()-1; i++) {
-			int ii = hpos.size() - i - 1;
+			int ii = (int)hpos.size() - i - 1;
 			hpos[i] = (double)ii / (hpos.size()-1) * (maxval - minval) + minval;
 		}
 	}
@@ -125244,7 +125462,7 @@ int Tool_prange::getTopQuartile(vector<double>& midibins) {
 
 	double cumsum = 0.0;
 	int i;
-	for (i=midibins.size()-1; i>=0; i--) {
+	for (i=(int)midibins.size()-1; i>=0; i--) {
 		if (midibins[i] <= 0.0) {
 			continue;
 		}
@@ -125342,7 +125560,7 @@ int Tool_prange::getStaffBase7(int base7) {
 //
 
 int Tool_prange::getMaxDiatonicIndex(vector<vector<double>>& diatonic) {
-	for (int i=diatonic.size()-1; i>=0; i--) {
+	for (int i=(int)diatonic.size()-1; i>=0; i--) {
 		if (diatonic.at(i).at(0) != 0.0) {
 			return i;
 		}

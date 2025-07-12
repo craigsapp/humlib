@@ -116,7 +116,13 @@ RANLIB    = ranlib
 # PREFLAGS: Compiler options placed before filenames
 PREFLAGS = -c -g -I$(INCDIR) -I$(INCDIR_PUGIXML) -I$(INCDIR_MIDIFILE)
 # Add warnings to PREFLAGS:
-PREFLAGS += -Wall -Werror -Wsign-compare
+PREFLAGS += -Wall
+
+# MacOS specific warnings
+ifeq ($(shell uname -s),Darwin)
+  PREFLAGS += -Wshorten-64-to-32
+endif
+
 # Optimize the binary code in object files to run faster:
 PREFLAGS += -O3
 

@@ -451,7 +451,7 @@ string Convert::generateRandomId(int length) {
     const string characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     std::random_device rd;  // Non-deterministic generator
     std::mt19937 gen(rd()); // Seed the generator
-    std::uniform_int_distribution<> distr(0, characters.size() - 1);
+    std::uniform_int_distribution<> distr(0, (int)characters.size() - 1);
     string randomId;
     std::generate_n(std::back_inserter(randomId), length, [&]() {
         return characters[distr(gen)];
