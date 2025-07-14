@@ -1513,7 +1513,7 @@ void Tool_composite::fixTiedNotes(vector<string>& data, HumdrumFile& infile) {
 			if (data.at(i).find("[") != string::npos) {
 				intie = false;
 			} else if (data.at(i).find("]") != string::npos) {
-				hre.replaceDestructive(data.at(i), "_", "[]]");
+				hre.replaceDestructive(data.at(i), "_", "\\]");
 			} else if (data.at(i).find("_") != string::npos) {
 				// do nothing
 			} else {

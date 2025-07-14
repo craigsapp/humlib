@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jul 12 18:06:54 CEST 2025
+// Last Modified: Mon Jul 14 20:39:48 CEST 2025
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -73000,7 +73000,7 @@ void Tool_composite::fixTiedNotes(vector<string>& data, HumdrumFile& infile) {
 			if (data.at(i).find("[") != string::npos) {
 				intie = false;
 			} else if (data.at(i).find("]") != string::npos) {
-				hre.replaceDestructive(data.at(i), "_", "[]]");
+				hre.replaceDestructive(data.at(i), "_", "\\]");
 			} else if (data.at(i).find("_") != string::npos) {
 				// do nothing
 			} else {
