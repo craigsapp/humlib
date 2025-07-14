@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Jul 14 20:39:48 CEST 2025
+// Last Modified: Mon Jul 14 21:37:27 CEST 2025
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -71538,22 +71538,24 @@ void Tool_colortriads::processFile(HumdrumFile& infile) {
 //
 
 Tool_composite::Tool_composite(void) {
-	define("debug=b",                  "print debug statements");
+
 	define("a|append=b",               "append data to end of line (top of system)");
-	define("x|extract=b",              "only output composite rhythm spines");
-	define("grace=b",                  "include grace notes in composite rhythms");
-	define("u|up-stem=b",              "force notes to be up-stem");
+	define("B|no-beam=b",              "do not try to automatically beam analysis notation");
+	define("c|coincidence=b",          "do coincidence rhythm analysis");
 	define("C|color-full-composite=b", "color full composite rhythm if score has groups");
-	define("l|score-size=d:100.0",     "set staff size of input score (percent)");
-	define("L|analysis-size=d:100.0",  "set staff size of analysis staves (percent)");
-	define("o|only=s",                 "output notes of given group (A or B)");
-	define("r|rhythms=b",              "convert input score to rhythms only.");
+	define("debug=b",                  "print debug statements");
 	define("e|events=b",               "show event counts on analysis staves.");
 	define("F|no-full-composite=b",    "do not do full composite rhythm analysis");
-	define("c|coincidence=b",          "do coincidence rhythm analysis");
+	define("grace=b",                  "include grace notes in composite rhythms");
 	define("g|group|groups=b",         "do group rhythm analysis");
+	define("l|score-size=d:100.0",     "set staff size of input score (percent)");
+	define("L|analysis-size=d:100.0",  "set staff size of analysis staves (percent)");
 	define("m|mark=b",                 "mark coincidences in group analysis and input score");
 	define("M|mark-input=b",           "mark coincidences in input score");
+	define("o|only=s",                 "output notes of given group (A or B)");
+	define("r|rhythms=b",              "convert input score to rhythms only.");
+	define("u|up-stem=b",              "force notes to be up-stem");
+	define("x|extract=b",              "only output composite rhythm spines");
 
 	// Numeric analysis options:
 	define("A|analysis|analyses=s",    "list of numeric analysis features to extract");
@@ -71570,9 +71572,10 @@ Tool_composite::Tool_composite(void) {
 //
 
 void Tool_composite::initialize(HumdrumFile& infile) {
-	m_debugQ   = getBoolean("debug");
-	m_appendQ  = getBoolean("append");
-	m_extractQ = getBoolean("extract");
+	m_debugQ    =  getBoolean("debug");
+	m_beamQ     = !getBoolean("no-beam");
+	m_appendQ   =  getBoolean("append");
+	m_extractQ  =  getBoolean("extract");
 	if (m_extractQ) {
 		m_appendQ = false;
 		m_prependQ = false;
