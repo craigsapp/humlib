@@ -59,6 +59,20 @@ class GotScore {
 				// m_barnum: The measure number for the measure.
 				std::string m_barnum;
 
+				// m_linebreak: The linebreak group to add to end of measure
+				// when converting to **got or **kern  There are two labels:
+				//    half = linebreak at the half-system at the binding between
+				//           physical pages (each system takes up two pages width).
+				//    original = linebreak at the end of a system.
+				//    and empty m_linebreak means that there are no breaks after
+				//    this measure.
+				// To encode half breaks, add the letter "p" to the end of the 
+				// current measure number.  This will be removed from the text of
+				// m_barline, and the "p" will convert to "half" in m_linebreak.
+				// The end of the system will be inferred from the system number in
+				// the GOT TSV data.
+				std::string m_linebreak;
+
 				// m_text: the text content for the measure.
 				std::string m_text;
 
@@ -160,6 +174,7 @@ class GotScore {
 		void     storePitchHistograms     (std::vector<std::vector<std::string*>>& P);
 		std::vector<std::string> generateVoiceClefs(void);
 		std::string chooseClef(double mean, double min, double max);
+		void     trimSpaces(std::string& s);
 
 		static int kernToBase40PC       (const std::string& kerndata);
 		static int kernToAccidentalCount(const std::string& kerndata);

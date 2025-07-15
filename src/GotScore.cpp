@@ -39,7 +39,7 @@ ostream& GotScore::Measure::print(ostream& output) {
 	output << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
 	output << "!!!BAR:\t" << m_barnum << endl;
 	if (!m_error.empty()) {
-		for (int i=0; i<m_error.size(); ++i) {
+		for (int i=0; i<(int)m_error.size(); ++i) {
 			output << "!!!ERROR: " << m_error[i] << endl;
 		}
 	}
@@ -90,7 +90,7 @@ ostream& GotScore::Measure::print(ostream& output) {
 		output << endl;
 	}
 
-	for (int i=0; i<m_error.size(); ++i) {
+	for (int i=0; i<(int)m_error.size(); ++i) {
 		output << "!!LO:TX:t=P:problem=";
 		for (int j=0; j<(int)m_error[i].size(); ++j) {
 			if (m_error[i][j] == ':') {
@@ -266,7 +266,31 @@ void GotScore::prepareCells() {
 		fields.emplace_back(line.substr(start));
 		m_cells[i] = std::move(fields);
 	}
+
+	for (int i=0; i<(int)m_cells.size(); ++i) {
+		for (int j=0; j<(int)m_cells[i].size(); ++j) {
+			if (!m_cells[i][j].empty()) {
+				trimSpaces(m_cells[i][j]);
+			}
+		}
+	}
+
+
 	prepareMeasures(cerr);
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::trimSpaces --
+//
+
+void GotScore::trimSpaces(string& s) {
+	s.erase(s.begin(), std::find_if(s.begin(), s.end(),
+			[](unsigned char ch) { return !std::isspace(ch); }));
+	s.erase(std::find_if(s.rbegin(), s.rend(),
+			[](unsigned char ch) { return !std::isspace(ch); }).base(), s.end());
 }
 
 
@@ -428,6 +452,14 @@ bool GotScore::processSystemMeasures(int barIndex, int system, ostream& out) {
 		// Store the bar number for the measure:
 		lm.m_barnum = m_cells[barIndex].at(i);
 
+		// If there is a p in the barnum, store a half system break
+		// and remove the "p" from the barnum.
+		size_t ploc = lm.m_barnum.find('p');
+		if (ploc != string::npos) {
+			lm.m_linebreak = "half";
+			lm.m_barnum.erase(ploc, 1);
+		}
+
 		// Store the text for the measure:
 		if (textIndex >= 0) {
 			if (i < (int)m_cells[textIndex].size()) {
@@ -477,6 +509,10 @@ bool GotScore::processSystemMeasures(int barIndex, int system, ostream& out) {
 				}
 			}
 		}
+	}
+
+	if (!m_measures.empty()) {
+		m_measures.back().m_linebreak = "original";
 	}
 
 	return true;
@@ -555,6 +591,11 @@ vector<string> GotScore::splitBySpaces(const string& input) {
 string GotScore::getGotHumdrum(void) {
 	if (!m_got.empty()) {
 		return m_got;
+	}
+
+	// Do not put linebreak at last measure
+	if (!m_measures.empty()) {
+		m_measures.back().m_linebreak = "";
 	}
 
 	stringstream out;
@@ -784,6 +825,12 @@ string GotScore::getGotHumdrumMeasure(GotScore::Measure& mdata) {
 		out << endl;
 	}
 
+	if (!m_measures.empty()) {
+		if (!m_measures.back().m_linebreak.empty()) {
+			out << "!!LO:LB:g=" << m_measures.back().m_linebreak << endl;
+		}
+	}
+
 	return out.str();
 }
 
@@ -801,6 +848,11 @@ string GotScore::getGotHumdrumMeasure(GotScore::Measure& mdata) {
 string GotScore::getKernHumdrum(void) {
 	if (!m_kern.empty()) {
 		return m_kern;   // return cached
+	}
+
+	// Do not put linebreak at last measure
+	if (!m_measures.empty()) {
+		m_measures.back().m_linebreak = "";
 	}
 
 	// Tokenize each measure into individual rhythm & pitch tokens
@@ -1072,6 +1124,10 @@ string GotScore::getKernHumdrumMeasure(GotScore::Measure& mdata) {
 		  }
 
 		  out << "\n";
+	}
+
+	if (!mdata.m_linebreak.empty()) {
+		out << "!!LO:LB:g=" << mdata.m_linebreak << endl;
 	}
 
 	return out.str();

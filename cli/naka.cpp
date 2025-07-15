@@ -48,7 +48,7 @@ void processFile(HumdrumFile& infile, Options& options) {
 	infile.getKernSpineStartList(spinestarts);
 	map<int, int> trackToPart;
 	for (int i=0; i<(int)spinestarts.size(); i++) {
-		int part = spinestarts.size() - i;
+		int part = (int)spinestarts.size() - i;
 		int track = spinestarts[i]->getTrack();
 		trackToPart[track] = part;
 	}

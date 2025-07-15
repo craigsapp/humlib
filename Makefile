@@ -1,7 +1,7 @@
 ##
 ## Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 ## Creation Date: Sun Aug  9 22:20:14 PDT 2015
-## Last Modified: Sun Apr 16 08:27:37 PDT 2023
+## Last Modified: Tue Jul 15 13:41:27 CEST 2025
 ## Syntax:        GNU Makefile
 ## Filename:      humlib/Makefile
 ## vim:           ts=3
@@ -121,6 +121,7 @@ PREFLAGS += -Wall
 # MacOS specific warnings
 ifeq ($(shell uname -s),Darwin)
   PREFLAGS += -Wshorten-64-to-32
+  PREFLAGS += -Wsign-compare
 endif
 
 # Optimize the binary code in object files to run faster:
