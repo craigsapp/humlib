@@ -511,6 +511,10 @@ void Tool_composite::prepareOutput(HumdrumFile& infile) {
 		}
 		analysis << endl;
 	}
+//cerr << "GOT HERE FFF" << endl;
+//cerr << "ANALYSIS vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv\n";
+//cerr << analysis.str();
+//cerr << "ANALYSIS ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n";
 
 	HumdrumFile output;
 	output.readString(analysis.str());

@@ -1076,54 +1076,65 @@ string GotScore::getKernHumdrumMeasure(GotScore::Measure& mdata) {
 	auto aligned = alignEventsByTimestamp(mdata);
 	bool textPrinted = false;
 
+	string currentMet;
+
 	for (const auto& e : aligned) {
-		  // 1) print the **kern** columns
-		  for (int i = (int)e.rhythms.size() - 1; i >= 0; --i) {
-				if (i < (int)e.rhythms.size() - 1) out << "\t";
-				const string& r = e.rhythms[i];
-				const string& p = e.pitches[i];
+		currentMet = "";
 
-				if (r.empty() || r == ".") {
-					 out << ".";
-				}
-				else if (r[0] == '*') {
-					 // interpretation token: only print r
-					 out << r;
-				}
-				else {
-					 // normal note
-					 out << mergeRhythmAndPitchIntoNote(r, p);
-				}
-		  }
-
-		  // 2) figure out if this row is an interpretation line
-		  bool isInterpRow = false;
-		  for (auto& r : e.rhythms) {
-				if (!r.empty() && r[0] == '*') {
-					 isInterpRow = true;
-					 break;
-				}
-		  }
-
-		  // 3) print the text spine
-		  if (m_textQ) {
+		// print the **kern columns
+		for (int i = (int)e.rhythms.size() - 1; i >= 0; --i) {
+			if (i < (int)e.rhythms.size() - 1) {
 				out << "\t";
-				if (isInterpRow) {
-					 // always null-interpretation on met/measuresig rows
-					 out << "*";
-				}
-				else if (!textPrinted && !mdata.m_text.empty()) {
-					 // first real data row gets the lyric
-					 out << mdata.m_text;
-					 textPrinted = true;
-				}
-				else {
-					 // all later rows null out
-					 out << ".";
-				}
-		  }
+			}
+			const string& r = e.rhythms[i];
+			const string& p = e.pitches[i];
 
-		  out << "\n";
+			if (r.empty() || r == ".") {
+				out << ".";
+			}
+			else if (r[0] == '*') {
+				// interpretation token: only print r
+				out << r;
+				if (currentMet.empty() && r.find("met") != string::npos) {
+					currentMet = r;
+				}
+			} else {
+				// normal note
+				out << mergeRhythmAndPitchIntoNote(r, p);
+			}
+		}
+
+		// 2) figure out if this row is an interpretation line
+		bool isInterpRow = false;
+		for (auto& r : e.rhythms) {
+			if (!r.empty() && r[0] == '*') {
+				isInterpRow = true;
+				break;
+			}
+		}
+
+		// 3) print the text spine
+		if (m_textQ) {
+			out << "\t";
+			if (isInterpRow) {
+				// always null-interpretation on met/measures rows
+				out << "*";
+			}
+			else if (!textPrinted && !mdata.m_text.empty()) {
+				// first real data row gets the lyric
+				out << mdata.m_text;
+				textPrinted = true;
+			} else {
+				// all later rows null out
+				out << ".";
+			}
+		}
+
+		out << "\n";
+
+		if (!currentMet.empty()) {
+		  mdata.printTempoLine(out, currentMet, m_textQ);
+		}
 	}
 
 	if (!mdata.m_linebreak.empty()) {
@@ -2003,6 +2014,27 @@ void GotScore::processDotsForMeasure(GotScore::Measure& mdata) {
 			}
 		}
 	}
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::Measure::printTempoLine -- Using a constant MM180 for now.
+//
+
+void GotScore::Measure::printTempoLine(ostream& out, const string& met, bool textQ) {
+	int voices = (int)m_rhythms.size();
+	for (int i=0; i<voices; i++) {
+		if (i>0) {
+			out << "\t";
+		}
+		out << "*MM180";
+	}
+	if (textQ) {
+		out << "\t*";
+	}
+	out << endl;
 }
 
 

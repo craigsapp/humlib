@@ -41,6 +41,7 @@ class GotScore {
 				std::ostream& print(std::ostream& out);
 
 				void printKernBarline(std::ostream& out, bool textQ);
+				void printTempoLine(std::ostream& out, const std::string& met, bool textQ);
 
 				// Each rhythm+pitch pairing with computed start time and duration
 				class TimedEvent {

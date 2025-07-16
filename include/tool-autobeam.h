@@ -61,6 +61,7 @@ class Tool_autobeam : public HumTool {
 		std::vector<bool> m_tracks;
 		bool        m_includerests = false;
 		int         m_splitcount = 0;
+		HumNum      m_duration = 0;
 
 };
 

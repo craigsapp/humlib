@@ -31,6 +31,7 @@ namespace hum {
 //
 
 Tool_autobeam::Tool_autobeam(void) {
+	define("d|duration=s:4",       "grouping rhythm");
 	define("k|kern=i:0",           "process specific kern spine number");
 	define("t|track|tracks=s:0",   "process specific track number(s)");
 	define("r|remove=b",           "remove all beams");
@@ -857,6 +858,11 @@ void Tool_autobeam::initialize(HumdrumFile& infile) {
 		// process all (kern) tracks:
 		m_tracks.resize(maxtrack+1);
 		fill(m_tracks.begin(), m_tracks.end(), true);
+	}
+
+	if (getBoolean("duration")) {
+		m_duration = Convert::recipToDuration(getString("duration"));
+cerr << "MDURATION = " << m_duration << endl;
 	}
 
 	m_includerests = getBoolean("include-rests");

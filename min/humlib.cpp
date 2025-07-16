@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Jul 14 21:37:27 CEST 2025
+// Last Modified: Wed Jul 16 12:45:11 CEST 2025
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -5934,7 +5934,7 @@ ostream& GotScore::Measure::print(ostream& output) {
 	output << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
 	output << "!!!BAR:\t" << m_barnum << endl;
 	if (!m_error.empty()) {
-		for (int i=0; i<m_error.size(); ++i) {
+		for (int i=0; i<(int)m_error.size(); ++i) {
 			output << "!!!ERROR: " << m_error[i] << endl;
 		}
 	}
@@ -5985,7 +5985,7 @@ ostream& GotScore::Measure::print(ostream& output) {
 		output << endl;
 	}
 
-	for (int i=0; i<m_error.size(); ++i) {
+	for (int i=0; i<(int)m_error.size(); ++i) {
 		output << "!!LO:TX:t=P:problem=";
 		for (int j=0; j<(int)m_error[i].size(); ++j) {
 			if (m_error[i][j] == ':') {
@@ -6161,7 +6161,31 @@ void GotScore::prepareCells() {
 		fields.emplace_back(line.substr(start));
 		m_cells[i] = std::move(fields);
 	}
+
+	for (int i=0; i<(int)m_cells.size(); ++i) {
+		for (int j=0; j<(int)m_cells[i].size(); ++j) {
+			if (!m_cells[i][j].empty()) {
+				trimSpaces(m_cells[i][j]);
+			}
+		}
+	}
+
+
 	prepareMeasures(cerr);
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::trimSpaces --
+//
+
+void GotScore::trimSpaces(string& s) {
+	s.erase(s.begin(), std::find_if(s.begin(), s.end(),
+			[](unsigned char ch) { return !std::isspace(ch); }));
+	s.erase(std::find_if(s.rbegin(), s.rend(),
+			[](unsigned char ch) { return !std::isspace(ch); }).base(), s.end());
 }
 
 
@@ -6323,6 +6347,14 @@ bool GotScore::processSystemMeasures(int barIndex, int system, ostream& out) {
 		// Store the bar number for the measure:
 		lm.m_barnum = m_cells[barIndex].at(i);
 
+		// If there is a p in the barnum, store a half system break
+		// and remove the "p" from the barnum.
+		size_t ploc = lm.m_barnum.find('p');
+		if (ploc != string::npos) {
+			lm.m_linebreak = "half";
+			lm.m_barnum.erase(ploc, 1);
+		}
+
 		// Store the text for the measure:
 		if (textIndex >= 0) {
 			if (i < (int)m_cells[textIndex].size()) {
@@ -6372,6 +6404,10 @@ bool GotScore::processSystemMeasures(int barIndex, int system, ostream& out) {
 				}
 			}
 		}
+	}
+
+	if (!m_measures.empty()) {
+		m_measures.back().m_linebreak = "original";
 	}
 
 	return true;
@@ -6450,6 +6486,11 @@ vector<string> GotScore::splitBySpaces(const string& input) {
 string GotScore::getGotHumdrum(void) {
 	if (!m_got.empty()) {
 		return m_got;
+	}
+
+	// Do not put linebreak at last measure
+	if (!m_measures.empty()) {
+		m_measures.back().m_linebreak = "";
 	}
 
 	stringstream out;
@@ -6679,6 +6720,12 @@ string GotScore::getGotHumdrumMeasure(GotScore::Measure& mdata) {
 		out << endl;
 	}
 
+	if (!m_measures.empty()) {
+		if (!m_measures.back().m_linebreak.empty()) {
+			out << "!!LO:LB:g=" << m_measures.back().m_linebreak << endl;
+		}
+	}
+
 	return out.str();
 }
 
@@ -6696,6 +6743,11 @@ string GotScore::getGotHumdrumMeasure(GotScore::Measure& mdata) {
 string GotScore::getKernHumdrum(void) {
 	if (!m_kern.empty()) {
 		return m_kern;   // return cached
+	}
+
+	// Do not put linebreak at last measure
+	if (!m_measures.empty()) {
+		m_measures.back().m_linebreak = "";
 	}
 
 	// Tokenize each measure into individual rhythm & pitch tokens
@@ -6919,54 +6971,69 @@ string GotScore::getKernHumdrumMeasure(GotScore::Measure& mdata) {
 	auto aligned = alignEventsByTimestamp(mdata);
 	bool textPrinted = false;
 
+	string currentMet;
+
 	for (const auto& e : aligned) {
-		  // 1) print the **kern** columns
-		  for (int i = (int)e.rhythms.size() - 1; i >= 0; --i) {
-				if (i < (int)e.rhythms.size() - 1) out << "\t";
-				const string& r = e.rhythms[i];
-				const string& p = e.pitches[i];
+		currentMet = "";
 
-				if (r.empty() || r == ".") {
-					 out << ".";
-				}
-				else if (r[0] == '*') {
-					 // interpretation token: only print r
-					 out << r;
-				}
-				else {
-					 // normal note
-					 out << mergeRhythmAndPitchIntoNote(r, p);
-				}
-		  }
-
-		  // 2) figure out if this row is an interpretation line
-		  bool isInterpRow = false;
-		  for (auto& r : e.rhythms) {
-				if (!r.empty() && r[0] == '*') {
-					 isInterpRow = true;
-					 break;
-				}
-		  }
-
-		  // 3) print the text spine
-		  if (m_textQ) {
+		// print the **kern columns
+		for (int i = (int)e.rhythms.size() - 1; i >= 0; --i) {
+			if (i < (int)e.rhythms.size() - 1) {
 				out << "\t";
-				if (isInterpRow) {
-					 // always null-interpretation on met/measuresig rows
-					 out << "*";
-				}
-				else if (!textPrinted && !mdata.m_text.empty()) {
-					 // first real data row gets the lyric
-					 out << mdata.m_text;
-					 textPrinted = true;
-				}
-				else {
-					 // all later rows null out
-					 out << ".";
-				}
-		  }
+			}
+			const string& r = e.rhythms[i];
+			const string& p = e.pitches[i];
 
-		  out << "\n";
+			if (r.empty() || r == ".") {
+				out << ".";
+			}
+			else if (r[0] == '*') {
+				// interpretation token: only print r
+				out << r;
+				if (currentMet.empty() && r.find("met") != string::npos) {
+					currentMet = r;
+				}
+			} else {
+				// normal note
+				out << mergeRhythmAndPitchIntoNote(r, p);
+			}
+		}
+
+		// 2) figure out if this row is an interpretation line
+		bool isInterpRow = false;
+		for (auto& r : e.rhythms) {
+			if (!r.empty() && r[0] == '*') {
+				isInterpRow = true;
+				break;
+			}
+		}
+
+		// 3) print the text spine
+		if (m_textQ) {
+			out << "\t";
+			if (isInterpRow) {
+				// always null-interpretation on met/measures rows
+				out << "*";
+			}
+			else if (!textPrinted && !mdata.m_text.empty()) {
+				// first real data row gets the lyric
+				out << mdata.m_text;
+				textPrinted = true;
+			} else {
+				// all later rows null out
+				out << ".";
+			}
+		}
+
+		out << "\n";
+
+		if (!currentMet.empty()) {
+		  mdata.printTempoLine(out, currentMet, m_textQ);
+		}
+	}
+
+	if (!mdata.m_linebreak.empty()) {
+		out << "!!LO:LB:g=" << mdata.m_linebreak << endl;
 	}
 
 	return out.str();
@@ -7842,6 +7909,27 @@ void GotScore::processDotsForMeasure(GotScore::Measure& mdata) {
 			}
 		}
 	}
+}
+
+
+
+//////////////////////////////
+//
+// GotScore::Measure::printTempoLine -- Using a constant MM180 for now.
+//
+
+void GotScore::Measure::printTempoLine(ostream& out, const string& met, bool textQ) {
+	int voices = (int)m_rhythms.size();
+	for (int i=0; i<voices; i++) {
+		if (i>0) {
+			out << "\t";
+		}
+		out << "*MM180";
+	}
+	if (textQ) {
+		out << "\t*";
+	}
+	out << endl;
 }
 
 
@@ -58661,6 +58749,7 @@ void Tool_autoaccid::removeAccidentalQualifications(HumdrumFile& infile) {
 //
 
 Tool_autobeam::Tool_autobeam(void) {
+	define("d|duration=s:4",       "grouping rhythm");
 	define("k|kern=i:0",           "process specific kern spine number");
 	define("t|track|tracks=s:0",   "process specific track number(s)");
 	define("r|remove=b",           "remove all beams");
@@ -59487,6 +59576,11 @@ void Tool_autobeam::initialize(HumdrumFile& infile) {
 		// process all (kern) tracks:
 		m_tracks.resize(maxtrack+1);
 		fill(m_tracks.begin(), m_tracks.end(), true);
+	}
+
+	if (getBoolean("duration")) {
+		m_duration = Convert::recipToDuration(getString("duration"));
+cerr << "MDURATION = " << m_duration << endl;
 	}
 
 	m_includerests = getBoolean("include-rests");
@@ -71998,6 +72092,10 @@ void Tool_composite::prepareOutput(HumdrumFile& infile) {
 		}
 		analysis << endl;
 	}
+//cerr << "GOT HERE FFF" << endl;
+//cerr << "ANALYSIS vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv\n";
+//cerr << analysis.str();
+//cerr << "ANALYSIS ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n";
 
 	HumdrumFile output;
 	output.readString(analysis.str());
