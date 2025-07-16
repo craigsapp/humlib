@@ -380,7 +380,7 @@ bool GotScore::processSystemMeasures(int barIndex, int system, ostream& out) {
 	regex badrhythm("[a-gA-GrHhR#-]"); // rhythm cell cannot have a pitch letter
 
 	// pitch words must have a letter, or there is an error:
-	regex needpitch("[a-hA-H]");
+	regex needpitch("[a-hA-Hr]");
 
 	// rhythm words must have a digit, or there is an error:
 	regex needrhythm("[0-9]");
@@ -490,16 +490,17 @@ bool GotScore::processSystemMeasures(int barIndex, int system, ostream& out) {
 			lm.m_rhythms.at(j) = splitBySpaces(rhythm_cell);
 			for (int k=0; k<(int)lm.m_rhythms.at(j).size(); ++k) {
 				string& value = lm.m_rhythms.at(j).at(k);
+				if (!value.empty()) {
+					if (value.at(0) == '*') {
+                  // Interpretation, so do not parse as rhythm.
+						continue;
+					}
+				}
 				if (!regex_search(value, needrhythm)) {
 					stringstream ss;
 					ss << "Measure " << lm.m_barnum << ", voice ";
 					ss << j+1 << ", group " << (k+1) << ": missing some rhythm content : " << value;
 					lm.m_error.push_back(ss.str());
-				}
-				if (!value.empty()) {
-					if (value.at(0) == '*') {
-						continue;
-					}
 				}
 				if (regex_search(value, badrhythm)) {
 					stringstream ss;
@@ -515,16 +516,17 @@ bool GotScore::processSystemMeasures(int barIndex, int system, ostream& out) {
 			lm.m_pitches.at(j) = splitBySpaces(pitch_cell);
 			for (int k=0; k<(int)lm.m_pitches.at(j).size(); ++k) {
 				string& value = lm.m_pitches.at(j).at(k);
+				if (!value.empty()) {
+					if (value.at(0) == '*') {
+                  // Interpretation, so do not parse as pitch.
+						continue;
+					}
+				}
 				if (!regex_search(value, needpitch)) {
 					stringstream ss;
 					ss << "Measure " << lm.m_barnum << ", voice ";
 					ss << j+1 << ", word " << (k+1) << ": missing some pitch content : " << value;
 					lm.m_error.push_back(ss.str());
-				}
-				if (!value.empty()) {
-					if (value.at(0) == '*') {
-						continue;
-					}
 				}
 				if (regex_search(value, badpitch)) {
 					stringstream ss;
