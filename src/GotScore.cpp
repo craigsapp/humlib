@@ -492,7 +492,7 @@ bool GotScore::processSystemMeasures(int barIndex, int system, ostream& out) {
 				string& value = lm.m_rhythms.at(j).at(k);
 				if (!value.empty()) {
 					if (value.at(0) == '*') {
-                  // Interpretation, so do not parse as rhythm.
+						// Interpretation, so do not parse as rhythm.
 						continue;
 					}
 				}
@@ -518,7 +518,7 @@ bool GotScore::processSystemMeasures(int barIndex, int system, ostream& out) {
 				string& value = lm.m_pitches.at(j).at(k);
 				if (!value.empty()) {
 					if (value.at(0) == '*') {
-                  // Interpretation, so do not parse as pitch.
+						// Interpretation, so do not parse as pitch.
 						continue;
 					}
 				}
@@ -922,7 +922,7 @@ string GotScore::getKernHumdrum(void) {
 				for (auto& tok : beat) {
 					if (!tok.empty() && tok[0] != '*') {
 						pp.push_back(&tok);
-                  pall.at(v).push_back(&tok);
+						pall.at(v).push_back(&tok);
 					}
 				}
 			}
@@ -2096,22 +2096,22 @@ void GotScore::Measure::printKernBarline(ostream& out, bool textQ) {
 //
 
 double GotScore::durationFromRhythmToken(const std::string& token) {
-    if (token.empty() || token[0]=='*' || token == ".") {
-        return 0.0;
-    }
+	if (token.empty() || token[0]=='*' || token == ".") {
+		return 0.0;
+	}
 
-    static const std::regex re(R"((\d+)(\.*))");
-    std::smatch m;
-    if (std::regex_search(token, m, re)) {
-        int base    = std::stoi(m[1].str());
-        double dur  = 1.0 / base;
-        for (char c : m[2].str()) {
-            if (c == '.') dur += dur/2.0;
-        }
-        return dur;
-    }
+	static const std::regex re(R"((\d+)(\.*))");
+	std::smatch m;
+	if (std::regex_search(token, m, re)) {
+		int base    = std::stoi(m[1].str());
+		double dur  = 1.0 / base;
+		for (char c : m[2].str()) {
+			if (c == '.') dur += dur/2.0;
+		}
+		return dur;
+	}
 
-    return 0.0;
+	return 0.0;
 }
 
 
