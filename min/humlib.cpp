@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Jul 16 12:45:11 CEST 2025
+// Last Modified: Wed Jul 16 16:22:35 CEST 2025
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -5932,20 +5932,20 @@ int Convert::tempoNameToMm (const string& name, int bot, int top) {
 
 ostream& GotScore::Measure::print(ostream& output) {
 	output << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
-	output << "!!!BAR:\t" << m_barnum << endl;
+	output << "!!!BAR: " << m_barnum << endl;
 	if (!m_error.empty()) {
 		for (int i=0; i<(int)m_error.size(); ++i) {
 			output << "!!!ERROR: " << m_error[i] << endl;
 		}
 	}
 	if (!m_text.empty()) {
-		output << "!!!TEXT:\t" << m_text << endl;
+		output << "!!!TEXT: " << m_text << endl;
 	}
 
 	for (int v=0; v<(int)m_rhythms.size(); v++) {
 		output << "!!!rhythms-voice-" << v+1 << ":";
 		for (int b=0; b<(int)m_rhythms.at(v).size(); b++) {
-			output << "\t";
+			output << " ";
 			output << m_rhythms.at(v).at(b);
 		}
 		output << endl;
@@ -5954,7 +5954,7 @@ ostream& GotScore::Measure::print(ostream& output) {
 	for (int v=0; v<(int)m_pitches.size(); v++) {
 		output << "!!!pitches-voice-" << v+1 << ":";
 		for (int b=0; b<(int)m_pitches.at(v).size(); b++) {
-			output << "\t";
+			output << " ";
 			output << m_pitches.at(v).at(b);
 		}
 		output << endl;
@@ -5963,7 +5963,7 @@ ostream& GotScore::Measure::print(ostream& output) {
 	for (int v=0; v<(int)m_splitRhythms.size(); v++) {
 		output << "!!!kern-rhythms-voice-" << v+1 << ":";
 		for (int b=0; b<(int)m_splitRhythms.at(v).size(); b++) {
-			output << "\t";
+			output << " ";
 			for (int p=0; p<(int)m_splitRhythms.at(v).at(b).size(); p++) {
 				output << " " << m_splitRhythms.at(v).at(b).at(p);
 			}
@@ -5974,7 +5974,7 @@ ostream& GotScore::Measure::print(ostream& output) {
 	for (int v=0; v<(int)m_splitPitches.size(); v++) {
 		output << "!!!kern-pitches-voice-" << v+1 << ":";
 		for (int b=0; b<(int)m_splitPitches.at(v).size(); b++) {
-			output << "\t";
+			output << " ";
 			for (int p=0; p<(int)m_splitPitches.at(v).at(b).size(); p++) {
 				if (p != 0) {
 					output << " ";
@@ -5985,8 +5985,11 @@ ostream& GotScore::Measure::print(ostream& output) {
 		output << endl;
 	}
 
-	for (int i=0; i<(int)m_error.size(); ++i) {
+	for (int i=(int)m_error.size()-1; i>=0; --i) {
 		output << "!!LO:TX:t=P:problem=";
+		if (m_error.size() > 1) {
+			output << "(" << (i+1) << ") ";
+		}
 		for (int j=0; j<(int)m_error[i].size(); ++j) {
 			if (m_error[i][j] == ':') {
 				output << "&colon;";
@@ -6001,12 +6004,17 @@ ostream& GotScore::Measure::print(ostream& output) {
 		if (i > 0) {
 			output << "\t";
 		}
-		output << "4ryy";
+		output << "2ryy";
 	}
 	if (m_owner && m_owner->m_textQ) {
 		output << "\t.";
 	}
 	output << endl;
+
+	// print linebreak:
+	if (!m_linebreak.empty()) {
+		output << "!!LO:LB:g=" << m_linebreak << endl;
+	}
 
 	return output;
 }
@@ -6264,7 +6272,13 @@ bool GotScore::processSystemMeasures(int barIndex, int system, ostream& out) {
 
 	// error checking
 	regex badpitch("\\d"); // pitch cell cannot have a digit
-	regex badrhythm("[a-gA-GrR#-]"); // rhythm cell cannot have a pitch letter
+	regex badrhythm("[a-gA-GrHhR#-]"); // rhythm cell cannot have a pitch letter
+
+	// pitch words must have a letter, or there is an error:
+	regex needpitch("[a-hA-H]");
+
+	// rhythm words must have a digit, or there is an error:
+	regex needrhythm("[0-9]");
 
 	// Identify the lines for each type of data for one system:
 	// * line index for the bar numbers
@@ -6371,6 +6385,12 @@ bool GotScore::processSystemMeasures(int barIndex, int system, ostream& out) {
 			lm.m_rhythms.at(j) = splitBySpaces(rhythm_cell);
 			for (int k=0; k<(int)lm.m_rhythms.at(j).size(); ++k) {
 				string& value = lm.m_rhythms.at(j).at(k);
+				if (!regex_search(value, needrhythm)) {
+					stringstream ss;
+					ss << "Measure " << lm.m_barnum << ", voice ";
+					ss << j+1 << ", group " << (k+1) << ": missing some rhythm content : " << value;
+					lm.m_error.push_back(ss.str());
+				}
 				if (!value.empty()) {
 					if (value.at(0) == '*') {
 						continue;
@@ -6381,7 +6401,7 @@ bool GotScore::processSystemMeasures(int barIndex, int system, ostream& out) {
 					ss << "Measure " << lm.m_barnum << ", voice ";
 					ss << j+1 << ": detected pitch characters in rhythm cell: " << value;
 					lm.m_error.push_back(ss.str());
-					break;
+					//break;
 				}
 			}
 		}
@@ -6390,6 +6410,12 @@ bool GotScore::processSystemMeasures(int barIndex, int system, ostream& out) {
 			lm.m_pitches.at(j) = splitBySpaces(pitch_cell);
 			for (int k=0; k<(int)lm.m_pitches.at(j).size(); ++k) {
 				string& value = lm.m_pitches.at(j).at(k);
+				if (!regex_search(value, needpitch)) {
+					stringstream ss;
+					ss << "Measure " << lm.m_barnum << ", voice ";
+					ss << j+1 << ", word " << (k+1) << ": missing some pitch content : " << value;
+					lm.m_error.push_back(ss.str());
+				}
 				if (!value.empty()) {
 					if (value.at(0) == '*') {
 						continue;
@@ -6400,7 +6426,7 @@ bool GotScore::processSystemMeasures(int barIndex, int system, ostream& out) {
 					ss << "Measure " << lm.m_barnum << ", voice ";
 					ss << j+1 << ": detected rhythm characters in pitch cell: " << value;
 					lm.m_error.push_back(ss.str());
-					break;
+					// break;
 				}
 			}
 		}
