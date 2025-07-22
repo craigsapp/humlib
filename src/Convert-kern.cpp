@@ -647,6 +647,48 @@ HumNum Convert::kernToDuration(const string& aKernString) {
 }
 
 
+
+//////////////////////////////
+//
+// Convert::kernTimeSignatureBottom -- returns the rhythm value
+//	in the bottom part of a time signature
+//
+
+HumNum Convert::kernTimeSignatureBottomToDuration (const string& aKernString) {
+	size_t loc = aKernString.find('/');
+	if (loc == std::string::npos) {
+		cerr << "Error: poorly formed time signature: " << aKernString << endl;
+		exit(1);
+	}
+	string afterslash = aKernString.substr(loc+1);
+	return Convert::kernToDuration(afterslash);
+}
+
+
+
+//////////////////////////////
+//
+// Convert::kernTimeSignatureTop -- returns the number of beats
+//	in the top part of a time signature
+// fixed bug Wed May  5 23:56:19 PDT 2004
+//
+
+int Convert::kernTimeSignatureTop (const string& aKernString) {
+	if (aKernString.find('+') != std::string::npos) {
+		cerr << "Error: cannot handle time signature: " << aKernString
+			  << " yet." << endl;
+		exit(1);
+	} else {
+		int len = (int)aKernString.size();
+		if (len > 2) {
+			return (double)atoi(aKernString.data()+2);  // used to be 1
+		} else {
+			return 0;
+		}
+	}
+}
+
+
 // END_MERGE
 
 } // end namespace hum
