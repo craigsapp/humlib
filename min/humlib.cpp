@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Jul 16 16:37:17 CEST 2025
+// Last Modified: Tue Jul 22 11:56:10 CEST 2025
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -6387,7 +6387,7 @@ bool GotScore::processSystemMeasures(int barIndex, int system, ostream& out) {
 				string& value = lm.m_rhythms.at(j).at(k);
 				if (!value.empty()) {
 					if (value.at(0) == '*') {
-                  // Interpretation, so do not parse as rhythm.
+						// Interpretation, so do not parse as rhythm.
 						continue;
 					}
 				}
@@ -6413,7 +6413,7 @@ bool GotScore::processSystemMeasures(int barIndex, int system, ostream& out) {
 				string& value = lm.m_pitches.at(j).at(k);
 				if (!value.empty()) {
 					if (value.at(0) == '*') {
-                  // Interpretation, so do not parse as pitch.
+						// Interpretation, so do not parse as pitch.
 						continue;
 					}
 				}
@@ -6817,7 +6817,7 @@ string GotScore::getKernHumdrum(void) {
 				for (auto& tok : beat) {
 					if (!tok.empty() && tok[0] != '*') {
 						pp.push_back(&tok);
-                  pall.at(v).push_back(&tok);
+						pall.at(v).push_back(&tok);
 					}
 				}
 			}
@@ -7991,22 +7991,22 @@ void GotScore::Measure::printKernBarline(ostream& out, bool textQ) {
 //
 
 double GotScore::durationFromRhythmToken(const std::string& token) {
-    if (token.empty() || token[0]=='*' || token == ".") {
-        return 0.0;
-    }
+	if (token.empty() || token[0]=='*' || token == ".") {
+		return 0.0;
+	}
 
-    static const std::regex re(R"((\d+)(\.*))");
-    std::smatch m;
-    if (std::regex_search(token, m, re)) {
-        int base    = std::stoi(m[1].str());
-        double dur  = 1.0 / base;
-        for (char c : m[2].str()) {
-            if (c == '.') dur += dur/2.0;
-        }
-        return dur;
-    }
+	static const std::regex re(R"((\d+)(\.*))");
+	std::smatch m;
+	if (std::regex_search(token, m, re)) {
+		int base    = std::stoi(m[1].str());
+		double dur  = 1.0 / base;
+		for (char c : m[2].str()) {
+			if (c == '.') dur += dur/2.0;
+		}
+		return dur;
+	}
 
-    return 0.0;
+	return 0.0;
 }
 
 
@@ -63296,6 +63296,117 @@ void Tool_autostem::countBeamStuff(const string& token, int& start, int& stop,
 
 
 
+Tool_barnum::Tool_barnum(void) {
+	define("r|remove=b", "Remove bar numbers from the file");
+	define("s|start=i:1", "Starting bar number");
+	define("a|all=b",     "Print numbers on all barlines");
+	define("debug=b",     "Print debug info");
+}
+
+
+bool Tool_barnum::run(HumdrumFileSet& infiles) {
+	bool status = true;
+	for (int i=0; i<infiles.getCount(); i++) {
+		status &= run(infiles[i]);
+	}
+	return status;
+}
+
+
+bool Tool_barnum::run(HumdrumFile& infile) {
+	initialize();
+	if (m_removeQ) {
+		removeBarNumbers(infile);
+	} else {
+		renumberBarNumbers(infile);
+	}
+	return true;
+}
+
+
+void Tool_barnum::initialize(void) {
+	m_removeQ  = getBoolean("remove");
+	m_startnum = getInteger("start");
+	m_allQ     = getBoolean("all");
+	m_debugQ   = getBoolean("debug");
+}
+
+
+void Tool_barnum::removeBarNumbers(HumdrumFile& infile) {
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isBarline()) {
+			m_humdrum_text << infile[i] << "\n";
+			continue;
+		}
+		printWithoutBarNumbers(infile[i]);
+	}
+}
+
+
+void Tool_barnum::printWithoutBarNumbers(HumdrumLine& line) {
+	for (int i=0; i<line.getFieldCount(); i++) {
+		string token = *line.token(i);
+		stringstream out;
+		if (token.empty() || token[0] != '=') {
+			out << token;
+		} else {
+			for (char c : token) {
+				if (!isdigit(c)) out << c;
+			}
+		}
+		m_humdrum_text << out.str();
+		if (i < line.getFieldCount()-1) m_humdrum_text << "\t";
+	}
+	m_humdrum_text << "\n";
+}
+
+
+void Tool_barnum::printWithBarNumbers(HumdrumLine& line, int number) {
+	for (int i=0; i<line.getFieldCount(); i++) {
+		string token = *line.token(i);
+		stringstream out;
+		bool numbered = false;
+		for (size_t j=0; j<token.size(); j++) {
+			if (token[j] == '=' && (j+1 == token.size() || !isdigit(token[j+1]))) {
+				out << '=' << number;
+				numbered = true;
+			} else if (!isdigit(token[j]) || !numbered) {
+				out << token[j];
+			}
+		}
+		m_humdrum_text << out.str();
+		if (i < line.getFieldCount()-1) m_humdrum_text << "\t";
+	}
+	m_humdrum_text << "\n";
+}
+
+
+void Tool_barnum::renumberBarNumbers(HumdrumFile& infile) {
+	infile.analyzeRhythmStructure();
+	vector<int> barlines;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (infile[i].isBarline()) {
+			barlines.push_back(i);
+		}
+	}
+
+	int number = m_startnum;
+	int index = 0;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isBarline()) {
+			m_humdrum_text << infile[i] << "\n";
+			continue;
+		}
+		if (m_allQ || index == 0 || index == (int)barlines.size()-1) {
+			printWithBarNumbers(infile[i], number++);
+		} else {
+			printWithoutBarNumbers(infile[i]);
+		}
+		index++;
+	}
+}
+
+
 
 /////////////////////////////////
 //
@@ -91814,6 +91925,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(autocadence, infile, commands[i].second, status);
 		} else if (commands[i].first == "autostem") {
 			RUNTOOL(autostem, infile, commands[i].second, status);
+		} else if (commands[i].first == "barnum") {
+			RUNTOOL(barnum, infile, commands[i].second, status);
 		} else if (commands[i].first == "bstyle") {
 			RUNTOOL(bstyle, infile, commands[i].second, status);
 		} else if (commands[i].first == "binroll") {

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Jul 16 16:37:17 CEST 2025
+// Last Modified: Tue Jul 22 11:56:10 CEST 2025
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -6379,6 +6379,31 @@ class Tool_autostem : public HumTool {
 		int    notlongQ      = 0;       // used with -L option
 		bool   m_quit        = false;
 
+};
+
+
+class Tool_barnum : public HumTool {
+	public:
+		         Tool_barnum          (void);
+		        ~Tool_barnum          () {};
+
+		bool     run                  (HumdrumFileSet& infiles);
+		bool     run                  (HumdrumFile& infile);
+		bool     run                  (const std::string& indata, std::ostream& out);
+		bool     run                  (HumdrumFile& infile, std::ostream& out);
+
+	protected:
+		void     initialize           (void);
+		void     removeBarNumbers     (HumdrumFile& infile);
+		void     renumberBarNumbers   (HumdrumFile& infile);
+		void     printWithoutBarNumbers(HumdrumLine& line);
+		void     printWithBarNumbers  (HumdrumLine& line, int measurenum);
+
+	private:
+		bool     m_removeQ  = false;   // -r: remove bar numbers
+		int      m_startnum = 1;       // -s: starting bar number
+		bool     m_allQ     = false;   // -a: number all barlines
+		bool     m_debugQ   = false;   // --debug
 };
 
 

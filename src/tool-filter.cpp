@@ -22,8 +22,9 @@
 #include "tool-autobeam.h"
 #include "tool-autocadence.h"
 #include "tool-autostem.h"
-#include "tool-bstyle.h"
+#include "tool-barnum.h"
 #include "tool-binroll.h"
+#include "tool-bstyle.h"
 #include "tool-chantize.h"
 #include "tool-chint.h"
 #include "tool-chooser.h"
@@ -263,6 +264,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(autocadence, infile, commands[i].second, status);
 		} else if (commands[i].first == "autostem") {
 			RUNTOOL(autostem, infile, commands[i].second, status);
+		} else if (commands[i].first == "barnum") {
+			RUNTOOL(barnum, infile, commands[i].second, status);
 		} else if (commands[i].first == "bstyle") {
 			RUNTOOL(bstyle, infile, commands[i].second, status);
 		} else if (commands[i].first == "binroll") {
