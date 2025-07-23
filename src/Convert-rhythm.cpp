@@ -422,7 +422,7 @@ string Convert::durationFloatToRecip(double input, HumNum timebase) {
 //   Example: 3/8 => 3/2 quarters
 //
 
-HumNum Convert::timeSigToDurationInQuarter(HTp token) {
+HumNum Convert::timeSigToDurationInQuarters(HTp token) {
 	HumRegex hre;
 	if (!token->isTimeSignature()) {
 		return 0;

@@ -185,7 +185,7 @@ int HumdrumFileContent::hasPickup(void) {
 		return 0;
 	}
 	HumNum mdur = infile[barline].getDurationFromStart();
-	HumNum tdur = Convert::timeSigToDurationInQuarter(tsig);
+	HumNum tdur = Convert::timeSigToDurationInQuarters(tsig);
 	if (mdur == tdur) {
 		return 0;
 	}

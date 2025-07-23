@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Jul 22 21:20:41 CEST 2025
+// Last Modified: Wed Jul 23 07:00:37 CEST 2025
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -5419,7 +5419,7 @@ string Convert::durationFloatToRecip(double input, HumNum timebase) {
 //   Example: 3/8 => 3/2 quarters
 //
 
-HumNum Convert::timeSigToDurationInQuarter(HTp token) {
+HumNum Convert::timeSigToDurationInQuarters(HTp token) {
 	HumRegex hre;
 	if (!token->isTimeSignature()) {
 		return 0;
@@ -29543,7 +29543,7 @@ int HumdrumFileContent::hasPickup(void) {
 		return 0;
 	}
 	HumNum mdur = infile[barline].getDurationFromStart();
-	HumNum tdur = Convert::timeSigToDurationInQuarter(tsig);
+	HumNum tdur = Convert::timeSigToDurationInQuarters(tsig);
 	if (mdur == tdur) {
 		return 0;
 	}
@@ -63407,10 +63407,10 @@ void Tool_barnum::removeBarNumbers(HumdrumFile& infile) {
 	int i;
 	for (i=0; i<infile.getLineCount(); i++) {
 		if (!infile[i].isBarline()) {
-			cout << infile[i] << "\n";
-			continue;
+			m_humdrum_text << infile[i] << "\n";
+		} else {
+			printWithoutBarNumbers(infile[i]);
 		}
-		printWithoutBarNumbers(infile[i]);
 	}
 }
 
@@ -63422,22 +63422,26 @@ void Tool_barnum::removeBarNumbers(HumdrumFile& infile) {
 //
 
 void Tool_barnum::printWithoutBarNumbers(HumdrumLine& humline) {
+	if (!humline.isBarline()) {
+		m_humdrum_text << humline << endl;
+		return;
+	}
 	for (int i=0; i<humline.getFieldCount(); i++) {
 		string& token = *humline.token(i);
 		if (token[0] != '=') {
-			cout << token;
+			m_humdrum_text << token;
 		} else {
 			for (int j=0; j<(int)token.size(); j++) {
 				if (!std::isdigit(token[j])) {
-					cout << token[j];
+					m_humdrum_text << token[j];
 				}
 			}
 		}
 		if (i < humline.getFieldCount()-1) {
-			cout << "\t";
+			m_humdrum_text << "\t";
 		}
 	}
-	cout << "\n";
+	m_humdrum_text << "\n";
 }
 
 
@@ -63476,59 +63480,54 @@ void Tool_barnum::processFile(HumdrumFile& infile) {
 	}
 
 	vector<int>    measureline;   // line number in the file where measure occur
-	vector<HumNum> measurebeats;  // duration of measure
-	vector<HumNum> timesigbeats;  // duration according to timesignature
+	vector<HumNum> measuredurs;  // duration of measure
+	vector<HumNum> timesigdurs;  // duration according to timesignature
 	vector<int>    control;       // control = numbered measure
 	vector<int>    measurenums;   // output measure numbers
 
 	measureline.reserve(infile.getLineCount());
-	measurebeats.reserve(infile.getLineCount());
-	timesigbeats.reserve(infile.getLineCount());
+	measuredurs.reserve(infile.getLineCount());
+	timesigdurs.reserve(infile.getLineCount());
 
-	HumNum timesigdur = 0.0;
-	int timetop = 4;
-	HumNum timebot = 1;
-	HumNum value   = 1;
-	HumNum lastvalue = 1;
+	HumNum timesigdur = 0;
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (m_debugQ) {
-			cout << "LINE " << i+1 << "\t" << infile[i] << endl;
+			m_humdrum_text << "!! LINE " << i+1 << "\t" << infile[i] << endl;
 		}
 		if (infile[i].isInterpretation()) {
 			for (int j=0; j<infile[i].getFieldCount(); j++) {
-				if ((infile.token(i, j)->compare(0, 2, "*M") == 0)
+				HTp token = infile.token(i, j);
+				if ((token->compare(0, 2, "*M") == 0)
 						&& (infile.token(i, j)->find('/') != string::npos)) {
-					timetop = Convert::kernTimeSignatureTop(*infile.token(i, j));
-					timebot = Convert::kernTimeSignatureBottomToDuration(*infile.token(i, j));
-					timesigdur = timebot * timetop;
-					// fix last timesigbeats value
-					if (timesigbeats.size() > 0) {
-						timesigbeats[(int)timesigbeats.size()-1] = timesigdur;
-						measurebeats[(int)measurebeats.size()-1] = lastvalue * timebot;
+					timesigdur = Convert::timeSigToDurationInQuarters(token);
+					if (m_debugQ) {
+						cerr << "!!! TSIG=" << token << "\tDUR=" << timesigdur << endl;
+					}
+					// Update time signature for measure (only one time signature per measue)
+					// but looping through all time signatures for all parts right now.
+					if (timesigdurs.size() > 0) {
+						timesigdurs[(int)timesigdurs.size()-1] = timesigdur;
 					}
 				}
 			}
 		} else if (infile[i].isBarline()) {
 			measureline.push_back(i);
-			lastvalue = infile[i].getBeat();
-			// shouldn't use timebot (now analyzing rhythm by "4")
-			// value = lastvalue * timebot;
-			value = lastvalue;
-			measurebeats.push_back(value);
-			timesigbeats.push_back(timesigdur);
+			HumNum bardur = infile[i].getDurationToBarline();
+			measuredurs.push_back(bardur);
+			timesigdurs.push_back(timesigdur);
 		}
 	}
 
 	if (m_debugQ) {
-		cout << "measure beats / timesig beats" << endl;
-		for (int i=0; i<(int)measurebeats.size(); i++) {
-			cout << measurebeats[i] << "\t" << timesigbeats[i] << endl;
+		m_humdrum_text << "!! measure beats / timesig beats" << endl;
+		for (int i=0; i<(int)measuredurs.size(); i++) {
+			m_humdrum_text << measuredurs[i] << "\t" << timesigdurs[i] << endl;
 		}
 	}
 
-	if (measurebeats.size() == 0) {
+	if (measuredurs.size() == 0) {
 		// no barlines, nothing to do...
-		cout << infile;
+		m_humdrum_text << infile;
 		return;
 	}
 
@@ -63549,21 +63548,28 @@ void Tool_barnum::processFile(HumdrumFile& infile) {
 
 	control.resize(measureline.size());
 	measurenums.resize(measureline.size());
+	if (m_debugQ) {
+		cerr << "!! SETTING MEASURE NUMBERS TO SIZE " << measurenums.size() << endl;
+	}
 	std::fill(control.begin(), control.end(), -1);
 	std::fill(measurenums.begin(), measurenums.end(), -1);
 
 	// If the time signature and the number of beats in a measure
 	// agree, then the bar is worth numbering:
 	for (int i=0; i<(int)control.size(); i++) {
-		if (measurebeats[i] == timesigbeats[i]) {
+		if (m_debugQ) {
+			cerr << "!! MEASURE BEATS " << i << " = " << measuredurs[i]
+			     << "\tTIMESIGBEATS = " << timesigdurs[i] << endl;
+		}
+		if (measuredurs[i] == timesigdurs[i]) {
 			control[i] = 1;
 		}
 	}
 
 	// Determine first bar (which is marked with a negative value
 	// if there is a pickup bar)
-	if (measurebeats[0] < 0) {
-		if (-measurebeats[0] == timesigbeats[0]) {
+	if (measuredurs[0] < 0) {
+		if (-measuredurs[0] == timesigdurs[0]) {
 			control[0] = 1;
 		}
 	}
@@ -63573,10 +63579,10 @@ void Tool_barnum::processFile(HumdrumFile& infile) {
 		if ((control[i] == 1) || (control[i+1] == 1)) {
 			continue;
 		}
-		if (timesigbeats[i] != timesigbeats[i+1]) {
+		if (timesigdurs[i] != timesigdurs[i+1]) {
 			continue;
 		}
-		if ((measurebeats[i]+measurebeats[i+1]) == timesigbeats[i]) {
+		if ((measuredurs[i]+measuredurs[i+1]) == timesigdurs[i]) {
 			// found a barline which splits a complete measure
 			// into two pieces.
 			control[i] = 1;
@@ -63603,7 +63609,7 @@ void Tool_barnum::processFile(HumdrumFile& infile) {
 
 	// if a measure contains no beats, then it is not a controlling barline
 	for (int i=0; i<(int)control.size(); i++) {
-		if (measurebeats[i] == 0) {
+		if (measuredurs[i] == 0) {
 			control[i] = 0;
 		}
 	}
@@ -63619,7 +63625,7 @@ void Tool_barnum::processFile(HumdrumFile& infile) {
 			continue;
 		}
 		if (infile[i].isBarline()) {
-			if ((measurebeats[0] > 0) && dataq) {
+			if ((measuredurs[0] > 0) && dataq) {
 				offset = 1;
 			}
 			break;
@@ -63672,10 +63678,10 @@ void Tool_barnum::processFile(HumdrumFile& infile) {
 	}
 
 	if (m_debugQ) {
-		cout << "cont\tnum\tbeats" << endl;
+		m_humdrum_text << "!! cont\tnum\tbeats\ttbeats" << endl;
 		for (int i=0; i<(int)control.size(); i++) {
-			cout << control[i] << "\t" << measurenums[i] << "\t"
-				  << measurebeats[i] << "\t" << timesigbeats[i] << endl;
+			m_humdrum_text << "!!" << control[i] << "\t" << measurenums[i] << "\t"
+				  << measuredurs[i] << "\t" << timesigdurs[i] << endl;
 		}
 	}
 
@@ -63684,8 +63690,8 @@ void Tool_barnum::processFile(HumdrumFile& infile) {
 	// ready to print the new barline numbers
 	int mindex = 0;
 	for (int i=0; i<infile.getLineCount(); i++) {
-		if (infile[i].isBarline()) {
-			cout << infile[i] << "\n";
+		if (!infile[i].isBarline()) {
+			m_humdrum_text << infile[i] << "\n";
 			continue;
 		}
 
@@ -63710,14 +63716,18 @@ void Tool_barnum::processFile(HumdrumFile& infile) {
 //
 
 void Tool_barnum::printWithBarNumbers(HumdrumLine& humline, int measurenum) {
+	if (!humline.isBarline()) {
+		m_humdrum_text << humline << endl;
+		return;
+	}
 	for (int i=0; i<humline.getFieldCount(); i++) {
 		string& token = *humline.token(i);
 		printSingleBarNumber(token,  measurenum);
 		if (i < humline.getFieldCount() -1) {
-			 cout << "\t";
+			 m_humdrum_text << "\t";
 		 }
 	}
-	cout << "\n";
+	m_humdrum_text << "\n";
 }
 
 
@@ -63730,9 +63740,9 @@ void Tool_barnum::printWithBarNumbers(HumdrumLine& humline, int measurenum) {
 void Tool_barnum::printSingleBarNumber(const string& astring, int measurenum) {
 	for (int i=0; i<(int)astring.size(); i++) {
 		if ((astring[i] == '=') && (astring[i+1] != '=')) {
-			cout << astring[i] << measurenum;
+			m_humdrum_text << astring[i] << measurenum;
 		} else if (!isdigit(astring[i])) {
-			cout << astring[i];
+			m_humdrum_text << astring[i];
 		}
 	}
 }

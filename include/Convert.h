@@ -49,7 +49,7 @@ class Convert {
 		                                     HumNum scale = HumNum(1,4));
 		static std::string  durationFloatToRecip (double duration,
 		                                     HumNum scale = HumNum(1,4));
-		static HumNum timeSigToDurationInQuarter(HTp token);
+		static HumNum timeSigToDurationInQuarters(HTp token);
 
 		// Tempo processing, defined in Convert-tempo.cpp
 		static int tempoNameToMm (const std::string& name, int bot = 4, int top = 4);

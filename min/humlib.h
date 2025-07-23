@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Jul 22 21:20:41 CEST 2025
+// Last Modified: Wed Jul 23 07:00:37 CEST 2025
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -4048,7 +4048,7 @@ class Convert {
 		                                     HumNum scale = HumNum(1,4));
 		static std::string  durationFloatToRecip (double duration,
 		                                     HumNum scale = HumNum(1,4));
-		static HumNum timeSigToDurationInQuarter(HTp token);
+		static HumNum timeSigToDurationInQuarters(HTp token);
 
 		// Tempo processing, defined in Convert-tempo.cpp
 		static int tempoNameToMm (const std::string& name, int bot = 4, int top = 4);
