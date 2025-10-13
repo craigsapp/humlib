@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Jul 23 07:00:37 CEST 2025
+// Last Modified: Mon Oct 13 10:55:39 PDT 2025
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -11021,6 +11021,27 @@ class Tool_restfill : public HumTool {
 	private:
 		bool        m_hiddenQ  = false;
 		std::string m_exinterp = "**kern";
+
+};
+
+
+class Tool_restit : public HumTool {
+	public:
+		         Tool_restit       (void);
+		        ~Tool_restit       () {};
+
+		bool     run               (HumdrumFileSet& infiles);
+		bool     run               (HumdrumFile& infile);
+		bool     run               (const std::string& indata, std::ostream& out);
+		bool     run               (HumdrumFile& infile, std::ostream& out);
+
+	protected:
+		void     processFile       (HumdrumFile& infile);
+		void     initialize        (HumdrumFile& infile);
+
+	private:
+		bool     m_modifiedQ = false;
+		std::vector<int> m_kern;
 
 };
 
