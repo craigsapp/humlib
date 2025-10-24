@@ -2344,7 +2344,7 @@ void HumdrumFileBase::fixMerges(int linei) {
 			for (int j=0; j<(int)linetoks[i].size(); j++) {
 				track1 = linetoks[i][j]->getTrack();
 				findex = linetoks[i][j]->getFieldIndex();
-            // move the token to the next line:
+            			// move the token to the next line:
 				newline->m_tokens.push_back(linetoks[i][j]);
 				// put it in the list for later processing:
 				newtokbytrack[track1].push_back(linetoks[i][j]);
@@ -2358,9 +2358,9 @@ void HumdrumFileBase::fixMerges(int linei) {
 			// This is the bad boundary.  Keep track fields in the
 			// original line, and create one new null token in
 			// the newline.
-// original     *    *v   *v   o    o    o    o    o
-// new          o    o         *v   *v   *    *v   *v
-// track:       1    2         3    3    4    5    5
+			// original     *    *v   *v   o    o    o    o    o
+			// new          o    o         *v   *v   *    *v   *v
+			// track:       1    2         3    3    4    5    5
 			difference = linetoks[i].size() - 1;
 
 			track1 = linetoks[i][0]->getTrack();

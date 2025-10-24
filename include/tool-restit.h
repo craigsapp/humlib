@@ -36,11 +36,14 @@ class Tool_restit : public HumTool {
 
 	protected:
 		void     processFile       (HumdrumFile& infile);
+		void     processSpine      (HTp token);
 		void     initialize        (HumdrumFile& infile);
+		std::string filterNote     (std::string& value);
 
 	private:
 		bool     m_modifiedQ = false;
-		std::vector<int> m_kern;
+		std::vector<bool> m_spines;
+		std::vector<bool> m_midi;
 
 };
 

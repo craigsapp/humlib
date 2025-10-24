@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Oct 13 10:55:39 PDT 2025
+// Last Modified: Fri Oct 24 11:04:20 PDT 2025
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -24922,7 +24922,7 @@ void HumdrumFileBase::fixMerges(int linei) {
 			for (int j=0; j<(int)linetoks[i].size(); j++) {
 				track1 = linetoks[i][j]->getTrack();
 				findex = linetoks[i][j]->getFieldIndex();
-            // move the token to the next line:
+            			// move the token to the next line:
 				newline->m_tokens.push_back(linetoks[i][j]);
 				// put it in the list for later processing:
 				newtokbytrack[track1].push_back(linetoks[i][j]);
@@ -24936,9 +24936,9 @@ void HumdrumFileBase::fixMerges(int linei) {
 			// This is the bad boundary.  Keep track fields in the
 			// original line, and create one new null token in
 			// the newline.
-// original     *    *v   *v   o    o    o    o    o
-// new          o    o         *v   *v   *    *v   *v
-// track:       1    2         3    3    4    5    5
+			// original     *    *v   *v   o    o    o    o    o
+			// new          o    o         *v   *v   *    *v   *v
+			// track:       1    2         3    3    4    5    5
 			difference = linetoks[i].size() - 1;
 
 			track1 = linetoks[i][0]->getTrack();
@@ -37992,12 +37992,26 @@ string HumdrumToken::getSubtoken(int index, const string& separator) const {
 //     default value: separator = " "
 //
 
-std::vector<std::string> HumdrumToken::getSubtokens (const std::string& separator) const {
-	std::vector<std::string> output;
-	const string& token = *this;
-	HumRegex hre;
-	hre.split(output, token, separator);
-	return output;
+std::vector<std::string> HumdrumToken::getSubtokens(const std::string& separator) const {
+    std::vector<std::string> out;
+    const std::string& s = *this;
+
+    if (separator.empty()) {
+        if (!s.empty()) out.push_back(s);
+        return out;
+    }
+
+    std::string::size_type start = 0;
+    while (true) {
+        auto pos = s.find(separator, start);
+        if (pos == std::string::npos) {
+            if (start < s.size()) out.emplace_back(s.substr(start)); // last piece
+            break;
+        }
+        if (pos > start) out.emplace_back(s.substr(start, pos - start)); // ignore empties
+        start = pos + separator.size();
+    }
+    return out;
 }
 
 
@@ -127148,6 +127162,7 @@ HumNum Tool_restfill::getNextTime(HTp token) {
 
 Tool_restit::Tool_restit(void) {
 	define("k|kern=s", "process only the given spines");
+	define("m|midi=s", "process only the given midi pitches");
 
 }
 
@@ -127205,15 +127220,26 @@ bool Tool_restit::run(HumdrumFile& infile) {
 //
 
 void Tool_restit::initialize(HumdrumFile& infile) {
-cerr << "one" << endl;
 	if (getBoolean("kern")) {
-cerr << "two" << endl;
-      string klist = getString("kern");
-cerr << "three" << endl;
-		cout << "KLIST = " << klist << endl;
-cerr << "four" << endl;
-   }
-cerr << "five" << endl;
+		string klist = getString("kern");
+		infile.makeBooleanTrackList(m_spines, klist);
+		for (int z=0; z<(int)infile.getMaxTrack(); z++) {
+		cout << "\t" << m_spines.at(z) << endl;
+	}
+	} else {
+		m_spines.resize(infile.getMaxTrack());
+		fill(m_spines.begin(), m_spines.end(), true);
+	}
+	m_modifiedQ = false;
+	if (getBoolean("midi")) {
+		string midi = getString("midi");
+		infile.makeBooleanTrackList(m_midi, midi);
+		Convert::makeBooleanTrackList(m_midi, midi, 128);
+
+	} else {
+		m_midi.resize(128);
+		fill(m_midi.begin(), m_midi.end(), true);
+	}
 
 }
 
@@ -127228,17 +127254,80 @@ void Tool_restit::processFile(HumdrumFile& infile) {
 	vector<HTp> starts;
 	infile.getSpineStartList(starts);
 	for (int i=0; i<(int)starts.size(); i++) {
-		cout << starts[i] << endl;
+		if (!starts[i]->isKern()) {
+			continue;
+		}
+		int track = starts[i]->getTrack();
+		cerr << "TRACK: " << track << endl;
+		if (!m_spines.at(track-1)) {
+			continue;
+		}
+		processSpine(starts[i]);
 	}
 
-	if (m_modifiedQ) {
-		infile.createLinesFromTokens();
-	}
+	infile.createLinesFromTokens();
 	m_humdrum_text << infile;
 }
 
 
+///////////////////////////////
+//
+// Tool_restit::processSpine --
+//
 
+void Tool_restit::processSpine(HTp token) {
+	HTp current = token;
+	if (token->isNull()) {
+		return;
+	}
+	int spine = token->getTrack() - 1;
+	if (!m_spines.at(spine)) {
+		current = current->getNextToken();
+		return;
+	}
+	while (current) {
+		if (!current->isData()) {
+			current = current->getNextToken();
+			continue;
+		}
+		vector<string>subtokens = current->getSubtokens();
+		for (int z=0; z<(int)subtokens.size(); z++) {
+			subtokens[z] = filterNote(subtokens[z]);
+		} 
+		string newtoken = "";
+		if (!subtokens.empty()) {
+			newtoken += subtokens[0];
+		} else {
+			current = current->getNextToken();
+			continue;
+		}
+		for (int i=1; i<(int)subtokens.size(); i++) {
+			newtoken += " ";
+			newtoken += subtokens[i];
+		}
+		if (*current == newtoken) {
+			current = current->getNextToken();
+			continue;
+		} else {
+		}
+		current->setText(newtoken);
+		current = current->getNextToken();
+	}
+	
+}
+
+
+//////////////////////////////
+//
+// Tool_restit::filterNote --
+//
+
+string Tool_restit::filterNote(string& value) {
+	int midikey = Convert::kernToMidiNoteNumber(value);
+	midikey = midikey == m_midi[midikey]? 0: 1;
+	string output = to_string(midikey);
+	return output;
+}
 
 
 

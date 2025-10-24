@@ -2672,12 +2672,26 @@ string HumdrumToken::getSubtoken(int index, const string& separator) const {
 //     default value: separator = " "
 //
 
-std::vector<std::string> HumdrumToken::getSubtokens (const std::string& separator) const {
-	std::vector<std::string> output;
-	const string& token = *this;
-	HumRegex hre;
-	hre.split(output, token, separator);
-	return output;
+std::vector<std::string> HumdrumToken::getSubtokens(const std::string& separator) const {
+    std::vector<std::string> out;
+    const std::string& s = *this;
+
+    if (separator.empty()) {
+        if (!s.empty()) out.push_back(s);
+        return out;
+    }
+
+    std::string::size_type start = 0;
+    while (true) {
+        auto pos = s.find(separator, start);
+        if (pos == std::string::npos) {
+            if (start < s.size()) out.emplace_back(s.substr(start)); // last piece
+            break;
+        }
+        if (pos > start) out.emplace_back(s.substr(start, pos - start)); // ignore empties
+        start = pos + separator.size();
+    }
+    return out;
 }
 
 
