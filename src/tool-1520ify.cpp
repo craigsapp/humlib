@@ -191,6 +191,41 @@ void Tool_1520ify::processFile(HumdrumFile& infile) {
 
 	adjustSystemDecoration(infile);
 
+	// Add *met() interpretations for mensuration marks
+	for (int i = 0; i < infile.getLineCount(); i++) {
+		if (!infile[i].isInterpretation()) continue;
+
+		bool hasMensuration = false;
+		for (int j = 0; j < infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (token->compare(0, 2, "*M") == 0) {
+				hasMensuration = true;
+				break;
+			}
+		}
+
+		if (hasMensuration) {
+			// Construct a new line with *met(...) in the same columns
+			std::string newline;
+			for (int j = 0; j < infile[i].getFieldCount(); j++) {
+				HTp token = infile.token(i, j);
+				if (token->isNull()) {
+					newline += "*";
+				} else if (token->compare(0, 5, "*M2/1") == 0) {
+					newline += "*met(C|)";
+				} else if (token->compare(0, 5, "*M3/1") == 0) {
+					newline += "*met(O)";
+				} else {
+					newline += "*";
+				}
+				if (j < infile[i].getFieldCount() - 1)
+					newline += "\t";
+			}
+			infile.insertLine(i + 1, newline);
+			i++; // skip over the inserted line
+		}
+	}
+
 	// Input lyrics may contain "=" signs which are to be converted into
 	// spaces in **text data, and into elisions when displaying with verovio.
 	Tool_shed shed;
