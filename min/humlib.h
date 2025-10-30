@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Oct 30 10:45:12 PDT 2025
+// Last Modified: Thu Oct 30 11:10:34 PDT 2025
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -11025,31 +11025,6 @@ class Tool_restfill : public HumTool {
 };
 
 
-class Tool_restit : public HumTool {
-	public:
-		         Tool_restit       (void);
-		        ~Tool_restit       () {};
-
-		bool     run               (HumdrumFileSet& infiles);
-		bool     run               (HumdrumFile& infile);
-		bool     run               (const std::string& indata, std::ostream& out);
-		bool     run               (HumdrumFile& infile, std::ostream& out);
-
-	protected:
-		void        processFile  (HumdrumFile& infile);
-		void        processSpine (HTp token);
-		void        initialize   (HumdrumFile& infile);
-		bool        isDelete     (std::string& value);
-		std::string addRest      (const std::string& input);
-
-	private:
-		bool     m_modifiedQ = false;
-		std::vector<bool> m_spines;
-		std::vector<bool> m_midi;
-
-};
-
-
 class Tool_rid : public HumTool {
 	public:
 		         Tool_rid          (void);
@@ -11083,6 +11058,31 @@ class Tool_rid : public HumTool {
 		int      option_c = 0;   // used with -c option
 		int      option_k = 0;   // used with -k option
 		int      option_V = 0;   // used with -V option
+
+};
+
+
+class Tool_rmask : public HumTool {
+	public:
+		         Tool_rmask       (void);
+		        ~Tool_rmask       () {};
+
+		bool     run               (HumdrumFileSet& infiles);
+		bool     run               (HumdrumFile& infile);
+		bool     run               (const std::string& indata, std::ostream& out);
+		bool     run               (HumdrumFile& infile, std::ostream& out);
+
+	protected:
+		void        processFile  (HumdrumFile& infile);
+		void        processSpine (HTp token);
+		void        initialize   (HumdrumFile& infile);
+		bool        isDelete     (std::string& value);
+		std::string addRest      (const std::string& input);
+
+	private:
+		bool     m_modifiedQ = false;
+		std::vector<bool> m_spines;
+		std::vector<bool> m_midi;
 
 };
 

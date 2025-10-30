@@ -2,15 +2,15 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Fri Oct 10 09:56:34 PDT 2025
 // Last Modified: Thu Oct 30 09:27:00 PDT 2025
-// Filename:      tool-rfilt.cpp
-// URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-rfilt.cpp
+// Filename:      tool-rmask.cpp
+// URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-rmask.cpp
 // Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
-// Description:   Switch between rfilt encoding and corrected encoding.
+// Description:   Switch between rmask encoding and corrected encoding.
 //
 
-#include "tool-rfilt.h"
+#include "tool-rmask.h"
 #include "Convert.h"
 #include "HumRegex.h"
 #include <iostream>
@@ -24,10 +24,10 @@ namespace hum {
 
 /////////////////////////////////
 //
-// Tool_rfilt::Tool_rfilt -- Set the recognized options for the tool.
+// Tool_rmask::Tool_rmask -- Set the recognized options for the tool.
 //
 
-Tool_rfilt::Tool_rfilt(void) {
+Tool_rmask::Tool_rmask(void) {
 	define("k|kern=s", "process only the given spines");
 	define("m|midi=s", "process only the given midi pitches");
 }
@@ -36,10 +36,10 @@ Tool_rfilt::Tool_rfilt(void) {
 
 /////////////////////////////////
 //
-// Tool_rfilt::run -- Do the main work of the tool.
+// Tool_rmask::run -- Do the main work of the tool.
 //
 
-bool Tool_rfilt::run(HumdrumFileSet& infiles) {
+bool Tool_rmask::run(HumdrumFileSet& infiles) {
 	bool status = true;
 	for (int i = 0; i < infiles.getCount(); i++) {
 		status &= run(infiles[i]);
@@ -48,7 +48,7 @@ bool Tool_rfilt::run(HumdrumFileSet& infiles) {
 }
 
 
-bool Tool_rfilt::run(const string& indata, ostream& out) {
+bool Tool_rmask::run(const string& indata, ostream& out) {
 	HumdrumFile infile(indata);
 	bool status = run(infile);
 	if (hasAnyText()) {
@@ -60,7 +60,7 @@ bool Tool_rfilt::run(const string& indata, ostream& out) {
 }
 
 
-bool Tool_rfilt::run(HumdrumFile& infile, ostream& out) {
+bool Tool_rmask::run(HumdrumFile& infile, ostream& out) {
 	bool status = run(infile);
 	if (hasAnyText()) {
 		getAllText(out);
@@ -71,7 +71,7 @@ bool Tool_rfilt::run(HumdrumFile& infile, ostream& out) {
 }
 
 
-bool Tool_rfilt::run(HumdrumFile& infile) {
+bool Tool_rmask::run(HumdrumFile& infile) {
 	initialize(infile);
 	processFile(infile);
 	return true;
@@ -81,11 +81,11 @@ bool Tool_rfilt::run(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_rfilt::initialize --  Initializations that only have to be done once
+// Tool_rmask::initialize --  Initializations that only have to be done once
 //    for all HumdrumFile segments.
 //
 
-void Tool_rfilt::initialize(HumdrumFile& infile) {
+void Tool_rmask::initialize(HumdrumFile& infile) {
 	if (getBoolean("kern")) {
 		string klist = getString("kern");
 		infile.makeBooleanTrackList(m_spines, klist);
@@ -99,15 +99,10 @@ void Tool_rfilt::initialize(HumdrumFile& infile) {
 
 	m_modifiedQ = false;
 
-	cout << "GOT HERE AA" << endl;
-
 	if (getBoolean("midi")) {
 		string midi = getString("midi");
 		infile.makeBooleanTrackList(m_midi, midi);
 		Convert::makeBooleanTrackList(m_midi, midi, 128);
-		for (int i = 0; i < (int)m_midi.size(); i++) {
-			cout << "MIDI " << i << "=\t" << m_midi[i] << endl;
-		}
 	} else {
 		m_midi.resize(128);
 		fill(m_midi.begin(), m_midi.end(), true);
@@ -118,10 +113,10 @@ void Tool_rfilt::initialize(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_rfilt::processFile --
+// Tool_rmask::processFile --
 //
 
-void Tool_rfilt::processFile(HumdrumFile& infile) {
+void Tool_rmask::processFile(HumdrumFile& infile) {
 	vector<HTp> starts;
 	infile.getSpineStartList(starts);
 	for (int i = 0; i < (int)starts.size(); i++) {
@@ -141,10 +136,10 @@ void Tool_rfilt::processFile(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_rfilt::processSpine --
+// Tool_rmask::processSpine --
 //
 
-void Tool_rfilt::processSpine(HTp token) {
+void Tool_rmask::processSpine(HTp token) {
 	HTp current = token;
 	if (token->isNull()) return;
 
@@ -159,26 +154,18 @@ void Tool_rfilt::processSpine(HTp token) {
 			current = current->getNextToken();
 			continue;
 		}
-
-		cerr << "CURRENT: " << current << endl;
 		vector<string> subtoks = current->getSubtokens();
-		cerr << "SIZE OF SUBTOKEN: " << subtoks.size() << endl;
-
 		string newtoken;
-
 		for (int i = 0; i < (int)subtoks.size(); i++) {
 			string temp;
 
 			if (isDelete(subtoks[i])) {
 				// Convert this subtoken to a rest with the same duration
 				temp = addRest(subtoks[i]);
-				cerr << "DELETE i=" << i << ":\t" << subtoks[i] << " -> " << temp << endl;
 			} else {
 				// Keep original subtoken as-is
 				temp = subtoks[i];
 			}
-
-			cerr << "SUBROK i=" << i << ":\t" << temp << endl;
 
 			if (!newtoken.empty()) newtoken += " ";
 			newtoken += temp;
@@ -197,10 +184,10 @@ void Tool_rfilt::processSpine(HTp token) {
 
 //////////////////////////////
 //
-// Tool_rfilt::isDelete --
+// Tool_rmask::isDelete --
 //
 
-bool Tool_rfilt::isDelete(string& value) {
+bool Tool_rmask::isDelete(string& value) {
 	int midikey = Convert::kernToMidiNoteNumber(value);
 	return m_midi[midikey];
 }
@@ -209,16 +196,14 @@ bool Tool_rfilt::isDelete(string& value) {
 
 //////////////////////////////
 //
-// Tool_rfilt::addRest --
+// Tool_rmask::addRest --
 //
 
-string Tool_rfilt::addRest(const string& input) {
-	cerr << "INPUT = " << input << endl;
+string Tool_rmask::addRest(const string& input) {
 	HumRegex hre;
 	string output = input;
 	hre.replaceDestructive(output, "", "[#n-]", "g");
 	hre.replaceDestructive(output, "r", "[A-G]+", "gi");
-	cerr << "OUTPUT= " << output << endl;
 	return output;
 }
 
