@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Oct 24 11:04:20 PDT 2025
+// Last Modified: Thu Oct 30 10:45:12 PDT 2025
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -11036,10 +11036,11 @@ class Tool_restit : public HumTool {
 		bool     run               (HumdrumFile& infile, std::ostream& out);
 
 	protected:
-		void     processFile       (HumdrumFile& infile);
-		void     processSpine      (HTp token);
-		void     initialize        (HumdrumFile& infile);
-		std::string filterNote     (std::string& value);
+		void        processFile  (HumdrumFile& infile);
+		void        processSpine (HTp token);
+		void        initialize   (HumdrumFile& infile);
+		bool        isDelete     (std::string& value);
+		std::string addRest      (const std::string& input);
 
 	private:
 		bool     m_modifiedQ = false;
