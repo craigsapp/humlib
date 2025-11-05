@@ -72,6 +72,7 @@
 #include "tool-prange.h"
 #include "tool-recip.h"
 #include "tool-restfill.h"
+#include "tool-rmask.h"
 #include "tool-rid.h"
 #include "tool-rphrase.h"
 #include "tool-sab2gs.h"
@@ -346,6 +347,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(prange, infile, commands[i].second, status);
 		} else if (commands[i].first == "recip") {
 			RUNTOOL(recip, infile, commands[i].second, status);
+		} else if (commands[i].first == "rmask") {
+			RUNTOOL(rmask, infile, commands[i].second, status);
 		} else if (commands[i].first == "restfill") {
 			RUNTOOL(restfill, infile, commands[i].second, status);
 		} else if (commands[i].first == "rphrase") {
