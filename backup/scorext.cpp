@@ -730,7 +730,7 @@ void fillAnalysisInfo(HumdrumFile& infile) {
 			if (!tok->isTimeSignature()) {
 				continue;
 			}
-			HumNum value = Convert::timeSigToDurationInQuarter(tok);
+			HumNum value = Convert::timeSigToDurationInQuarters(tok);
 			meter = value;
 		}
 		Meterdur[i] = meter;

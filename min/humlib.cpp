@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Nov  5 06:21:09 PST 2025
+// Last Modified: Tue Nov 11 00:34:58 PST 2025
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -113291,7 +113291,128 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 	prepareRdfs(partdata);
 	printRdfs(out);
 
+	checkForInformation(out, doc);
+
 	return status;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musicx2hum::checkForInformation --
+// <identification>
+//    <creator type="arranger">Janosch Umbreit 2025/10/17</creator>
+//    <creator type="composer">Jean Conseil</creator>
+//
+//    !!!ENC: Umbreit, Joanosch
+//    !!!END: 2025/10/17
+//    !!!COM: Conseil, Jean
+//
+
+void Tool_musicxml2hum::checkForInformation(ostream& out, xml_document& doc) {
+    pugi::xml_node identification = doc.child("score-partwise").child("identification");
+    if (!identification) {
+	out << "!! NO IDENTIFICATION FOUND" << endl;
+	// No identification found
+        return;
+    }
+    for (pugi::xml_node creator : identification.children("creator")) {
+        std::string type = creator.attribute("type").value();
+	if (type == "composer") {
+        	std::string text = creator.child_value();
+
+		// Trim leading/trailing spaces
+		while (!text.empty() && std::isspace((unsigned char)text.front())) {
+			text.erase(text.begin());
+		}
+		while (!text.empty() && std::isspace((unsigned char)text.back())) {
+			text.pop_back();
+		}
+	
+		if (text.empty()) {
+			continue;
+		}
+
+		// Split into tokens
+		std::istringstream iss(text);
+		std::vector<std::string> tokens;
+		std::string t;
+		while (iss >> t) {
+			tokens.push_back(t);
+		}
+		if (tokens.empty()) {
+			continue;
+		}
+	
+		// Build "Last, First" format
+		std::string output;
+		std::string last = tokens.back();
+		tokens.pop_back();
+		output = last;
+		if (!tokens.empty()) {
+			output += ", ";
+			for (int i=0; i<(int)tokens.size(); ++i) {
+				if (i > 0) {
+					output += " ";
+				}
+				output += tokens[i];
+			}
+		}
+
+		out << "!!!COM: " << output << "\n";
+
+	} else if (type == "arranger") {
+        	std::string text = creator.child_value();
+		// trim leading/trailing spaces:
+		while (!text.empty() && std::isspace((unsigned char)text.front())) text.erase(text.begin());
+		while (!text.empty() && std::isspace((unsigned char)text.back())) text.pop_back();
+	
+		if (text.empty()) continue;
+	
+		// tokenize
+		std::istringstream ss(text);
+		std::vector<std::string> tokens;
+		std::string t;
+		while (ss >> t) {
+			tokens.push_back(t);
+		}
+		if (tokens.empty()) {
+			continue;
+		}
+
+		// check if last token is a date in form YYYY/MM/DD
+		std::string date;
+		std::string last = tokens.back();
+		if (last.size() == 10 && std::isdigit(last[0]) && 
+			std::isdigit(last[1]) && std::isdigit(last[2]) && 
+			std::isdigit(last[3]) && last[4] == '/' && std::isdigit(last[5]) && 
+			std::isdigit(last[6]) && last[7] == '/' && std::isdigit(last[8]) && 
+			std::isdigit(last[9])) {
+			date = last;
+			tokens.pop_back();
+		}
+
+		// construct name "Last, First"
+		std::string name;
+		if (!tokens.empty()) {
+			std::string lastName = tokens.back();
+			tokens.pop_back();
+			name = lastName;
+			if (!tokens.empty()) {
+				name += ", ";
+				for (int i=0; i<(int)tokens.size(); ++i) {
+					if (i) name += " ";
+					name += tokens[i];
+				}
+			}
+		}
+
+		if (!name.empty()) out << "!!!ENC: " << name << "\n";
+		if (!date.empty()) out << "!!!END: " << date << "\n";
+
+	}
+    }
 }
 
 
@@ -127533,7 +127654,7 @@ void Tool_rmask::initialize(HumdrumFile& infile) {
 
 	if (getBoolean("midi")) {
 		string midi = getString("midi");
-		infile.makeBooleanTrackList(m_midi, midi);
+		//infile.makeBooleanTrackList(m_midi, midi);
 		Convert::makeBooleanTrackList(m_midi, midi, 128);
 	} else {
 		m_midi.resize(128);

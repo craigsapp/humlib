@@ -101,7 +101,7 @@ void Tool_rmask::initialize(HumdrumFile& infile) {
 
 	if (getBoolean("midi")) {
 		string midi = getString("midi");
-		infile.makeBooleanTrackList(m_midi, midi);
+		//infile.makeBooleanTrackList(m_midi, midi);
 		Convert::makeBooleanTrackList(m_midi, midi, 128);
 	} else {
 		m_midi.resize(128);

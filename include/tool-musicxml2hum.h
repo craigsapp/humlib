@@ -219,6 +219,7 @@ class Tool_musicxml2hum : public HumTool {
 		void printResult       (ostream& out, HumdrumFile& outfile);
 		void addMeasureOneNumber(HumdrumFile& infile);
 		bool isUsedHairpin     (pugi::xml_node hairpin, int partindex);
+		void checkForInformation(std::ostream& out, xml_document& doc);
 
 	public:
 
