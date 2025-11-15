@@ -1,7 +1,7 @@
 //
-// Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
+// Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu> and Benjamin Ory <benjaminory@gmail.com>
 // Creation Date: Wed Oct 18 13:40:23 PDT 2017
-// Last Modified: Wed Oct 18 13:40:26 PDT 2017
+// Last Modified: Fri Nov 14 17:00:00 PDT 2025
 // Filename:      tool-1520ify.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-1520ify.cpp
 // Syntax:        C++11; humlib
@@ -199,16 +199,20 @@ void Tool_1520ify::processFile(HumdrumFile& infile) {
 
 	// --- 1) Normalize mensurations ---
 	for (int i = 0; i < infile.getLineCount(); ++i) {
-		if (!infile[i].isInterpretation()) continue;
+		if (!infile[i].isInterpretation()) {
+			continue;
+		}
 
 		for (int j = 0; j < infile[i].getFieldCount(); ++j) {
 			HTp tok = infile.token(i, j);
-			if (!tok || tok->isNull()) continue;
+			if (!tok || tok->isNull()) {
+				continue;
+			}
 
 			// Any of these → *M2/1
-			if (tok->compare(0, 5, "*M2/2") == 0 ||
-			    tok->compare(0, 5, "*M4/2") == 0 ||
-			    tok->compare(0, 5, "*M4/4") == 0) {
+			if ((*tok == "*M2/2") ||
+			    (*tok == "*M4/2") ||
+			    (*tok == "*M4/4")) {
 				tok->setText("*M2/1");
 			}
 		}
@@ -216,13 +220,18 @@ void Tool_1520ify::processFile(HumdrumFile& infile) {
 
 	// --- 2) Normalize existing *met(...) lines and remove duplicates ---
 	for (int i = 0; i < infile.getLineCount(); ++i) {
-		if (!infile[i].isInterpretation()) continue;
+		if (!infile[i].isInterpretation()) {
+			continue;
+		}
 
 		// Does this line contain any *met(...) tokens?
 		bool hasMet = false;
 		for (int j = 0; j < infile[i].getFieldCount(); ++j) {
 			HTp tok = infile.token(i, j);
-			if (tok && tok->compare(0, 5, "*met(") == 0) { hasMet = true; break; }
+			if (tok->compare(0, 5, "*met(") == 0) { 
+				hasMet = true; 
+				break; 
+			}
 		}
 		if (!hasMet) continue;
 
@@ -233,19 +242,25 @@ void Tool_1520ify::processFile(HumdrumFile& infile) {
 				HTp metTok  = infile.token(i, j);
 				HTp mensTok = infile.token(mensLine, j);
 
-				if (!metTok || metTok->isNull()) continue;
-
 				// Default: leave non-*met tokens alone on this line
-				if (metTok->compare(0, 5, "*met(") != 0) continue;
+				if (!metTok || metTok->isNull()) {
+				    continue;
+				}
+
+				if (metTok->compare(0, 5, "*met(") != 0) {
+				    continue;
+				}
 
 				// Decide canonical met from the mensuration just above
-				const char* repl = "*"; // if we can’t decide, blank it
+				const char* repl = "*";   // if we can’t decide, blank it
+
 				if (mensTok && !mensTok->isNull()) {
-					if (mensTok->compare(0, 5, "*M2/1") == 0) {
-						repl = "*met(C|)";
-					} else if (mensTok->compare(0, 5, "*M3/1") == 0) {
-						repl = "*met(O)";
-					}
+				    if (*mensTok == "*M2/1") {
+				        repl = "*met(C|)";
+				    }
+				    else if (*mensTok == "*M3/1") {
+				        repl = "*met(O)";
+				    }
 				}
 				metTok->setText(repl);
 			}
@@ -255,42 +270,65 @@ void Tool_1520ify::processFile(HumdrumFile& infile) {
 		bool emptyLine = true;
 		for (int j = 0; j < infile[i].getFieldCount(); ++j) {
 			HTp tok = infile.token(i, j);
-			if (tok && *tok != "*") { emptyLine = false; break; }
+			if (tok && *tok != "*") { 
+				emptyLine = false; 
+				break; 
+			}
 		}
-		if (emptyLine) { infile.deleteLine(i); --i; continue; }
+		if (emptyLine) { 
+			infile.deleteLine(i); --i; continue; 
+		}
 
 		// If another *met line immediately follows, remove the later duplicate(s)
 		while (i + 1 < infile.getLineCount() && infile[i + 1].isInterpretation()) {
 			bool nextHasMet = false;
 			for (int j = 0; j < infile[i + 1].getFieldCount(); ++j) {
 				HTp tok = infile.token(i + 1, j);
-				if (tok && tok->compare(0, 5, "*met(") == 0) { nextHasMet = true; break; }
+				if (tok && tok->compare(0, 5, "*met(") == 0) { 
+					nextHasMet = true; 
+					break; 
+				}
 			}
-			if (!nextHasMet) break;
+			if (!nextHasMet) {
+				break;
+			}
 			infile.deleteLine(i + 1); // drop duplicate *met line
 		}
 	}
 
 	// After normalization passes, add *met() interpretations if missing
 	for (int i = 0; i < infile.getLineCount(); ++i) {
-		if (!infile[i].isInterpretation()) continue;
+		if (!infile[i].isInterpretation()) {
+			continue;
+		}
+
 
 		// Does this interpretation line contain any mensuration?
 		bool hasMens = false;
 		for (int j = 0; j < infile[i].getFieldCount(); ++j) {
 			HTp tok = infile.token(i, j);
-			if (tok && tok->compare(0, 2, "*M") == 0) { hasMens = true; break; }
+			if (tok && tok->compare(0, 2, "*M") == 0) { 
+				hasMens = true; 
+				break;
+			}
 		}
-		if (!hasMens) continue;
+		if (!hasMens) {
+			continue;
+		}
 
 		// If the next line already contains *met(...), don't insert another
 		if (i + 1 < infile.getLineCount() && infile[i + 1].isInterpretation()) {
 			bool nextHasMet = false;
 			for (int k = 0; k < infile[i + 1].getFieldCount(); ++k) {
 				HTp nt = infile.token(i + 1, k);
-				if (nt && nt->compare(0, 5, "*met(") == 0) { nextHasMet = true; break; }
+				if (nt && nt->compare(0, 5, "*met(") == 0) { 
+					nextHasMet = true; 
+					break; 
+				}
 			}
-			if (nextHasMet) continue;
+			if (nextHasMet) {
+				continue;
+			}
 		}
 
 		// Build a *met(...) line (post-normalization we only need to check *M2/1 and *M3/1)
@@ -301,11 +339,19 @@ void Tool_1520ify::processFile(HumdrumFile& infile) {
 			HTp tok = infile.token(i, j);
 			const char* out = "*";
 			if (tok && !tok->isNull()) {
-				if (tok->compare(0, 5, "*M2/1") == 0) { out = "*met(C|)"; willInsert = true; }
-				else if (tok->compare(0, 5, "*M3/1") == 0) { out = "*met(O)"; willInsert = true; }
+				if (*tok == "*M2/1") { 
+					out = "*met(C|)"; 
+					willInsert = true; 
+				}
+				else if (*tok == "*M3/1") { 
+					out = "*met(O)"; 
+					willInsert = true; 
+				}
 			}
 			newline += out;
-			if (j < infile[i].getFieldCount() - 1) newline += "\t";
+			if (j < infile[i].getFieldCount() - 1) {
+				newline += "\t";
+			}
 		}
 
 		if (willInsert) {
@@ -316,14 +362,17 @@ void Tool_1520ify::processFile(HumdrumFile& infile) {
 
 	// Convert LO:TX Section lines in-place to !!section and !!!OMD
 	for (int i = 0; i < infile.getLineCount(); ++i) {
-		if (!infile[i].isLocalComment()) continue;
-
+		if (!infile[i].isLocalComment()) {
+			continue;
+		}
 		bool matched = false;
 		std::string sectionTitle;
 
 		for (int j = 0; j < infile[i].getFieldCount(); ++j) {
 			HTp tok = infile.token(i, j);
-			if (!tok) continue;
+			if (!tok) {
+				continue;
+			}
 
 			// Look for: !LO:TX:<stuff>:t=Section&colon; <Title>
 			// Capture everything after "Section&colon;" including leading spaces
@@ -346,7 +395,9 @@ void Tool_1520ify::processFile(HumdrumFile& infile) {
 			}
 		}
 
-		if (!matched) continue;
+		if (!matched) {
+			continue;
+		}
 
 		// Replace this local-comment line with two new global comments right here
 		// Insert in order: !!section then !!!OMD, then remove the original line
@@ -387,7 +438,7 @@ void Tool_1520ify::adjustSystemDecoration(HumdrumFile& infile) {
 			continue;
 		}
 		HTp token = infile.token(i, 0);
-		if (token->compare(0, 21, "!!!system-decoration:") == 0) {
+		if (*token == "!!!system-decoration:") {
 			token->setText("!!!system-decoration: [*]");
 			break;
 		}
@@ -737,9 +788,13 @@ void Tool_1520ify::addBibliographicRecords(HumdrumFile& infile) {
 	// Case 2: fall back to existing !!!OTL: if filename is empty
 	if (basename.empty()) {
 		for (int li = 0; li < infile.getLineCount(); ++li) {
-			if (!infile[li].isReference()) continue;
+			if (!infile[li].isReference()) {
+				continue;
+			}
 			HTp tok = infile.token(li, 0);
-			if (!tok) continue;
+			if (!tok) {
+				continue;
+			}
 
 			if (tok->compare(0, 7, "!!!OTL:") == 0) {
 				std::string text = tok->getText();
@@ -747,8 +802,7 @@ void Tool_1520ify::addBibliographicRecords(HumdrumFile& infile) {
 				if (colon != std::string::npos) {
 					basename = text.substr(colon + 1);
 					// trim leading spaces
-					while (!basename.empty() &&
-					       std::isspace((unsigned char)basename.front())) {
+					while (!basename.empty() && std::isspace((unsigned char)basename.front())) {
 						basename.erase(basename.begin());
 					}
 				}
@@ -789,10 +843,16 @@ void Tool_1520ify::addBibliographicRecords(HumdrumFile& infile) {
 	// Figure out an insertion anchor for new refs (after SEGMENT/ID if present)
 	int afterHeader = 0;
 	for (int li = 0; li < infile.getLineCount(); ++li) {
-	    if (!infile[li].isReference()) continue;
+	    if (!infile[li].isReference()) {
+	    	continue;
+	    }
 	    HTp tok = infile.token(li, 0);
-	    if (tok->compare(0, 13, "!!!!SEGMENT: ") == 0) afterHeader = li + 1;
-	    if (tok->compare(0, 7,  "!!!id: ")      == 0) afterHeader = li + 1;
+	    if (tok->compare(0, 13, "!!!!SEGMENT: ") == 0) {
+	    	afterHeader = li + 1;
+	    }
+	    if (tok->compare(0, 7,  "!!!id: ")      == 0) {
+	    	afterHeader = li + 1;
+	    }
 	}
 
 	// Work on a stem without .krn, only for parsing
@@ -817,14 +877,20 @@ void Tool_1520ify::addBibliographicRecords(HumdrumFile& infile) {
 	    size_t start = 0;
 	    while (true) {
 	        size_t pos = mainPart.find('-', start);
-	        if (pos == std::string::npos) { chunks.push_back(mainPart.substr(start)); break; }
+	        if (pos == std::string::npos) { 
+	        	chunks.push_back(mainPart.substr(start)); 
+	        	break; 
+	        }
 	        chunks.push_back(mainPart.substr(start, pos - start));
 	        start = pos + 1;
 	    }
 	}
 
 	// helper: underscores → spaces
-	auto us2sp = [](std::string s){ std::replace(s.begin(), s.end(), '_', ' '); return s; };
+	auto us2sp = [](std::string s) { 
+		std::replace(s.begin(), s.end(), '_', ' '); 
+		return s; 
+	};
 
 	// Compute desired OTL / OPR
 	std::string wantOTL, wantOPR;
@@ -835,16 +901,22 @@ void Tool_1520ify::addBibliographicRecords(HumdrumFile& infile) {
 	    // join middle chunks as main work title
 	    std::string mainWork;
 	    for (size_t k = 1; k + 1 < chunks.size(); ++k) {
-	        if (!mainWork.empty()) mainWork += ' ';
+	        if (!mainWork.empty()){
+	        	mainWork += ' ';
+	        }
 	        mainWork += us2sp(chunks[k]);
 	    }
 	    wantOPR = mainWork;
-	    if (!suffixPart.empty()) wantOPR += " (" + us2sp(suffixPart) + ")";
+	    if (!suffixPart.empty()) {
+	    	wantOPR += " (" + us2sp(suffixPart) + ")";
+	    }
 	} else {
 	    // only one or two chunks — just an OTL
 	    std::string title = (chunks.size() >= 2) ? chunks[1] : chunks[0];
 	    wantOTL = us2sp(title);
-	    if (!suffixPart.empty()) wantOTL += " (" + us2sp(suffixPart) + ")";
+	    if (!suffixPart.empty()) {
+	    	wantOTL += " (" + us2sp(suffixPart) + ")";
+	    }
 	}
 
 	// If there is a “--suffix” part (e.g. Paris_1555), put it into !!!SMS:
@@ -852,9 +924,13 @@ void Tool_1520ify::addBibliographicRecords(HumdrumFile& infile) {
 	    std::string smsText = us2sp(suffixPart);  // underscores → spaces
 
 	    for (int li = 0; li < infile.getLineCount(); ++li) {
-	        if (!infile[li].isReference()) continue;
+	        if (!infile[li].isReference()) {
+	        	continue;
+	        }
 	        HTp tok = infile.token(li, 0);
-	        if (!tok) continue;
+	        if (!tok) {
+	        	continue;
+	        }
 
 	        if (tok->compare(0, 7, "!!!SMS:") == 0) {
 	            std::string cur = tok->getText();
@@ -885,7 +961,9 @@ void Tool_1520ify::addBibliographicRecords(HumdrumFile& infile) {
 	{
 	    bool updated = false;
 	    for (int li = 0; li < infile.getLineCount(); ++li) {
-	        if (!infile[li].isReference()) continue;
+	        if (!infile[li].isReference()) {
+	        	continue;
+	        }
 	        HTp tok = infile.token(li, 0);
 	        if (tok->compare(0, 7, "!!!OTL:") == 0) {
 	            tok->setText("!!!OTL: " + wantOTL);
@@ -905,7 +983,9 @@ void Tool_1520ify::addBibliographicRecords(HumdrumFile& infile) {
 	int oprLine = -1;
 
 	for (int li = 0; li < infile.getLineCount(); ++li) {
-	    if (!infile[li].isReference()) continue;
+	    if (!infile[li].isReference()) {
+	    	continue;
+	    }
 	    HTp tok = infile.token(li, 0);
 	    if (tok->compare(0, 7, "!!!OPR:") == 0) {
 	        foundOPR = true;
@@ -933,13 +1013,18 @@ void Tool_1520ify::addBibliographicRecords(HumdrumFile& infile) {
 
 		if (voiceCount > 0) {
 			for (int li = 0; li < infile.getLineCount(); ++li) {
-				if (!infile[li].isReference()) continue;
+				if (!infile[li].isReference()) {
+					continue;
+				}
 				HTp tok = infile.token(li, 0);
-				if (!tok) continue;
+				if (!tok) {
+					continue;
+				}
 
 				// Find the !!!voices: line
-				if (tok->compare(0, 10, "!!!voices:") != 0)
+				if (tok->compare(0, 10, "!!!voices:") != 0){
 					continue;
+				}
 
 				std::string cur = tok->getText();
 
@@ -964,7 +1049,9 @@ void Tool_1520ify::addBibliographicRecords(HumdrumFile& infile) {
 		}
 	}
 
+
 	// --- Auto-fill AGN (genre + optional movement name) based on numeric id ---
+	
 	{
 	    // Extract first 4 digits from id (e.g., Con2008 → 2008)
 	    int workNumber = -1;
@@ -1001,9 +1088,13 @@ void Tool_1520ify::addBibliographicRecords(HumdrumFile& infile) {
 	    if (!agnLine.empty()) {
 	        // Apply only if AGN exists and is empty
 	        for (int li = 0; li < infile.getLineCount(); ++li) {
-	            if (!infile[li].isReference()) continue;
+	            if (!infile[li].isReference()) {
+	            	continue;
+	            }
 	            HTp tok = infile.token(li, 0);
-	            if (!tok) continue;
+	            if (!tok) {
+	            	continue;
+	            }
 
 	            if (tok->compare(0, 7, "!!!AGN:") == 0) {
 	                std::string cur = tok->getText();
@@ -1065,21 +1156,28 @@ void Tool_1520ify::addBibliographicRecords(HumdrumFile& infile) {
 	// --- Rewrite ENC name from "Last, First" → "First Last" if applicable ---
 	{
 	    for (int li = 0; li < infile.getLineCount(); ++li) {
-	        if (!infile[li].isReference()) continue;
+	        if (!infile[li].isReference()) {
+	        	continue;
+	        }
 	        HTp tok = infile.token(li, 0);
-	        if (!tok) continue;
+	        if (!tok) {
+	        	continue;
+	        }
 
 	        if (tok->compare(0, 7, "!!!ENC:") == 0) {
 	            std::string text = tok->getText();  // "!!!ENC: Last, First"
 	            
 	            // Extract the part after the colon
 	            size_t colon = text.find(':');
-	            if (colon == std::string::npos) break;
+	            if (colon == std::string::npos) {
+	            	break;
+	            }
 
 	            std::string name = text.substr(colon + 1);
 	            // Trim leading spaces
-	            while (!name.empty() && std::isspace((unsigned char)name.front()))
+	            while (!name.empty() && std::isspace((unsigned char)name.front())){
 	                name.erase(name.begin());
+	            }
 
 	            // Look for the comma separating "Last, First"
 	            size_t comma = name.find(',');
@@ -1153,9 +1251,13 @@ void Tool_1520ify::addBibliographicRecords(HumdrumFile& infile) {
 	std::string lastComName;
 
 	for (int i = 0; i < infile.getLineCount(); ++i) {
-	    if (!infile[i].isReference()) continue;
+	    if (!infile[i].isReference()) {
+	    	continue;
+	    } 
 	    HTp tok = infile.token(i, 0);
-	    if (!tok) continue;
+	    if (!tok) {
+	    	continue;
+	    }
 
 	    if (tok->compare(0, 7, "!!!COM:") == 0) {
 	        std::string text = tok->getText();      // "!!!COM: Adrian Willaert"
@@ -1217,9 +1319,13 @@ void Tool_1520ify::addBibliographicRecords(HumdrumFile& infile) {
 	// --- Remove !!!SMS: if it contains no content ---
 	{
 	    for (int li = 0; li < infile.getLineCount(); ++li) {
-	        if (!infile[li].isReference()) continue;
+	        if (!infile[li].isReference()) {
+	        	continue;
+	        }
 	        HTp tok = infile.token(li, 0);
-	        if (!tok) continue;
+	        if (!tok) {
+	        	continue;
+	        }
 
 	        if (tok->compare(0, 7, "!!!SMS:") == 0) {
 	            std::string text = tok->getText();
