@@ -1,7 +1,7 @@
 //
-// Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
+// Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu> and Benjamin Ory <benjaminory@gmail.com>
 // Creation Date: Wed Oct 18 13:40:23 PDT 2017
-// Last Modified: Wed Oct 18 13:40:26 PDT 2017
+// Last Modified: Fri Nov 14 17:00:00 PDT 2025
 // Filename:      tool-1520ify.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-1520ify.cpp
 // Syntax:        C++11; humlib
@@ -19,6 +19,12 @@
 #include <algorithm>
 #include <chrono>
 #include <iomanip>
+
+// include filesystem for grabbing the filename
+#include <filesystem>
+
+// for title
+#include <regex>
 
 using namespace std;
 
@@ -191,39 +197,216 @@ void Tool_1520ify::processFile(HumdrumFile& infile) {
 
 	adjustSystemDecoration(infile);
 
-	// Add *met() interpretations for mensuration marks
-	for (int i = 0; i < infile.getLineCount(); i++) {
-		if (!infile[i].isInterpretation()) continue;
+	// --- 1) Normalize mensurations ---
+	for (int i = 0; i < infile.getLineCount(); ++i) {
+		if (!infile[i].isInterpretation()) {
+			continue;
+		}
 
-		bool hasMensuration = false;
-		for (int j = 0; j < infile[i].getFieldCount(); j++) {
-			HTp token = infile.token(i, j);
-			if (token->compare(0, 2, "*M") == 0) {
-				hasMensuration = true;
+		for (int j = 0; j < infile[i].getFieldCount(); ++j) {
+			HTp tok = infile.token(i, j);
+			if (!tok || tok->isNull()) {
+				continue;
+			}
+
+			// Any of these → *M2/1
+			if ((*tok == "*M2/2") ||
+			    (*tok == "*M4/2") ||
+			    (*tok == "*M4/4")) {
+				tok->setText("*M2/1");
+			}
+		}
+	}
+
+	// --- 2) Normalize existing *met(...) lines and remove duplicates ---
+	for (int i = 0; i < infile.getLineCount(); ++i) {
+		if (!infile[i].isInterpretation()) {
+			continue;
+		}
+
+		// Does this line contain any *met(...) tokens?
+		bool hasMet = false;
+		for (int j = 0; j < infile[i].getFieldCount(); ++j) {
+			HTp tok = infile.token(i, j);
+			if (tok->compare(0, 5, "*met(") == 0) { 
+				hasMet = true; 
+				break; 
+			}
+		}
+		if (!hasMet) continue;
+
+		// If there is a mensuration line just above, use it to decide canonical *met(...)
+		int mensLine = i - 1;
+		if (mensLine >= 0 && infile[mensLine].isInterpretation()) {
+			for (int j = 0; j < infile[i].getFieldCount(); ++j) {
+				HTp metTok  = infile.token(i, j);
+				HTp mensTok = infile.token(mensLine, j);
+
+				// Default: leave non-*met tokens alone on this line
+				if (!metTok || metTok->isNull()) {
+				    continue;
+				}
+
+				if (metTok->compare(0, 5, "*met(") != 0) {
+				    continue;
+				}
+
+				// Decide canonical met from the mensuration just above
+				const char* repl = "*";   // if we can’t decide, blank it
+
+				if (mensTok && !mensTok->isNull()) {
+				    if (*mensTok == "*M2/1") {
+				        repl = "*met(C|)";
+				    }
+				    else if (*mensTok == "*M3/1") {
+				        repl = "*met(O)";
+				    }
+				}
+				metTok->setText(repl);
+			}
+		}
+
+		// If the whole line is now only "*" (no real *met left), delete it.
+		bool emptyLine = true;
+		for (int j = 0; j < infile[i].getFieldCount(); ++j) {
+			HTp tok = infile.token(i, j);
+			if (tok && *tok != "*") { 
+				emptyLine = false; 
+				break; 
+			}
+		}
+		if (emptyLine) { 
+			infile.deleteLine(i); --i; continue; 
+		}
+
+		// If another *met line immediately follows, remove the later duplicate(s)
+		while (i + 1 < infile.getLineCount() && infile[i + 1].isInterpretation()) {
+			bool nextHasMet = false;
+			for (int j = 0; j < infile[i + 1].getFieldCount(); ++j) {
+				HTp tok = infile.token(i + 1, j);
+				if (tok && tok->compare(0, 5, "*met(") == 0) { 
+					nextHasMet = true; 
+					break; 
+				}
+			}
+			if (!nextHasMet) {
+				break;
+			}
+			infile.deleteLine(i + 1); // drop duplicate *met line
+		}
+	}
+
+	// After normalization passes, add *met() interpretations if missing
+	for (int i = 0; i < infile.getLineCount(); ++i) {
+		if (!infile[i].isInterpretation()) {
+			continue;
+		}
+
+
+		// Does this interpretation line contain any mensuration?
+		bool hasMens = false;
+		for (int j = 0; j < infile[i].getFieldCount(); ++j) {
+			HTp tok = infile.token(i, j);
+			if (tok && tok->compare(0, 2, "*M") == 0) { 
+				hasMens = true; 
 				break;
 			}
 		}
-
-		if (hasMensuration) {
-			// Construct a new line with *met(...) in the same columns
-			std::string newline;
-			for (int j = 0; j < infile[i].getFieldCount(); j++) {
-				HTp token = infile.token(i, j);
-				if (token->isNull()) {
-					newline += "*";
-				} else if (token->compare(0, 5, "*M2/1") == 0) {
-					newline += "*met(C|)";
-				} else if (token->compare(0, 5, "*M3/1") == 0) {
-					newline += "*met(O)";
-				} else {
-					newline += "*";
-				}
-				if (j < infile[i].getFieldCount() - 1)
-					newline += "\t";
-			}
-			infile.insertLine(i + 1, newline);
-			i++; // skip over the inserted line
+		if (!hasMens) {
+			continue;
 		}
+
+		// If the next line already contains *met(...), don't insert another
+		if (i + 1 < infile.getLineCount() && infile[i + 1].isInterpretation()) {
+			bool nextHasMet = false;
+			for (int k = 0; k < infile[i + 1].getFieldCount(); ++k) {
+				HTp nt = infile.token(i + 1, k);
+				if (nt && nt->compare(0, 5, "*met(") == 0) { 
+					nextHasMet = true; 
+					break; 
+				}
+			}
+			if (nextHasMet) {
+				continue;
+			}
+		}
+
+		// Build a *met(...) line (post-normalization we only need to check *M2/1 and *M3/1)
+		std::string newline;
+		bool willInsert = false;
+
+		for (int j = 0; j < infile[i].getFieldCount(); ++j) {
+			HTp tok = infile.token(i, j);
+			const char* out = "*";
+			if (tok && !tok->isNull()) {
+				if (*tok == "*M2/1") { 
+					out = "*met(C|)"; 
+					willInsert = true; 
+				}
+				else if (*tok == "*M3/1") { 
+					out = "*met(O)"; 
+					willInsert = true; 
+				}
+			}
+			newline += out;
+			if (j < infile[i].getFieldCount() - 1) {
+				newline += "\t";
+			}
+		}
+
+		if (willInsert) {
+			infile.insertLine(i + 1, newline);
+			i++;  // skip the line we just inserted
+		}
+	}
+
+	// Convert LO:TX Section lines in-place to !!section and !!!OMD
+	for (int i = 0; i < infile.getLineCount(); ++i) {
+		if (!infile[i].isLocalComment()) {
+			continue;
+		}
+		bool matched = false;
+		std::string sectionTitle;
+
+		for (int j = 0; j < infile[i].getFieldCount(); ++j) {
+			HTp tok = infile.token(i, j);
+			if (!tok) {
+				continue;
+			}
+
+			// Look for: !LO:TX:<stuff>:t=Section&colon; <Title>
+			// Capture everything after "Section&colon;" including leading spaces
+			// Example token: !LO:TX:a:t=Section&colon; Pater, peccavi
+			std::string text = tok->getText();
+			const std::string key = "Section&colon;";
+			size_t pos = text.find(key);
+			if (text.rfind("!LO:TX:", 0) == 0 && pos != std::string::npos) {
+				// Extract after "Section&colon;"
+				sectionTitle = text.substr(pos + key.size());
+				// Trim leading spaces (but not first real character!)
+				while (!sectionTitle.empty() && std::isspace((unsigned char)sectionTitle.front())) {
+					sectionTitle.erase(sectionTitle.begin());
+				}
+				// If the title ended up empty, ignore this match
+				if (!sectionTitle.empty()) {
+					matched = true;
+					break; // use first matching token on the line
+				}
+			}
+		}
+
+		if (!matched) {
+			continue;
+		}
+
+		// Replace this local-comment line with two new global comments right here
+		// Insert in order: !!section then !!!OMD, then remove the original line
+		infile.insertLine(i, "!!section: " + sectionTitle);
+		infile.insertLine(i + 1, "!!!OMD: " + sectionTitle);
+		infile.deleteLine(i + 2); // original LO:TX line has shifted to i+2 after the two inserts
+
+		// Skip past the two lines we just inserted
+		i += 1;
 	}
 
 	// Input lyrics may contain "=" signs which are to be converted into
@@ -255,7 +438,7 @@ void Tool_1520ify::adjustSystemDecoration(HumdrumFile& infile) {
 			continue;
 		}
 		HTp token = infile.token(i, 0);
-		if (token->compare(0, 21, "!!!system-decoration:") == 0) {
+		if (*token == "!!!system-decoration:") {
 			token->setText("!!!system-decoration: [*]");
 			break;
 		}
@@ -507,11 +690,10 @@ void Tool_1520ify::deleteBreaks(HumdrumFile& infile) {
 // Tool_1520ify::addBibliographicRecords --
 //
 // !!!!SEGMENT:
-// !!!renid:
+// !!!id:
 // !!!AGN:
 // !!!voices:
 // !!!COM:
-// !!!CDT:
 // !!!OTL:
 // !!!OPR:
 //
@@ -553,14 +735,6 @@ void Tool_1520ify::addBibliographicRecords(HumdrumFile& infile) {
 		}
 	}
 
-	if (refs.find("CDT") == refs.end()) {
-		if (infile.token(0, 0)->find("!!!CDT") != std::string::npos) {
-			infile.insertLine(1, "!!!CDT:");
-		} else {
-			infile.insertLine(0, "!!!CDT:");
-		}
-	}
-
 	if (refs.find("COM") == refs.end()) {
 		if (infile.token(0, 0)->find("!!!COM") != std::string::npos) {
 			infile.insertLine(1, "!!!COM:");
@@ -585,19 +759,365 @@ void Tool_1520ify::addBibliographicRecords(HumdrumFile& infile) {
 		}
 	}
 
-	if (refs.find("renid") == refs.end()) {
-		if (infile.token(0, 0)->find("!!!renid") != std::string::npos) {
-			infile.insertLine(1, "!!!renid:");
+	if (refs.find("SMS") == refs.end()) {
+		if (infile.token(0, 0)->find("!!!SMS") != std::string::npos) {
+			infile.insertLine(1, "!!!SMS:");
 		} else {
-			infile.insertLine(0, "!!!renid:");
+			infile.insertLine(0, "!!!SMS:");
 		}
 	}
 
-	infile.insertLine(0, "!!!!SEGMENT:");
+	// Create !!!!SEGMENT 
+	// Try to get a usable "basename" for this piece.
+	// 1) Prefer the actual filename if present.
+	// 2) If reading from stdin (pipelines), fall back to existing !!!OTL: value.
+
+	std::string filename = infile.getFilename();
+	std::string basename;
+
+	// Case 1: real filename
+	if (!filename.empty()) {
+		size_t slash = filename.find_last_of("/\\");
+		if (slash == std::string::npos) {
+			basename = filename;
+		} else {
+			basename = filename.substr(slash + 1);
+		}
+	}
+
+	// Case 2: fall back to existing !!!OTL: if filename is empty
+	if (basename.empty()) {
+		for (int li = 0; li < infile.getLineCount(); ++li) {
+			if (!infile[li].isReference()) {
+				continue;
+			}
+			HTp tok = infile.token(li, 0);
+			if (!tok) {
+				continue;
+			}
+
+			if (tok->compare(0, 7, "!!!OTL:") == 0) {
+				std::string text = tok->getText();
+				size_t colon = text.find(':');
+				if (colon != std::string::npos) {
+					basename = text.substr(colon + 1);
+					// trim leading spaces
+					while (!basename.empty() && std::isspace((unsigned char)basename.front())) {
+						basename.erase(basename.begin());
+					}
+				}
+				break;
+			}
+		}
+	}
+
+	// Build the segment line
+	std::string segmentLine = "!!!!SEGMENT: " + basename;
+
+	// Insert it at the top of the file
+	infile.insertLine(0, segmentLine);
 
 	int year = getYear();
 	string date = getDate();
 
+	// Extract ID from filename (before first '-')
+	std::string id;
+	size_t dashPos = basename.find('-');
+	if (dashPos != std::string::npos) {
+	    id = basename.substr(0, dashPos);
+	} else {
+	    id = basename;  // fallback if no dash
+	}
+
+	// Remove any extension (e.g., .krn) from the ID
+	size_t dotPos = id.find('.');
+	if (dotPos != std::string::npos) {
+	    id = id.substr(0, dotPos);
+	}
+
+	// Insert the ID line right after the SEGMENT line
+	std::string idLine = "!!!id: " + id;
+	infile.insertLine(1, idLine);
+
+
+	// Figure out an insertion anchor for new refs (after SEGMENT/ID if present)
+	int afterHeader = 0;
+	for (int li = 0; li < infile.getLineCount(); ++li) {
+	    if (!infile[li].isReference()) {
+	    	continue;
+	    }
+	    HTp tok = infile.token(li, 0);
+	    if (tok->compare(0, 13, "!!!!SEGMENT: ") == 0) {
+	    	afterHeader = li + 1;
+	    }
+	    if (tok->compare(0, 7,  "!!!id: ")      == 0) {
+	    	afterHeader = li + 1;
+	    }
+	}
+
+	// Work on a stem without .krn, only for parsing
+	std::string stem = basename;
+	size_t p = stem.find('.');
+	if (p != std::string::npos) {
+	    stem = stem.substr(0, p);
+	}
+
+	// Split off optional “--suffix”
+	std::string mainPart = stem;
+	std::string suffixPart;
+	size_t dd = stem.find("--");
+	if (dd != std::string::npos) {
+	    mainPart   = stem.substr(0, dd);
+	    suffixPart = stem.substr(dd + 2);
+	}
+
+	// Split mainPart on single dashes
+	std::vector<std::string> chunks;
+	{
+	    size_t start = 0;
+	    while (true) {
+	        size_t pos = mainPart.find('-', start);
+	        if (pos == std::string::npos) { 
+	        	chunks.push_back(mainPart.substr(start)); 
+	        	break; 
+	        }
+	        chunks.push_back(mainPart.substr(start, pos - start));
+	        start = pos + 1;
+	    }
+	}
+
+	// helper: underscores → spaces
+	auto us2sp = [](std::string s) { 
+		std::replace(s.begin(), s.end(), '_', ' '); 
+		return s; 
+	};
+
+	// Compute desired OTL / OPR
+	std::string wantOTL, wantOPR;
+
+	if (chunks.size() >= 3) {
+	    // e.g. Con2008-Missa_Spes_salutis-Kyrie--Paris_1555
+	    wantOTL = us2sp(chunks.back());  // subtitle
+	    // join middle chunks as main work title
+	    std::string mainWork;
+	    for (size_t k = 1; k + 1 < chunks.size(); ++k) {
+	        if (!mainWork.empty()){
+	        	mainWork += ' ';
+	        }
+	        mainWork += us2sp(chunks[k]);
+	    }
+	    wantOPR = mainWork;
+	    if (!suffixPart.empty()) {
+	    	wantOPR += " (" + us2sp(suffixPart) + ")";
+	    }
+	} else {
+	    // only one or two chunks — just an OTL
+	    std::string title = (chunks.size() >= 2) ? chunks[1] : chunks[0];
+	    wantOTL = us2sp(title);
+	    if (!suffixPart.empty()) {
+	    	wantOTL += " (" + us2sp(suffixPart) + ")";
+	    }
+	}
+
+	// If there is a “--suffix” part (e.g. Paris_1555), put it into !!!SMS:
+	if (!suffixPart.empty()) {
+	    std::string smsText = us2sp(suffixPart);  // underscores → spaces
+
+	    for (int li = 0; li < infile.getLineCount(); ++li) {
+	        if (!infile[li].isReference()) {
+	        	continue;
+	        }
+	        HTp tok = infile.token(li, 0);
+	        if (!tok) {
+	        	continue;
+	        }
+
+	        if (tok->compare(0, 7, "!!!SMS:") == 0) {
+	            std::string cur = tok->getText();
+
+	            // Check whether there is already non-whitespace after the colon
+	            size_t colon = cur.find(':');
+	            bool hasContent = false;
+	            if (colon != std::string::npos) {
+	                for (size_t p = colon + 1; p < cur.size(); ++p) {
+	                    if (!std::isspace(static_cast<unsigned char>(cur[p]))) {
+	                        hasContent = true;
+	                        break;
+	                    }
+	                }
+	            }
+
+	            // Only fill auto if it was effectively empty
+	            if (!hasContent) {
+	                tok->setText("!!!SMS: " + smsText);
+	            }
+	            break; // done with SMS
+	        }
+	    }
+	}
+
+
+	// Update or insert OTL
+	{
+	    bool updated = false;
+	    for (int li = 0; li < infile.getLineCount(); ++li) {
+	        if (!infile[li].isReference()) {
+	        	continue;
+	        }
+	        HTp tok = infile.token(li, 0);
+	        if (tok->compare(0, 7, "!!!OTL:") == 0) {
+	            tok->setText("!!!OTL: " + wantOTL);
+	            updated = true;
+	            break;
+	        }
+	    }
+	    if (!updated) {
+	        infile.insertLine(afterHeader, "!!!OTL: " + wantOTL);
+	        ++afterHeader;
+	    }
+	}
+
+	// Handle OPR: keep if needed, remove otherwise
+	bool needOPR = !wantOPR.empty();
+	bool foundOPR = false;
+	int oprLine = -1;
+
+	for (int li = 0; li < infile.getLineCount(); ++li) {
+	    if (!infile[li].isReference()) {
+	    	continue;
+	    }
+	    HTp tok = infile.token(li, 0);
+	    if (tok->compare(0, 7, "!!!OPR:") == 0) {
+	        foundOPR = true;
+	        oprLine = li;
+	        break;
+	    }
+	}
+
+	if (needOPR) {
+	    if (foundOPR) {
+	        infile.token(oprLine, 0)->setText("!!!OPR: " + wantOPR);
+	    } else {
+	        infile.insertLine(afterHeader, "!!!OPR: " + wantOPR);
+	        ++afterHeader;
+	    }
+	} else if (foundOPR) {
+	    infile.deleteLine(oprLine);
+	}
+
+	// --- Populate voices from number of **kern spines ---
+	{
+		// Count **kern spines
+		std::vector<HTp> kerns = infile.getKernSpineStartList();
+		int voiceCount = static_cast<int>(kerns.size());
+
+		if (voiceCount > 0) {
+			for (int li = 0; li < infile.getLineCount(); ++li) {
+				if (!infile[li].isReference()) {
+					continue;
+				}
+				HTp tok = infile.token(li, 0);
+				if (!tok) {
+					continue;
+				}
+
+				// Find the !!!voices: line
+				if (tok->compare(0, 10, "!!!voices:") != 0){
+					continue;
+				}
+
+				std::string cur = tok->getText();
+
+				// Check if there is already non-whitespace content after the colon
+				size_t colon = cur.find(':');
+				bool hasContent = false;
+				if (colon != std::string::npos) {
+					for (size_t p = colon + 1; p < cur.size(); ++p) {
+						if (!std::isspace(static_cast<unsigned char>(cur[p]))) {
+							hasContent = true;
+							break;
+						}
+					}
+				}
+
+				// Only auto-fill if it was effectively empty
+				if (!hasContent) {
+					tok->setText("!!!voices: " + std::to_string(voiceCount));
+				}
+				break; // done with voices
+			}
+		}
+	}
+
+
+	// --- Auto-fill AGN (genre + optional movement name) based on numeric id ---
+	
+	{
+	    // Extract first 4 digits from id (e.g., Con2008 → 2008)
+	    int workNumber = -1;
+	    std::string digits;
+	    for (char c : id) {
+	        if (std::isdigit(static_cast<unsigned char>(c))) {
+	            digits.push_back(c);
+	        }
+	    }
+	    if (digits.size() >= 4) {
+	        try {
+	            workNumber = std::stoi(digits.substr(0, 4));
+	        } catch (...) {
+	            workNumber = -1;
+	        }
+	    }
+
+	    std::string agnLine;
+
+	    // Determine AGN logic
+	    if (workNumber >= 1000 && workNumber < 2000) {
+	        // --- Mass movement ---
+	        agnLine = "!!!AGN: Mass; " + wantOTL;
+	    }
+	    else if (workNumber >= 2000 && workNumber < 3000) {
+	        // --- Motet ---
+	        agnLine = "!!!AGN: Motet";
+	    }
+	    else if (workNumber >= 3000 && workNumber < 4000) {
+	        // --- Secular work ---
+	        agnLine = "!!!AGN: Secular work";
+	    }
+
+	    if (!agnLine.empty()) {
+	        // Apply only if AGN exists and is empty
+	        for (int li = 0; li < infile.getLineCount(); ++li) {
+	            if (!infile[li].isReference()) {
+	            	continue;
+	            }
+	            HTp tok = infile.token(li, 0);
+	            if (!tok) {
+	            	continue;
+	            }
+
+	            if (tok->compare(0, 7, "!!!AGN:") == 0) {
+	                std::string cur = tok->getText();
+	                size_t colon = cur.find(':');
+	                bool hasContent = false;
+
+	                if (colon != std::string::npos) {
+	                    for (size_t p = colon + 1; p < cur.size(); ++p) {
+	                        if (!std::isspace(static_cast<unsigned char>(cur[p]))) {
+	                            hasContent = true;
+	                            break;
+	                        }
+	                    }
+	                }
+
+	                if (!hasContent) {
+	                    tok->setText(agnLine);
+	                }
+	                break;
+	            }
+	        }
+	    }
+	}
 
 
 	// trailer records
@@ -616,11 +1136,160 @@ void Tool_1520ify::addBibliographicRecords(HumdrumFile& infile) {
 			foundi = true;
 		}
 	}
-	if (!foundi) {
+
+	// Always ensure RDF records appear together and in the correct order:
+	if (!foundi && !foundl) {
 		infile.appendLine("!!!RDF**kern: i = editorial accidental");
-	}
-	if (!foundl) {
 		infile.appendLine("!!!RDF**kern: l = terminal long");
+	} else if (!foundi) {
+		infile.appendLine("!!!RDF**kern: i = editorial accidental");
+	} else if (!foundl) {
+		// Insert directly after the editorial accidental RDF line
+		for (int i = 0; i < infile.getLineCount(); i++) {
+			if (infile[i].isReference() && infile.token(i, 0)->find("!!!RDF**kern: i = editorial accidental") != std::string::npos) {
+				infile.insertLine(i + 1, "!!!RDF**kern: l = terminal long");
+				break;
+			}
+		}
+	}
+
+	// --- Rewrite ENC name from "Last, First" → "First Last" if applicable ---
+	{
+	    for (int li = 0; li < infile.getLineCount(); ++li) {
+	        if (!infile[li].isReference()) {
+	        	continue;
+	        }
+	        HTp tok = infile.token(li, 0);
+	        if (!tok) {
+	        	continue;
+	        }
+
+	        if (tok->compare(0, 7, "!!!ENC:") == 0) {
+	            std::string text = tok->getText();  // "!!!ENC: Last, First"
+	            
+	            // Extract the part after the colon
+	            size_t colon = text.find(':');
+	            if (colon == std::string::npos) {
+	            	break;
+	            }
+
+	            std::string name = text.substr(colon + 1);
+	            // Trim leading spaces
+	            while (!name.empty() && std::isspace((unsigned char)name.front())){
+	                name.erase(name.begin());
+	            }
+
+	            // Look for the comma separating "Last, First"
+	            size_t comma = name.find(',');
+	            if (comma != std::string::npos) {
+	                std::string last  = name.substr(0, comma);
+	                std::string first = name.substr(comma + 1);
+
+	                // Trim spaces
+	                auto trim = [](std::string& s) {
+	                    while (!s.empty() && std::isspace((unsigned char)s.front()))
+	                        s.erase(s.begin());
+	                    while (!s.empty() && std::isspace((unsigned char)s.back()))
+	                        s.pop_back();
+	                };
+
+	                trim(last);
+	                trim(first);
+
+	                if (!last.empty() && !first.empty()) {
+	                    std::string fixed = "!!!ENC: " + first + " " + last;
+	                    tok->setText(fixed);
+	                }
+	            }
+
+	            break; // Only one ENC line exists
+	        }
+	    }
+	}
+
+	// Helper: trim leading/trailing whitespace (in-place)
+	auto trim = [](std::string& s) {
+	    while (!s.empty() && std::isspace((unsigned char)s.front())) {
+	        s.erase(s.begin());
+	    }
+	    while (!s.empty() && std::isspace((unsigned char)s.back())) {
+	        s.pop_back();
+	    }
+	};
+
+	// Helper: normalize a composer name so that
+	// "Willaert, Adrian" ≈ "Adrian Willaert" for comparison.
+	auto normalizeComposer = [&](std::string s) -> std::string {
+	    trim(s);
+
+	    // If there is a comma, assume "Last, First ..." and flip to "First ... Last"
+	    size_t comma = s.find(',');
+	    if (comma != std::string::npos) {
+	        std::string last  = s.substr(0, comma);
+	        std::string first = s.substr(comma + 1);
+	        trim(last);
+	        trim(first);
+	        if (!first.empty() && !last.empty()) {
+	            s = first + " " + last;
+	        }
+	    }
+
+	    // Lowercase and strip non-alphanumerics for comparison
+	    std::string out;
+	    for (unsigned char c : s) {
+	        if (std::isalnum(c)) {
+	            out.push_back(std::tolower(c));
+	        }
+	    }
+	    return out;
+	};
+
+	// --- Resolve possible duplicate or conflicting !!!COM: records ---
+	int firstComLine = -1;
+	int lastComLine  = -1;
+	std::string firstComName;
+	std::string lastComName;
+
+	for (int i = 0; i < infile.getLineCount(); ++i) {
+	    if (!infile[i].isReference()) {
+	    	continue;
+	    } 
+	    HTp tok = infile.token(i, 0);
+	    if (!tok) {
+	    	continue;
+	    }
+
+	    if (tok->compare(0, 7, "!!!COM:") == 0) {
+	        std::string text = tok->getText();      // "!!!COM: Adrian Willaert"
+	        std::string name = text.substr(7);      // " Adrian Willaert"
+	        trim(name);
+
+	        if (firstComLine < 0) {
+	            firstComLine  = i;
+	            firstComName  = name;
+	        }
+	        lastComLine = i;
+	        lastComName = name;
+	    }
+	}
+
+	// If there are two distinct COM lines (header + trailer)
+	if (firstComLine >= 0 && lastComLine >= 0 && firstComLine != lastComLine) {
+
+	    std::string normFirst = normalizeComposer(firstComName);
+	    std::string normLast  = normalizeComposer(lastComName);
+
+	    bool bothNonEmpty = !normFirst.empty() && !normLast.empty();
+
+	    // Only report a conflict if the *normalized* names really differ
+	    if (bothNonEmpty && normFirst != normLast) {
+	        std::string msg = "!!!ONB: Composer conflict between \"" +
+	                          firstComName + "\" and \"" + lastComName + "\"";
+	        infile.appendLine(msg);
+	    }
+
+	    // Always delete the trailing COM — keep the earlier one as canonical
+	    infile.deleteLine(lastComLine);
 	}
 
 	if (refs.find("ENC") == refs.end()) {
@@ -647,6 +1316,42 @@ void Tool_1520ify::addBibliographicRecords(HumdrumFile& infile) {
 		infile.appendLine(line);
 	}
 
+	// --- Remove !!!SMS: if it contains no content ---
+	{
+	    for (int li = 0; li < infile.getLineCount(); ++li) {
+	        if (!infile[li].isReference()) {
+	        	continue;
+	        }
+	        HTp tok = infile.token(li, 0);
+	        if (!tok) {
+	        	continue;
+	        }
+
+	        if (tok->compare(0, 7, "!!!SMS:") == 0) {
+	            std::string text = tok->getText();
+
+	            // Find colon and check if anything nonspace follows
+	            size_t colon = text.find(':');
+	            bool hasContent = false;
+
+	            if (colon != std::string::npos) {
+	                for (size_t p = colon + 1; p < text.size(); ++p) {
+	                    if (!std::isspace(static_cast<unsigned char>(text[p]))) {
+	                        hasContent = true;
+	                        break;
+	                    }
+	                }
+	            }
+
+	            // Delete the line if it is empty
+	            if (!hasContent) {
+	                infile.deleteLine(li);
+	            }
+
+	            break;  // Only one SMS line exists
+	        }
+	    }
+	}
 }
 
 
@@ -985,6 +1690,3 @@ int Tool_1520ify::getYear(void) {
 // END_MERGE
 
 } // end namespace hum
-
-
-
