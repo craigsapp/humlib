@@ -101446,8 +101446,7 @@ void Tool_kernview::processFile(HumdrumFile& infile) {
 
 
 
-// #define QUARTER_CONVERT * 4
-#define QUARTER_CONVERT
+#define QUARTER_CONVERT * 4
 
 #define ELEMENT_DEBUG_STATEMENT(X)
 //#define ELEMENT_DEBUG_STATEMENT(X)  cerr << #X << endl;
