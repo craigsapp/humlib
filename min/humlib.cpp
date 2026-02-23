@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Feb 23 14:01:58 PST 2026
+// Last Modified: Mon Feb 23 14:35:56 PST 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -138656,7 +138656,7 @@ void Tool_text::processFile(HumdrumFile& infile) {
 	}
 	m_humdrum_text << infile;
 	m_humdrum_text << "!!@CONTENT:" << endl;
-	m_humdrum_text << m_text;
+	m_humdrum_text << m_output.str();
 	m_humdrum_text << "!!@@END: "<< endl;
 	if (m_aboveQ) {
 		m_humdrum_text << "PREHTML" << endl;

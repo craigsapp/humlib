@@ -105,7 +105,7 @@ void Tool_text::processFile(HumdrumFile& infile) {
 	}
 	m_humdrum_text << infile;
 	m_humdrum_text << "!!@CONTENT:" << endl;
-	m_humdrum_text << m_text;
+	m_humdrum_text << m_output.str();
 	m_humdrum_text << "!!@@END: "<< endl;
 	if (m_aboveQ) {
 		m_humdrum_text << "PREHTML" << endl;
