@@ -467,7 +467,7 @@ strip:
 	@(cd $(BINDIR) && strip $(CLILIST))
 
 strip-sudo:
-	@(cd $(BINDIR) && sudo -u $(SUDO_USER) strip $(CLILIST))
+	@(cd $(BINDIR) && sudo strip $(CLILIST))
 
 
 
@@ -500,6 +500,7 @@ strip-sudo:
 
 install: strip-sudo
 	@echo Copying cli tools to /usr/local/bin
+	@su mkdir -p /usr/local/bin # needed in MacOS 15 or later
 	@(cd $(BINDIR) && cp -f $(CLILIST) /usr/local/bin/)
 
 

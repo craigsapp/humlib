@@ -162,6 +162,12 @@ class Tool_prange : public HumTool {
 		// m_trackToKernIndex: mapping from track to **kern index
 		std::vector<int> m_trackToKernIndex;
 
+                // m_lineQ: rint analysis line
+                bool m_lineQ = false;
+
+                // m_voiceCount: Number of voices: (0 minimum voices)
+		int m_voiceCount = 0;
+
 };
 
 // END_MERGE

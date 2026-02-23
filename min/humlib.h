@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Nov 11 00:34:58 PST 2025
+// Last Modified: Mon Feb 23 14:01:58 PST 2026
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -10972,6 +10972,12 @@ class Tool_prange : public HumTool {
 		// m_trackToKernIndex: mapping from track to **kern index
 		std::vector<int> m_trackToKernIndex;
 
+                // m_lineQ: rint analysis line
+                bool m_lineQ = false;
+
+                // m_voiceCount: Number of voices: (0 minimum voices)
+		int m_voiceCount = 0;
+
 };
 
 
@@ -11822,6 +11828,33 @@ class Tool_tassoize : public HumTool {
 		std::vector<std::vector<int>> m_kstates;
 		std::vector<std::vector<bool>> m_estates;
 
+};
+
+
+class Tool_text : public HumTool {
+	public:
+		         Tool_text       (void);
+		        ~Tool_text       () {};
+
+		bool     run               (HumdrumFileSet& infiles);
+		bool     run               (HumdrumFile& infile);
+		bool     run               (const std::string& indata, std::ostream& out);
+		bool     run               (HumdrumFile& infile, std::ostream& out);
+
+	protected:
+		void     processFile       (HumdrumFile& infile);
+		void     initialize        (void);
+		void     processTextSpine  (HTp tspine);
+                void     removePartText    (HTp& startspine, HTp& endspine, 
+                                            HumdrumFile& infile);
+		void     removeText        (HumdrumFile& infile);
+
+	private:
+		bool     m_onlyQ  = false;
+		bool     m_aboveQ = false;
+
+		std::vector<std::vector<std::string>> m_text;
+		std::stringstream m_output;
 };
 
 
