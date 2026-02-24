@@ -89,6 +89,7 @@
 #include "tool-tabber.h"
 #include "tool-tandeminfo.h"
 #include "tool-tassoize.h"
+#include "tool-text.h"
 #include "tool-textdur.h"
 #include "tool-thru.h"
 #include "tool-tie.h"
@@ -385,6 +386,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(tassoize, infile, commands[i].second, status);
 		} else if (commands[i].first == "tasso") {
 			RUNTOOL(tassoize, infile, commands[i].second, status);
+		} else if (commands[i].first == "text") {
+			RUNTOOL(text, infile, commands[i].second, status);
 		} else if (commands[i].first == "textdur") {
 			RUNTOOL(textdur, infile, commands[i].second, status);
 		} else if (commands[i].first == "tie") {
