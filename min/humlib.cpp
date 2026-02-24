@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Feb 23 14:35:56 PST 2026
+// Last Modified: Mon Feb 23 16:26:53 PST 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -138579,6 +138579,7 @@ string Tool_tassoize::getDate(void) {
 
 Tool_text::Tool_text(void) {
 	define("1|first=b", "Display only first verse for each part");
+	define("a|above=b", "Display only first verse for each part");
 }
 
 

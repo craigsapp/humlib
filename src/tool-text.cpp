@@ -28,6 +28,7 @@ namespace hum {
 
 Tool_text::Tool_text(void) {
 	define("1|first=b", "Display only first verse for each part");
+	define("a|above=b", "Display only first verse for each part");
 }
 
 
