@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Feb 23 16:38:18 PST 2026
+// Last Modified: Wed Feb 25 15:42:33 PST 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -35726,7 +35726,8 @@ HTp HumdrumToken::getExclusiveInterpretation(void) {
 
 bool HumdrumToken::isDataType(const string& dtype) const {
 	if (dtype.compare(0, 2, "**") == 0) {
-		return dtype == getDataType();
+		bool value = dtype == getDataType();
+		return value;
 	} else {
 		return getDataType().compare(2, string::npos, dtype) == 0;
 	}
@@ -138581,7 +138582,9 @@ string Tool_tassoize::getDate(void) {
 
 Tool_text::Tool_text(void) {
 	define("1|first=b", "Display only first verse for each part");
-	define("a|above=b", "Display only first verse for each part");
+	define("a|above=b", "Show above the music");
+	define("b|below=b", "Show below the music");
+	define("j|join=b", "join syllables into single word");
 }
 
 
@@ -138623,6 +138626,7 @@ bool Tool_text::run(HumdrumFile& infile, ostream& out) {
 }
 
 
+
 bool Tool_text::run(HumdrumFile& infile) {
 	initialize();
 	processFile(infile);
@@ -138640,6 +138644,8 @@ bool Tool_text::run(HumdrumFile& infile) {
 void Tool_text::initialize(void) {
 	m_onlyQ  = getBoolean("first");
 	m_aboveQ = getBoolean("above");
+	m_belowQ = getBoolean("below");
+	m_joinQ  = getBoolean("join");
 }
 
 
@@ -138651,22 +138657,23 @@ void Tool_text::initialize(void) {
 
 void Tool_text::processFile(HumdrumFile& infile) {
 	removeText(infile);
+	m_humdrum_text << infile;
 	m_humdrum_text << "!!@@BEGIN: ";
 	if (m_aboveQ) {
 		m_humdrum_text << "PREHTML" << endl;
 	} else {
 		m_humdrum_text << "POSTHTML" << endl;
 	}
-	m_humdrum_text << infile;
 	m_humdrum_text << "!!@CONTENT:" << endl;
 	m_humdrum_text << m_output.str();
-	m_humdrum_text << "!!@@END: "<< endl;
+	m_humdrum_text << "!!@@END: ";
 	if (m_aboveQ) {
 		m_humdrum_text << "PREHTML" << endl;
 	} else {
 		m_humdrum_text << "POSTHTML" << endl;
 	}
 }
+
 
 
 /////////////////////////////
@@ -138675,32 +138682,26 @@ void Tool_text::processFile(HumdrumFile& infile) {
 //
 
 void Tool_text::removeText(HumdrumFile& infile) {
-	vector<HTp> staffspines;
-	infile.getStaffLikeSpineStartList(staffspines);
-	staffspines.push_back(NULL);
-	for (int i=0; i<(int)staffspines.size()-1; i++) {
-		removePartText(staffspines[i], staffspines[i+1], infile);
+	vector<HTp> sspines;
+	infile.getSpineStartList(sspines);
+	sspines.push_back(NULL);
+	for (int i=0; i<(int)sspines.size()-1; i++) {
+		if (sspines[i]->isKern()) {
+			continue;
+		}
+		removePartText(sspines[i]);
 	}
-
 }
+
+
 
 /////////////////////////////
 //
 // Tool_text:removePartText --
 //
 
-void Tool_text::removePartText(HTp& startspine, HTp& endspine, HumdrumFile& infile) {
-	int endcol;
-	if (endspine) {
-		endcol = endspine->getSpineIndex();
-	} else {
-		endcol = infile.getMaxTracks() - 1;
-	}
-	HTp current = startspine;
-	while (current && current->getSpineIndex() != endcol) {
-		processTextSpine(startspine);
-		current = current->getNextFieldToken();
-	}
+void Tool_text::removePartText(HTp& startspine) {
+	processTextSpine(startspine);
 }
 
 
@@ -138722,7 +138723,8 @@ void Tool_text::processTextSpine(HTp tspine) {
 			current = current->getNextToken();
 			continue;
 		}
-		m_output << current->getText();
+		m_output << current->getText() << " ";
+		current = current->getNextToken();
 	}
 	m_output << endl;
 }

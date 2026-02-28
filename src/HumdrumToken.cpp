@@ -406,7 +406,8 @@ HTp HumdrumToken::getExclusiveInterpretation(void) {
 
 bool HumdrumToken::isDataType(const string& dtype) const {
 	if (dtype.compare(0, 2, "**") == 0) {
-		return dtype == getDataType();
+		bool value = dtype == getDataType();
+		return value;
 	} else {
 		return getDataType().compare(2, string::npos, dtype) == 0;
 	}

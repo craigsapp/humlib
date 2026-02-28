@@ -38,13 +38,14 @@ class Tool_text : public HumTool {
 		void     processFile       (HumdrumFile& infile);
 		void     initialize        (void);
 		void     processTextSpine  (HTp tspine);
-                void     removePartText    (HTp& startspine, HTp& endspine, 
-                                            HumdrumFile& infile);
+                void     removePartText    (HTp& startspine);
 		void     removeText        (HumdrumFile& infile);
 
 	private:
 		bool     m_onlyQ  = false;
 		bool     m_aboveQ = false;
+		bool     m_belowQ = false;
+		bool     m_joinQ  = false;
 
 		std::vector<std::vector<std::string>> m_text;
 		std::stringstream m_output;
