@@ -2319,8 +2319,6 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 //
 
 void Tool_autocadence::prepareCadenceLabels(void) {
-	m_cadenceLabels.reserve(70);
-
 	m_cadenceLabels.emplace("Ab",   "Altizans Only");
 	m_cadenceLabels.emplace("AB",   "Reinterpreted");
 	m_cadenceLabels.emplace("Abx",  "Altizans Only");
