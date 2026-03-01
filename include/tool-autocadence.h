@@ -5,7 +5,7 @@
 // Filename:      tool-autocadence.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-autocadence.h
 // Syntax:        C++11; humlib
-// vim:           ts=3 noexpandtab
+// vim:           ts=3 nowrap noexpandtab
 //
 // Description:   Automatic detection of cadences in Renaissance music.
 //
@@ -64,6 +64,8 @@ class Tool_autocadence : public HumTool {
 		std::string getDiatonicIntervalString  (int lower, int upper);
 		int         getDiatonicInterval        (int lower, int upper);
 		void        prepareCadenceDefinitions  (void);
+		void        prepareCadenceLabels       (void);
+		void        addCadenceLabel            (std::string definition, std::string label);
 		void        addCadenceDefinition       (const std::string& funcL, const std::string& funcU,
 		                                        const std::string& name, const std::string& regex);
 		void        prepareLowestPitches       (void);
@@ -105,6 +107,7 @@ class Tool_autocadence : public HumTool {
 		void        prepareDissonances         (HumdrumFile& infile);
 		void        prepareDissonancesForLine  (HumdrumLine& iline, HumdrumLine& dline);
 		void        identifySuspensionsAndAgents(HumdrumFile& infile);
+		std::string sortUniqueChars            (const std::string& input);
 
 	private:
 
@@ -167,6 +170,9 @@ class Tool_autocadence : public HumTool {
 
 		// m_dissonanceNames: mapping from dissonance abbreviation to full name of dissonance.
 		std::map<std::string, std::string> m_dissonanceNames;
+
+		// m_cadenceLabels: mapping from part function to full name of cadence.
+		std::map<std::string, std::string> m_cadenceLabels;
 
 		bool m_hasSuspensionMarkersQ = false;
 

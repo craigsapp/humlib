@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Feb 25 15:42:33 PST 2026
+// Last Modified: Sun Mar  1 04:40:27 PST 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -60764,6 +60764,7 @@ void Tool_autocadence::initialize(void) {
    m_showSuspensionsQ         = !getBoolean("do-not-show-suspensions");
 
 	prepareCadenceDefinitions();
+	prepareCadenceLabels();
 	prepareCvfNames();
 	prepareDissonanceNames();
 }
@@ -61931,6 +61932,8 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 	}
 
 	stringstream labelline;
+	stringstream cadenceline;
+	string clabel;
 	if (foundLabelQ) {
 		for (int i=0; i<fcount; i++) {
 			HTp token = infile.token(index, i);
@@ -61946,6 +61949,11 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 				labelline << "!LO:TX:a:B:cvf";
 				labelline << ":color=" << m_color;
 				labelline << ":t=" << label;
+				if (clabel.empty()) {
+					clabel += label;
+				} else {
+					clabel += "," + label;
+				}
 				if (m_popupQ) {
 				 	string fname = getFunctionNames(label);
 				 	if (!fname.empty()) {
@@ -61960,6 +61968,20 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 				}
 			}
 		}
+	}
+	if (!clabel.empty()) {
+		string slabel = sortUniqueChars(clabel);
+		string cadence = m_cadenceLabels[slabel];
+		if (cadence.empty()) {
+			cadence = "UNKNOWN";
+		} else {
+			HumRegex hre;
+			hre.replaceDestructive(cadence, "\\n", " ", "g");
+			if (cadence.find("\\n") != std::string::npos) {
+				cadence += "\\n";
+			}
+		}
+		cadenceline << "!!LO:TX:a:B:rj:color=red:cadence:t=" << cadence;
 	}
 
 	stringstream dissonanceline;
@@ -61994,6 +62016,9 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 		}
 	}
 
+	if (!cadenceline.str().empty()) {
+		m_humdrum_text << cadenceline.str() << endl;
+	}
 	if (!dissonanceline.str().empty()) {
 		m_humdrum_text << dissonanceline.str() << endl;
 	}
@@ -62003,6 +62028,27 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 	if (!dataline.str().empty()) {
 		m_humdrum_text << dataline.str() << endl;
 	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::sortUniqueChars --  Put *izans in alphabetical order (capital frst and unique).
+//
+
+std::string Tool_autocadence::sortUniqueChars(const string& input) {
+    std::set<char> chars;
+    std::stringstream ss(input);
+    std::string token;
+
+    while (std::getline(ss, token, ',')) {
+        if (!token.empty()) {
+            chars.insert(token[0]);
+        }
+    }
+
+    return std::string(chars.begin(), chars.end());
 }
 
 
@@ -62680,6 +62726,87 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/* 130 */ addCadenceDefinition("z", "c",	"zc2",	R"(^(?:R_1|-?\d+_-?[^1]):1, 7_1:-2, 6_R:-2, R_)");
 	/* 131 */ addCadenceDefinition("z", "y",	"zy1",	R"(^(?:R_1|-?\d+_-?[^1]):1, -2_1:-2, -3_1:1, -3_R:R, R_)");
 	/* 132 */ addCadenceDefinition("z", "y",	"zy2",	R"(^(?:R_1|-?\d+_-?[^1]):1, -2_1:-2, -3_R:R, R_)");
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::prepareCadenceLabels --
+//  https://github.com/HCDigitalScholarship/intervals/blob/main/crim_intervals/data/cadences/cadenceLabels.csv#L2
+//
+
+void Tool_autocadence::prepareCadenceLabels(void) {
+	m_cadenceLabels.reserve(70);
+
+	m_cadenceLabels.emplace("Ab",   "Altizans Only");
+	m_cadenceLabels.emplace("AB",   "Reinterpreted");
+	m_cadenceLabels.emplace("Abx",  "Altizans Only");
+	m_cadenceLabels.emplace("ABx",  "Reinterpreted");
+	m_cadenceLabels.emplace("Abxz", "Altizans Only");
+	m_cadenceLabels.emplace("ABxz", "Reinterpreted");
+	m_cadenceLabels.emplace("Abz",  "Altizans Only");
+	m_cadenceLabels.emplace("ABz",  "Reinterpreted");
+	m_cadenceLabels.emplace("ACt",  "Evaded Clausula Vera");
+	m_cadenceLabels.emplace("ACT",  "Phrygian Clausula Vera");
+	m_cadenceLabels.emplace("ACTt", "Double Leading Tone");
+	m_cadenceLabels.emplace("ACTtz","Double Leading Tone");
+	m_cadenceLabels.emplace("ACtz", "Evaded Clausula Vera");
+	m_cadenceLabels.emplace("ACz",  "Abandoned Double Leading Tone");
+	m_cadenceLabels.emplace("AT",   "Phrygian Altizans");
+	m_cadenceLabels.emplace("ATx",  "Altizans Only");
+	m_cadenceLabels.emplace("ATxy", "Altizans Only");
+	m_cadenceLabels.emplace("ATxyz","Altizans Only");
+	m_cadenceLabels.emplace("ATxz", "Altizans Only");
+	m_cadenceLabels.emplace("ATy",  "Phrygian Altizans");
+	m_cadenceLabels.emplace("ATyz", "Phrygian Altizans");
+	m_cadenceLabels.emplace("ATz",  "Phrygian Altizans");
+	m_cadenceLabels.emplace("BC",   "Authentic");
+	m_cadenceLabels.emplace("Bc",   "Evaded Authentic");
+	m_cadenceLabels.emplace("BCu",  "Authentic");
+	m_cadenceLabels.emplace("BCuz", "Authentic");
+	m_cadenceLabels.emplace("BCx",  "Authentic");
+	m_cadenceLabels.emplace("BCxz", "Authentic");
+	m_cadenceLabels.emplace("BCz",  "Authentic");
+	m_cadenceLabels.emplace("Bcz",  "Evaded Authentic");
+	m_cadenceLabels.emplace("C",    "Quince");
+	m_cadenceLabels.emplace("Cb",   "Evaded Authentic");
+	m_cadenceLabels.emplace("CLT",  "Leaping Contratenor");
+	m_cadenceLabels.emplace("CLTz", "Leaping Contratenor");
+	m_cadenceLabels.emplace("Cp",   "Evaded Clausula Vera");
+	m_cadenceLabels.emplace("Cpt",  "Evaded Clausula Vera");
+	m_cadenceLabels.emplace("CPT",  "Phrygian");
+	m_cadenceLabels.emplace("CPTz", "Phrygian");
+	m_cadenceLabels.emplace("Ct",   "Evaded Clausula Vera");
+	m_cadenceLabels.emplace("CT",   "Phrygian Clausula Vera");
+	m_cadenceLabels.emplace("CTa",  "Clausula Vera");
+	m_cadenceLabels.emplace("CTaz", "Clausula Vera");
+	m_cadenceLabels.emplace("CTp",  "Evaded Clausula Vera");
+	m_cadenceLabels.emplace("CTpt", "Evaded Clausula Vera");
+	m_cadenceLabels.emplace("CTu",  "Clausula Vera");
+	m_cadenceLabels.emplace("Ctu",  "Evaded Authentic");
+	m_cadenceLabels.emplace("CTux", "Evaded Authentic");
+	m_cadenceLabels.emplace("CTx",  "Clausula Vera");
+	m_cadenceLabels.emplace("Ctxz", "Evaded Clausula Vera");
+	m_cadenceLabels.emplace("Ctz",  "Evaded Clausula Vera");
+	m_cadenceLabels.emplace("CTz",  "Phrygian Clausula Vera");
+	m_cadenceLabels.emplace("Cu",   "Evaded Authentic");
+	m_cadenceLabels.emplace("cx",   "Abandoned Authentic");
+	m_cadenceLabels.emplace("Cx",   "Abandoned Authentic");
+	m_cadenceLabels.emplace("cxz",  "Abandoned Authentic");
+	m_cadenceLabels.emplace("Cxz",  "Abandoned Clausula Vera");
+	m_cadenceLabels.emplace("Cz",   "Abandoned Clausula Vera");
+	m_cadenceLabels.emplace("cz",   "Evaded Clausula Vera");
+	m_cadenceLabels.emplace("Ta",   "Evaded Altizans Only");
+	m_cadenceLabels.emplace("Taz",  "Evaded Altizans Only");
+	m_cadenceLabels.emplace("Tc",   "Evaded Clausula Vera");
+	m_cadenceLabels.emplace("Tcx",  "Evaded Clausula Vera");
+	m_cadenceLabels.emplace("Tcxz", "Evaded Clausula Vera");
+	m_cadenceLabels.emplace("Tcz",  "Evaded Clausula Vera");
+	m_cadenceLabels.emplace("Ty",   "Evaded Clausula Vera");
+	m_cadenceLabels.emplace("xy",   "Abandoned Authentic");
+	m_cadenceLabels.emplace("xyz",  "Abandoned Authentic");
+	m_cadenceLabels.emplace("yz",   "Abandoned Clausula Vera");
 }
 
 
@@ -138713,6 +138840,7 @@ void Tool_text::removePartText(HTp& startspine) {
 
 void Tool_text::processTextSpine(HTp tspine) {
 	HTp current = tspine;
+	m_output << "!!";
 	m_output << "!!@<p>";
 	while (current) {
 		if (!current->isData()) {
