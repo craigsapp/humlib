@@ -623,41 +623,127 @@ void Tool_1520ify::fixInstrumentAbbreviations(HumdrumFile& infile) {
 		cur = cur->getNextToken();
 	}
 
-	if (iline < 0) {
-		// no names to create abbreviations for
+	// Must have parallel *I" (full name) and *I' (abbr) lines of equal width
+	if (iline < 0){
 		return;
 	}
-	if (aline < 0) {
-		// not creating a new abbreviation for now
-		// (could add later).
+	if (aline < 0){
+		return;
+	} 
+	if (infile[iline].getFieldCount() != infile[aline].getFieldCount()){
 		return;
 	}
-	if (infile[iline].getFieldCount() != infile[aline].getFieldCount()) {
-		// no spine splitting between the two lines.
-		return;
-	}
-	// Maybe also require them to be adjacent to each other.
+
 	HumRegex hre;
-	for (int j=0; j<(int)infile[iline].getFieldCount(); j++) {
-		if (!infile.token(iline, j)->isKern()) {
-			continue;
+
+	//-----------------------------------------------------------
+	// Helper: split voice name into canonical base + Roman numeral
+	//-----------------------------------------------------------
+	auto parseVoiceName = [&](const std::string& s) -> std::pair<std::string,std::string> {
+		// Split on whitespace
+		std::vector<std::string> words;
+		std::string tmp;
+		for (char c : s) {
+			if (std::isspace((unsigned char)c)) {
+				if (!tmp.empty()) { 
+					words.push_back(tmp); tmp.clear(); 
+				}
+			} else {
+				tmp.push_back(c);
+			}
 		}
-		if (!hre.search(*infile.token(iline, j), "([A-Za-z][A-Za-z .0-9]+)")) {
-			continue;
+		if (!tmp.empty()){
+			words.push_back(tmp);
+		} 
+
+		std::string base;
+		std::string roman;
+
+		if (words.empty()){
+			return { "", "" };
 		}
-		string name = hre.getMatch(1);
-		string abbr = "*I'";
-		if (name == "Basso Continuo") {
-			abbr += "BC";
-		} else if (name == "Basso continuo") {
-			abbr += "BC";
-		} else if (name == "basso continuo") {
-			abbr += "BC";
+
+		// Canonical voice names:
+		//   Superius, Altus, Tenor, Bassus
+		std::string first = words[0];
+		std::string lower;
+		for (char c : first){
+			lower.push_back(std::tolower((unsigned char)c));
+		}
+		if (lower == "superius" || lower == "cantus"){
+			base = "Superius";
+		} else if (lower == "altus"){
+			base = "Altus";
+		} else if (lower == "tenor"){
+			base = "Tenor";
+		} else if (lower == "bassus"){
+			base = "Bassus";
 		} else {
-			abbr += toupper(name[0]);
+			base = first; // fallback
 		}
-		// check for numbers after the end of the name and add to abbreviation
-		infile.token(aline, j)->setText(abbr);
+
+		// Check for Roman numeral as second word
+		if (words.size() >= 2) {
+			std::string w2 = words[1];
+			std::string up;
+			for (char c : w2){
+				up.push_back(std::toupper((unsigned char)c));
+			}
+			if (hre.search(up, "^(I|II|III|IV|V|VI|VII|VIII|IX|X)$")){
+				roman = w2;
+			}
+		}
+
+		return { base, roman };
+	};
+
+	// Abbreviation rules
+	auto baseToAbbr = [&](const std::string& base) -> std::string {
+		if (base == "Superius"){
+			return "S.";
+		} 
+		if (base == "Altus"){
+			return "A.";
+		}    
+		if (base == "Tenor"){
+			return "T.";
+		}   
+		if (base == "Bassus"){
+			return "B.";
+		}
+		// fallback: first letter + .
+		return std::string(1, std::toupper(base[0])) + ".";
+	};
+
+	// Process each spine and rewrite abbreviation
+	for (int j = 0; j < infile[iline].getFieldCount(); j++) {
+		HTp tokFull = infile.token(iline, j);
+		HTp tokAbbr = infile.token(aline, j);
+
+		if (!tokFull || !tokAbbr || !tokFull->isKern()){
+			continue;
+		}
+
+		// Extract raw name after *I"
+		std::string text = tokFull->getText();
+		std::string raw;
+		if (hre.search(text, "^\\*I\"(.*)$")){
+			raw = hre.getMatch(1);
+		} else {
+			continue;
+		}
+
+		auto parsed = parseVoiceName(raw);
+		std::string base  = parsed.first;
+		std::string roman = parsed.second;
+
+		std::string abbr = "*I'";
+		abbr += baseToAbbr(base);
+		if (!roman.empty()){
+			abbr += " " + roman;
+		}
+
+		tokAbbr->setText(abbr);
 	}
 }
 
