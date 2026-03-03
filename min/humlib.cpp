@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Mar  1 07:57:27 PST 2026
+// Last Modified: Mon Mar  2 16:35:54 PST 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -138796,6 +138796,7 @@ Tool_text::Tool_text(void) {
 	define("a|above=b", "Show above the music");
 	define("b|below=b", "Show below the music");
 	define("j|join=b", "join syllables into single word");
+	define("M|no-merge=b", "do not merge syllables");
 }
 
 
@@ -138935,11 +138936,41 @@ void Tool_text::processTextSpine(HTp tspine) {
 			current = current->getNextToken();
 			continue;
 		}
-		m_output << current->getText() << " ";
+		string syllable = getSyllable(current);
+		m_output << syllable;
 		current = current->getNextToken();
 	}
 	m_output << endl;
 }
+
+
+
+//////////////////////////////
+//
+// Tool_text::getSyllable --
+//
+
+string Tool_text::getSyllable(HTp token) {
+	string text = *token;
+	HumRegex hre;
+	if (m_mergeQ) {
+		hre.replaceDestructive(text, "", "^-");
+		if (!text.empty()) {
+			if (text.back() == '-') {
+				text.resize((int)text.size()-1);
+			} else {
+				text += " ";
+			}
+		} else {
+			text += " ";
+		}
+	} else {
+		text += " ";
+	}
+
+	return text;
+}
+
 
 
 

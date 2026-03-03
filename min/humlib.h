@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Mar  1 07:57:27 PST 2026
+// Last Modified: Mon Mar  2 16:35:54 PST 2026
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -11853,12 +11853,14 @@ class Tool_text : public HumTool {
 		void     processTextSpine  (HTp tspine);
                 void     removePartText    (HTp& startspine);
 		void     removeText        (HumdrumFile& infile);
+		std::string   getSyllable  (HTp token);
 
 	private:
 		bool     m_onlyQ  = false;
 		bool     m_aboveQ = false;
 		bool     m_belowQ = false;
 		bool     m_joinQ  = false;
+		bool     m_mergeQ = true;
 
 		std::vector<std::vector<std::string>> m_text;
 		std::stringstream m_output;
