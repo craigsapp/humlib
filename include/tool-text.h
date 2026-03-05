@@ -40,12 +40,14 @@ class Tool_text : public HumTool {
 		void     processTextSpine  (HTp tspine);
                 void     removePartText    (HTp& startspine);
 		void     removeText        (HumdrumFile& infile);
+		std::string   getSyllable  (HTp token);
 
 	private:
 		bool     m_onlyQ  = false;
 		bool     m_aboveQ = false;
 		bool     m_belowQ = false;
 		bool     m_joinQ  = false;
+		bool     m_mergeQ = true;
 
 		std::vector<std::vector<std::string>> m_text;
 		std::stringstream m_output;

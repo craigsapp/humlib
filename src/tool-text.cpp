@@ -31,6 +31,7 @@ Tool_text::Tool_text(void) {
 	define("a|above=b", "Show above the music");
 	define("b|below=b", "Show below the music");
 	define("j|join=b", "join syllables into single word");
+	define("M|no-merge=b", "do not merge syllables");
 }
 
 
@@ -176,11 +177,41 @@ void Tool_text::processTextSpine(HTp tspine) {
 			current = current->getNextToken();
 			continue;
 		}
-		m_output << current->getText() << " ";
+		string syllable = getSyllable(current);
+		m_output << syllable;
 		current = current->getNextToken();
 	}
 	m_output << endl;
 }
+
+
+
+//////////////////////////////
+//
+// Tool_text::getSyllable --
+//
+
+string Tool_text::getSyllable(HTp token) {
+	string text = *token;
+	HumRegex hre;
+	if (m_mergeQ) {
+		hre.replaceDestructive(text, "", "^-");
+		if (!text.empty()) {
+			if (text.back() == '-') {
+				text.resize((int)text.size()-1);
+			} else {
+				text += " ";
+			}
+		} else {
+			text += " ";
+		}
+	} else {
+		text += " ";
+	}
+
+	return text;
+}
+
 
 
 
