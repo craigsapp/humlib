@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Mar  1 07:57:27 PST 2026
+// Last Modified: Thu Mar  5 13:08:45 PST 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -32332,6 +32332,40 @@ std::string HumdrumFileStructure::getKernAboveSignifier(void) {
 std::string HumdrumFileStructure::getKernBelowSignifier(void) {
 	return m_signifiers.getKernBelowSignifier();
 }
+
+
+
+/////////////////////////////
+//
+// HumdrumFileStructure::getPartName --
+//
+
+string HumdrumFileStructure::getPartName(HTp sstart) {
+	cerr << "GOT Here AAA " << sstart << endl;
+	HTp current = sstart;
+
+	// Go back to the previous stafflike spine.
+	while (current && !current->isStaffLike()) {
+		current = current->getPreviousFieldToken();
+	}
+
+	while (current && !current->isData()) {
+		if (current->isInterpretation()) {
+			if (current->substr(0, 3) == "*I\"") {
+				string value =  current->substr(3);
+				cerr << "VALUE" << value << endl;
+				if (value.empty()) {
+					value = "empty";
+				}
+				return value;
+			}
+		}
+		current = current->getNextToken();
+	}
+	string value = "Unknown";
+	return value;
+}
+
 
 
 
@@ -138895,8 +138929,7 @@ void Tool_text::processFile(HumdrumFile& infile) {
 void Tool_text::removeText(HumdrumFile& infile) {
 	vector<HTp> sspines;
 	infile.getSpineStartList(sspines);
-	sspines.push_back(NULL);
-	for (int i=0; i<(int)sspines.size()-1; i++) {
+	for (int i=(int)sspines.size()-1; i>0; i--) {
 		if (sspines[i]->isKern()) {
 			continue;
 		}
@@ -138923,9 +138956,16 @@ void Tool_text::removePartText(HTp& startspine) {
 //
 
 void Tool_text::processTextSpine(HTp tspine) {
+	HumdrumFileStructure *infile = tspine->getOwner()->getOwner();
+	string name = infile->getPartName(tspine);
+	if (!name.empty()) {
+		m_output << "!!\n!! " << name << endl;
+	} else {
+		m_output << "!!\n!! " << "empty" << endl;
+	}
+
+	m_output << "!! <p>";
 	HTp current = tspine;
-	m_output << "!!";
-	m_output << "!!@<p>";
 	while (current) {
 		if (!current->isData()) {
 			current = current->getNextToken();

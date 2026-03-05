@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Mar  1 07:57:27 PST 2026
+// Last Modified: Thu Mar  5 13:08:45 PST 2026
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -2469,6 +2469,7 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		std::string   getKernLinkSignifier         (void);
 		std::string   getKernAboveSignifier        (void);
 		std::string   getKernBelowSignifier        (void);
+		std::string   getPartName                  (HTp sstart);
 
 
 	protected:
@@ -2510,6 +2511,7 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		void          setLineRhythmAnalyzed        (void);
 		bool          prepareMensurationInformation(void);
 };
+
 
 
 

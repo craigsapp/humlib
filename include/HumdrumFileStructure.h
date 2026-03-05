@@ -134,6 +134,7 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		std::string   getKernLinkSignifier         (void);
 		std::string   getKernAboveSignifier        (void);
 		std::string   getKernBelowSignifier        (void);
+		std::string   getPartName                  (HTp sstart);
 
 
 	protected:
@@ -175,6 +176,7 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		void          setLineRhythmAnalyzed        (void);
 		bool          prepareMensurationInformation(void);
 };
+
 
 
 // END_MERGE

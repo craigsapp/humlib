@@ -1785,6 +1785,40 @@ std::string HumdrumFileStructure::getKernBelowSignifier(void) {
 
 
 
+/////////////////////////////
+//
+// HumdrumFileStructure::getPartName --
+//
+
+string HumdrumFileStructure::getPartName(HTp sstart) {
+	cerr << "GOT Here AAA " << sstart << endl;
+	HTp current = sstart;
+
+	// Go back to the previous stafflike spine.
+	while (current && !current->isStaffLike()) {
+		current = current->getPreviousFieldToken();
+	}
+
+	while (current && !current->isData()) {
+		if (current->isInterpretation()) {
+			if (current->substr(0, 3) == "*I\"") {
+				string value =  current->substr(3);
+				cerr << "VALUE" << value << endl;
+				if (value.empty()) {
+					value = "empty";
+				}
+				return value;
+			}
+		}
+		current = current->getNextToken();
+	}
+	string value = "Unknown";
+	return value;
+}
+
+
+
+
 // END_MERGE
 
 } // end namespace hum

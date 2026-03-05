@@ -130,8 +130,7 @@ void Tool_text::processFile(HumdrumFile& infile) {
 void Tool_text::removeText(HumdrumFile& infile) {
 	vector<HTp> sspines;
 	infile.getSpineStartList(sspines);
-	sspines.push_back(NULL);
-	for (int i=0; i<(int)sspines.size()-1; i++) {
+	for (int i=(int)sspines.size()-1; i>0; i--) {
 		if (sspines[i]->isKern()) {
 			continue;
 		}
@@ -158,9 +157,16 @@ void Tool_text::removePartText(HTp& startspine) {
 //
 
 void Tool_text::processTextSpine(HTp tspine) {
+	HumdrumFileStructure *infile = tspine->getOwner()->getOwner();
+	string name = infile->getPartName(tspine);
+	if (!name.empty()) {
+		m_output << "!!\n!! " << name << endl;
+	} else {
+		m_output << "!!\n!! " << "empty" << endl;
+	}
+
+	m_output << "!! <p>";
 	HTp current = tspine;
-	m_output << "!!";
-	m_output << "!!@<p>";
 	while (current) {
 		if (!current->isData()) {
 			current = current->getNextToken();
