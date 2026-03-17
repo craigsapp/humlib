@@ -90,7 +90,7 @@ bool Tool_text::run(HumdrumFile& infile) {
 
 void Tool_text::initialize(void) {
 	m_onlyQ  = getBoolean("first");
-	m_aboveQ = getBoolean("above");
+	m_aboveQ = !getBoolean("above");
 	m_belowQ = getBoolean("below");
 	m_joinQ  = getBoolean("join");
 }
@@ -129,15 +129,35 @@ void Tool_text::processFile(HumdrumFile& infile) {
 //
 
 void Tool_text::removeText(HumdrumFile& infile) {
+/*
 	vector<HTp> sspines;
 	infile.getSpineStartList(sspines);
+	vector<vector<HTp>> twoarray;
+	makeTextArray(twoarray);
 	for (int i=(int)sspines.size()-1; i>0; i--) {
 		if (sspines[i]->isKern()) {
 			continue;
 		}
 		removePartText(sspines[i]);
 	}
+*/
 }
+
+
+
+//////////////////////////////
+//
+// Tool_text::makeTextArray -- Reverse order of **text;
+//
+
+/*
+void Tool_text::makeTextArray(vector<vector<HTp>>& texts, vector<HTp> spines) {
+	text.resize(1();
+	for (i=90 i<(int)spine.size(); i++) {
+
+}
+*/
+
 
 
 
@@ -146,8 +166,152 @@ void Tool_text::removeText(HumdrumFile& infile) {
 // Tool_text:removePartText --
 //
 
-void Tool_text::removePartText(HTp& startspine) {
-	processTextSpine(startspine);
+void Tool_text::removePartText(HTp startspine) {
+	if (hasPline(startspine)) {
+		processPlineSpine(startspine);
+	} else {
+		processTextSpine(startspine);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_text::hasPline -- True if *pline exists in spine
+//
+
+bool Tool_text::hasPline(HTp tspine) {
+	HTp current = tspine;
+	while (current) {
+		if (!current->isInterpretation()) {
+			current = current->getNextToken();
+			continue;
+		} else if (current->compare(0, 7, "*pline:") == 0) {
+			return true;
+		}
+		current = current->getNextToken();
+	}
+
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_text::procesTextSpine -- Extract a verse/spine of text
+//
+
+void Tool_text::processPlineSpine(HTp tspine) {
+	vector<vector<HTp>> plines;
+	fillPlines(plines, tspine);
+	m_output << "\n!! <table>";
+	for (int i=1; i<(int)plines.size(); i++) {
+		zprintPlineRow(plines[i]);
+	}
+	m_output << "\n!! </table>\n";
+}
+
+
+
+//////////////////////////////
+//
+// Tool_text::printPlineRow -- print text for a pline
+//
+
+void Tool_text::zprintPlineRow(vector<HTp>& pieces) {
+	m_output << "\n!! <tr>";
+	string plinelabel = getPlineLabel(pieces);
+	if (!plinelabel.empty()) {
+		m_output << "\n!! <td class=\"pline\">";
+		m_output << plinelabel;
+		m_output << "</td>";
+	}
+	m_output << "\n!! <td class=\"pline-text\">";
+	printPlineSyllables(pieces);
+	m_output << "</td>";
+	m_output << "\n!! </tr>";
+}
+
+
+
+//////////////////////////////
+//
+// Tool_text::getPlineLabel -- print text for a pline
+//
+
+string Tool_text::getPlineLabel(vector<HTp>& pieces) {
+	for (int i=0; i<(int)pieces.size(); i++) {
+		if (pieces[i]->isInterpretation()) {
+			if (pieces[i]->compare(0, 7, "*pline:") == 0) {
+				return pieces[i]->substr(7);
+			}
+		}
+	}
+	string out = "NONE";
+	return out;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_text::printPlineSyllables -- print text for a pline
+//
+
+void Tool_text::printPlineSyllables(vector<HTp>& pieces) {
+	stringstream out;
+	vector<HTp> np;
+	for (int i=0; i<(int)pieces.size(); i++) {
+		if (pieces[i]->isNull()) {
+			continue;
+		}
+		else if (pieces[i]->isData()) {
+			np.push_back(pieces[i]);
+		}
+	}
+
+	// strip dashes
+	for (int i=0; i<(int)np.size(); i++) {
+		string text = *np[i];
+		if (!text.empty()) {
+			if (text.back() == '-') {
+				text.resize(text.size()-1);
+			}
+		}
+		if (!text.empty()) {
+			if (text[0] == '-') {
+				text = text.substr(1);
+			}
+		}
+		m_output << text << " ";
+	}
+
+
+	m_output << out.str();
+	return;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_text::fillPlines -- create vector for each pline.
+//
+
+void Tool_text::fillPlines(vector<vector<HTp>>& plines, HTp tspine) {
+	plines.clear();
+	plines.resize(1);
+	HTp current = tspine;
+	while (current) {
+		if (current->isInterpretation() && current->compare(0, 7, "*pline:") == 0) {
+			plines.resize(plines.size() + 1);
+		}
+		plines.back().push_back(current);
+		current = current->getNextToken();
+	}
+
 }
 
 
@@ -161,9 +325,9 @@ void Tool_text::processTextSpine(HTp tspine) {
 	HumdrumFileStructure *infile = tspine->getOwner()->getOwner();
 	string name = infile->getPartName(tspine);
 	if (!name.empty()) {
-		m_output << "!!\n!! " << name << endl;
+		m_output << "!!\n!! <p>" << name << endl;
 	} else {
-		m_output << "!!\n!! " << "empty" << endl;
+		m_output << "!!\n!! <p>" << "empty" << endl;
 	}
 
 	m_output << "!! <p>";

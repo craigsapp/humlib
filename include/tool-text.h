@@ -38,9 +38,17 @@ class Tool_text : public HumTool {
 		void     processFile       (HumdrumFile& infile);
 		void     initialize        (void);
 		void     processTextSpine  (HTp tspine);
-                void     removePartText    (HTp& startspine);
+		void     processPlineSpine (HTp tspine);
+		bool     hasPline          (HTp tspine);
+                void     removePartText    (HTp startspine);
 		void     removeText        (HumdrumFile& infile);
-		std::string   getSyllable  (HTp token);
+		std::string getSyllable    (HTp token);
+		void     fillPlines        (std::vector<std::vector<HTp>>& plines, HTp tspine);
+		std::string getPlineLabel  (std::vector<HTp>& pieces);
+		void     printPlineSyllables(std::vector<HTp>& pieces);
+		std::string getPlineRow    (std::vector<HTp>& pieces);
+		void        zprintPlineRow (std::vector<HTp>& pieces);
+		void        makeTextArray   (std::vector<std::vector<HTp>>& texts, std::vector<HTp> spines);
 
 	private:
 		bool     m_onlyQ  = false;

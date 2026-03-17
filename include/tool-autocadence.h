@@ -174,6 +174,9 @@ class Tool_autocadence : public HumTool {
 		// m_cadenceLabels: mapping from part function to full name of cadence.
 		std::map<std::string, std::string> m_cadenceLabels;
 
+		// m_barnum: mapping from line to measure number (of fist spine);
+		std::vector<int> m_barnum;
+
 		bool m_hasSuspensionMarkersQ = false;
 
 		// options:
@@ -194,6 +197,8 @@ class Tool_autocadence : public HumTool {
 		bool m_nobackQ                  = false; // -B: don't highlight start of sustain at start of cadence definition
 		bool m_showSuspensionsQ         = true;  // !-S: show suspension/agent labels in output score
 		bool m_lowestQ                  = false; // -l: use lowest note to define suspensions instead of dissonance analysis
+		bool m_repeatQ                  = false; // -r: allow repeated notes
+		bool m_infoQ                    = false; // -i print info only
 		std::string m_marker = "@";
 		std::string m_suspensionMarker = "N";
 		std::string m_suspensionColor  = "crimson";
