@@ -1,6 +1,5 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
-// Creation Date: Thu Jan 30 22:26:33 PST 2020
 // Last Modified: Thu Jan 30 22:26:35 PST 2020
 // Filename:      tool-text.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-text.cpp
@@ -32,6 +31,8 @@ Tool_text::Tool_text(void) {
 	define("b|below=b", "Show below the music");
 	define("j|join=b", "join syllables into single word");
 	define("M|no-merge=b", "do not merge syllables");
+	define("r|remove-first= b", "Remove text from music, except first verse");
+	define("R|remove-all= b", "Remove all text from music");
 }
 
 
@@ -89,10 +90,12 @@ bool Tool_text::run(HumdrumFile& infile) {
 //
 
 void Tool_text::initialize(void) {
-	m_onlyQ  = getBoolean("first");
-	m_aboveQ = !getBoolean("above");
-	m_belowQ = getBoolean("below");
-	m_joinQ  = getBoolean("join");
+	m_onlyQ       = getBoolean("first");
+	m_aboveQ      = !getBoolean("above");
+	m_belowQ      = getBoolean("below");
+	m_joinQ       = getBoolean("join");
+	m_removeQ     = getBoolean("remove-first");
+	m_removeAllQ  = getBoolean("remove-all");
 }
 
 
@@ -103,6 +106,7 @@ void Tool_text::initialize(void) {
 //
 
 void Tool_text::processFile(HumdrumFile& infile) {
+	cerr << "Entering processFile()" << endl;
 	removeText(infile);
 	m_humdrum_text << infile;
 	m_humdrum_text << "!!@@BEGIN: ";
@@ -129,18 +133,27 @@ void Tool_text::processFile(HumdrumFile& infile) {
 //
 
 void Tool_text::removeText(HumdrumFile& infile) {
-/*
+	cerr << "Entering removeText() " << endl;
 	vector<HTp> sspines;
 	infile.getSpineStartList(sspines);
 	vector<vector<HTp>> twoarray;
-	makeTextArray(twoarray);
-	for (int i=(int)sspines.size()-1; i>0; i--) {
-		if (sspines[i]->isKern()) {
-			continue;
+	makeTextArray(twoarray, sspines);
+	cerr << "!!size of parts: " << twoarray.size() << endl;
+	for (int i=0; i<(int)twoarray.size(); i++) {
+cerr << "GOT HERE PPP  " << twoarray[i].size() << endl;
+		for (int j=(int)twoarray[i].size()-1; j>0; j--) {
+			cerr << "!!size " << i << "of parts: " << twoarray[i].size() << "(" << twoarray[i][j] << ")" << endl;
+			if (twoarray[i][j]->isKern()) {
+				continue;
+			}
+			removePartText(twoarray[i][j]);
+			if (m_removeAllQ && j==0) {
+				twoarray[i][j]->setText("**Xtext");
+			} else if (m_removeQ && j>0) {
+				twoarray[i][j]->setText("**Xtext");
+			}
 		}
-		removePartText(sspines[i]);
 	}
-*/
 }
 
 
@@ -150,14 +163,17 @@ void Tool_text::removeText(HumdrumFile& infile) {
 // Tool_text::makeTextArray -- Reverse order of **text;
 //
 
-/*
 void Tool_text::makeTextArray(vector<vector<HTp>>& texts, vector<HTp> spines) {
-	text.resize(1();
-	for (i=90 i<(int)spine.size(); i++) {
+	texts.resize(1);
+	for (int i=(int)spines.size()-1; i>0; i--) {
+		if (spines[i]->isDataType("**text")) {
+			texts.back().push_back(spines[i]);
+		} else {
+			texts.resize(texts.size() + 1);
+		}
+	}
 
 }
-*/
-
 
 
 
@@ -167,7 +183,7 @@ void Tool_text::makeTextArray(vector<vector<HTp>>& texts, vector<HTp> spines) {
 //
 
 void Tool_text::removePartText(HTp startspine) {
-	if (hasPline(startspine)) {
+	if (hasParam(startspine, "*pline:")) {
 		processPlineSpine(startspine);
 	} else {
 		processTextSpine(startspine);
@@ -178,22 +194,68 @@ void Tool_text::removePartText(HTp startspine) {
 
 //////////////////////////////
 //
-// Tool_text::hasPline -- True if *pline exists in spine
+// Tool_text::hasParam -- True if *pline exists in spine
 //
 
-bool Tool_text::hasPline(HTp tspine) {
+bool Tool_text::hasParam(HTp tspine, const string& target) {
 	HTp current = tspine;
+	int len = (int)target.size();
 	while (current) {
 		if (!current->isInterpretation()) {
 			current = current->getNextToken();
 			continue;
-		} else if (current->compare(0, 7, "*pline:") == 0) {
+		} else if (current->compare(0, len, target) == 0) {
 			return true;
 		}
 		current = current->getNextToken();
 	}
 
 	return false;
+}
+
+
+
+/////////////////////////////
+//
+// Text_tool::getParamList -- Find the parameter anywhere in the list of tokens. Example
+//     if the target is "*rf:" and the first token found is *rf:e, the string returned will
+//     be "e".
+//
+
+string Tool_text::getParamList(vector<HTp>& tspine, const string& target) {
+	string value = "";
+	int len = (int)target.size();
+	for (int i=0; i<(int)tspine.size(); i++) {
+		if (!tspine[i]->isInterpretation()) {
+			continue;
+		} else {
+			if (tspine[i]->compare(0, len, target) == 0) {
+				return tspine[i]->substr(len);
+			}
+		}
+	}
+	return value;
+}
+
+//
+// Similar but search only at the same timestamp for the first data.
+//
+
+string Tool_text::getParmTimestamp(HTp token, const string& target) {
+	HTp current = token;
+	string value = "";
+	int len = (int)target.size();
+	while (current) {
+		if (!current->isInterpretation()) {
+			continue;
+		} else {
+			if (current->compare(0, len, target) == 0) {
+				return current->substr(len);
+			}
+		}
+	}
+	return value;
+
 }
 
 
@@ -231,6 +293,12 @@ void Tool_text::zprintPlineRow(vector<HTp>& pieces) {
 	m_output << "\n!! <td class=\"pline-text\">";
 	printPlineSyllables(pieces);
 	m_output << "</td>";
+	string rp = getParamList(pieces, "*rp:");
+	string rf = getParamList(pieces, "*rf:");
+	string rs = getParamList(pieces, "*rs:");
+	m_output << "\n!! <td class='rp'>" << rp << "</td>";
+	m_output << "\n!! <td class='ft'>" << rf << "</td>";
+	m_output << "\n!! <td class='rs'>" << rs << "</td>";
 	m_output << "\n!! </tr>";
 }
 
@@ -258,6 +326,7 @@ string Tool_text::getPlineLabel(vector<HTp>& pieces) {
 //////////////////////////////
 //
 // Tool_text::printPlineSyllables -- print text for a pline
+// XXX
 //
 
 void Tool_text::printPlineSyllables(vector<HTp>& pieces) {
@@ -275,21 +344,11 @@ void Tool_text::printPlineSyllables(vector<HTp>& pieces) {
 	// strip dashes
 	for (int i=0; i<(int)np.size(); i++) {
 		string text = *np[i];
-		if (!text.empty()) {
-			if (text.back() == '-') {
-				text.resize(text.size()-1);
-			}
+		if (text.empty()) {
+		} else {
+			m_output << getSyllable(text);
 		}
-		if (!text.empty()) {
-			if (text[0] == '-') {
-				text = text.substr(1);
-			}
-		}
-		m_output << text << " ";
 	}
-
-
-	m_output << out.str();
 	return;
 }
 
@@ -341,7 +400,7 @@ void Tool_text::processTextSpine(HTp tspine) {
 			current = current->getNextToken();
 			continue;
 		}
-		string syllable = getSyllable(current);
+		string syllable = getSyllable(*current);
 		m_output << syllable;
 		current = current->getNextToken();
 	}
@@ -355,25 +414,25 @@ void Tool_text::processTextSpine(HTp tspine) {
 // Tool_text::getSyllable --
 //
 
-string Tool_text::getSyllable(HTp token) {
-	string text = *token;
+string Tool_text::getSyllable(const string& text) {
+	string newtext = text;
 	HumRegex hre;
 	if (m_mergeQ) {
-		hre.replaceDestructive(text, "", "^-");
-		if (!text.empty()) {
-			if (text.back() == '-') {
-				text.resize((int)text.size()-1);
+		hre.replaceDestructive(newtext, "", "^-");
+		if (!newtext.empty()) {
+			if (newtext.back() == '-') {
+				newtext.resize((int)newtext.size()-1);
 			} else {
-				text += " ";
+				newtext += " ";
 			}
 		} else {
-			text += " ";
+			newtext += " ";
 		}
 	} else {
-		text += " ";
+		newtext += " ";
 	}
 
-	return text;
+	return newtext;
 }
 
 

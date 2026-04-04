@@ -39,10 +39,12 @@ class Tool_text : public HumTool {
 		void     initialize        (void);
 		void     processTextSpine  (HTp tspine);
 		void     processPlineSpine (HTp tspine);
-		bool     hasPline          (HTp tspine);
+		bool     hasParam          (HTp tspine, const std::string& target);
+		std::string getParamList   (std::vector<HTp>& tspine, const std::string& target);
+		std::string getParmTimestamp(HTp token, const std::string& target);
                 void     removePartText    (HTp startspine);
 		void     removeText        (HumdrumFile& infile);
-		std::string getSyllable    (HTp token);
+		std::string getSyllable    (const std::string& token);
 		void     fillPlines        (std::vector<std::vector<HTp>>& plines, HTp tspine);
 		std::string getPlineLabel  (std::vector<HTp>& pieces);
 		void     printPlineSyllables(std::vector<HTp>& pieces);
@@ -51,11 +53,13 @@ class Tool_text : public HumTool {
 		void        makeTextArray   (std::vector<std::vector<HTp>>& texts, std::vector<HTp> spines);
 
 	private:
-		bool     m_onlyQ  = false;
-		bool     m_aboveQ = false;
-		bool     m_belowQ = false;
-		bool     m_joinQ  = false;
-		bool     m_mergeQ = true;
+		bool     m_onlyQ      = false;
+		bool     m_aboveQ     = false;
+		bool     m_belowQ     = false;
+		bool     m_joinQ      = false;
+		bool     m_removeQ    = false;
+		bool     m_removeAllQ = false;
+		bool     m_mergeQ     = true;
 
 		std::vector<std::vector<std::string>> m_text;
 		std::stringstream m_output;
