@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Mar 29 10:43:31 PDT 2026
+// Last Modified: Fri Apr 10 12:03:00 PDT 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -60919,6 +60919,7 @@ void Tool_autocadence::processFile(HumdrumFile& infile) {
 		return;
 	}
 
+cerr << "GOT HERE AAA" << endl;
 	// identify dissonances
 	prepareDissonances(infile);
 
@@ -62799,6 +62800,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/*   5 */ addCadenceDefinition("A", "T",	"AT2",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_-2:1, -2_3:-2, -5_)");
 	/*   6 */ addCadenceDefinition("A", "T",	"AT3",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_1:1, -3_-2:1, -2_3:-2, -5_)");
 	/*   7 */ addCadenceDefinition("A", "T",	"AT4",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_2:-2, -5_)");
+
 	/*   8 */ addCadenceDefinition("B", "C",	"BC1",	R"("^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:-2, 2_1:2, 3_4:2, (1|8)_)");
 	/*   9 */ addCadenceDefinition("B", "C",	"BC2",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]), 4D_1:-2, 3_1:-2, 2_1:2, 3_1:1, 3_-5:2, 8_)");
 	/*  10 */ addCadenceDefinition("B", "C",	"BC3",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4_1:-2, 3_-5:2, 8_)");
@@ -62810,6 +62812,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/*  16 */ addCadenceDefinition("B", "C",	"BC9",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_4:2, (?:8|1)_)");
 	/*  17 */ addCadenceDefinition("B", "C",	"BC10",	R"(^3_1:2, 4D_1:-2, 3_(?:4|-5):2, (?:1|8)_)");
 	/*  18 */ addCadenceDefinition("B", "C",	"BC11",	R"(^5_1:-2, 4D_1:-2, 3_(?:4|-5):2, (?:1|8)_)");
+
 	/*  19 */ addCadenceDefinition("B", "c",	"Bc1",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_(?:4|-5):(?:4|-5), 3_)");
 	/*  20 */ addCadenceDefinition("C", "B",	"CB1",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_-2:1, -2_2:1, -3_2:(?:-5|4), -8_)");
 	/*  21 */ addCadenceDefinition("C", "B",	"CB2",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_-2:1, -2_2:1, -3_2:4, (?:1|-8)_)");
@@ -63154,7 +63157,7 @@ void Tool_autocadence::prepareCvfNames(void) {
 
 void Tool_autocadence::prepareDissonances(HumdrumFile& infile) {
 	if (!m_infoQ) {
-		return;
+//		return;
 	}
 	HumdrumFile dfile;
 	stringstream ss;
@@ -63172,6 +63175,7 @@ void Tool_autocadence::prepareDissonances(HumdrumFile& infile) {
 	}
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (infile[i].isData()) {
+cerr << "PREPARE dissonance for line " << infile[i] << endl;
 			prepareDissonancesForLine(infile[i], dfile[i]);
 		}
 	}
@@ -63206,6 +63210,7 @@ void Tool_autocadence::prepareDissonancesForLine(HumdrumLine& iline, HumdrumLine
 				string text = token->getText();
 				if (text != ".") {
 					ikern.at(kindex)->setValue("auto", "dissonance", text);
+cerr << "FOUND DISSONANCE" << endl;
 				}
 			}
 		}
@@ -139151,9 +139156,9 @@ bool Tool_text::hasParam(HTp tspine, const string& target) {
 
 /////////////////////////////
 //
-// Text_tool::getParamList -- Find the parameter anywhere in the list of tokens. Example
-//     if the target is "*rf:" and the first token found is *rf:e, the string returned will
-//     be "e".
+// Text_tool::getParamList -- Find the parameter anywhere in the list of tokens. 
+//     Example if the target is "*rf:" and the first token found is *rf:e, the 
+//     string returned will be "e".
 //
 
 string Tool_text::getParamList(vector<HTp>& tspine, const string& target) {
@@ -139165,6 +139170,23 @@ string Tool_text::getParamList(vector<HTp>& tspine, const string& target) {
 		} else {
 			if (tspine[i]->compare(0, len, target) == 0) {
 				return tspine[i]->substr(len);
+			}
+		}
+	}
+	return value;
+}
+
+string Tool_text::getParamList(vector<vector<HTp>>& tspine, const string& target) {
+	string value = "";
+	int len = (int)target.size();
+	for (int i=0; i<(int)tspine.size(); i++) {
+		for (int j=0; j<(int)tspine.size(); j++) {
+			if (!tspine[i][j]->isInterpretation()) {
+				continue;
+			} else {
+				if (tspine[i][j]->compare(0, len, target) == 0) {
+					return tspine[i][j]->substr(len);
+				}
 			}
 		}
 	}
@@ -139202,11 +139224,37 @@ string Tool_text::getParmTimestamp(HTp token, const string& target) {
 void Tool_text::processPlineSpine(HTp tspine) {
 	vector<vector<HTp>> plines;
 	fillPlines(plines, tspine);
+	string style = makeStyle();
+	m_output << style;
 	m_output << "\n!! <table>";
+	string verse = getParamList(plines, "*v:");
+cerr << "VALUE = " << verse << endl;
+	if (!verse.empty()) {
+		m_output << "<td class=\"verse\" colspan=\"4\">VERSE " << verse << "</td>";
+	}
 	for (int i=1; i<(int)plines.size(); i++) {
 		zprintPlineRow(plines[i]);
 	}
 	m_output << "\n!! </table>\n";
+}
+
+
+/////////////////////////////
+//
+// Tool_text::makeStyle --
+//
+
+string Tool_text::makeStyle(void) {
+	stringstream out;
+	out << "!!<style>" << endl;
+	out << "!! table {" << endl;
+  	out << "!! width: max-content;" << endl;
+  	out << "!! border-collapse: collapse;" << endl;
+	out << "!!}" << endl;
+	out << "!! .rf {color: fuchsia; }" << endl;
+	out << "!! .rp {color: purple; }" << endl;
+	out << "!!</style>";
+	return out.str();
 }
 
 
@@ -139230,8 +139278,8 @@ void Tool_text::zprintPlineRow(vector<HTp>& pieces) {
 	string rp = getParamList(pieces, "*rp:");
 	string rf = getParamList(pieces, "*rf:");
 	string rs = getParamList(pieces, "*rs:");
-	m_output << "\n!! <td class='rp'>" << rp << "</td>";
-	m_output << "\n!! <td class='ft'>" << rf << "</td>";
+	m_output << "\n!! <td class='rp'>" << "<span class=\"rp\">"<< rp;
+	m_output << "</span>/<span class=\"rf\">" << rf << "</span>" << "</td>";
 	m_output << "\n!! <td class='rs'>" << rs << "</td>";
 	m_output << "\n!! </tr>";
 }

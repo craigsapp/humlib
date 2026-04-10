@@ -217,9 +217,9 @@ bool Tool_text::hasParam(HTp tspine, const string& target) {
 
 /////////////////////////////
 //
-// Text_tool::getParamList -- Find the parameter anywhere in the list of tokens. Example
-//     if the target is "*rf:" and the first token found is *rf:e, the string returned will
-//     be "e".
+// Text_tool::getParamList -- Find the parameter anywhere in the list of tokens. 
+//     Example if the target is "*rf:" and the first token found is *rf:e, the 
+//     string returned will be "e".
 //
 
 string Tool_text::getParamList(vector<HTp>& tspine, const string& target) {
@@ -231,6 +231,23 @@ string Tool_text::getParamList(vector<HTp>& tspine, const string& target) {
 		} else {
 			if (tspine[i]->compare(0, len, target) == 0) {
 				return tspine[i]->substr(len);
+			}
+		}
+	}
+	return value;
+}
+
+string Tool_text::getParamList(vector<vector<HTp>>& tspine, const string& target) {
+	string value = "";
+	int len = (int)target.size();
+	for (int i=0; i<(int)tspine.size(); i++) {
+		for (int j=0; j<(int)tspine.size(); j++) {
+			if (!tspine[i][j]->isInterpretation()) {
+				continue;
+			} else {
+				if (tspine[i][j]->compare(0, len, target) == 0) {
+					return tspine[i][j]->substr(len);
+				}
 			}
 		}
 	}
@@ -268,11 +285,37 @@ string Tool_text::getParmTimestamp(HTp token, const string& target) {
 void Tool_text::processPlineSpine(HTp tspine) {
 	vector<vector<HTp>> plines;
 	fillPlines(plines, tspine);
+	string style = makeStyle();
+	m_output << style;
 	m_output << "\n!! <table>";
+	string verse = getParamList(plines, "*v:");
+cerr << "VALUE = " << verse << endl;
+	if (!verse.empty()) {
+		m_output << "<td class=\"verse\" colspan=\"4\">VERSE " << verse << "</td>";
+	}
 	for (int i=1; i<(int)plines.size(); i++) {
 		zprintPlineRow(plines[i]);
 	}
 	m_output << "\n!! </table>\n";
+}
+
+
+/////////////////////////////
+//
+// Tool_text::makeStyle --
+//
+
+string Tool_text::makeStyle(void) {
+	stringstream out;
+	out << "!!<style>" << endl;
+	out << "!! table {" << endl;
+  	out << "!! width: max-content;" << endl;
+  	out << "!! border-collapse: collapse;" << endl;
+	out << "!!}" << endl;
+	out << "!! .rf {color: fuchsia; }" << endl;
+	out << "!! .rp {color: purple; }" << endl;
+	out << "!!</style>";
+	return out.str();
 }
 
 
@@ -296,8 +339,8 @@ void Tool_text::zprintPlineRow(vector<HTp>& pieces) {
 	string rp = getParamList(pieces, "*rp:");
 	string rf = getParamList(pieces, "*rf:");
 	string rs = getParamList(pieces, "*rs:");
-	m_output << "\n!! <td class='rp'>" << rp << "</td>";
-	m_output << "\n!! <td class='ft'>" << rf << "</td>";
+	m_output << "\n!! <td class='rp'>" << "<span class=\"rp\">"<< rp;
+	m_output << "</span>/<span class=\"rf\">" << rf << "</span>" << "</td>";
 	m_output << "\n!! <td class='rs'>" << rs << "</td>";
 	m_output << "\n!! </tr>";
 }

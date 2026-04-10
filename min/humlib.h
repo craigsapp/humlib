@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Mar 29 10:43:31 PDT 2026
+// Last Modified: Fri Apr 10 12:03:00 PDT 2026
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -11862,6 +11862,7 @@ class Tool_text : public HumTool {
 		void     processPlineSpine (HTp tspine);
 		bool     hasParam          (HTp tspine, const std::string& target);
 		std::string getParamList   (std::vector<HTp>& tspine, const std::string& target);
+		std::string getParamList   (std::vector<std::vector<HTp>>& tspine, const std::string& target);
 		std::string getParmTimestamp(HTp token, const std::string& target);
                 void     removePartText    (HTp startspine);
 		void     removeText        (HumdrumFile& infile);
@@ -11871,7 +11872,8 @@ class Tool_text : public HumTool {
 		void     printPlineSyllables(std::vector<HTp>& pieces);
 		std::string getPlineRow    (std::vector<HTp>& pieces);
 		void        zprintPlineRow (std::vector<HTp>& pieces);
-		void        makeTextArray   (std::vector<std::vector<HTp>>& texts, std::vector<HTp> spines);
+		void        makeTextArray  (std::vector<std::vector<HTp>>& texts, std::vector<HTp> spines);
+		std::string makeStyle      (void);
 
 	private:
 		bool     m_onlyQ      = false;

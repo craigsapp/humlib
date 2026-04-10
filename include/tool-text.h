@@ -41,6 +41,7 @@ class Tool_text : public HumTool {
 		void     processPlineSpine (HTp tspine);
 		bool     hasParam          (HTp tspine, const std::string& target);
 		std::string getParamList   (std::vector<HTp>& tspine, const std::string& target);
+		std::string getParamList   (std::vector<std::vector<HTp>>& tspine, const std::string& target);
 		std::string getParmTimestamp(HTp token, const std::string& target);
                 void     removePartText    (HTp startspine);
 		void     removeText        (HumdrumFile& infile);
@@ -50,7 +51,8 @@ class Tool_text : public HumTool {
 		void     printPlineSyllables(std::vector<HTp>& pieces);
 		std::string getPlineRow    (std::vector<HTp>& pieces);
 		void        zprintPlineRow (std::vector<HTp>& pieces);
-		void        makeTextArray   (std::vector<std::vector<HTp>>& texts, std::vector<HTp> spines);
+		void        makeTextArray  (std::vector<std::vector<HTp>>& texts, std::vector<HTp> spines);
+		std::string makeStyle      (void);
 
 	private:
 		bool     m_onlyQ      = false;

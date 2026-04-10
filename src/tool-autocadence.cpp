@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sun Feb 16 13:22:15 PST 2025
-// Last Modified: Sat Apr 19 06:52:08 CEST 2025
+// Last Modified: Sat Apr  4 14:23:43 PDT 2026
 // Filename:      tool-autocadence.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-autocadence.cpp
 // Syntax:        C++11; humlib
@@ -71,13 +71,11 @@ Abandoned Cadential Voice Functions (also lowercase letters):
 	y - Abandoned Cantizans
 	z - Abandoned Tenorizans
 
-
 First entry, which is an unornamented clausula vera:
 
 "^(?:R_1|7_1|[\-]?._[\-]?[^1]):1, 7_1:-2, 6_-2:2, 8",T,C
 
 (?:R_1|7_1|[\-]?._[\-]?[^1]):1 == means 7 in 7_1:-2 is a suspension.
-
 
 7_1:-2 = slice interval is a seventh with the lower voice staying on the
 same pitch, and the upper voice going down a second (so the next harmonic
@@ -381,6 +379,7 @@ void Tool_autocadence::processFile(HumdrumFile& infile) {
 		return;
 	}
 
+cerr << "GOT HERE AAA" << endl;
 	// identify dissonances
 	prepareDissonances(infile);
 
@@ -2261,6 +2260,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/*   5 */ addCadenceDefinition("A", "T",	"AT2",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_-2:1, -2_3:-2, -5_)");
 	/*   6 */ addCadenceDefinition("A", "T",	"AT3",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_1:1, -3_-2:1, -2_3:-2, -5_)");
 	/*   7 */ addCadenceDefinition("A", "T",	"AT4",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_2:-2, -5_)");
+
 	/*   8 */ addCadenceDefinition("B", "C",	"BC1",	R"("^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:-2, 2_1:2, 3_4:2, (1|8)_)");
 	/*   9 */ addCadenceDefinition("B", "C",	"BC2",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]), 4D_1:-2, 3_1:-2, 2_1:2, 3_1:1, 3_-5:2, 8_)");
 	/*  10 */ addCadenceDefinition("B", "C",	"BC3",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4_1:-2, 3_-5:2, 8_)");
@@ -2272,6 +2272,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/*  16 */ addCadenceDefinition("B", "C",	"BC9",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_4:2, (?:8|1)_)");
 	/*  17 */ addCadenceDefinition("B", "C",	"BC10",	R"(^3_1:2, 4D_1:-2, 3_(?:4|-5):2, (?:1|8)_)");
 	/*  18 */ addCadenceDefinition("B", "C",	"BC11",	R"(^5_1:-2, 4D_1:-2, 3_(?:4|-5):2, (?:1|8)_)");
+
 	/*  19 */ addCadenceDefinition("B", "c",	"Bc1",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_(?:4|-5):(?:4|-5), 3_)");
 	/*  20 */ addCadenceDefinition("C", "B",	"CB1",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_-2:1, -2_2:1, -3_2:(?:-5|4), -8_)");
 	/*  21 */ addCadenceDefinition("C", "B",	"CB2",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_-2:1, -2_2:1, -3_2:4, (?:1|-8)_)");
@@ -2616,7 +2617,7 @@ void Tool_autocadence::prepareCvfNames(void) {
 
 void Tool_autocadence::prepareDissonances(HumdrumFile& infile) {
 	if (!m_infoQ) {
-		return;
+//		return;
 	}
 	HumdrumFile dfile;
 	stringstream ss;
@@ -2634,6 +2635,7 @@ void Tool_autocadence::prepareDissonances(HumdrumFile& infile) {
 	}
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (infile[i].isData()) {
+cerr << "PREPARE dissonance for line " << infile[i] << endl;
 			prepareDissonancesForLine(infile[i], dfile[i]);
 		}
 	}
@@ -2668,6 +2670,7 @@ void Tool_autocadence::prepareDissonancesForLine(HumdrumLine& iline, HumdrumLine
 				string text = token->getText();
 				if (text != ".") {
 					ikern.at(kindex)->setValue("auto", "dissonance", text);
+cerr << "FOUND DISSONANCE" << endl;
 				}
 			}
 		}
