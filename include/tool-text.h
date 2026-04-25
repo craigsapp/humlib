@@ -37,13 +37,13 @@ class Tool_text : public HumTool {
 	protected:
 		void     processFile       (HumdrumFile& infile);
 		void     initialize        (void);
-		void     processTextSpine  (HTp tspine);
-		void     processPlineSpine (HTp tspine);
+		void     processTextSpine  (HTp tspine, int vth, int vsize);
+		void     processPlineSpine (HTp tspine, int vth, int vsize);
 		bool     hasParam          (HTp tspine, const std::string& target);
 		std::string getParamList   (std::vector<HTp>& tspine, const std::string& target);
 		std::string getParamList   (std::vector<std::vector<HTp>>& tspine, const std::string& target);
 		std::string getParmTimestamp(HTp token, const std::string& target);
-                void     removePartText    (HTp startspine);
+		void     removePartText    (HTp startspine, int vth, int vsize);
 		void     removeText        (HumdrumFile& infile);
 		std::string getSyllable    (const std::string& token);
 		void     fillPlines        (std::vector<std::vector<HTp>>& plines, HTp tspine);

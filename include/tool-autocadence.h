@@ -177,6 +177,9 @@ class Tool_autocadence : public HumTool {
 		// m_barnum: mapping from line to measure number (of fist spine);
 		std::vector<int> m_barnum;
 
+		// m_lastmel: The last melodic interval (diatonic)
+		std::vector<std::vector<int>> m_lastmel;
+
 		bool m_hasSuspensionMarkersQ = false;
 
 		// options:
@@ -203,6 +206,7 @@ class Tool_autocadence : public HumTool {
 		std::string m_marker = "@";
 		std::string m_suspensionMarker = "N";
 		std::string m_suspensionColor  = "crimson";
+		std::stringstream m_info;
 };
 
 // END_MERGE
