@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sun Feb 16 13:22:15 PST 2025
-// Last Modified: Sat Apr  4 14:23:43 PDT 2026
+// Last Modified: Sat Apr 19 06:52:08 CEST 2025
 // Filename:      tool-autocadence.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-autocadence.cpp
 // Syntax:        C++11; humlib
@@ -71,11 +71,13 @@ Abandoned Cadential Voice Functions (also lowercase letters):
 	y - Abandoned Cantizans
 	z - Abandoned Tenorizans
 
+
 First entry, which is an unornamented clausula vera:
 
 "^(?:R_1|7_1|[\-]?._[\-]?[^1]):1, 7_1:-2, 6_-2:2, 8",T,C
 
 (?:R_1|7_1|[\-]?._[\-]?[^1]):1 == means 7 in 7_1:-2 is a suspension.
+
 
 7_1:-2 = slice interval is a seventh with the lower voice staying on the
 same pitch, and the upper voice going down a second (so the next harmonic
@@ -273,7 +275,6 @@ Tool_autocadence::Tool_autocadence(void) {
 	define("color=s:dodgerblue",         "Color cadence formula notes with given color");
 	define("count|match-count=b",        "Return number of cadence formulas that match");
 	define("i|info=b",                   "Show only information not score");
-	define("f|file=b",                   "Show only filename on info");
 }
 
 
@@ -345,9 +346,8 @@ void Tool_autocadence::initialize(void) {
 	m_showFormulaIndexQ        =  getBoolean("show-formula-index");
 	m_repeatQ                  =  getBoolean("repeat");
 	m_infoQ                    =  getBoolean("info");
-	m_fileQ                    =  getBoolean("file");
-   m_lowestQ                  =  getBoolean("lowest");
-   m_showSuspensionsQ         = !getBoolean("do-not-show-suspensions");
+	m_lowestQ                  =  getBoolean("lowest");
+	m_showSuspensionsQ         = !getBoolean("do-not-show-suspensions");
 
 	prepareCadenceDefinitions();
 	prepareCadenceLabels();
@@ -363,13 +363,13 @@ void Tool_autocadence::initialize(void) {
 //
 
 void Tool_autocadence::processFile(HumdrumFile& infile) {
+	m_info.str("");
 	m_barnum = infile.getMeasureNumbers();
-	if (m_infoQ) {
-		m_free_text << "**bar\t**clab\t**slab\t**cadence";
-		if (m_fileQ) {
-			m_free_text << "\t**file";
-		}
-		m_free_text << endl;
+
+	// fill m_lastmel
+	m_lastmel.resize(infile.getLineCount());
+	for (int i=0; i<infile.getLineCount(); i++) {
+		m_lastmel.resize(infile[i].getFieldCount());
 	}
 
 	// fill m_pitches and m_lowestPitch
@@ -379,7 +379,6 @@ void Tool_autocadence::processFile(HumdrumFile& infile) {
 		return;
 	}
 
-cerr << "GOT HERE AAA" << endl;
 	// identify dissonances
 	prepareDissonances(infile);
 
@@ -413,8 +412,9 @@ cerr << "GOT HERE AAA" << endl;
 	markupScore(infile);
 	printScore(infile);
 
-	if (m_infoQ) {
-		m_free_text << "*-\t*-\t*-\t*-\n";
+	if (!m_info.str().empty()) {
+		m_humdrum_text.str("");
+		m_humdrum_text << m_info.str();
 	}
 
 }
@@ -439,13 +439,9 @@ void Tool_autocadence::printScore(HumdrumFile& infile) {
 
 	for (int i=0; i < infile.getLineCount(); i++) {
 		if (!infile[i].hasSpines()) {
-			if (!m_infoQ) {
-				m_humdrum_text << infile[i] << endl;
-			}
+			m_humdrum_text << infile[i] << endl;
 		} else if (infile[i].isEmpty()) {
-			if (!m_infoQ) {
-				m_humdrum_text <<" III " << endl;
-			}
+			m_humdrum_text << endl;
 		} else if (infile[i].isManipulator()) {
 			printIntervalManipulatorLine(infile, i, kcount);
 		} else if (infile[i].isData()) {
@@ -464,13 +460,13 @@ void Tool_autocadence::printScore(HumdrumFile& infile) {
 
 	if (m_infoQ) {
 		if (m_colorQ) {
-			m_humdrum_text << "!!RDF**kern: " << m_marker << " = marked note, color=" << m_color << endl;
+			m_humdrum_text << "!!zRDF**kern: " << m_marker << " = marked note, color=" << m_color << endl;
 		}
 		if (m_hasSuspensionMarkersQ) {
-			m_humdrum_text << "!!RDF**kern: " << m_suspensionMarker << " = marked note, color=" << m_suspensionColor << endl;
+			m_humdrum_text << "!!yRDF**kern: " << m_suspensionMarker << " = marked note, color=" << m_suspensionColor << endl;
 		}
 		if (m_evenNoteSpacingQ) {
-			m_humdrum_text << "!!verovio: evenNoteSpacing" << endl;
+			m_humdrum_text << "!!wverovio: evenNoteSpacing" << endl;
 		}
 
 		if (m_regexQ) {
@@ -481,15 +477,14 @@ void Tool_autocadence::printScore(HumdrumFile& infile) {
 
 
 
+
+
 //////////////////////////////
 //
 // Tool_autocadence::printRegexTable --
 //
 
 void Tool_autocadence::printRegexTable(void) {
-	if (m_infoQ) {
-		return;
-	}
 
 	// pair::first: index into m_definitions;
 	// pair::second: occurrence count for given cadence in score.
@@ -503,24 +498,24 @@ void Tool_autocadence::printRegexTable(void) {
 		return;
 	}
 
-	m_humdrum_text << "!!C@@BEGIN: PREHTML" << endl;
-	m_humdrum_text << "!!D@CONTENT:" << endl;
-	m_humdrum_text << "!!E <table class=regex>" << endl;
+	m_humdrum_text << "!!@@BEGIN: PREHTML" << endl;
+	m_humdrum_text << "!!@CONTENT:" << endl;
+	m_humdrum_text << "!! <table class=regex>" << endl;
 
-	m_humdrum_text << "!!F <tr>" << endl;
-	m_humdrum_text << "!!G <th class=lcvf title='lower cadence vocal function'>LCVF</th>" << endl;
-	m_humdrum_text << "!!H <th class=ucvf title='upper cadence vocal function'>UCVF</th>" << endl;
-	m_humdrum_text << "!!I <th class=name title='cadence name (abbreviation)'>Name</th>" << endl;
-	m_humdrum_text << "!!J <th class='index' title='cadence enumeration'>Index</th>" << endl;
-	m_humdrum_text << "!!K <th title='regular expression definition for cadence formula'>Cadence formula</th>" << endl;
-	m_humdrum_text << "!!L </tr>" << endl;
+	m_humdrum_text << "!! <tr>" << endl;
+	m_humdrum_text << "!! <th class=lcvf title='lower cadence vocal function'>LCVF</th>" << endl;
+	m_humdrum_text << "!! <th class=ucvf title='upper cadence vocal function'>UCVF</th>" << endl;
+	m_humdrum_text << "!! <th class=name title='cadence name (abbreviation)'>Name</th>" << endl;
+	m_humdrum_text << "!! <th class='index' title='cadence enumeration'>Index</th>" << endl;
+	m_humdrum_text << "!! <th title='regular expression definition for cadence formula'>Cadence formula</th>" << endl;
+	m_humdrum_text << "!! </tr>" << endl;
 
 	for (int index : definitionList) {
 		printDefinitionRow(index);
 	}
 
-	m_humdrum_text << "!!M </table>" << endl;
-	m_humdrum_text << "!!N@@END: PREHTML" << endl;
+	m_humdrum_text << "!! </table>" << endl;
+	m_humdrum_text << "!!@@END: PREHTML" << endl;
 
 }
 
@@ -539,31 +534,31 @@ void Tool_autocadence::printDefinitionRow(int index) {
 	}
 	auto& def = m_definitions.at(index);
 
-	m_humdrum_text << "!!O <tr>" << endl;
+	m_humdrum_text << "!! <tr>" << endl;
 
 	string nameL = m_functionNames[def.m_funcL];
 	string nameU = m_functionNames[def.m_funcU];
 
-	m_humdrum_text << "!!P <td class=lcvf";
+	m_humdrum_text << "!! <td class=lcvf";
 	if (!nameL.empty()) {
 		m_humdrum_text << " title='" << nameL << "'";
 	}
 	m_humdrum_text << ">" << def.m_funcL << "</td>" << endl;
 
 
-	m_humdrum_text << "!!Q <td class=ucvf";
+	m_humdrum_text << "!! <td class=ucvf";
 	if (!nameU.empty()) {
 		m_humdrum_text << " title='" << nameU << "'";
 	}
 	m_humdrum_text << ">" << def.m_funcU << "</td>" << endl;
 
-	m_humdrum_text << "!!R <td class=name>" << def.m_name  << "</td>" << endl;
-	m_humdrum_text << "!!S <td class=index>" << index << "</td>" << endl;
-	m_humdrum_text << "!!T <td class=definition>" << def.m_regex << "</td>" << endl;
+	m_humdrum_text << "!! <td class=name>" << def.m_name  << "</td>" << endl;
+	m_humdrum_text << "!! <td class=index>" << index << "</td>" << endl;
+	m_humdrum_text << "!! <td class=definition>" << def.m_regex << "</td>" << endl;
 
-	m_humdrum_text << "!!U </tr>" << endl;
+	m_humdrum_text << "!! </tr>" << endl;
 
-	string style = R"(!!V <style>
+	string style = R"(!! <style>
 !! table.regex tr:hover { background: orange; }
 !! table.regex {
 !!    border-collapse: collapse;
@@ -1356,6 +1351,7 @@ void Tool_autocadence::printExtractedPitchInfo(HumdrumFile& infile) {
 //
 
 void Tool_autocadence::printExtractedIntervalInfo(HumdrumFile& infile) {
+
 	prepareAbbreviations(infile);
 	vector<HTp> kspines;
 	infile.getKernSpineStartList(kspines);
@@ -1363,13 +1359,9 @@ void Tool_autocadence::printExtractedIntervalInfo(HumdrumFile& infile) {
 
 	for (int i=0; i < infile.getLineCount(); i++) {
 		if (!infile[i].hasSpines()) {
-			if (m_infoQ) {
-				m_humdrum_text << infile[i] << endl;
-			}
+			m_humdrum_text << infile[i] << endl;
 		} else if (infile[i].isEmpty()) {
-			if (m_infoQ) {
-				m_humdrum_text << endl;
-			}
+			m_humdrum_text << endl;
 		} else if (infile[i].isManipulator()) {
 			printIntervalManipulatorLine(infile, i, kcount);
 		} else if (infile[i].isData()) {
@@ -1396,9 +1388,6 @@ void Tool_autocadence::printExtractedIntervalInfo(HumdrumFile& infile) {
 //
 
 void Tool_autocadence::printIntervalManipulatorLine(HumdrumFile& infile, int index, int kcount) {
-	if (m_infoQ) {
-		return;
-	}
 	stringstream line;
 	int fcount = infile[index].getFieldCount();
 	for (int i=0; i<fcount; i++) {
@@ -1449,9 +1438,6 @@ void Tool_autocadence::printIntervalManipulatorLine(HumdrumFile& infile, int ind
 //
 
 void Tool_autocadence::printIntervalDataLine(HumdrumFile& infile, int index, int kcount) {
-	if (m_infoQ) {
-		return;
-	}
 	stringstream line;
 	int fcount = infile[index].getFieldCount();
 	for (int i=0; i<fcount; i++) {
@@ -1497,7 +1483,6 @@ void Tool_autocadence::printIntervalDataLine(HumdrumFile& infile, int index, int
 
 void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 		int index, int kcount) {
-//m_humdrum_text << "ZZY\n";
 
 	vector<string> labels(infile[index].getFieldCount());
 	bool foundLabelQ = false;
@@ -1593,20 +1578,8 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 		string slabel = sortUniqueChars(clabel);
 		string cadence = m_cadenceLabels[slabel];
 		if (m_infoQ) {
-			m_free_text << m_barnum.at(index);
-			m_free_text << "\t" << clabel;
-			m_free_text << "\t" << slabel;
-			m_free_text << "\t";
-			if (cadence.empty()) {
-				m_free_text << "UNKNOWN";
-			} else {
-				m_free_text << cadence;
-			}
-			if (m_fileQ) {
-				m_free_text << "\t" << infile.getFilename();
-			}
-			m_free_text << endl;
-
+			m_info << "M=" << m_barnum.at(index) << "\tclabel=" << clabel << "\tslabel=" << slabel << "\tcadence=" << cadence << endl;
+			cerr << "M=" << m_barnum.at(index) << "\tclabel=" << clabel << "\tslabel=" << slabel << "\tcadence=" << cadence << endl;
 		}
 		if (cadence.empty()) {
 			cadence = "UNKNOWN";
@@ -1652,22 +1625,20 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 		}
 	}
 
-	if (!m_infoQ) {
-		if (!cadenceline.str().empty()) {
-			m_humdrum_text << cadenceline.str() << endl;
-		}
-		if (!dissonanceline.str().empty()) {
-			m_humdrum_text << dissonanceline.str() << endl;
-		}
-		if (!labelline.str().empty()) {
-			m_humdrum_text << labelline.str() << endl;
-		}
-		if (!dataline.str().empty()) {
-			m_humdrum_text << dataline.str() << endl;
-		}
+
+	if (!cadenceline.str().empty()) {
+		m_humdrum_text << cadenceline.str() << endl;
+	}
+	if (!dissonanceline.str().empty()) {
+		m_humdrum_text << dissonanceline.str() << endl;
+	}
+	if (!labelline.str().empty()) {
+		m_humdrum_text << labelline.str() << endl;
+	}
+	if (!dataline.str().empty()) {
+		m_humdrum_text << dataline.str() << endl;
 	}
 }
-
 
 
 //////////////////////////////
@@ -1706,7 +1677,6 @@ std::string Tool_autocadence::sortUniqueChars(const std::string& input) {
 
 	return output;
 }
-
 
 
 //////////////////////////////
@@ -1788,9 +1758,6 @@ string Tool_autocadence::getFunctionNames(const string& input) {
 //
 
 void Tool_autocadence::printIntervalLine(HumdrumFile& infile, int index, int kcount, const string& tok) {
-	if (m_infoQ) {
-		return;
-	}
 	stringstream line;
 	int fcount = infile[index].getFieldCount();
 	for (int i=0; i<fcount; i++) {
@@ -2260,10 +2227,9 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/*   5 */ addCadenceDefinition("A", "T",	"AT2",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_-2:1, -2_3:-2, -5_)");
 	/*   6 */ addCadenceDefinition("A", "T",	"AT3",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_1:1, -3_-2:1, -2_3:-2, -5_)");
 	/*   7 */ addCadenceDefinition("A", "T",	"AT4",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_2:-2, -5_)");
-
-	/*   8 */ addCadenceDefinition("B", "C",	"BC1",	R"("^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:-2, 2_1:2, 3_4:2, (1|8)_)");
+	/*   8 */ addCadenceDefinition("B", "C",	"BC1",	R"("^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:-2, 2_1:2, 3_4:2, (?:1|8)_)");
 	/*   9 */ addCadenceDefinition("B", "C",	"BC2",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]), 4D_1:-2, 3_1:-2, 2_1:2, 3_1:1, 3_-5:2, 8_)");
-	/*  10 */ addCadenceDefinition("B", "C",	"BC3",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4_1:-2, 3_-5:2, 8_)");
+	/*  10 */ addCadenceDefinition("B", "C",	"BC3",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_-5:2, 8_)");
 	/*  11 */ addCadenceDefinition("B", "C",	"BC4",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:-2, 2_-5:3, 8_)");
 	/*  12 */ addCadenceDefinition("B", "C",	"BC5",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:-2, 2_1:2, 3_-5:2, 8_)");
 	/*  13 */ addCadenceDefinition("B", "C",	"BC6",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:1, 3_-5:2, 8_)");
@@ -2272,7 +2238,6 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/*  16 */ addCadenceDefinition("B", "C",	"BC9",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_4:2, (?:8|1)_)");
 	/*  17 */ addCadenceDefinition("B", "C",	"BC10",	R"(^3_1:2, 4D_1:-2, 3_(?:4|-5):2, (?:1|8)_)");
 	/*  18 */ addCadenceDefinition("B", "C",	"BC11",	R"(^5_1:-2, 4D_1:-2, 3_(?:4|-5):2, (?:1|8)_)");
-
 	/*  19 */ addCadenceDefinition("B", "c",	"Bc1",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_(?:4|-5):(?:4|-5), 3_)");
 	/*  20 */ addCadenceDefinition("C", "B",	"CB1",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_-2:1, -2_2:1, -3_2:(?:-5|4), -8_)");
 	/*  21 */ addCadenceDefinition("C", "B",	"CB2",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_-2:1, -2_2:1, -3_2:4, (?:1|-8)_)");
@@ -2421,15 +2386,9 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("ATyz", "Phrygian Altizans");
 	m_cadenceLabels.emplace("ATz",  "Phrygian Altizans");
 	m_cadenceLabels.emplace("BC",   "Authentic");
-	m_cadenceLabels.emplace("BCTt", "Authentic");
-	m_cadenceLabels.emplace("BCTtu","Authentic");
-	m_cadenceLabels.emplace("BCTu", "Authentic");
-	m_cadenceLabels.emplace("BCTuz","Authentic");
-	m_cadenceLabels.emplace("BCtz", "Authentic");
-	m_cadenceLabels.emplace("BCTx", "Authentic");
-	m_cadenceLabels.emplace("BCtx", "Authentic");
-	m_cadenceLabels.emplace("CTb",  "Authentic");
-	m_cadenceLabels.emplace("BCt",  "Authentic");
+	m_cadenceLabels.emplace("BCT",   "Authentic");
+	m_cadenceLabels.emplace("CTb",   "Authentic");
+	m_cadenceLabels.emplace("BCt",   "Authentic");
 	m_cadenceLabels.emplace("Bc",   "Evaded Authentic");
 	m_cadenceLabels.emplace("BCu",  "Authentic");
 	m_cadenceLabels.emplace("BCuz", "Authentic");
@@ -2439,9 +2398,6 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("Bcz",  "Evaded Authentic");
 	m_cadenceLabels.emplace("C",    "Quince");
 	m_cadenceLabels.emplace("Cb",   "Evaded Authentic");
-	m_cadenceLabels.emplace("Cbu",  "Evaded Authentic");
-	m_cadenceLabels.emplace("Cbx",  "Evaded Authentic");
-	m_cadenceLabels.emplace("Cbz",  "Evaded Authentic");
 	m_cadenceLabels.emplace("CLT",  "Leaping Contratenor");
 	m_cadenceLabels.emplace("CLTz", "Leaping Contratenor");
 	m_cadenceLabels.emplace("Cp",   "Evaded Clausula Vera");
@@ -2450,8 +2406,6 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("CPTz", "Phrygian");
 	m_cadenceLabels.emplace("Ct",   "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("CT",   "Phrygian Clausula Vera");
-	m_cadenceLabels.emplace("CTtx", "Clausula Vera");
-	m_cadenceLabels.emplace("CTx",  "Clausula Vera");
 	m_cadenceLabels.emplace("CTa",  "Clausula Vera");
 	m_cadenceLabels.emplace("CTaz", "Clausula Vera");
 	m_cadenceLabels.emplace("CTp",  "Evaded Clausula Vera");
@@ -2464,7 +2418,6 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("Ctz",  "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("CTz",  "Phrygian Clausula Vera");
 	m_cadenceLabels.emplace("Cu",   "Evaded Authentic");
-	m_cadenceLabels.emplace("Cuz",  "Evaded Authentic");
 	m_cadenceLabels.emplace("cx",   "Abandoned Authentic");
 	m_cadenceLabels.emplace("Cx",   "Abandoned Authentic");
 	m_cadenceLabels.emplace("cxz",  "Abandoned Authentic");
@@ -2483,13 +2436,11 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("yz",   "Abandoned Clausula Vera");
 }
 
-
-
 //////////////////////////////
 //
 // Tool_autocadence::addCadenceDefinition --
-///
 //
+
 // addCadenceDefinition("z", "y",	"zy2",	R"(^(?:R_1|-?\d+_-?[^1]):1, -2_1:-2, -3_R:R, R_)");
 //		bool        split              (std::vector<std::string>& entries,
 //		                                const std::string& buffer,
@@ -2523,16 +2474,11 @@ void Tool_autocadence::addCadenceDefinition(const std::string& funcL, const std:
 	m_definitions.resize(m_definitions.size() + 1);
 	if (m_repeatQ) {
 		m_definitions.back().setDefinition(funcL, funcU, name, output);
-		if (!m_infoQ) {
-cerr << "!!>>> " << output << endl;
-		}
 	} else {
 		m_definitions.back().setDefinition(funcL, funcU, name, regex);
-		if (!m_infoQ) {
-//cerr << "%%% " << regex << endl;
-		}
 	}
 }
+
 
 
 
@@ -2616,9 +2562,6 @@ void Tool_autocadence::prepareCvfNames(void) {
 //
 
 void Tool_autocadence::prepareDissonances(HumdrumFile& infile) {
-	if (!m_infoQ) {
-//		return;
-	}
 	HumdrumFile dfile;
 	stringstream ss;
 	ss << infile;
@@ -2635,7 +2578,6 @@ void Tool_autocadence::prepareDissonances(HumdrumFile& infile) {
 	}
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (infile[i].isData()) {
-cerr << "PREPARE dissonance for line " << infile[i] << endl;
 			prepareDissonancesForLine(infile[i], dfile[i]);
 		}
 	}
@@ -2670,7 +2612,6 @@ void Tool_autocadence::prepareDissonancesForLine(HumdrumLine& iline, HumdrumLine
 				string text = token->getText();
 				if (text != ".") {
 					ikern.at(kindex)->setValue("auto", "dissonance", text);
-cerr << "FOUND DISSONANCE" << endl;
 				}
 			}
 		}
@@ -2681,6 +2622,3 @@ cerr << "FOUND DISSONANCE" << endl;
 // END_MERGE
 
 } // end namespace hum
-
-
-

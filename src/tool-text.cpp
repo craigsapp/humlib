@@ -91,8 +91,7 @@ bool Tool_text::run(HumdrumFile& infile) {
 
 void Tool_text::initialize(void) {
 	m_onlyQ       = getBoolean("first");
-	m_aboveQ      = !getBoolean("above");
-	m_belowQ      = getBoolean("below");
+	m_aboveQ      = getBoolean("above");
 	m_joinQ       = getBoolean("join");
 	m_removeQ     = getBoolean("remove-first");
 	m_removeAllQ  = getBoolean("remove-all");
@@ -110,6 +109,7 @@ void Tool_text::processFile(HumdrumFile& infile) {
 	removeText(infile);
 	m_humdrum_text << infile;
 	m_humdrum_text << "!!@@BEGIN: ";
+cerr << "MABOVEQ = " << m_aboveQ << endl;
 	if (m_aboveQ) {
 		m_humdrum_text << "PREHTML" << endl;
 	} else {
@@ -133,20 +133,27 @@ void Tool_text::processFile(HumdrumFile& infile) {
 //
 
 void Tool_text::removeText(HumdrumFile& infile) {
-	cerr << "Entering removeText() " << endl;
 	vector<HTp> sspines;
 	infile.getSpineStartList(sspines);
 	vector<vector<HTp>> twoarray;
 	makeTextArray(twoarray, sspines);
-	cerr << "!!size of parts: " << twoarray.size() << endl;
+
+	string style = makeStyle();
+	m_output << style;
+	m_output << "!! <table class=\"pline\">" << endl;
+	m_output << "!! <tr class=\"header\">" << endl;
+	m_output << "!!    <th class=\"pline\"> line </th>" << endl;
+	m_output << "!!    <th class=\"pline-text\"> text </th>" << endl;
+	m_output << "!!    <th class=\"rp-rf\"> <span title=\"Rhyme phoneme\">rp</span>";
+	m_output << "/<span title=\"Rhyme syllable\">rf</span> </th>" << endl;
+	m_output << "!!    <th title=\"Rhyme Scheme\"> rs </th>" << endl;
+	m_output << "!! </tr>";
 	for (int i=0; i<(int)twoarray.size(); i++) {
-cerr << "GOT HERE PPP  " << twoarray[i].size() << endl;
-		for (int j=(int)twoarray[i].size()-1; j>0; j--) {
-			cerr << "!!size " << i << "of parts: " << twoarray[i].size() << "(" << twoarray[i][j] << ")" << endl;
+		for (int j=(int)twoarray[i].size()-1; j>=0; j--) {
 			if (twoarray[i][j]->isKern()) {
 				continue;
 			}
-			removePartText(twoarray[i][j]);
+			removePartText(twoarray[i][j], j, (int)twoarray[i].size());
 			if (m_removeAllQ && j==0) {
 				twoarray[i][j]->setText("**Xtext");
 			} else if (m_removeQ && j>0) {
@@ -154,6 +161,7 @@ cerr << "GOT HERE PPP  " << twoarray[i].size() << endl;
 			}
 		}
 	}
+	m_output << "\n!! </table>\n";
 }
 
 
@@ -182,11 +190,11 @@ void Tool_text::makeTextArray(vector<vector<HTp>>& texts, vector<HTp> spines) {
 // Tool_text:removePartText --
 //
 
-void Tool_text::removePartText(HTp startspine) {
+void Tool_text::removePartText(HTp startspine, int vth, int vsize) {
 	if (hasParam(startspine, "*pline:")) {
-		processPlineSpine(startspine);
+		processPlineSpine(startspine, vth, vsize);
 	} else {
-		processTextSpine(startspine);
+		processTextSpine(startspine, vth, vsize);
 	}
 }
 
@@ -282,21 +290,14 @@ string Tool_text::getParmTimestamp(HTp token, const string& target) {
 // Tool_text::procesTextSpine -- Extract a verse/spine of text
 //
 
-void Tool_text::processPlineSpine(HTp tspine) {
+void Tool_text::processPlineSpine(HTp tspine, int vth, int vsize) {
 	vector<vector<HTp>> plines;
 	fillPlines(plines, tspine);
-	string style = makeStyle();
-	m_output << style;
-	m_output << "\n!! <table>";
 	string verse = getParamList(plines, "*v:");
-cerr << "VALUE = " << verse << endl;
-	if (!verse.empty()) {
-		m_output << "<td class=\"verse\" colspan=\"4\">VERSE " << verse << "</td>";
-	}
+	m_output << "\n!!   <td class=\"verse\" colspan=\"4\">VERSE " << verse << "</td>";
 	for (int i=1; i<(int)plines.size(); i++) {
 		zprintPlineRow(plines[i]);
 	}
-	m_output << "\n!! </table>\n";
 }
 
 
@@ -307,14 +308,29 @@ cerr << "VALUE = " << verse << endl;
 
 string Tool_text::makeStyle(void) {
 	stringstream out;
-	out << "!!<style>" << endl;
-	out << "!! table {" << endl;
-  	out << "!! width: max-content;" << endl;
-  	out << "!! border-collapse: collapse;" << endl;
-	out << "!!}" << endl;
-	out << "!! .rf {color: fuchsia; }" << endl;
-	out << "!! .rp {color: purple; }" << endl;
-	out << "!!</style>";
+	out << R"(!! <style>
+!! table.pline {
+!!   table-layout: auto;
+!!   width: auto;
+!!   margin-left: 20px;
+!!   margin-right: 20px;
+!! }
+, table.pline td!! table.pline th, table.pline td { 
+!!   cursor: pointer; position: 
+!!   sticky; top: 0;  
+!!   background: orange; 
+!!   opacity: 0.8
+!!}
+!! table.pline td {  vertical-align: top; padding-right: 20px;}
+!! table.pline tr.pline:hover td { background-color: #eeeeee; }
+!! table.pline .verse { padding-top: 10px; }
+!! table.pline td.pline { padding-right: 10px; }
+!! table.pline .rf {color: fuchsia; }
+!! table.pline .rp {color: purple; }
+!! table.pline .rs {font-weight: bold; color: limeegreen; }
+!! table.pline .rs {font-weight: bold; }
+!! </style>
+)";
 	return out.str();
 }
 
@@ -326,22 +342,22 @@ string Tool_text::makeStyle(void) {
 //
 
 void Tool_text::zprintPlineRow(vector<HTp>& pieces) {
-	m_output << "\n!! <tr>";
+	m_output << "\n!! <tr class=\"pline\">";
 	string plinelabel = getPlineLabel(pieces);
 	if (!plinelabel.empty()) {
-		m_output << "\n!! <td class=\"pline\">";
+		m_output << "\n!!   <td class=\"pline\">";
 		m_output << plinelabel;
 		m_output << "</td>";
 	}
-	m_output << "\n!! <td class=\"pline-text\">";
+	m_output << "\n!!   <td class=\"pline-text\">";
 	printPlineSyllables(pieces);
 	m_output << "</td>";
 	string rp = getParamList(pieces, "*rp:");
 	string rf = getParamList(pieces, "*rf:");
 	string rs = getParamList(pieces, "*rs:");
-	m_output << "\n!! <td class='rp'>" << "<span class=\"rp\">"<< rp;
+	m_output << "\n!!   <td class='rp'>" << "<span class=\"rp\">"<< rp;
 	m_output << "</span>/<span class=\"rf\">" << rf << "</span>" << "</td>";
-	m_output << "\n!! <td class='rs'>" << rs << "</td>";
+	m_output << "\n!!   <td class='rs'>" << rs << "</td>";
 	m_output << "\n!! </tr>";
 }
 
@@ -423,7 +439,7 @@ void Tool_text::fillPlines(vector<vector<HTp>>& plines, HTp tspine) {
 // Tool_text::procesTextSpine -- Extract a verse/spine of text
 //
 
-void Tool_text::processTextSpine(HTp tspine) {
+void Tool_text::processTextSpine(HTp tspine, int vth, int vsize) {
 	HumdrumFileStructure *infile = tspine->getOwner()->getOwner();
 	string name = infile->getPartName(tspine);
 	if (!name.empty()) {
