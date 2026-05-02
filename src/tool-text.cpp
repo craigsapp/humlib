@@ -325,7 +325,7 @@ void Tool_text::processPlineSpine(HTp tspine, int vth, int vsize) {
 	if (m_showVerseQ) {
 		if (!verse.empty()) {
 			label = "VERSE ";
- 			label += to_string(verse);
+ 			label += verse;
 		}
 		string refrain = getParamListTwo(plines, "*rline:");
 		if (!refrain.empty()) {
@@ -334,13 +334,13 @@ void Tool_text::processPlineSpine(HTp tspine, int vth, int vsize) {
 			}
 		} else if (verse.empty()) {
 			label = "VERSE [";
-			label += to_string(verse);
+			label += verse;
 			label += "]";
 		}
 	}
 
 	if (label != lastlabel) {
-		m_output << "\n!!   <td class=\"verse\" colspan=\"4\"> << label << "</td>";
+		m_output << "\n!!   <td class=\"verse\" colspan=\"4\">" << label << "</td>";
 	}
 	for (int i=1; i<(int)plines.size(); i++) {
 		zprintPlineRow(plines[vth]);
