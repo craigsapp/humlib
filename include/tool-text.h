@@ -40,15 +40,17 @@ class Tool_text : public HumTool {
 		void     processTextSpine  (HTp tspine, int vth, int vsize);
 		void     processPlineSpine (HTp tspine, int vth, int vsize);
 		bool     hasParam          (HTp tspine, const std::string& target);
-		std::string getParamList   (std::vector<HTp>& tspine, const std::string& target);
-		std::string getParamList   (std::vector<std::vector<HTp>>& tspine, const std::string& target);
+		std::string getParamListOne(std::vector<HTp>& tspine, const std::string& target);
+		std::string getParamListTwo(std::vector<std::vector<HTp>>& tspine, const std::string& target);
 		std::string getParmTimestamp(HTp token, const std::string& target);
 		void     removePartText    (HTp startspine, int vth, int vsize);
 		void     removeText        (HumdrumFile& infile);
 		std::string getSyllable    (const std::string& token);
-		void     fillPlines        (std::vector<std::vector<HTp>>& plines, HTp tspine);
+		void     fillPlines        (std::vector<std::vector<HTp>>& plines, HTp tspine,
+		                            int vth, int vsize);
 		std::string getPlineLabel  (std::vector<HTp>& pieces);
 		void     printPlineSyllables(std::vector<HTp>& pieces);
+		void     printPline(std::vector<std::vector<HTp>>& p, const char* description);
 		std::string getPlineRow    (std::vector<HTp>& pieces);
 		void        zprintPlineRow (std::vector<HTp>& pieces);
 		void        makeTextArray  (std::vector<std::vector<HTp>>& texts, std::vector<HTp> spines);
@@ -62,6 +64,9 @@ class Tool_text : public HumTool {
 		bool     m_removeQ    = false;
 		bool     m_removeAllQ = false;
 		bool     m_mergeQ     = true;
+		bool     m_rawQ       = false;
+		bool     m_noRepeatsQ = false;
+		bool     m_showVerseQ = false;
 
 		std::vector<std::vector<std::string>> m_text;
 		std::stringstream m_output;
