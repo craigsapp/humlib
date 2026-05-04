@@ -436,14 +436,14 @@ void Tool_autocadence::printScore(HumdrumFile& infile) {
 	}
 
 	for (int i=0; i < infile.getLineCount(); i++) {
-		if (!infile[i].hasSpines()) {
-			m_humdrum_text << infile[i] << endl;
-		} else if (infile[i].isEmpty()) {
-			m_humdrum_text << endl;
-		} else if (infile[i].isManipulator()) {
+		m_humdrum_text << "!!LINE: " << to_string(i) << endl;
+
+		if (infile[i].isManipulator()) {
 			printIntervalManipulatorLine(infile, i, kcount);
 		} else if (infile[i].isData()) {
+		m_humdrum_text << "!!PINE: " << to_string(i) << endl;
 			printIntervalDataLineScore(infile, i, kcount);
+		m_humdrum_text << "!!XPINE: " << to_string(i) << endl;
 		} else if (infile[i].isBarline()) {
 			string bartok = *infile.token(i, 0);
 			printIntervalLine(infile, i, kcount, bartok);
@@ -452,8 +452,16 @@ void Tool_autocadence::printScore(HumdrumFile& infile) {
 		} else if (infile[i].isInterpretation()) {
 			printIntervalLine(infile, i, kcount, "*");
 		} else {
-			m_humdrum_text << "!! UNKNOWN LINE: " << infile[i] << endl;
+			// m_humdrum_text << "!X!" << infile[i] << endl;
 		}
+
+		if (!infile[i].hasSpines()) {
+			m_humdrum_text << "!!P!!" << infile[i] << endl;
+		} else if (infile[i].isEmpty()) {
+			m_humdrum_text << endl;
+		}
+
+		m_humdrum_text << "!!XLINE: " << to_string(i) << endl;
 	}
 
 	if (m_infoQ) {
@@ -1356,11 +1364,8 @@ void Tool_autocadence::printExtractedIntervalInfo(HumdrumFile& infile) {
 	int kcount = (int)kspines.size();
 
 	for (int i=0; i < infile.getLineCount(); i++) {
-		if (!infile[i].hasSpines()) {
-			m_humdrum_text << infile[i] << endl;
-		} else if (infile[i].isEmpty()) {
-			m_humdrum_text << endl;
-		} else if (infile[i].isManipulator()) {
+
+		if (infile[i].isManipulator()) {
 			printIntervalManipulatorLine(infile, i, kcount);
 		} else if (infile[i].isData()) {
 			printIntervalDataLine(infile, i, kcount);
@@ -1372,7 +1377,13 @@ void Tool_autocadence::printExtractedIntervalInfo(HumdrumFile& infile) {
 		} else if (infile[i].isInterpretation()) {
 			printIntervalLine(infile, i, kcount, "*");
 		} else {
-			m_humdrum_text << "!! UNKNOWN LINE: " << infile[i] << endl;
+			m_humdrum_text << "!Y!" << infile[i] << endl;
+		}
+
+		if (!infile[i].hasSpines()) {
+			m_humdrum_text << infile[i] << endl;
+		} else if (infile[i].isEmpty()) {
+			m_humdrum_text << endl;
 		}
 	}
 
@@ -1481,6 +1492,7 @@ void Tool_autocadence::printIntervalDataLine(HumdrumFile& infile, int index, int
 
 void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 		int index, int kcount) {
+m_humdrum_text << "!!!CCC" << endl;
 
 	vector<string> labels(infile[index].getFieldCount());
 	bool foundLabelQ = false;
@@ -1533,6 +1545,7 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 		}
 
 	}
+m_humdrum_text << "!!!DDD" << endl;
 
 	stringstream labelline;
 	stringstream cadenceline;
@@ -1572,6 +1585,7 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 			}
 		}
 	}
+m_humdrum_text << "!!!EEE" << endl;
 	if (!clabel.empty()) {
 		string slabel = sortUniqueChars(clabel);
 		string cadence = m_cadenceLabels[slabel];
@@ -1590,6 +1604,7 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 		}
 		cadenceline << "!!LO:TX:a:B:rj:color=red:cadence:t=" << cadence;
 	}
+m_humdrum_text << "!!!FFF" << endl;
 
 	stringstream dissonanceline;
 	if (m_showSuspensionsQ && foundDissonanceQ) {
@@ -1622,6 +1637,7 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 			}
 		}
 	}
+m_humdrum_text << "!!!GGG" << endl;
 
 	stringstream lastmelline;
 	int lastcount = 0;
@@ -1644,9 +1660,6 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 				continue;
 			}
 			string interval = token->getValue("auto", "lastmel");
-//if (token->getLineIndex() < 50) {
-//cout << "READING INTERVAL (" << token->getLineIndex() << "," << token->getFieldIndex() << ": " << token << endl;
-//}
 			if (interval.empty()) {
 				lastmelline << "!";
 				continue;
@@ -1655,30 +1668,42 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 				lastmelline << "!LO:TX:b:lastmel:vgrp=7";
 				if (interval == "4" || interval == "-5") {
 					lastmelline << ":B:";
-					lastmelline << ":cj:color=" << m_lastMelColor;
+					lastmelline << ":color=" << m_lastMelColor;
 				} else {
-					lastmelline << ":cj:color=gray";
+					lastmelline << ":color=gray";
 				}
 				lastmelline << ":t=" << interval;
 			}
 		}
 	}
-//azzz
+m_humdrum_text << "!!!HHH" << endl;
 
+m_humdrum_text << "!!MLINE: " << to_string(index) << endl;
 	if (!cadenceline.str().empty()) {
+		m_humdrum_text << "!!!AA1" << endl;
 		m_humdrum_text << cadenceline.str() << endl;
+		m_humdrum_text << "!!!BB1" << endl;
 	}
 	if (!dissonanceline.str().empty()) {
+		m_humdrum_text << "!!!AA2" << endl;
 		m_humdrum_text << dissonanceline.str() << endl;
+		m_humdrum_text << "!!!BB2" << endl;
 	}
 	if (!labelline.str().empty()) {
+		m_humdrum_text << "!!!AA3" << endl;
 		m_humdrum_text << labelline.str() << endl;
-	}
-	if (!dataline.str().empty()) {
-		m_humdrum_text << dataline.str() << endl;
+		m_humdrum_text << "!!!BB3" << endl;
 	}
 	if (lastcount > 0) {
+		m_humdrum_text << "!!!AA5" << endl;
 		m_humdrum_text << lastmelline.str() << endl;
+		m_humdrum_text << "!!!BB5" << endl;
+	}
+
+	if (!dataline.str().empty()) {
+		m_humdrum_text << "!!!AA4" << endl;
+		m_humdrum_text << dataline.str() << endl;
+		m_humdrum_text << "!!!BB4" << endl;
 	}
 
 
@@ -2685,14 +2710,14 @@ void Tool_autocadence::fillInLastMelodicInterval(HumdrumFile& infile) {
 		calculateVoiceIntervals(notes[i], diatonic[i], interval[i]);
 	}
 
-	//for (int i=0; i<(int)notes.size(); i++) {
-	//	for (int j=0; j<(int)notes[i].size(); j++) {
-	//		cout << "\t" << notes[i][j];
-	//		cout << "\t" << diatonic[i][j];
-	//		cout << "\t" << interval[i][j];
-	//		cout << endl;
-	//	}
-	//}
+//	for (int i=0; i<(int)notes.size(); i++) {
+//		for (int j=0; j<(int)notes[i].size(); j++) {
+//			cout << "!!\t" << notes[i][j];
+//			cout << "\t" << diatonic[i][j];
+//			cout << "\t" << interval[i][j];
+//			cout << endl;
+//		}
+//	}
 
 
 	// Allocate and fill in m_lastmel

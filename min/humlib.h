@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Apr 10 12:03:00 PDT 2026
+// Last Modified: Sun May  3 23:08:44 PDT 2026
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -6160,6 +6160,11 @@ class Tool_autocadence : public HumTool {
 
 	protected:
 		void        processFile         (HumdrumFile& infile);
+		void        fillInLastMelodicInterval(HumdrumFile& infile);
+		void        getTokenList        (HTp start, std::vector<HTp>& holder);
+		void        calculateVoiceIntervals(const std::vector<HTp>& contents,
+		                                    std::vector<int>& diatonic,
+		                                    std::vector<std::string>& interval);
 		void        generateCounterpointStrings(std::vector<HTp>& kspines, int indexL, int indexU);
 		std::string generateCounterpointString(std::vector<std::vector<HTp>>& pairings, int index);
       void        printModules        (std::vector<std::string>& modules, int lowerPart, int upperPart);
@@ -6280,6 +6285,9 @@ class Tool_autocadence : public HumTool {
 		// m_barnum: mapping from line to measure number (of fist spine);
 		std::vector<int> m_barnum;
 
+		// m_lastmel: The last melodic interval (diatonic)
+		std::vector<std::vector<std::string>> m_lastmel;
+
 		bool m_hasSuspensionMarkersQ = false;
 
 		// options:
@@ -6303,9 +6311,12 @@ class Tool_autocadence : public HumTool {
 		bool m_repeatQ                  = false; // -r: allow repeated notes
 		bool m_infoQ                    = false; // -i print info only
 		bool m_fileQ                    = false; // -f print filename info
+		bool m_lastMelodyQ              = false;  // -L
 		std::string m_marker = "@";
 		std::string m_suspensionMarker = "N";
 		std::string m_suspensionColor  = "crimson";
+		std::stringstream m_info;
+		std::string m_lastMelColor     = "limegreen";
 };
 
 
@@ -11858,18 +11869,20 @@ class Tool_text : public HumTool {
 	protected:
 		void     processFile       (HumdrumFile& infile);
 		void     initialize        (void);
-		void     processTextSpine  (HTp tspine);
-		void     processPlineSpine (HTp tspine);
+		void     processTextSpine  (HTp tspine, int vth, int vsize);
+		void     processPlineSpine (HTp tspine, int vth, int vsize);
 		bool     hasParam          (HTp tspine, const std::string& target);
-		std::string getParamList   (std::vector<HTp>& tspine, const std::string& target);
-		std::string getParamList   (std::vector<std::vector<HTp>>& tspine, const std::string& target);
+		std::string getParamListOne(std::vector<HTp>& tspine, const std::string& target);
+		std::string getParamListTwo(std::vector<std::vector<HTp>>& tspine, const std::string& target);
 		std::string getParmTimestamp(HTp token, const std::string& target);
-                void     removePartText    (HTp startspine);
+		void     removePartText    (HTp startspine, int vth, int vsize);
 		void     removeText        (HumdrumFile& infile);
 		std::string getSyllable    (const std::string& token);
-		void     fillPlines        (std::vector<std::vector<HTp>>& plines, HTp tspine);
+		void     fillPlines        (std::vector<std::vector<HTp>>& plines, HTp tspine,
+		                            int vth, int vsize);
 		std::string getPlineLabel  (std::vector<HTp>& pieces);
 		void     printPlineSyllables(std::vector<HTp>& pieces);
+		void     printPline(std::vector<std::vector<HTp>>& p, const char* description);
 		std::string getPlineRow    (std::vector<HTp>& pieces);
 		void        zprintPlineRow (std::vector<HTp>& pieces);
 		void        makeTextArray  (std::vector<std::vector<HTp>>& texts, std::vector<HTp> spines);
@@ -11883,6 +11896,9 @@ class Tool_text : public HumTool {
 		bool     m_removeQ    = false;
 		bool     m_removeAllQ = false;
 		bool     m_mergeQ     = true;
+		bool     m_rawQ       = false;
+		bool     m_noRepeatsQ = false;
+		bool     m_showVerseQ = false;
 
 		std::vector<std::vector<std::string>> m_text;
 		std::stringstream m_output;
