@@ -57,6 +57,11 @@ class Tool_autocadence : public HumTool {
 
 	protected:
 		void        processFile         (HumdrumFile& infile);
+		void        fillInLastMelodicInterval(HumdrumFile& infile);
+		void        getTokenList        (HTp start, std::vector<HTp>& holder);
+		void        calculateVoiceIntervals(const std::vector<HTp>& contents,
+		                                    std::vector<int>& diatonic,
+		                                    std::vector<std::string>& interval);
 		void        generateCounterpointStrings(std::vector<HTp>& kspines, int indexL, int indexU);
 		std::string generateCounterpointString(std::vector<std::vector<HTp>>& pairings, int index);
       void        printModules        (std::vector<std::string>& modules, int lowerPart, int upperPart);
@@ -178,7 +183,7 @@ class Tool_autocadence : public HumTool {
 		std::vector<int> m_barnum;
 
 		// m_lastmel: The last melodic interval (diatonic)
-		std::vector<std::vector<int>> m_lastmel;
+		std::vector<std::vector<std::string>> m_lastmel;
 
 		bool m_hasSuspensionMarkersQ = false;
 
@@ -203,10 +208,12 @@ class Tool_autocadence : public HumTool {
 		bool m_repeatQ                  = false; // -r: allow repeated notes
 		bool m_infoQ                    = false; // -i print info only
 		bool m_fileQ                    = false; // -f print filename info
+		bool m_lastMelodyQ              = false;  // -L
 		std::string m_marker = "@";
 		std::string m_suspensionMarker = "N";
 		std::string m_suspensionColor  = "crimson";
 		std::stringstream m_info;
+		std::string m_lastMelColor     = "limegreen";
 };
 
 // END_MERGE

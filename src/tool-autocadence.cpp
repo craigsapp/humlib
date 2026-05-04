@@ -275,6 +275,7 @@ Tool_autocadence::Tool_autocadence(void) {
 	define("color=s:dodgerblue",         "Color cadence formula notes with given color");
 	define("count|match-count=b",        "Return number of cadence formulas that match");
 	define("i|info=b",                   "Show only information not score");
+	define("L|last-melody=b",            "Show interval to last note");
 }
 
 
@@ -348,6 +349,7 @@ void Tool_autocadence::initialize(void) {
 	m_infoQ                    =  getBoolean("info");
 	m_lowestQ                  =  getBoolean("lowest");
 	m_showSuspensionsQ         = !getBoolean("do-not-show-suspensions");
+	m_lastMelodyQ              =  getBoolean("last-melody");
 
 	prepareCadenceDefinitions();
 	prepareCadenceLabels();
@@ -366,11 +368,7 @@ void Tool_autocadence::processFile(HumdrumFile& infile) {
 	m_info.str("");
 	m_barnum = infile.getMeasureNumbers();
 
-	// fill m_lastmel
-	m_lastmel.resize(infile.getLineCount());
-	for (int i=0; i<infile.getLineCount(); i++) {
-		m_lastmel.resize(infile[i].getFieldCount());
-	}
+	fillInLastMelodicInterval(infile);
 
 	// fill m_pitches and m_lowestPitch
 	preparePitchInfo(infile);
@@ -1625,6 +1623,47 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 		}
 	}
 
+	stringstream lastmelline;
+	int lastcount = 0;
+	if ((1) || m_lastMelodyQ) {
+		for (int i=0; i<fcount; i++) {
+			if (i != 0) {
+				lastmelline << "\t";
+			}
+			HTp token = infile.token(index, i);
+			if (!token->isKern()) {
+				lastmelline << "!";
+				continue;
+			}
+			if (token->isNull()) {
+				lastmelline << "!";
+				continue;
+			}
+			if (token->isSecondaryTiedNote()) {
+				lastmelline << "!";
+				continue;
+			}
+			string interval = token->getValue("auto", "lastmel");
+//if (token->getLineIndex() < 50) {
+//cout << "READING INTERVAL (" << token->getLineIndex() << "," << token->getFieldIndex() << ": " << token << endl;
+//}
+			if (interval.empty()) {
+				lastmelline << "!";
+				continue;
+			} else {
+				lastcount++;
+				lastmelline << "!LO:TX:b:lastmel:vgrp=7";
+				if (interval == "4" || interval == "-5") {
+					lastmelline << ":B:";
+					lastmelline << ":cj:color=" << m_lastMelColor;
+				} else {
+					lastmelline << ":cj:color=gray";
+				}
+				lastmelline << ":t=" << interval;
+			}
+		}
+	}
+//azzz
 
 	if (!cadenceline.str().empty()) {
 		m_humdrum_text << cadenceline.str() << endl;
@@ -1638,6 +1677,11 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 	if (!dataline.str().empty()) {
 		m_humdrum_text << dataline.str() << endl;
 	}
+	if (lastcount > 0) {
+		m_humdrum_text << lastmelline.str() << endl;
+	}
+
+
 }
 
 
@@ -2227,7 +2271,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/*   5 */ addCadenceDefinition("A", "T",	"AT2",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_-2:1, -2_3:-2, -5_)");
 	/*   6 */ addCadenceDefinition("A", "T",	"AT3",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_1:1, -3_-2:1, -2_3:-2, -5_)");
 	/*   7 */ addCadenceDefinition("A", "T",	"AT4",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_2:-2, -5_)");
-	/*   8 */ addCadenceDefinition("B", "C",	"BC1",	R"("^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:-2, 2_1:2, 3_4:2, (?:1|8)_)");
+	/*   8 */ addCadenceDefinition("B", "C", 	"BC1",  R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:-2, 2_1:2, 3_(?:4|-5):2, (?:1|8)_)");
 	/*   9 */ addCadenceDefinition("B", "C",	"BC2",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]), 4D_1:-2, 3_1:-2, 2_1:2, 3_1:1, 3_-5:2, 8_)");
 	/*  10 */ addCadenceDefinition("B", "C",	"BC3",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_-5:2, 8_)");
 	/*  11 */ addCadenceDefinition("B", "C",	"BC4",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:-2, 2_-5:3, 8_)");
@@ -2618,6 +2662,124 @@ void Tool_autocadence::prepareDissonancesForLine(HumdrumLine& iline, HumdrumLine
 	}
 }
 
+
+
+//////////////////////////////
+//
+// Tool_autocadence::fillInLastMeloficInterval --
+//
+
+void Tool_autocadence::fillInLastMelodicInterval(HumdrumFile& infile) { 
+
+	vector<HTp> sstarts;
+	infile.getKernSpineStartList(sstarts);
+	vector<vector<HTp>> notes(sstarts.size());
+	for (int i=0; i<(int)notes.size(); i++) {
+		notes[i].reserve(infile.getLineCount());
+		getTokenList(sstarts[i], notes[i]);
+	}
+
+	vector<vector<int>> diatonic(notes.size());
+	vector<vector<string>> interval(notes.size());
+	for (int i=0; i<(int)notes.size(); i++) {
+		calculateVoiceIntervals(notes[i], diatonic[i], interval[i]);
+	}
+
+	//for (int i=0; i<(int)notes.size(); i++) {
+	//	for (int j=0; j<(int)notes[i].size(); j++) {
+	//		cout << "\t" << notes[i][j];
+	//		cout << "\t" << diatonic[i][j];
+	//		cout << "\t" << interval[i][j];
+	//		cout << endl;
+	//	}
+	//}
+
+
+	// Allocate and fill in m_lastmel
+	m_lastmel.resize(infile.getLineCount());
+	for (int i=0; i<infile.getLineCount(); i++) {
+		m_lastmel[i].resize(infile[i].getFieldCount());
+	}
+	// store into m_lastmel:
+	for (int i=0; i<(int)notes.size(); i++) {
+		for (int j=0; j<(int)notes[i].size(); j++) {
+			if (interval.at(i).at(j).empty()) {
+				continue;
+			}
+			int row = notes.at(i).at(j)->getLineIndex();
+			int col = notes.at(i).at(j)->getFieldIndex();
+			HTp token = infile.token(row,col);
+			token->setValue("auto", "lastmel", interval.at(i).at(j));
+			m_lastmel.at(row).at(col) = interval.at(i).at(j);
+		}
+	}
+	
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::calculateIntervals --
+//
+
+void Tool_autocadence::calculateVoiceIntervals(const std::vector<HTp>& contents,
+		std::vector<int>& diatonic, std::vector<std::string>& interval) {
+
+	diatonic.resize(contents.size());
+	for (int i=0; i<(int)contents.size(); i++) {
+		if (contents[i]->find("r") == string::npos) {
+			int octave = Convert::kernToOctaveNumber(contents[i]);
+			diatonic[i] = Convert::kernToDiatonicPC(contents[i]);
+			diatonic[i] += octave * 7;
+		}
+	}
+
+	interval.resize(contents.size());
+	for (int i=1; i<(int)contents.size(); i++) {
+		if (diatonic[i] == 0) {
+			interval.at(i) = "R";
+		} else if (diatonic[i-1] == 0) {
+			interval.at(i) = "R";
+		} else {
+			int inv = diatonic[i] - diatonic[i-1];
+			if (inv  < 0) {
+				inv--;
+			} else {
+				inv++;
+			}
+			interval.at(i) =  to_string(inv);
+		}
+	}
+
+	// repeat intervals for secondarty tied notes
+	for (int i=1; i<(int)contents.size(); i++) {
+		if ((contents[i]->find('_') != string::npos) || 
+			(contents[i]->find(']') != string::npos)) {
+			if (interval[i] == "1") {
+				interval[i] = interval[i-1];
+			}
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::getTokenList --
+//
+
+void Tool_autocadence::getTokenList(HTp start, std::vector<HTp>& holder) { 
+	HTp current = start;
+	while (current) {
+		if (current->isKern() && current->isData() && !current->isNull()) {
+			holder.push_back(current);
+		}
+		current = current->getNextToken();
+	}
+	return;
+}
 
 // END_MERGE
 
