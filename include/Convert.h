@@ -138,6 +138,9 @@ class Convert {
 		static int     base40IntervalToDiatonic(int base40interval);
       static HumNum  kernToDuration       (const std::string& aKernString);
 
+		// Serial: defined in Convert-serial.cpp
+		static std::vector<int> pitchToClass(const std::vector<int>& notes, int octave, int modulo);
+		static std::string getMidiPCTriadAbbr(const std::vector<int>& pcs);
 
 		// **mens, mensual notation, defiend in Convert-mens.cpp
 		static bool    isMensRest           (const std::string& mensdata);

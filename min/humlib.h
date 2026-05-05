@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun May  3 23:08:44 PDT 2026
+// Last Modified: Mon May  4 19:28:12 PDT 2026
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -4139,6 +4139,9 @@ class Convert {
 		static int     base40IntervalToDiatonic(int base40interval);
       static HumNum  kernToDuration       (const std::string& aKernString);
 
+		// Serial: defined in Convert-serial.cpp
+		static std::vector<int> pitchToClass(const std::vector<int>& notes, int octave, int modulo);
+		static std::string getMidiPCTriadAbbr(const std::vector<int>& pcs);
 
 		// **mens, mensual notation, defiend in Convert-mens.cpp
 		static bool    isMensRest           (const std::string& mensdata);
@@ -6216,6 +6219,7 @@ class Tool_autocadence : public HumTool {
 		void        prepareDissonancesForLine  (HumdrumLine& iline, HumdrumLine& dline);
 		void        identifySuspensionsAndAgents(HumdrumFile& infile);
 		std::string sortUniqueChars            (const std::string& input);
+		void fillInMajorMinor(HumdrumFile& infile);
 
 	private:
 

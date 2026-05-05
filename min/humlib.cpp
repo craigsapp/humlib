@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun May  3 23:08:44 PDT 2026
+// Last Modified: Mon May  4 19:28:12 PDT 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -5434,6 +5434,99 @@ HumNum Convert::timeSigToDurationInQuarters(HTp token) {
 	output /= bot;
 	output *= top;
 	return output;
+}
+
+
+
+
+
+//////////////////////////////
+//
+// Convert::midiPitchToClass --
+//
+
+vector<int> Convert::pitchToClass(const vector<int>& notes, int octave, int modulo) {
+    map<int, bool> seen;
+    vector<int> output;
+
+    for (int note : notes) {
+	if (note <= 0) {
+		continue; // pitch = 0 means rests (ignore).
+	}
+        int pc = note % modulo;
+
+        seen[pc] = true;
+    }
+
+    // extract unique values (sorted because map is ordered)
+    for (auto& kv : seen) {
+        output.push_back(kv.first + modulo*octave);
+    }
+
+    return output;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::getMidiPCTriadAbbr -- reurn M = major, m = minor, d = diminished, A = augmented
+//      Input PC are MIDI pitch classes.  Input PCs are assumed sorted and unique.
+//
+//    pcs.size() == 0 → "R" (Rest)
+//    pcs.size() == 1 → "U" (Unison)
+//    pcs.size() == 2
+//    interval 7      → "-5" (Open fifth)
+//    interval 3      → "-m" (minor 3rd dyad)
+//    interval 4      → "-M" (major 3rd dyad)
+//    pcs.size() == 3
+//    4,3 → "M"              (Major triad)
+//    3,4 → "m"              (Minor triad)
+//    3,3 → "d"              (Diminished triad)
+//    4,4 → "A"              (Augmented triad)
+//
+
+string Convert::getMidiPCTriadAbbr(const vector<int>& pcs) {
+    if (pcs.size() == 0) return "R"; // rest
+    if (pcs.size() == 1) return "U"; // Unison
+
+    if (pcs.size() == 2) {
+        int a = pcs[0];
+        int b = pcs[1];
+
+        int d = (b - a + 12) % 12;  // assumes pcs already 0–11
+
+        if (d == 7) return "-5";     // open fifth
+        if (d == 3) return "-m";     // minor third dyad
+        if (d == 4) return "-M";     // major third dyad
+        return "??";
+    }
+
+    if (pcs.size() > 3) return "+";  // more than 3pcs (so not a triad)
+
+    // Resolve triads:
+
+    const vector<int>& p = pcs;
+
+    for (int r = 0; r < 3; r++) {
+        int a = p[r];
+        int b = p[(r + 1) % 3];
+        int c = p[(r + 2) % 3];
+
+        if (b < a) b += 12;
+        if (c < b) c += 12;
+
+        int d1 = b - a;
+        int d2 = c - b;
+
+        if (d1 == 4 && d2 == 3) return "M";
+        if (d1 == 3 && d2 == 4) return "m";
+        if (d1 == 3 && d2 == 3) return "d";
+        if (d1 == 4 && d2 == 4) return "A";
+    }
+
+    return "???";
+
 }
 
 
@@ -32391,6 +32484,9 @@ void HumdrumLine::getMidiPitches(std::vector<int>& output) {
 			continue;
 		}
 		if (token->isNull()) {
+			return;
+		}
+		if (token->find('r') != string::npos) {
 			return;
 		}
 		token->getMidiPitches(tnotes);
@@ -60907,6 +61003,7 @@ void Tool_autocadence::processFile(HumdrumFile& infile) {
 	m_barnum = infile.getMeasureNumbers();
 
 	fillInLastMelodicInterval(infile);
+	// fillInMajorMinor(infile);
 
 	// fill m_pitches and m_lowestPitch
 	preparePitchInfo(infile);
@@ -60953,6 +61050,43 @@ void Tool_autocadence::processFile(HumdrumFile& infile) {
 		m_humdrum_text << m_info.str();
 	}
 
+}
+
+
+//////////////////////////////
+//
+// Tool_autocadence::fillInMajorMinor --
+//
+
+void Tool_autocadence::fillInMajorMinor(HumdrumFile& infile) {
+	vector<int> notes;
+	vector<int> pcs;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		infile[i].getMidiPitchesSortHL(notes);
+		if (notes.size() == 0) {
+			continue;
+		}
+		pcs = Convert::pitchToClass(notes, 5, 12);
+		if (pcs.size() > 3) {
+			continue;
+		}
+		string triad = Convert::getMidiPCTriadAbbr(pcs);
+
+		cout << i << "\t";
+
+		cout << "Pitches=" << notes.size() << "\t";
+		for (int i=0; i<(int)notes.size(); i++) {
+			cout << " " << notes[i];
+		}
+
+		cout << "\tClasses=" << pcs.size() << "\t";
+		for (int i=0; i<(int)pcs.size(); i++) {
+			cout << " " << pcs[i];
+		}
+
+		cout << "\tTriad" << triad;
+		cout << endl;
+	}
 }
 
 
@@ -139202,47 +139336,76 @@ void Tool_text::processFile(HumdrumFile& infile) {
 
 /////////////////////////////
 //
-// Tool_text:removeText -- move **text above/below music.
+// Tool_text::removeText -- move **text above/below music.
+//    Groups **text spines by **kern (part) and processes left → right.
 //
 
 void Tool_text::removeText(HumdrumFile& infile) {
+
+	// Get all spine starts (in left-to-right order)
 	vector<HTp> sspines;
 	infile.getSpineStartList(sspines);
+
+	// Build grouped text arrays (one per **kern)
 	vector<vector<HTp>> twoarray;
 	makeTextArray(twoarray, sspines);
 
+	// Debug (optional)
+	// cout << "ARRAY SIZE: " << twoarray.size() << endl;
+
+	// Output HTML wrapper
 	string style = makeStyle();
 	m_output << style;
+
 	m_output << "!! <table class=\"pline\">" << endl;
 	m_output << "!! <tr class=\"header\">" << endl;
+
 	if (!m_rawQ) {
 		m_output << "!!    <th class=\"pline\"> Bline </th>" << endl;
 	}
+
 	m_output << "!!    <th class=\"pline-text\"> text </th>" << endl;
 
 	if (!m_rawQ) {
 		m_output << "!!    <th class=\"rp-rf\"> <span title=\"Rhyme phoneme\">rp</span>";
 		m_output << "/<span title=\"Rhyme syllable\">rf</span> </th>" << endl;
-
 		m_output << "!!    <th title=\"Rhyme Scheme\"> rs </th>" << endl;
 	}
-	m_output << "!! </tr>";
 
-	for (int i=0; i<(int)twoarray.size(); i++) {
-		for (int j=(int)twoarray[i].size()-1; j>=0; j--) {
-			cerr << "SIZE OF ARRAY " << i << " IS: " << j << endl;
-			removePartText(twoarray[i][j], j, (int)twoarray[i].size());
-			if (m_removeAllQ && j==0) {
-				twoarray[i][j]->setText("**Xtext");
-			} else if (m_removeQ && j>0) {
-				twoarray[i][j]->setText("**Xtext");
+	m_output << "!! </tr>" << endl;
+
+
+	///////////////////////////////////////////
+	//
+	// Process each part (group of text spines)
+	//
+
+	for (int i = 0; i < (int)twoarray.size(); i++) {
+
+		vector<HTp>& part = twoarray[i];
+
+		// Process each verse spine in the part (LEFT → RIGHT)
+		for (int j = 0; j < (int)part.size(); j++) {
+
+			HTp spine = part[j];
+			if (!spine) {
+				continue;
+			}
+
+			// Extract text / plines
+			removePartText(spine, j, (int)part.size());
+
+			// Handle removal options
+			if (m_removeAllQ && j == 0) {
+				spine->setText("**Xtext");
+			} else if (m_removeQ && j > 0) {
+				spine->setText("**Xtext");
 			}
 		}
 	}
+
 	m_output << "\n!! </table>\n";
 }
-
-
 
 
 ////////////////////////////
@@ -139271,20 +139434,38 @@ cerr << "Pline" << startspine << endl;
 //
 
 void Tool_text::makeTextArray(vector<vector<HTp>>& texts, vector<HTp> spines) {
-	texts.clear();
-	texts.resize(1);
 
-	for (int i = (int)spines.size() - 1; i >= 0; i--) {
-		if (spines[i]->isDataType("**text")) {
-			texts.back().push_back(spines[i]);
-		} else {
-			texts.resize(texts.size() + 1);
+	texts.clear();
+
+	vector<HTp> currentGroup;
+
+	for (int i = 0; i < (int)spines.size(); i++) {
+
+		HTp s = spines[i];
+		if (!s) continue;
+
+		// When we hit a **kern, start a new group
+		if (s->isDataType("**kern")) {
+
+			if (!currentGroup.empty()) {
+				texts.push_back(currentGroup);
+				currentGroup.clear();
+			}
+
+			continue;
+		}
+
+		// Collect **text spines into current group
+		if (s->isDataType("**text")) {
+			currentGroup.push_back(s);
 		}
 	}
 
-	std::reverse(texts.begin(), texts.end());
+	// push last group
+	if (!currentGroup.empty()) {
+		texts.push_back(currentGroup);
+	}
 }
-
 
 
 //////////////////////////////
@@ -139378,19 +139559,16 @@ string Tool_text::getParmTimestamp(HTp token, const string& target) {
 
 void Tool_text::processPlineSpine(HTp tspine, int vth, int vsize) {
 	vector<vector<HTp>> plines;
-	HTp current = tspine;
-	for (int v = 0; v < vsize; v++) {
-		printPline(plines, "plines before fillPlines");
-		fillPlines(plines, current, vth, vsize);
-		printPline(plines, "plines after fillPlines");
-	}
+	fillPlines(plines, tspine, vth, vsize);
+
 	string verse = getParamListTwo(plines, "*v:");
 	string label = "";
 	static string lastlabel = "";
+
 	if (m_showVerseQ) {
 		if (!verse.empty()) {
 			label = "VERSE ";
- 			label += verse;
+			label += verse;
 		}
 		string refrain = getParamListTwo(plines, "*rline:");
 		if (!refrain.empty()) {
@@ -139407,12 +139585,13 @@ void Tool_text::processPlineSpine(HTp tspine, int vth, int vsize) {
 	if (label != lastlabel) {
 		m_output << "\n!!   <td class=\"verse\" colspan=\"4\">" << label << "</td>";
 	}
-	for (int i=1; i<(int)plines.size(); i++) {
-		zprintPlineRow(plines[vth]);
+
+	for (int i = 1; i < (int)plines.size(); i++) {
+		zprintPlineRow(plines[i]);
 	}
+
 	lastlabel = label;
 }
-	
 
 
 /////////////////////////////

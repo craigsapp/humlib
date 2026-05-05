@@ -41,6 +41,9 @@ void HumdrumLine::getMidiPitches(std::vector<int>& output) {
 		if (token->isNull()) {
 			return;
 		}
+		if (token->find('r') != string::npos) {
+			return;
+		}
 		token->getMidiPitches(tnotes);
 		output.insert(output.end(), tnotes.begin(), tnotes.end());
 	}

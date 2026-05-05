@@ -137,47 +137,76 @@ void Tool_text::processFile(HumdrumFile& infile) {
 
 /////////////////////////////
 //
-// Tool_text:removeText -- move **text above/below music.
+// Tool_text::removeText -- move **text above/below music.
+//    Groups **text spines by **kern (part) and processes left → right.
 //
 
 void Tool_text::removeText(HumdrumFile& infile) {
+
+	// Get all spine starts (in left-to-right order)
 	vector<HTp> sspines;
 	infile.getSpineStartList(sspines);
+
+	// Build grouped text arrays (one per **kern)
 	vector<vector<HTp>> twoarray;
 	makeTextArray(twoarray, sspines);
 
+	// Debug (optional)
+	// cout << "ARRAY SIZE: " << twoarray.size() << endl;
+
+	// Output HTML wrapper
 	string style = makeStyle();
 	m_output << style;
+
 	m_output << "!! <table class=\"pline\">" << endl;
 	m_output << "!! <tr class=\"header\">" << endl;
+
 	if (!m_rawQ) {
 		m_output << "!!    <th class=\"pline\"> Bline </th>" << endl;
 	}
+
 	m_output << "!!    <th class=\"pline-text\"> text </th>" << endl;
 
 	if (!m_rawQ) {
 		m_output << "!!    <th class=\"rp-rf\"> <span title=\"Rhyme phoneme\">rp</span>";
 		m_output << "/<span title=\"Rhyme syllable\">rf</span> </th>" << endl;
-
 		m_output << "!!    <th title=\"Rhyme Scheme\"> rs </th>" << endl;
 	}
-	m_output << "!! </tr>";
 
-	for (int i=0; i<(int)twoarray.size(); i++) {
-		for (int j=(int)twoarray[i].size()-1; j>=0; j--) {
-			cerr << "SIZE OF ARRAY " << i << " IS: " << j << endl;
-			removePartText(twoarray[i][j], j, (int)twoarray[i].size());
-			if (m_removeAllQ && j==0) {
-				twoarray[i][j]->setText("**Xtext");
-			} else if (m_removeQ && j>0) {
-				twoarray[i][j]->setText("**Xtext");
+	m_output << "!! </tr>" << endl;
+
+
+	///////////////////////////////////////////
+	//
+	// Process each part (group of text spines)
+	//
+
+	for (int i = 0; i < (int)twoarray.size(); i++) {
+
+		vector<HTp>& part = twoarray[i];
+
+		// Process each verse spine in the part (LEFT → RIGHT)
+		for (int j = 0; j < (int)part.size(); j++) {
+
+			HTp spine = part[j];
+			if (!spine) {
+				continue;
+			}
+
+			// Extract text / plines
+			removePartText(spine, j, (int)part.size());
+
+			// Handle removal options
+			if (m_removeAllQ && j == 0) {
+				spine->setText("**Xtext");
+			} else if (m_removeQ && j > 0) {
+				spine->setText("**Xtext");
 			}
 		}
 	}
+
 	m_output << "\n!! </table>\n";
 }
-
-
 
 
 ////////////////////////////
@@ -206,20 +235,38 @@ cerr << "Pline" << startspine << endl;
 //
 
 void Tool_text::makeTextArray(vector<vector<HTp>>& texts, vector<HTp> spines) {
-	texts.clear();
-	texts.resize(1);
 
-	for (int i = (int)spines.size() - 1; i >= 0; i--) {
-		if (spines[i]->isDataType("**text")) {
-			texts.back().push_back(spines[i]);
-		} else {
-			texts.resize(texts.size() + 1);
+	texts.clear();
+
+	vector<HTp> currentGroup;
+
+	for (int i = 0; i < (int)spines.size(); i++) {
+
+		HTp s = spines[i];
+		if (!s) continue;
+
+		// When we hit a **kern, start a new group
+		if (s->isDataType("**kern")) {
+
+			if (!currentGroup.empty()) {
+				texts.push_back(currentGroup);
+				currentGroup.clear();
+			}
+
+			continue;
+		}
+
+		// Collect **text spines into current group
+		if (s->isDataType("**text")) {
+			currentGroup.push_back(s);
 		}
 	}
 
-	std::reverse(texts.begin(), texts.end());
+	// push last group
+	if (!currentGroup.empty()) {
+		texts.push_back(currentGroup);
+	}
 }
-
 
 
 //////////////////////////////
@@ -313,19 +360,16 @@ string Tool_text::getParmTimestamp(HTp token, const string& target) {
 
 void Tool_text::processPlineSpine(HTp tspine, int vth, int vsize) {
 	vector<vector<HTp>> plines;
-	HTp current = tspine;
-	for (int v = 0; v < vsize; v++) {
-		printPline(plines, "plines before fillPlines");
-		fillPlines(plines, current, vth, vsize);
-		printPline(plines, "plines after fillPlines");
-	}
+	fillPlines(plines, tspine, vth, vsize);
+
 	string verse = getParamListTwo(plines, "*v:");
 	string label = "";
 	static string lastlabel = "";
+
 	if (m_showVerseQ) {
 		if (!verse.empty()) {
 			label = "VERSE ";
- 			label += verse;
+			label += verse;
 		}
 		string refrain = getParamListTwo(plines, "*rline:");
 		if (!refrain.empty()) {
@@ -342,12 +386,13 @@ void Tool_text::processPlineSpine(HTp tspine, int vth, int vsize) {
 	if (label != lastlabel) {
 		m_output << "\n!!   <td class=\"verse\" colspan=\"4\">" << label << "</td>";
 	}
-	for (int i=1; i<(int)plines.size(); i++) {
-		zprintPlineRow(plines[vth]);
+
+	for (int i = 1; i < (int)plines.size(); i++) {
+		zprintPlineRow(plines[i]);
 	}
+
 	lastlabel = label;
 }
-	
 
 
 /////////////////////////////

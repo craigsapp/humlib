@@ -369,6 +369,7 @@ void Tool_autocadence::processFile(HumdrumFile& infile) {
 	m_barnum = infile.getMeasureNumbers();
 
 	fillInLastMelodicInterval(infile);
+	// fillInMajorMinor(infile);
 
 	// fill m_pitches and m_lowestPitch
 	preparePitchInfo(infile);
@@ -415,6 +416,43 @@ void Tool_autocadence::processFile(HumdrumFile& infile) {
 		m_humdrum_text << m_info.str();
 	}
 
+}
+
+
+//////////////////////////////
+//
+// Tool_autocadence::fillInMajorMinor --
+//
+
+void Tool_autocadence::fillInMajorMinor(HumdrumFile& infile) {
+	vector<int> notes;
+	vector<int> pcs;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		infile[i].getMidiPitchesSortHL(notes);
+		if (notes.size() == 0) {
+			continue;
+		}
+		pcs = Convert::pitchToClass(notes, 5, 12);
+		if (pcs.size() > 3) {
+			continue;
+		}
+		string triad = Convert::getMidiPCTriadAbbr(pcs);
+
+		cout << i << "\t";
+
+		cout << "Pitches=" << notes.size() << "\t";
+		for (int i=0; i<(int)notes.size(); i++) {
+			cout << " " << notes[i];
+		}
+
+		cout << "\tClasses=" << pcs.size() << "\t";
+		for (int i=0; i<(int)pcs.size(); i++) {
+			cout << " " << pcs[i];
+		}
+
+		cout << "\tTriad" << triad;
+		cout << endl;
+	}
 }
 
 

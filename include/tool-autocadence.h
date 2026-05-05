@@ -113,6 +113,7 @@ class Tool_autocadence : public HumTool {
 		void        prepareDissonancesForLine  (HumdrumLine& iline, HumdrumLine& dline);
 		void        identifySuspensionsAndAgents(HumdrumFile& infile);
 		std::string sortUniqueChars            (const std::string& input);
+		void fillInMajorMinor(HumdrumFile& infile);
 
 	private:
 
