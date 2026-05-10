@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon May  4 19:28:12 PDT 2026
+// Last Modified: Sat May  9 23:12:46 PDT 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -32466,12 +32466,289 @@ string HumdrumFileStructure::getPartName(HTp sstart) {
 
 //////////////////////////////
 //
+// HumdrumLine::getTriadicQuality --
+//
+
+//
+// HumdrumLine::getTriadicQuality --
+//
+
+//
+// HumdrumLine::getTriadicQuality --
+//
+
+string HumdrumLine::getTriadicQuality(HumdrumFile& infile, int index,
+		string& quality, string& root, string& inversion,
+		bool pitchesQ, bool classQ, bool restQ) {
+
+	quality.clear();
+	root.clear();
+	inversion.clear();
+
+	if (infile[index].isExclusiveInterpretation()) {
+		return "**cdata";
+	}
+
+	if (infile[index].isManipulator()) {
+		return "*";
+	}
+
+	if (infile[index].isInterpretation()) {
+		if (infile[index].getFieldCount() > 0) {
+			if (*infile[index].token(0) == "*-") {
+				return "*-";
+			}
+		}
+		return "*";
+	}
+
+	if (infile[index].isBarline()) {
+		return *(infile[index].token(0));
+	}
+
+	if (infile[index].isCommentLocal()) {
+		return "!";
+	}
+
+	if (!infile[index].isData()) {
+		return "!!";
+	}
+
+	vector<int> notes;
+	vector<int> pcs;
+
+	infile[index].getMidiPitchesSortHL(notes);
+
+	if (notes.empty()) {
+		if (restQ) {
+			quality = "R";
+			return "";
+		} else {
+			return ".";
+		}
+	}
+
+	// Get leftmost sounding pitch class (NOT lowest pitch).
+
+	int basspc = -1;
+
+	for (int i=0; i<infile[index].getFieldCount(); i++) {
+
+		HTp tok = infile[index].token(i);
+
+		if (!tok->isData()) {
+			continue;
+		}
+
+		if (tok->isNull()) {
+			continue;
+		}
+
+		vector<int> subtoks;
+		tok->getMidiPitches(subtoks);
+
+		if (subtoks.empty()) {
+			continue;
+		}
+
+		basspc = subtoks[0] % 12;
+
+		if (basspc < 0) {
+			basspc += 12;
+		}
+
+		break;
+	}
+
+	// Extract unique pitch classes.
+
+	for (int i=0; i<(int)notes.size(); i++) {
+		int pc = notes[i] % 12;
+
+		if (pc < 0) {
+			pc += 12;
+		}
+
+		bool found = false;
+
+		for (int j=0; j<(int)pcs.size(); j++) {
+			if (pcs[j] == pc) {
+				found = true;
+				break;
+			}
+		}
+
+		if (!found) {
+			pcs.push_back(pc);
+		}
+	}
+
+	sort(pcs.begin(), pcs.end());
+
+	if (pitchesQ) {
+		for (int i=0; i<(int)notes.size(); i++) {
+			if (i > 0) {
+				quality += " ";
+			}
+			quality += to_string(notes[i]);
+		}
+		return "";
+	}
+
+	if (classQ) {
+		for (int i=0; i<(int)pcs.size(); i++) {
+			if (i > 0) {
+				quality += " ";
+			}
+			quality += to_string(pcs[i]);
+		}
+		return "";
+	}
+
+	static vector<string> pcnames = {
+		"C", "C#", "D", "E-", "E", "F",
+		"F#", "G", "A-", "A", "B-", "B"
+	};
+
+	if (pcs.size() == 0) {
+		if (restQ) {
+			quality = "R";
+			return "";
+		} else {
+			return ".";
+		}
+	}
+
+	if (pcs.size() == 1) {
+		quality = "U";
+		root = pcnames[pcs[0]];
+		return "";
+	}
+
+	if (pcs.size() == 2) {
+		int interval = (pcs[1] - pcs[0] + 12) % 12;
+
+		if (interval == 7) {
+			quality = "-5";   // missing third
+		} else if (interval == 3) {
+			quality = "-m";   // missing 5th (major)
+		} else if (interval == 4) {
+			quality = "-M";   // missing 5th (minor)
+		} else {
+			quality = "?";    // non-triadic dyad:
+		}
+
+		root = pcnames[pcs[0]];
+		return "";
+	}
+
+	if (pcs.size() > 3) {
+		quality = "+";
+		return "";
+	}
+
+	// Try all roots.
+
+	for (int i=0; i<3; i++) {
+
+		int r = pcs[i];
+
+		bool has3 = false;
+		bool has4 = false;
+		bool has6 = false;
+		bool has7 = false;
+		bool has8 = false;
+
+		for (int j=0; j<3; j++) {
+			int interval = (pcs[j] - r + 12) % 12;
+
+			if (interval == 3) {
+				has3 = true;
+			} else if (interval == 4) {
+				has4 = true;
+			} else if (interval == 6) {
+				has6 = true;
+			} else if (interval == 7) {
+				has7 = true;
+			} else if (interval == 8) {
+				has8 = true;
+			}
+		}
+
+		int bassint = (basspc - r + 12) % 12;
+
+		// Major
+
+		if (has4 && has7) {
+			quality = "M";
+			root = pcnames[r];
+
+			if (bassint == 4) {
+				inversion = "b";
+			} else if (bassint == 7) {
+				inversion = "c";
+			}
+
+			return "";
+		}
+
+		// Minor
+
+		if (has3 && has7) {
+			quality = "m";
+			root = pcnames[r];
+
+			if (bassint == 3) {
+				inversion = "b";
+			} else if (bassint == 7) {
+				inversion = "c";
+			}
+
+			return "";
+		}
+
+		// Diminished
+
+		if (has3 && has6) {
+			quality = "d";
+			root = pcnames[r];
+
+			if (bassint == 3) {
+				inversion = "b";
+			} else if (bassint == 6) {
+				inversion = "c";
+			}
+
+			return "";
+		}
+
+		// Augmented
+
+		if (has4 && has8) {
+			quality = "A";
+			root = pcnames[r];
+
+			if (bassint == 4) {
+				inversion = "b";
+			} else if (bassint == 8) {
+				inversion = "c";
+			}
+
+			return "";
+		}
+	}
+
+	quality = "??";
+	return "";
+}
+
+//////////////////////////////
+//
 // HumdrumLine::getMidiPitches: Get MIDI note numbers for **kern pitches on line.
 // 0 = rest, negative values are tied notes from previously in the score.
 //
 
 void HumdrumLine::getMidiPitches(std::vector<int>& output) {
-
 	HumdrumLine& line = *this;
 	output.clear();
 	if (!line.isData()) {
@@ -32484,10 +32761,7 @@ void HumdrumLine::getMidiPitches(std::vector<int>& output) {
 			continue;
 		}
 		if (token->isNull()) {
-			return;
-		}
-		if (token->find('r') != string::npos) {
-			return;
+			continue;
 		}
 		token->getMidiPitches(tnotes);
 		output.insert(output.end(), tnotes.begin(), tnotes.end());
@@ -93821,6 +94095,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(textdur, infile, commands[i].second, status);
 		} else if (commands[i].first == "tie") {
 			RUNTOOL(tie, infile, commands[i].second, status);
+		} else if (commands[i].first == "triad") {
+			RUNTOOL(triad, infile, commands[i].second, status);
 		} else if (commands[i].first == "tspos") {
 			RUNTOOL(tspos, infile, commands[i].second, status);
 		} else if (commands[i].first == "transpose") {
@@ -139234,7 +139510,7 @@ Tool_text::Tool_text(void) {
 	define("R|remove-all=b", "Remove all text from music");
 	define("raw=b", "Show only text, no line or rhyme");
 	define("v|show-verse=b", "force dispay of verse/referain labels (if output is raw)");
-	define("norep|no-rep|no-repetitions=b", "show only non-repeated text");
+	define("repeats|no-repeats=b", "suppress repeated plines ending in r");
 }
 
 
@@ -139292,13 +139568,13 @@ bool Tool_text::run(HumdrumFile& infile) {
 //
 
 void Tool_text::initialize(void) {
-	m_onlyQ       = getBoolean("first");
-	m_aboveQ      = getBoolean("above");
-	m_joinQ       = getBoolean("join");
-	m_removeQ     = getBoolean("remove-first");
-	m_removeAllQ  = getBoolean("remove-all");
-	m_rawQ        = getBoolean("raw");
-	m_noRepeatsQ  = getBoolean("no-repetitions");
+	m_onlyQ       =  getBoolean("first");
+	m_aboveQ      =  getBoolean("above");
+	m_joinQ       =  getBoolean("join");
+	m_removeQ     =  getBoolean("remove-first");
+	m_removeAllQ  =  getBoolean("remove-all");
+	m_rawQ        =  getBoolean("raw");
+	m_repeatsQ    =  getBoolean("repeats");
 	m_showVerseQ = true;
 	if (m_rawQ) {
 		m_showVerseQ = false;
@@ -139415,7 +139691,6 @@ void Tool_text::removeText(HumdrumFile& infile) {
 
 void Tool_text::removePartText(HTp startspine, int vth, int vsize) {
 	if (hasParam(startspine, "*pline:")) {
-cerr << "Pline" << startspine << endl;
 		processPlineSpine(startspine, vth, vsize);
 	} else if (hasParam(startspine, "*rline:")) {
 		processPlineSpine(startspine, vth, vsize);
@@ -139561,6 +139836,10 @@ void Tool_text::processPlineSpine(HTp tspine, int vth, int vsize) {
 	vector<vector<HTp>> plines;
 	fillPlines(plines, tspine, vth, vsize);
 
+	for (int i=1; i<(int)plines.size(); i++) {
+		addSyllables(plines[i]);
+	}
+
 	string verse = getParamListTwo(plines, "*v:");
 	string label = "";
 	static string lastlabel = "";
@@ -139586,12 +139865,66 @@ void Tool_text::processPlineSpine(HTp tspine, int vth, int vsize) {
 		m_output << "\n!!   <td class=\"verse\" colspan=\"4\">" << label << "</td>";
 	}
 
+	HumRegex hre;
+
 	for (int i = 1; i < (int)plines.size(); i++) {
+
+		string plinelabel = getPlineLabel(plines[i]);
+
+		// suppress repeated plines such as:
+		//    *pline:8r
+		//    *rline:12r
+		if (m_repeatsQ) {
+			if (hre.search(plinelabel, "r$")) {
+				continue;
+			}
+		}
+
 		zprintPlineRow(plines[i]);
 	}
 
 	lastlabel = label;
 }
+
+
+
+/////////////////////////////
+//
+// Tool_text::addSyllables --
+//
+
+void Tool_text::addSyllables(vector<HTp>& syllables) {
+	if (syllables.empty()) {
+		return;
+	}
+
+	HumRegex hre;
+	HTp current = syllables[0]->getNextToken();
+
+	while (current) {
+
+		if (current->isInterpretation()) {
+
+			if (hre.search(current, "^\\*[pr]line:")) {
+				break;
+			}
+
+			if (*current == "*-") {
+				break;
+			}
+		}
+
+		if (current->isNull()) {
+			current = current->getNextToken();
+			continue;
+		}
+
+		syllables.push_back(current);
+		current = current->getNextToken();
+	}
+}
+
+
 
 
 /////////////////////////////
@@ -139620,10 +139953,10 @@ string Tool_text::makeStyle(void) {
 !! table.pline .verse { padding-top: 10px; }
 !! table.pline td.pline { padding-right: 10px; }
 !! table.pline .rp {background: chartreuse !important}
-!! table.pline .rs {background: skyblue !important}
+!! table.pline .rs { }
 !! table.pline .rf {color: fuchsia; }
 !! table.pline .rp {color: purple; }
-!! table.pline .rs {font-weight: bold; color: limeegreen; }
+!! table.pline .rs {font-weight: bold; }
 !! table.pline .rs {font-weight: bold; }
 !! </style>
 )";
@@ -139640,35 +139973,35 @@ string Tool_text::makeStyle(void) {
 void Tool_text::zprintPlineRow(vector<HTp>& pieces) {
 	m_output << "\n!! <tr class=\"pline\">";
 	string plinelabel = getPlineLabel(pieces);
+
 	if (!m_rawQ) {
 		if (!plinelabel.empty()) {
 			m_output << "\n!!   <td class=\"pline\">";
 			m_output << plinelabel;
 			m_output << "</td>";
 		}
+	}
 
-	} 
 	m_output << "\n!!   <td class=\"pline-text\">";
 	printPlineSyllables(pieces);
 	m_output << "</td>";
 
+	string rp = getParamListOne(pieces, "*rp:");
+	string rf = getParamListOne(pieces, "*rf:");
 
-		string rp = getParamListOne(pieces, "*rp:");
-		string rf = getParamListOne(pieces, "*rf:");
-		if (!m_rawQ && !(rp.empty() || rf.empty())) {
-			m_output << "\n!!   <td class='rp'>";
-			m_output << "<span class=\"rp\">"<< rp;
-			m_output << "</span>";
-			m_output << "/";
-			m_output << "<span class=\"rf\">" << rf << "</span>";
-			m_output << "</td>";
+	if (!m_rawQ && !(rp.empty() || rf.empty())) {
+		m_output << "\n!!   <td class='rp'>";
+		m_output << "<span class=\"rp\">" << rp;
+		m_output << "</span>";
+		m_output << "/";
+		m_output << "<span class=\"rf\">" << rf << "</span>";
+		m_output << "</td>";
 
-			string rs = getParamListOne(pieces, "*rs:");
-			m_output << "\n!!   <td class='rs'>" << rs << "</td>";
-		}
+		string rs = getParamListOne(pieces, "*rs:");
+		m_output << "\n!!   <td class='rs'>" << rs << "</td>";
+	}
 
 	m_output << "\n!! </tr>";
-
 }
 
 
@@ -139701,9 +140034,9 @@ string Tool_text::getPlineLabel(vector<HTp>& pieces) {
 //
 
 void Tool_text::printPlineSyllables(vector<HTp>& pieces) {
-cerr << "Processing spine: " << pieces[0]->getSpineIndex() << endl;
 	stringstream out;
 	vector<HTp> np;
+
 	for (int i=0; i<(int)pieces.size(); i++) {
 		if (pieces[i]->isNull()) {
 			continue;
@@ -139721,6 +140054,7 @@ cerr << "Processing spine: " << pieces[0]->getSpineIndex() << endl;
 			m_output << getSyllable(text);
 		}
 	}
+
 	return;
 }
 
@@ -139728,27 +140062,68 @@ cerr << "Processing spine: " << pieces[0]->getSpineIndex() << endl;
 
 //////////////////////////////
 //
-// Tool_text::fillPlines -- create vector for each pline.
+// Tool_text::fillPlines -- create each pline entry.
 //
 
-void Tool_text::fillPlines(vector<vector<HTp>>& plines, HTp tspine, int vth, int vsize) {
+void Tool_text::fillPlines(vector<vector<HTp>>& plines, HTp tspine,
+		int vth, int vsize) {
+
 	HTp current = tspine;
+
 	plines.clear();
+
+	// plines[0] stores global verse/refrain metadata
 	plines.resize(1);
+
+	HumRegex hre;
+
+	// current active pline
+	int index = -1;
+
 	while (current) {
+
 		if (current->isInterpretation()) {
-			if ( current->compare(0, 7, "*pline:") == 0) {
+
+			// store verse interpretations globally
+			if (current->compare(0, 3, "*v:") == 0) {
+				plines[0].push_back(current);
+			}
+
+			// create a new pline/rline
+			else if (hre.search(current, "^\\*[pr]line:")) {
+
 				plines.resize(plines.size() + 1);
-			} else if (current->compare(0, 7, "*rline:") == 0) {
-				plines.resize(plines.size() + 1);
+
+				index = (int)plines.size() - 1;
+
+				plines[index].push_back(current);
+			}
+
+			// attach rhyme metadata to current pline
+			else if (hre.search(current, "^\\*rp:")) {
+
+				if (index >= 0) {
+					plines[index].push_back(current);
+				}
+			}
+
+			else if (hre.search(current, "^\\*rf:")) {
+
+				if (index >= 0) {
+					plines[index].push_back(current);
+				}
+			}
+
+			else if (hre.search(current, "^\\*rs:")) {
+
+				if (index >= 0) {
+					plines[index].push_back(current);
+				}
 			}
 		}
-		plines.back().push_back(current);
+
 		current = current->getNextToken();
 	}
-
-printPline(plines, "after plines");
-
 }
 
 
@@ -139760,12 +140135,16 @@ printPline(plines, "after plines");
 
 void Tool_text::printPline(vector<vector<HTp>>& p, const char* description) {
 	return;
+
 	cerr << endl << "PLINE----" << description << endl;
+
 	for (int i=0; i<(int)p.size(); i++) {
 		for (int j=0; j<(int)p[i].size(); j++) {
-			cerr << "===(" << i <<"," << j << ") = " << p.at(i).at(j) << endl;
+			cerr << "===(" << i <<"," << j << ") = "
+			     << p.at(i).at(j) << endl;
 		}
 	}
+
 	cerr << "PLINE^^^-------------" << endl;
 }
 
@@ -139779,6 +140158,7 @@ void Tool_text::printPline(vector<vector<HTp>>& p, const char* description) {
 void Tool_text::processTextSpine(HTp tspine, int vth, int vsize) {
 	HumdrumFileStructure *infile = tspine->getOwner()->getOwner();
 	string name = infile->getPartName(tspine);
+
 	if (!name.empty()) {
 		m_output << "!!\n!! <p>" << name << endl;
 	} else {
@@ -139786,20 +140166,27 @@ void Tool_text::processTextSpine(HTp tspine, int vth, int vsize) {
 	}
 
 	m_output << "!! <p>";
+
 	HTp current = tspine;
+
 	while (current) {
+
 		if (!current->isData()) {
 			current = current->getNextToken();
 			continue;
 		}
+
 		if (current->isNull()) {
 			current = current->getNextToken();
 			continue;
 		}
+
 		string syllable = getSyllable(*current);
 		m_output << syllable;
+
 		current = current->getNextToken();
 	}
+
 	m_output << endl;
 }
 
@@ -139815,16 +140202,21 @@ string Tool_text::getSyllable(const string& text) {
 	HumRegex hre;
 
 	if (!m_joinQ) {
+
 		hre.replaceDestructive(newtext, "", "^-");
+
 		if (!newtext.empty()) {
+
 			if (newtext.back() == '-') {
 				newtext.resize((int)newtext.size() - 1);
 			} else {
 				newtext += " ";
 			}
+
 		} else {
 			newtext += " ";
 		}
+
 	} else {
 		newtext += " ";
 	}
@@ -144039,6 +144431,178 @@ void Tool_tremolo::storeLastTremoloNoteInfo(HTp token) {
 		m_last_tremolo_time.at(track) = timestamp;
 	} else if (timestamp > m_last_tremolo_time.at(track)) {
 		m_last_tremolo_time.at(track) = timestamp;
+	}
+}
+
+
+
+
+
+/////////////////////////////////
+//
+// Tool_triad::Tool_triad -- Set the recognized options for the tool.
+//
+
+Tool_triad::Tool_triad(void) {
+	define("a|append=b",       "Add analysis at the end of the line");
+	define("c|pc|class|pitch-class=b",  "Display pitch classes");
+	define("p|pitches=b",      "Display pitches");
+	define("R|rest=b",         "Display rest rather than null token");
+	define("s|summary=b",      "Display summary table");
+	define("r|root=b",         "Display root only");
+	define("q|quality=b",      "Display quality only");
+	define("U|no-unison=b",    "No U quality");
+}
+
+
+
+/////////////////////////////////
+//
+// Tool_triad::run -- Do the main work of the tool.
+//
+
+bool Tool_triad::run(HumdrumFileSet& infiles) {
+	bool status = true;
+	for (int i=0; i<infiles.getCount(); i++) {
+		status &= run(infiles[i]);
+	}
+	return status;
+}
+
+
+bool Tool_triad::run(const string& indata, ostream& out) {
+	HumdrumFile infile(indata);
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_triad::run(HumdrumFile& infile, ostream& out) {
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+
+bool Tool_triad::run(HumdrumFile& infile) {
+	initialize();
+	processFile(infile);
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_triad::initialize --  Initializations that only have to be done once
+//    for all HumdrumFile segments.
+//
+
+void Tool_triad::initialize(void) {
+	m_appendQ   = getBoolean("append");
+	m_prependQ  = !m_appendQ;
+	m_summaryQ  = getBoolean("summary");
+	m_classQ    = getBoolean("pitch-class");
+	m_pitchesQ  = getBoolean("pitches");
+	m_rootQ     = getBoolean("root");
+	m_qualityQ  = getBoolean("quality");
+	m_unisonQ   = !getBoolean("no-unison");
+}
+
+
+
+/////////////////////////////
+//
+// Tool_triad::processFile --
+//
+
+void Tool_triad::processFile(HumdrumFile& infile) {
+	string quality;
+	string root;
+	string inversion;
+
+	for (int i=0; i<infile.getLineCount(); i++) {
+
+		// Preserve global/local comments exactly.
+		if (!infile[i].hasSpines()) {
+			m_humdrum_text << infile[i] << endl;
+			continue;
+		}
+
+		quality.clear();
+		root.clear();
+		inversion.clear();
+
+		string token = infile[i].getTriadicQuality(
+			infile,
+			i,
+			quality,
+			root,
+			inversion,
+			m_pitchesQ,
+			m_classQ,
+			getBoolean("rest")
+		);
+		if (!m_unisonQ && (quality == "U")) {
+			quality = "";
+		}
+		if (m_rootQ) {
+			quality = "";
+		}
+		if (m_qualityQ) {
+			root = "";
+			inversion = "";
+		}
+
+		// Construct analysis token for data lines.
+		if (token.empty()) {
+
+			token = quality;
+
+			if (!root.empty()) {
+				if (!m_rootQ) {
+					token += "(";
+				}
+				token += root;
+
+				if (!inversion.empty()) {
+					token += inversion;
+				}
+
+				if (!m_rootQ) {
+					token += ")";
+				}
+			}
+		}
+		if (token.empty()) {
+			token = ".";
+		}
+
+		// Ignore hidden comment marker.
+		if (token == "!!") {
+			m_humdrum_text << infile[i] << endl;
+			continue;
+		}
+
+		// Prepend analysis spine.
+		if (m_prependQ) {
+			m_humdrum_text << token << "\t" << infile[i] << endl;
+		}
+
+		// Append analysis spine.
+		else {
+			m_humdrum_text << infile[i] << "\t" << token << endl;
+		}
 	}
 }
 

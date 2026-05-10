@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon May  4 19:28:12 PDT 2026
+// Last Modified: Sat May  9 23:12:46 PDT 2026
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -1333,6 +1333,9 @@ class HumdrumLine : public std::string, public HumHash {
 
 		// pitch-related functions, defined in HumdrumLine-kern.cpp:
 
+		std::string getTriadicQuality(HumdrumFile& infile, int index,
+	 	                              std::string& quality, std::string& root, std::string& inversion,
+		                              bool pirchesQ = false, bool classQ = false, bool restQ = false);
 		void             getMidiPitches       (std::vector<int>& output);
 		std::vector<int> getMidiPitches       (void);
 		void             getMidiPitchesSortHL (std::vector<int>& output);
@@ -11884,6 +11887,7 @@ class Tool_text : public HumTool {
 		std::string getSyllable    (const std::string& token);
 		void     fillPlines        (std::vector<std::vector<HTp>>& plines, HTp tspine,
 		                            int vth, int vsize);
+		void     addSyllables      (std::vector<HTp>& syllables);
 		std::string getPlineLabel  (std::vector<HTp>& pieces);
 		void     printPlineSyllables(std::vector<HTp>& pieces);
 		void     printPline(std::vector<std::vector<HTp>>& p, const char* description);
@@ -11901,7 +11905,7 @@ class Tool_text : public HumTool {
 		bool     m_removeAllQ = false;
 		bool     m_mergeQ     = true;
 		bool     m_rawQ       = false;
-		bool     m_noRepeatsQ = false;
+		bool     m_repeatsQ   = false;
 		bool     m_showVerseQ = false;
 
 		std::vector<std::vector<std::string>> m_text;
@@ -12192,6 +12196,35 @@ class Tool_tremolo : public HumTool {
 		std::vector<HTp> m_markup_tokens;
 		std::vector<HumNum> m_first_tremolo_time;
 		std::vector<HumNum> m_last_tremolo_time;
+
+};
+
+
+class Tool_triad : public HumTool {
+	public:
+		         Tool_triad          (void);
+		        ~Tool_triad          () {};
+
+		bool     run                  (HumdrumFileSet& infiles);
+		bool     run                  (HumdrumFile& infile);
+		bool     run                  (const std::string& indata, std::ostream& out);
+		bool     run                  (HumdrumFile& infile, std::ostream& out);
+		void     processFile          (HumdrumFile& infile);
+		std::string fillInMajorMinor  (HumdrumFile& infile, int index);
+
+	protected:
+		void     initialize        (void);
+
+	private:
+		bool m_prependQ = true;
+		bool m_restQ    = false;
+		bool m_classQ   = false;
+		bool m_pitchesQ = false;
+		bool m_appendQ  = false;
+		bool m_summaryQ = false;
+		bool m_rootQ    = false;
+		bool m_qualityQ = false;
+		bool m_unisonQ  = false;
 
 };
 

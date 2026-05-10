@@ -97,6 +97,7 @@
 #include "tool-transpose.h"
 #include "tool-tremolo.h"
 #include "tool-trillspell.h"
+#include "tool-triad.h"
 #include "tool-tspos.h"
 #include "tool-vcross.h"
 #include "tool-1520ify.h"
@@ -392,6 +393,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(textdur, infile, commands[i].second, status);
 		} else if (commands[i].first == "tie") {
 			RUNTOOL(tie, infile, commands[i].second, status);
+		} else if (commands[i].first == "triad") {
+			RUNTOOL(triad, infile, commands[i].second, status);
 		} else if (commands[i].first == "tspos") {
 			RUNTOOL(tspos, infile, commands[i].second, status);
 		} else if (commands[i].first == "transpose") {
