@@ -48,6 +48,7 @@ class Tool_text : public HumTool {
 		std::string getSyllable    (const std::string& token);
 		void     fillPlines        (std::vector<std::vector<HTp>>& plines, HTp tspine,
 		                            int vth, int vsize);
+		void     addSyllables      (std::vector<HTp>& syllables);
 		std::string getPlineLabel  (std::vector<HTp>& pieces);
 		void     printPlineSyllables(std::vector<HTp>& pieces);
 		void     printPline(std::vector<std::vector<HTp>>& p, const char* description);
@@ -65,7 +66,7 @@ class Tool_text : public HumTool {
 		bool     m_removeAllQ = false;
 		bool     m_mergeQ     = true;
 		bool     m_rawQ       = false;
-		bool     m_noRepeatsQ = false;
+		bool     m_repeatsQ   = false;
 		bool     m_showVerseQ = false;
 
 		std::vector<std::vector<std::string>> m_text;

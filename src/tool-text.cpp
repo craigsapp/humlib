@@ -35,7 +35,7 @@ Tool_text::Tool_text(void) {
 	define("R|remove-all=b", "Remove all text from music");
 	define("raw=b", "Show only text, no line or rhyme");
 	define("v|show-verse=b", "force dispay of verse/referain labels (if output is raw)");
-	define("norep|no-rep|no-repetitions=b", "show only non-repeated text");
+	define("repeats|no-repeats=b", "suppress repeated plines ending in r");
 }
 
 
@@ -93,13 +93,13 @@ bool Tool_text::run(HumdrumFile& infile) {
 //
 
 void Tool_text::initialize(void) {
-	m_onlyQ       = getBoolean("first");
-	m_aboveQ      = getBoolean("above");
-	m_joinQ       = getBoolean("join");
-	m_removeQ     = getBoolean("remove-first");
-	m_removeAllQ  = getBoolean("remove-all");
-	m_rawQ        = getBoolean("raw");
-	m_noRepeatsQ  = getBoolean("no-repetitions");
+	m_onlyQ       =  getBoolean("first");
+	m_aboveQ      =  getBoolean("above");
+	m_joinQ       =  getBoolean("join");
+	m_removeQ     =  getBoolean("remove-first");
+	m_removeAllQ  =  getBoolean("remove-all");
+	m_rawQ        =  getBoolean("raw");
+	m_repeatsQ    =  getBoolean("repeats");
 	m_showVerseQ = true;
 	if (m_rawQ) {
 		m_showVerseQ = false;
@@ -216,7 +216,6 @@ void Tool_text::removeText(HumdrumFile& infile) {
 
 void Tool_text::removePartText(HTp startspine, int vth, int vsize) {
 	if (hasParam(startspine, "*pline:")) {
-cerr << "Pline" << startspine << endl;
 		processPlineSpine(startspine, vth, vsize);
 	} else if (hasParam(startspine, "*rline:")) {
 		processPlineSpine(startspine, vth, vsize);
@@ -362,6 +361,10 @@ void Tool_text::processPlineSpine(HTp tspine, int vth, int vsize) {
 	vector<vector<HTp>> plines;
 	fillPlines(plines, tspine, vth, vsize);
 
+	for (int i=1; i<(int)plines.size(); i++) {
+		addSyllables(plines[i]);
+	}
+
 	string verse = getParamListTwo(plines, "*v:");
 	string label = "";
 	static string lastlabel = "";
@@ -387,12 +390,66 @@ void Tool_text::processPlineSpine(HTp tspine, int vth, int vsize) {
 		m_output << "\n!!   <td class=\"verse\" colspan=\"4\">" << label << "</td>";
 	}
 
+	HumRegex hre;
+
 	for (int i = 1; i < (int)plines.size(); i++) {
+
+		string plinelabel = getPlineLabel(plines[i]);
+
+		// suppress repeated plines such as:
+		//    *pline:8r
+		//    *rline:12r
+		if (m_repeatsQ) {
+			if (hre.search(plinelabel, "r$")) {
+				continue;
+			}
+		}
+
 		zprintPlineRow(plines[i]);
 	}
 
 	lastlabel = label;
 }
+
+
+
+/////////////////////////////
+//
+// Tool_text::addSyllables --
+//
+
+void Tool_text::addSyllables(vector<HTp>& syllables) {
+	if (syllables.empty()) {
+		return;
+	}
+
+	HumRegex hre;
+	HTp current = syllables[0]->getNextToken();
+
+	while (current) {
+
+		if (current->isInterpretation()) {
+
+			if (hre.search(current, "^\\*[pr]line:")) {
+				break;
+			}
+
+			if (*current == "*-") {
+				break;
+			}
+		}
+
+		if (current->isNull()) {
+			current = current->getNextToken();
+			continue;
+		}
+
+		syllables.push_back(current);
+		current = current->getNextToken();
+	}
+}
+
+
 
 
 /////////////////////////////
@@ -421,10 +478,10 @@ string Tool_text::makeStyle(void) {
 !! table.pline .verse { padding-top: 10px; }
 !! table.pline td.pline { padding-right: 10px; }
 !! table.pline .rp {background: chartreuse !important}
-!! table.pline .rs {background: skyblue !important}
+!! table.pline .rs { }
 !! table.pline .rf {color: fuchsia; }
 !! table.pline .rp {color: purple; }
-!! table.pline .rs {font-weight: bold; color: limeegreen; }
+!! table.pline .rs {font-weight: bold; }
 !! table.pline .rs {font-weight: bold; }
 !! </style>
 )";
@@ -441,35 +498,35 @@ string Tool_text::makeStyle(void) {
 void Tool_text::zprintPlineRow(vector<HTp>& pieces) {
 	m_output << "\n!! <tr class=\"pline\">";
 	string plinelabel = getPlineLabel(pieces);
+
 	if (!m_rawQ) {
 		if (!plinelabel.empty()) {
 			m_output << "\n!!   <td class=\"pline\">";
 			m_output << plinelabel;
 			m_output << "</td>";
 		}
+	}
 
-	} 
 	m_output << "\n!!   <td class=\"pline-text\">";
 	printPlineSyllables(pieces);
 	m_output << "</td>";
 
+	string rp = getParamListOne(pieces, "*rp:");
+	string rf = getParamListOne(pieces, "*rf:");
 
-		string rp = getParamListOne(pieces, "*rp:");
-		string rf = getParamListOne(pieces, "*rf:");
-		if (!m_rawQ && !(rp.empty() || rf.empty())) {
-			m_output << "\n!!   <td class='rp'>";
-			m_output << "<span class=\"rp\">"<< rp;
-			m_output << "</span>";
-			m_output << "/";
-			m_output << "<span class=\"rf\">" << rf << "</span>";
-			m_output << "</td>";
+	if (!m_rawQ && !(rp.empty() || rf.empty())) {
+		m_output << "\n!!   <td class='rp'>";
+		m_output << "<span class=\"rp\">" << rp;
+		m_output << "</span>";
+		m_output << "/";
+		m_output << "<span class=\"rf\">" << rf << "</span>";
+		m_output << "</td>";
 
-			string rs = getParamListOne(pieces, "*rs:");
-			m_output << "\n!!   <td class='rs'>" << rs << "</td>";
-		}
+		string rs = getParamListOne(pieces, "*rs:");
+		m_output << "\n!!   <td class='rs'>" << rs << "</td>";
+	}
 
 	m_output << "\n!! </tr>";
-
 }
 
 
@@ -502,9 +559,9 @@ string Tool_text::getPlineLabel(vector<HTp>& pieces) {
 //
 
 void Tool_text::printPlineSyllables(vector<HTp>& pieces) {
-cerr << "Processing spine: " << pieces[0]->getSpineIndex() << endl;
 	stringstream out;
 	vector<HTp> np;
+
 	for (int i=0; i<(int)pieces.size(); i++) {
 		if (pieces[i]->isNull()) {
 			continue;
@@ -522,6 +579,7 @@ cerr << "Processing spine: " << pieces[0]->getSpineIndex() << endl;
 			m_output << getSyllable(text);
 		}
 	}
+
 	return;
 }
 
@@ -529,27 +587,68 @@ cerr << "Processing spine: " << pieces[0]->getSpineIndex() << endl;
 
 //////////////////////////////
 //
-// Tool_text::fillPlines -- create vector for each pline.
+// Tool_text::fillPlines -- create each pline entry.
 //
 
-void Tool_text::fillPlines(vector<vector<HTp>>& plines, HTp tspine, int vth, int vsize) {
+void Tool_text::fillPlines(vector<vector<HTp>>& plines, HTp tspine,
+		int vth, int vsize) {
+
 	HTp current = tspine;
+
 	plines.clear();
+
+	// plines[0] stores global verse/refrain metadata
 	plines.resize(1);
+
+	HumRegex hre;
+
+	// current active pline
+	int index = -1;
+
 	while (current) {
+
 		if (current->isInterpretation()) {
-			if ( current->compare(0, 7, "*pline:") == 0) {
+
+			// store verse interpretations globally
+			if (current->compare(0, 3, "*v:") == 0) {
+				plines[0].push_back(current);
+			}
+
+			// create a new pline/rline
+			else if (hre.search(current, "^\\*[pr]line:")) {
+
 				plines.resize(plines.size() + 1);
-			} else if (current->compare(0, 7, "*rline:") == 0) {
-				plines.resize(plines.size() + 1);
+
+				index = (int)plines.size() - 1;
+
+				plines[index].push_back(current);
+			}
+
+			// attach rhyme metadata to current pline
+			else if (hre.search(current, "^\\*rp:")) {
+
+				if (index >= 0) {
+					plines[index].push_back(current);
+				}
+			}
+
+			else if (hre.search(current, "^\\*rf:")) {
+
+				if (index >= 0) {
+					plines[index].push_back(current);
+				}
+			}
+
+			else if (hre.search(current, "^\\*rs:")) {
+
+				if (index >= 0) {
+					plines[index].push_back(current);
+				}
 			}
 		}
-		plines.back().push_back(current);
+
 		current = current->getNextToken();
 	}
-
-printPline(plines, "after plines");
-
 }
 
 
@@ -561,12 +660,16 @@ printPline(plines, "after plines");
 
 void Tool_text::printPline(vector<vector<HTp>>& p, const char* description) {
 	return;
+
 	cerr << endl << "PLINE----" << description << endl;
+
 	for (int i=0; i<(int)p.size(); i++) {
 		for (int j=0; j<(int)p[i].size(); j++) {
-			cerr << "===(" << i <<"," << j << ") = " << p.at(i).at(j) << endl;
+			cerr << "===(" << i <<"," << j << ") = "
+			     << p.at(i).at(j) << endl;
 		}
 	}
+
 	cerr << "PLINE^^^-------------" << endl;
 }
 
@@ -580,6 +683,7 @@ void Tool_text::printPline(vector<vector<HTp>>& p, const char* description) {
 void Tool_text::processTextSpine(HTp tspine, int vth, int vsize) {
 	HumdrumFileStructure *infile = tspine->getOwner()->getOwner();
 	string name = infile->getPartName(tspine);
+
 	if (!name.empty()) {
 		m_output << "!!\n!! <p>" << name << endl;
 	} else {
@@ -587,20 +691,27 @@ void Tool_text::processTextSpine(HTp tspine, int vth, int vsize) {
 	}
 
 	m_output << "!! <p>";
+
 	HTp current = tspine;
+
 	while (current) {
+
 		if (!current->isData()) {
 			current = current->getNextToken();
 			continue;
 		}
+
 		if (current->isNull()) {
 			current = current->getNextToken();
 			continue;
 		}
+
 		string syllable = getSyllable(*current);
 		m_output << syllable;
+
 		current = current->getNextToken();
 	}
+
 	m_output << endl;
 }
 
@@ -616,16 +727,21 @@ string Tool_text::getSyllable(const string& text) {
 	HumRegex hre;
 
 	if (!m_joinQ) {
+
 		hre.replaceDestructive(newtext, "", "^-");
+
 		if (!newtext.empty()) {
+
 			if (newtext.back() == '-') {
 				newtext.resize((int)newtext.size() - 1);
 			} else {
 				newtext += " ";
 			}
+
 		} else {
 			newtext += " ";
 		}
+
 	} else {
 		newtext += " ";
 	}
@@ -637,6 +753,3 @@ string Tool_text::getSyllable(const string& text) {
 // END_MERGE
 
 } // end namespace hum
-
-
-
