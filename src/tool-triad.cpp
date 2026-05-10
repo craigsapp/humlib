@@ -32,7 +32,9 @@ Tool_triad::Tool_triad(void) {
 	define("p|pitches=b",      "Display pitches");
 	define("R|rest=b",         "Display rest rather than null token");
 	define("s|summary=b",      "Display summary table");
-	define("r|root=b",         "Display root");
+	define("r|root=b",         "Display root only");
+	define("q|quality=b",      "Display quality only");
+	define("U|no-unison=b",    "No U quality");
 }
 
 
@@ -96,6 +98,8 @@ void Tool_triad::initialize(void) {
 	m_classQ    = getBoolean("pitch-class");
 	m_pitchesQ  = getBoolean("pitches");
 	m_rootQ     = getBoolean("root");
+	m_qualityQ  = getBoolean("quality");
+	m_unisonQ   = !getBoolean("no-unison");
 }
 
 
@@ -132,6 +136,16 @@ void Tool_triad::processFile(HumdrumFile& infile) {
 			m_classQ,
 			getBoolean("rest")
 		);
+		if (!m_unisonQ && (quality == "U")) {
+			quality = "";
+		}
+		if (m_rootQ) {
+			quality = "";
+		}
+		if (m_qualityQ) {
+			root = "";
+			inversion = "";
+		}
 
 		// Construct analysis token for data lines.
 		if (token.empty()) {
@@ -139,16 +153,22 @@ void Tool_triad::processFile(HumdrumFile& infile) {
 			token = quality;
 
 			if (!root.empty()) {
-				token += "(";
+				if (!m_rootQ) {
+					token += "(";
+				}
 				token += root;
 
 				if (!inversion.empty()) {
-					token += "/";
 					token += inversion;
 				}
 
-				token += ")";
+				if (!m_rootQ) {
+					token += ")";
+				}
 			}
+		}
+		if (token.empty()) {
+			token = ".";
 		}
 
 		// Ignore hidden comment marker.

@@ -47,6 +47,8 @@ class Tool_triad : public HumTool {
 		bool m_appendQ  = false;
 		bool m_summaryQ = false;
 		bool m_rootQ    = false;
+		bool m_qualityQ = false;
+		bool m_unisonQ  = false;
 
 };
 
