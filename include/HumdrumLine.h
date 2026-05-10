@@ -145,6 +145,9 @@ class HumdrumLine : public std::string, public HumHash {
 
 		// pitch-related functions, defined in HumdrumLine-kern.cpp:
 
+		std::string getTriadicQuality(HumdrumFile& infile, int index,
+	 	                              std::string& quality, std::string& root, std::string& inversion,
+		                              bool pirchesQ = false, bool classQ = false, bool restQ = false);
 		void             getMidiPitches       (std::vector<int>& output);
 		std::vector<int> getMidiPitches       (void);
 		void             getMidiPitchesSortHL (std::vector<int>& output);
