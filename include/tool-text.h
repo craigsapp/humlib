@@ -56,6 +56,7 @@ class Tool_text : public HumTool {
 		void        zprintPlineRow (std::vector<HTp>& pieces);
 		void        makeTextArray  (std::vector<std::vector<HTp>>& texts, std::vector<HTp> spines);
 		std::string makeStyle      (void);
+		int countSyllables         (std::vector<HTp>& tokens);
 
 	private:
 		bool     m_onlyQ      = false;
@@ -64,10 +65,13 @@ class Tool_text : public HumTool {
 		bool     m_joinQ      = false;
 		bool     m_removeQ    = false;
 		bool     m_removeAllQ = false;
-		bool     m_mergeQ     = true;
+		bool     m_mergeQ     =  true;
 		bool     m_rawQ       = false;
 		bool     m_repeatsQ   = false;
 		bool     m_showVerseQ = false;
+		bool     m_countQ     =  true;
+		bool     m_refrainOnlyQ = false;
+		bool     m_verseOnlyQ   = false;
 
 		std::vector<std::vector<std::string>> m_text;
 		std::stringstream m_output;
