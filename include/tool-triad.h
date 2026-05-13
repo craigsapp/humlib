@@ -40,15 +40,15 @@ class Tool_triad : public HumTool {
 		void     initialize        (void);
 
 	private:
-		bool m_prependQ = true;
-		bool m_restQ    = false;
-		bool m_classQ   = false;
-		bool m_pitchesQ = false;
-		bool m_appendQ  = false;
-		bool m_summaryQ = false;
-		bool m_rootQ    = false;
-		bool m_qualityQ = false;
-		bool m_unisonQ  = false;
+		bool m_appendQ  = false; // -a
+		bool m_classQ   = false; // -c
+		bool m_lowQ     = false; // -l
+		bool m_pitchesQ = false; // -p
+		bool m_qualityQ = false; // -q
+		bool m_restQ    = false; // -R
+		bool m_rootQ    = false; // -r
+		bool m_summaryQ = false; // not implemented
+		bool m_unisonQ  = false; // -U
 
 };
 

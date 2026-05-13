@@ -35,6 +35,7 @@ Tool_triad::Tool_triad(void) {
 	define("r|root=b",         "Display root only");
 	define("q|quality=b",      "Display quality only");
 	define("U|no-unison=b",    "No U quality");
+	define("l|low=b",          "Sort pitches from low to high");
 }
 
 
@@ -93,13 +94,13 @@ bool Tool_triad::run(HumdrumFile& infile) {
 
 void Tool_triad::initialize(void) {
 	m_appendQ   = getBoolean("append");
-	m_prependQ  = !m_appendQ;
 	m_summaryQ  = getBoolean("summary");
 	m_classQ    = getBoolean("pitch-class");
 	m_pitchesQ  = getBoolean("pitches");
 	m_rootQ     = getBoolean("root");
 	m_qualityQ  = getBoolean("quality");
 	m_unisonQ   = !getBoolean("no-unison");
+	m_lowQ      = !getBoolean("low");
 }
 
 
@@ -126,16 +127,14 @@ void Tool_triad::processFile(HumdrumFile& infile) {
 		root.clear();
 		inversion.clear();
 
+		map<string, bool> options;
+		options["pitches"] = m_pitchesQ;
+		options["class"]   = m_classQ;
+		options["rest"]    = m_restQ;
+		options["low"]     = m_lowQ;
+
 		string token = infile[i].getTriadicQuality(
-			infile,
-			i,
-			quality,
-			root,
-			inversion,
-			m_pitchesQ,
-			m_classQ,
-			getBoolean("rest")
-		);
+			infile, i, quality, root, inversion, options);
 		if (!m_unisonQ && (quality == "U")) {
 			quality = "";
 		}
@@ -178,13 +177,10 @@ void Tool_triad::processFile(HumdrumFile& infile) {
 		}
 
 		// Prepend analysis spine.
-		if (m_prependQ) {
-			m_humdrum_text << token << "\t" << infile[i] << endl;
-		}
-
-		// Append analysis spine.
-		else {
+		if (m_appendQ) {
 			m_humdrum_text << infile[i] << "\t" << token << endl;
+		} else {
+			m_humdrum_text << token << "\t" << infile[i] << endl;
 		}
 	}
 }
