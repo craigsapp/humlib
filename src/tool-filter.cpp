@@ -38,6 +38,7 @@
 #include "tool-dissonant.h"
 #include "tool-double.h"
 #include "tool-extract.h"
+#include "tool-extremis.h"
 #include "tool-fb.h"
 #include "tool-flipper.h"
 #include "tool-gasparize.h"
@@ -289,6 +290,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(dissonant, infile, commands[i].second, status);
 		} else if (commands[i].first == "double") {
 			RUNTOOL(double, infile, commands[i].second, status);
+		} else if (commands[i].first == "extremis") {
+			RUNTOOL(extremis, infile, commands[i].second, status);
 		} else if (commands[i].first == "fb") {
 			RUNTOOL(fb, infile, commands[i].second, status);
 		} else if (commands[i].first == "flipper") {
