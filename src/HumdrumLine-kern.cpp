@@ -30,10 +30,10 @@ string HumdrumLine::getTriadicQuality(HumdrumFile& infile, int index,
 		string& quality, string& root, string& inversion,
 		map<string, bool>& options) {
 
-	bool pitchesQ = options["pitches"];
-	bool classQ   = options["class"];
-	bool restQ    = options["rest"];
-	bool lowQ     = options["low"];
+	bool pitchesQ = options["pitches"]; // show list of pitches
+	bool classQ   = options["class"]; // show list of unique pitch classes
+	bool restQ    = options["rest"];  // include rest
+	bool lowQ     = options["low"];   // sort pitches from low to high
 
 	quality.clear();
 	root.clear();

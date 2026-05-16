@@ -211,12 +211,19 @@ class Tool_autocadence : public HumTool {
 		bool m_repeatQ                  = false; // -r: allow repeated notes
 		bool m_infoQ                    = false; // -i print info only
 		bool m_fileQ                    = false; // -f print filename info
-		bool m_melodyQ                  = false;  // -L
+		bool m_lastQ                    = false;  // -L
+		bool m_markupQ                  = false; // -M
+		bool m_rootQ                    = false; // --root
+		bool m_qualityQ                 = false; // -q
+		bool m_triadQ                   = false; // -q|--root
+
 		std::string m_marker = "@";
 		std::string m_suspensionMarker = "N";
 		std::string m_suspensionColor  = "crimson";
 		std::stringstream m_info;
 		std::string m_lastMelColor     = "limegreen";
+		std::vector<std::string> m_quality;
+		std::vector<std::string> m_root;
 };
 
 // END_MERGE

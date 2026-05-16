@@ -275,7 +275,11 @@ Tool_autocadence::Tool_autocadence(void) {
 	define("color=s:dodgerblue",         "Color cadence formula notes with given color");
 	define("count|match-count=b",        "Return number of cadence formulas that match");
 	define("i|info=b",                   "Show only information not score");
-	define("M|L|last-melody=b",          "Show melodic interval to last note");
+
+	define("M|analytic-markup|markup=b", "Show melodic interval to last note");
+	define("L|last-melody=b",            "Show melodic interval to last note");
+	define("root=b",                     "Show triadic root sonority");
+	define("Q|quality=b",                "Show triadic quality sonority");
 }
 
 
@@ -349,7 +353,19 @@ void Tool_autocadence::initialize(void) {
 	m_infoQ                    =  getBoolean("info");
 	m_lowestQ                  =  getBoolean("lowest");
 	m_showSuspensionsQ         = !getBoolean("do-not-show-suspensions");
-	m_melodyQ                  =  getBoolean("last-melody");
+	m_markupQ                  =  getBoolean("analytic-markup");
+	m_lastQ                    =  getBoolean("last-melody");
+	m_rootQ                    =  getBoolean("root");
+	m_qualityQ                 =  getBoolean("quality");
+
+	if (m_markupQ) {
+		m_lastQ = true;
+		m_rootQ = true;
+		m_qualityQ = true;
+	}
+	if (m_rootQ || m_qualityQ) {
+		m_triadQ = true;
+	}
 
 	prepareCadenceDefinitions();
 	prepareCadenceLabels();
@@ -369,7 +385,9 @@ void Tool_autocadence::processFile(HumdrumFile& infile) {
 	m_barnum = infile.getMeasureNumbers();
 
 	fillInLastMelodicInterval(infile);
-	// fillInMajorMinor(infile);
+	if (m_triadQ) {
+		fillInMajorMinor(infile);
+	}
 
 	// fill m_pitches and m_lowestPitch
 	preparePitchInfo(infile);
@@ -425,33 +443,34 @@ void Tool_autocadence::processFile(HumdrumFile& infile) {
 //
 
 void Tool_autocadence::fillInMajorMinor(HumdrumFile& infile) {
-	vector<int> notes;
-	vector<int> pcs;
+cerr << "FILLING MAJOR MINOR" << endl;
+
+	m_root.resize(infile.getLineCount());
+	m_quality.resize(infile.getLineCount());
+	vector<string> inversion(infile.getLineCount());
+
+	map<string, bool> options;
+	options["pitches"] = false; // show list of pitches
+	options["class"] = false; // show list of unique pitch classes
+	options["rest"] = false;  // include rest
+	options["low"] = false;   // sort pitches from low to high
+
 	for (int i=0; i<infile.getLineCount(); i++) {
-		infile[i].getMidiPitchesSortHL(notes);
-		if (notes.size() == 0) {
-			continue;
-		}
-		pcs = Convert::pitchToClass(notes, 5, 12);
-		if (pcs.size() > 3) {
-			continue;
-		}
-		string triad = Convert::getMidiPCTriadAbbr(pcs);
+		std::string value = infile[i].getTriadicQuality(infile, i,
+	 	                              m_quality[i], m_root[i], inversion[i], options);
 
-		cout << i << "\t";
-
-		cout << "Pitches=" << notes.size() << "\t";
-		for (int i=0; i<(int)notes.size(); i++) {
-			cout << " " << notes[i];
+		cerr << value << "\t" << m_quality[i]  << "\t" << m_root[i] << endl;
+		if ((m_quality[i] == "M") || //major
+		   (m_quality[i] == "m") || //minor
+		   (m_quality[i] == "-5") || //open 5th
+		   (m_quality[i] == "-M") || //incomplete major
+		   (m_quality[i] == "-m")) { //incomplete minor
+			infile[i].setValue("auto", "quality", m_quality[i]);
+			infile[i].setValue("auto", "root", m_root[i]);
+			infile[i].setValue("auto", "inversion", inversion[i]);
+		} else if (!m_quality[i].empty()) {
+			infile[i].setValue("auto", "quality", m_quality[i]);
 		}
-
-		cout << "\tClasses=" << pcs.size() << "\t";
-		for (int i=0; i<(int)pcs.size(); i++) {
-			cout << " " << pcs[i];
-		}
-
-		cout << "\tTriad" << triad;
-		cout << endl;
 	}
 }
 
@@ -1671,7 +1690,7 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 
 	stringstream lastmelline;
 	int lastcount = 0;
-	if (m_melodyQ) {
+	if (m_lastQ) {
 		for (int i=0; i<fcount; i++) {
 			if (i != 0) {
 				lastmelline << "\t";
