@@ -113,7 +113,9 @@ class Tool_autocadence : public HumTool {
 		void        prepareDissonancesForLine  (HumdrumLine& iline, HumdrumLine& dline);
 		void        identifySuspensionsAndAgents(HumdrumFile& infile);
 		std::string sortUniqueChars            (const std::string& input);
-		void fillInMajorMinor(HumdrumFile& infile);
+		void        fillInMajorMinor           (HumdrumFile& infile);
+		bool        getPhrygian                (HumdrumFile& infile, int index);
+		std::string getIntervalName            (const std::string& b40);
 
 	private:
 
@@ -209,7 +211,7 @@ class Tool_autocadence : public HumTool {
 		bool m_repeatQ                  = false; // -r: allow repeated notes
 		bool m_infoQ                    = false; // -i print info only
 		bool m_fileQ                    = false; // -f print filename info
-		bool m_lastMelodyQ              = false;  // -L
+		bool m_melodyQ                  = false;  // -L
 		std::string m_marker = "@";
 		std::string m_suspensionMarker = "N";
 		std::string m_suspensionColor  = "crimson";

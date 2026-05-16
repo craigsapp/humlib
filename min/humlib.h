@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat May  9 23:12:46 PDT 2026
+// Last Modified: Fri May 15 21:03:24 PDT 2026
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -1335,7 +1335,7 @@ class HumdrumLine : public std::string, public HumHash {
 
 		std::string getTriadicQuality(HumdrumFile& infile, int index,
 	 	                              std::string& quality, std::string& root, std::string& inversion,
-		                              bool pirchesQ = false, bool classQ = false, bool restQ = false);
+		                              std::map<std::string,bool>& options);
 		void             getMidiPitches       (std::vector<int>& output);
 		std::vector<int> getMidiPitches       (void);
 		void             getMidiPitchesSortHL (std::vector<int>& output);
@@ -6222,7 +6222,9 @@ class Tool_autocadence : public HumTool {
 		void        prepareDissonancesForLine  (HumdrumLine& iline, HumdrumLine& dline);
 		void        identifySuspensionsAndAgents(HumdrumFile& infile);
 		std::string sortUniqueChars            (const std::string& input);
-		void fillInMajorMinor(HumdrumFile& infile);
+		void        fillInMajorMinor           (HumdrumFile& infile);
+		bool        getPhrygian                (HumdrumFile& infile, int index);
+		std::string getIntervalName            (const std::string& b40);
 
 	private:
 
@@ -6318,7 +6320,7 @@ class Tool_autocadence : public HumTool {
 		bool m_repeatQ                  = false; // -r: allow repeated notes
 		bool m_infoQ                    = false; // -i print info only
 		bool m_fileQ                    = false; // -f print filename info
-		bool m_lastMelodyQ              = false;  // -L
+		bool m_melodyQ                  = false;  // -L
 		std::string m_marker = "@";
 		std::string m_suspensionMarker = "N";
 		std::string m_suspensionColor  = "crimson";
@@ -11895,6 +11897,7 @@ class Tool_text : public HumTool {
 		void        zprintPlineRow (std::vector<HTp>& pieces);
 		void        makeTextArray  (std::vector<std::vector<HTp>>& texts, std::vector<HTp> spines);
 		std::string makeStyle      (void);
+		int countSyllables         (std::vector<HTp>& tokens);
 
 	private:
 		bool     m_onlyQ      = false;
@@ -11903,10 +11906,13 @@ class Tool_text : public HumTool {
 		bool     m_joinQ      = false;
 		bool     m_removeQ    = false;
 		bool     m_removeAllQ = false;
-		bool     m_mergeQ     = true;
+		bool     m_mergeQ     =  true;
 		bool     m_rawQ       = false;
 		bool     m_repeatsQ   = false;
 		bool     m_showVerseQ = false;
+		bool     m_countQ     =  true;
+		bool     m_refrainOnlyQ = false;
+		bool     m_verseOnlyQ   = false;
 
 		std::vector<std::vector<std::string>> m_text;
 		std::stringstream m_output;
@@ -12216,15 +12222,15 @@ class Tool_triad : public HumTool {
 		void     initialize        (void);
 
 	private:
-		bool m_prependQ = true;
-		bool m_restQ    = false;
-		bool m_classQ   = false;
-		bool m_pitchesQ = false;
-		bool m_appendQ  = false;
-		bool m_summaryQ = false;
-		bool m_rootQ    = false;
-		bool m_qualityQ = false;
-		bool m_unisonQ  = false;
+		bool m_appendQ  = false; // -a
+		bool m_classQ   = false; // -c
+		bool m_lowQ     = false; // -l
+		bool m_pitchesQ = false; // -p
+		bool m_qualityQ = false; // -q
+		bool m_restQ    = false; // -R
+		bool m_rootQ    = false; // -r
+		bool m_summaryQ = false; // not implemented
+		bool m_unisonQ  = false; // -U
 
 };
 

@@ -26,55 +26,65 @@ namespace hum {
 // HumdrumLine::getTriadicQuality --
 //
 
-//
-// HumdrumLine::getTriadicQuality --
-//
-
-//
-// HumdrumLine::getTriadicQuality --
-//
-
 string HumdrumLine::getTriadicQuality(HumdrumFile& infile, int index,
 		string& quality, string& root, string& inversion,
-		bool pitchesQ, bool classQ, bool restQ) {
+		map<string, bool>& options) {
+
+	bool pitchesQ = options["pitches"];
+	bool classQ   = options["class"];
+	bool restQ    = options["rest"];
+	bool lowQ     = options["low"];
 
 	quality.clear();
 	root.clear();
 	inversion.clear();
 
+	// Return non-data line types:
 	if (infile[index].isExclusiveInterpretation()) {
 		return "**cdata";
-	}
-
-	if (infile[index].isManipulator()) {
+	} else if (infile[index].isManipulator()) {
 		return "*";
-	}
-
-	if (infile[index].isInterpretation()) {
+	} else if (infile[index].isInterpretation()) {
 		if (infile[index].getFieldCount() > 0) {
 			if (*infile[index].token(0) == "*-") {
 				return "*-";
 			}
 		}
 		return "*";
-	}
-
-	if (infile[index].isBarline()) {
+	} else if (infile[index].isBarline()) {
 		return *(infile[index].token(0));
-	}
-
-	if (infile[index].isCommentLocal()) {
+	} else if (infile[index].isCommentLocal()) {
 		return "!";
-	}
-
-	if (!infile[index].isData()) {
+	} else  if (!infile[index].isData()) {
 		return "!!";
 	}
 
 	vector<int> notes;
-	vector<int> pcs;
+	//Collect note attacks/sustains/rests on line
+	// 0 = rests
+	// <0 = sustain
+	// Sorting ignores sign
+	if (lowQ) {
+		infile[index].getMidiPitchesSortHL(notes); // reversed for some reason
+	} else {
+		infile[index].getMidiPitchesSortLH(notes);
+	}
 
-	infile[index].getMidiPitchesSortHL(notes);
+	if (pitchesQ) {
+		string output = "[";
+		for (int i=0; i<(int)notes.size(); i++) {
+			if (restQ && notes[i] == 0) {
+				continue;
+			}
+			output += to_string(notes[i]) +  " ";
+		}
+		output.back() = ']';
+		quality = output;
+cerr << "Quality = " << output << endl;
+		root = "";
+		inversion = "";
+		return output;
+	}
 
 	if (notes.empty()) {
 		if (restQ) {
@@ -85,46 +95,42 @@ string HumdrumLine::getTriadicQuality(HumdrumFile& infile, int index,
 		}
 	}
 
-	// Get leftmost sounding pitch class (NOT lowest pitch).
-
+	// Get leftmost sounding pitch class (NOT necessarily lowest pitch).
 	int basspc = -1;
 
 	for (int i=0; i<infile[index].getFieldCount(); i++) {
-
 		HTp tok = infile[index].token(i);
-
+		if (tok->isNull()) {
+			// deal with null tokens
+			tok = tok->resolveNull();
+			if (!tok || tok->isNull()) {
+				continue;
+			}
+			continue;
+		}
 		if (!tok->isData()) {
 			continue;
-		}
-
-		if (tok->isNull()) {
-			continue;
-		}
-
+		} 
 		vector<int> subtoks;
 		tok->getMidiPitches(subtoks);
-
-		if (subtoks.empty()) {
-			continue;
+		for (int j=0; j<(int)subtoks.size(); j++) {
+			notes.push_back(subtoks[i]);
 		}
-
-		basspc = subtoks[0] % 12;
-
-		if (basspc < 0) {
-			basspc += 12;
-		}
-
-		break;
 	}
 
 	// Extract unique pitch classes.
-
+	vector<int> pcs;
 	for (int i=0; i<(int)notes.size(); i++) {
-		int pc = notes[i] % 12;
-
-		if (pc < 0) {
-			pc += 12;
+		int pc = notes[i];
+		if (pc == 0) {
+			// ignore rests
+			continue;
 		}
+		if (pc < 0) {
+			// ignore sustains
+			pc = -pc;
+		}
+		pc = notes[i] % 12;
 
 		bool found = false;
 
@@ -133,33 +139,21 @@ string HumdrumLine::getTriadicQuality(HumdrumFile& infile, int index,
 				found = true;
 				break;
 			}
-		}
-
-		if (!found) {
-			pcs.push_back(pc);
+			if (!found) {
+				pcs.push_back(pc);
+			}
 		}
 	}
 
 	sort(pcs.begin(), pcs.end());
 
-	if (pitchesQ) {
-		for (int i=0; i<(int)notes.size(); i++) {
-			if (i > 0) {
-				quality += " ";
-			}
-			quality += to_string(notes[i]);
-		}
-		return "";
-	}
-
 	if (classQ) {
+		string output = "{";
 		for (int i=0; i<(int)pcs.size(); i++) {
-			if (i > 0) {
-				quality += " ";
-			}
-			quality += to_string(pcs[i]);
+			output += to_string(pcs[i]) + " ";
 		}
-		return "";
+		output.back() = '}';
+		return output;
 	}
 
 	static vector<string> pcnames = {
@@ -339,7 +333,7 @@ void HumdrumLine::getMidiPitchesSortHL(std::vector<int>& output) {
 	this->getMidiPitches(output);
 	sort(output.begin(), output.end(),
 		[](const int& a, const int& b) {
-			return abs(a) > abs(b);
+			return std::abs(a) > std::abs(b);
 		}
 	);
 }

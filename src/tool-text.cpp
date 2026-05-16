@@ -169,7 +169,7 @@ void Tool_text::removeText(HumdrumFile& infile) {
 	m_output << "!! <tr class=\"header\">" << endl;
 
 	if (!m_rawQ) {
-		m_output << "!!    <th class=\"pline\"> Bline </th>" << endl;
+		m_output << "!!    <th class=\"pline\"> line </th>" << endl;
 	}
 
 	m_output << "!!    <th class=\"pline-text\"> text </th>" << endl;
@@ -177,12 +177,11 @@ void Tool_text::removeText(HumdrumFile& infile) {
 	if (!m_rawQ) {
 		m_output << "!!    <th class=\"rp-rf\"> <span title=\"Rhyme phoneme\">rp</span>";
 		m_output << "/<span title=\"Rhyme syllable\">rf</span> </th>" << endl;
+		if (m_countQ) {
+			m_output << "!!    <th class=\"syl\" title=\"Syllables\"> syl </th>" << endl;
+		}
+		m_output << "!!    <th title=\"Rhyme Scheme\"> rs </th>" << endl;
 	}
-	if (m_countQ) {
-		m_output << "!!    <th class=\"syl\" title=\"Syllables\"> syl </th>" << endl;
-	}
-	m_output << "!!    <th title=\"Rhyme Scheme\"> rs </th>" << endl;
-
 	m_output << "!! </tr>" << endl;
 
 
@@ -388,37 +387,40 @@ void Tool_text::processPlineSpine(HTp tspine, int vth, int vsize) {
 				label += verse;
 			}
 		}
+
 		string refrain = getParamListTwo(plines, "*rline:");
 		if (!refrain.empty()) {
-			if (!verse.empty()) {
-				label = "REFRAIN";
-			}
-		} else if (verse.empty()) {
+			label = "REFRAIN";
+		}
+
+		if (verse.empty() && refrain.empty()) {
 			if (!m_refrainOnlyQ) {
-				label = "VERSE [";
-				label += verse;
-				label += "]";
+				label = "VERSE";
 			}
 		}
 	}
 
 	if (label != lastlabel) {
-		m_output << "\n!!   <td class=\"verse\" colspan=\"4\">" << label << "</td>";
+		m_output << "\n!!   <td class=\"verse\" colspan=\"4\">"
+		         << label
+		         << "</td>";
 	}
 
 	HumRegex hre;
-	for (int i = 1; i < (int)plines.size(); i++) {
+
+	for (int i=1; i<(int)plines.size(); i++) {
+
 		string plinelabel = getPlineLabel(plines[i]);
-		// suppress repeated plines such as:
-		//    *pline:8r
-		//    *rline:12r
+
 		if (m_repeatsQ) {
 			if (hre.search(plinelabel, "r$")) {
 				continue;
 			}
 		}
+
 		zprintPlineRow(plines[i]);
 	}
+
 	lastlabel = label;
 }
 
@@ -529,15 +531,18 @@ void Tool_text::zprintPlineRow(vector<HTp>& pieces) {
 		m_output << "/";
 		m_output << "<span class=\"rf\">" << rf << "</span>";
 		m_output << "</td>";
+	} else {
+		m_output << "<td class='rp'> </td>";
 	}
+	if (!m_rawQ) {
+		if (m_countQ) {
+			int sylcount = countSyllables(pieces);
+			m_output << "\n!!   <td class='syl'>" << sylcount << "</td>";
+		}
 
-	if (m_countQ) {
-		int sylcount = countSyllables(pieces);
-		m_output << "\n!!   <td class='syl'>" << sylcount << "</td>";
+		string rs = getParamListOne(pieces, "*rs:");
+		m_output << "\n!!   <td class='rs'>" << rs << "</td>";
 	}
-
-	string rs = getParamListOne(pieces, "*rs:");
-	m_output << "\n!!   <td class='rs'>" << rs << "</td>";
 
 	m_output << "\n!! </tr>";
 }
@@ -620,71 +625,86 @@ void Tool_text::printPlineSyllables(vector<HTp>& pieces) {
 // Tool_text::fillPlines -- create each pline entry.
 //
 
-void Tool_text::fillPlines(vector<vector<HTp>>& plines, HTp tspine,
-		int vth, int vsize) {
-
-	HTp current = tspine;
+void Tool_text::fillPlines(vector<vector<HTp>>& plines,
+		HTp tspine, int vth, int vsize) {
 
 	plines.clear();
 
-	// plines[0] stores global verse/refrain metadata
+	// plines[0] = global metadata
 	plines.resize(1);
 
 	HumRegex hre;
 
-	// current active pline
+	HTp current = tspine;
+
 	int index = -1;
 
 	while (current) {
+
 		if (current->isInterpretation()) {
-			// store verse interpretations globally
+
+			// Store verse metadata globally
 			if (current->compare(0, 3, "*v:") == 0) {
 				plines[0].push_back(current);
 			}
 
-			// create a new pline/rline
+			// Start a NEW pline entry
 			else if (hre.search(current, "^\\*pline:")) {
-				if (!m_refrainOnlyQ) {
-					plines.resize(plines.size() + 1);
-					index = (int)plines.size() - 1;
-					plines[index].push_back(current);
-				} else {
+
+				if (m_refrainOnlyQ) {
 					current = current->getNextToken();
 					continue;
 				}
-			} else if (hre.search(current, "^\\*rline:")) {
-				if (!m_verseOnlyQ) {
-					plines.resize(plines.size() + 1);
-					index = (int)plines.size() - 1;
-					plines[index].push_back(current);
-				} else {
-					current = current->getNextToken();
-					continue;
-				}
+
+				plines.push_back(vector<HTp>());
+
+				index = (int)plines.size() - 1;
+
+				plines[index].push_back(current);
 			}
 
-			// attach rhyme metadata to current pline
+			// Start a NEW rline entry
+			else if (hre.search(current, "^\\*rline:")) {
+
+				if (m_verseOnlyQ) {
+					current = current->getNextToken();
+					continue;
+				}
+
+				plines.push_back(vector<HTp>());
+
+				index = (int)plines.size() - 1;
+
+				plines[index].push_back(current);
+			}
+
+			// Attach metadata to current pline
 			else if (hre.search(current, "^\\*rp:")) {
 				if (index >= 0) {
 					plines[index].push_back(current);
 				}
-			} else if (hre.search(current, "^\\*rf:")) {
+			}
+
+			else if (hre.search(current, "^\\*rf:")) {
 				if (index >= 0) {
 					plines[index].push_back(current);
 				}
-			} else if (hre.search(current, "^\\*rs:")) {
+			}
+
+			else if (hre.search(current, "^\\*rs:")) {
 				if (index >= 0) {
 					plines[index].push_back(current);
 				}
 			}
 		}
+
 		current = current->getNextToken();
 	}
 }
 
 
 
-//////////////////////////////
+/////////////////////////////
 //
 // Tool_text::printPline --
 //
