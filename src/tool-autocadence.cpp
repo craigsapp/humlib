@@ -275,7 +275,7 @@ Tool_autocadence::Tool_autocadence(void) {
 	define("color=s:dodgerblue",         "Color cadence formula notes with given color");
 	define("count|match-count=b",        "Return number of cadence formulas that match");
 	define("i|info=b",                   "Show only information not score");
-	define("L|last-melody=b",            "Show interval to last note");
+	define("M|L|last-melody=b",          "Show melodic interval to last note");
 }
 
 
@@ -349,7 +349,7 @@ void Tool_autocadence::initialize(void) {
 	m_infoQ                    =  getBoolean("info");
 	m_lowestQ                  =  getBoolean("lowest");
 	m_showSuspensionsQ         = !getBoolean("do-not-show-suspensions");
-	m_lastMelodyQ              =  getBoolean("last-melody");
+	m_melodyQ                  =  getBoolean("last-melody");
 
 	prepareCadenceDefinitions();
 	prepareCadenceLabels();
@@ -474,14 +474,10 @@ void Tool_autocadence::printScore(HumdrumFile& infile) {
 	}
 
 	for (int i=0; i < infile.getLineCount(); i++) {
-		m_humdrum_text << "!!LINE: " << to_string(i) << endl;
-
 		if (infile[i].isManipulator()) {
 			printIntervalManipulatorLine(infile, i, kcount);
 		} else if (infile[i].isData()) {
-		m_humdrum_text << "!!PINE: " << to_string(i) << endl;
 			printIntervalDataLineScore(infile, i, kcount);
-		m_humdrum_text << "!!XPINE: " << to_string(i) << endl;
 		} else if (infile[i].isBarline()) {
 			string bartok = *infile.token(i, 0);
 			printIntervalLine(infile, i, kcount, bartok);
@@ -490,32 +486,28 @@ void Tool_autocadence::printScore(HumdrumFile& infile) {
 		} else if (infile[i].isInterpretation()) {
 			printIntervalLine(infile, i, kcount, "*");
 		} else {
-			// m_humdrum_text << "!X!" << infile[i] << endl;
 		}
 
 		if (!infile[i].hasSpines()) {
-			m_humdrum_text << "!!P!!" << infile[i] << endl;
 		} else if (infile[i].isEmpty()) {
 			m_humdrum_text << endl;
 		}
 
-		m_humdrum_text << "!!XLINE: " << to_string(i) << endl;
 	}
 
-	if (m_infoQ) {
-		if (m_colorQ) {
-			m_humdrum_text << "!!zRDF**kern: " << m_marker << " = marked note, color=" << m_color << endl;
-		}
-		if (m_hasSuspensionMarkersQ) {
-			m_humdrum_text << "!!yRDF**kern: " << m_suspensionMarker << " = marked note, color=" << m_suspensionColor << endl;
-		}
-		if (m_evenNoteSpacingQ) {
-			m_humdrum_text << "!!wverovio: evenNoteSpacing" << endl;
-		}
+m_humdrum_text << "!! INFO " << m_infoQ << " COLOR " <<  m_color << endl;
+	if (m_colorQ) {
+		m_humdrum_text << "!!!RDF**kern: " << m_marker << " = marked note, color=" << m_color << endl;
+	}
+	if (m_hasSuspensionMarkersQ) {
+		m_humdrum_text << "!!!RDF**kern: " << m_suspensionMarker << " = marked note, color=" << m_suspensionColor << endl;
+	}
+	if (m_evenNoteSpacingQ) {
+		m_humdrum_text << "!!wverovio: evenNoteSpacing" << endl;
+	}
 
-		if (m_regexQ) {
-			printRegexTable();
-		}
+	if (m_regexQ) {
+		printRegexTable();
 	}
 }
 
@@ -1530,7 +1522,6 @@ void Tool_autocadence::printIntervalDataLine(HumdrumFile& infile, int index, int
 
 void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 		int index, int kcount) {
-m_humdrum_text << "!!!CCC" << endl;
 
 	vector<string> labels(infile[index].getFieldCount());
 	bool foundLabelQ = false;
@@ -1583,7 +1574,6 @@ m_humdrum_text << "!!!CCC" << endl;
 		}
 
 	}
-m_humdrum_text << "!!!DDD" << endl;
 
 	stringstream labelline;
 	stringstream cadenceline;
@@ -1623,7 +1613,6 @@ m_humdrum_text << "!!!DDD" << endl;
 			}
 		}
 	}
-m_humdrum_text << "!!!EEE" << endl;
 	if (!clabel.empty()) {
 		string slabel = sortUniqueChars(clabel);
 		string cadence = m_cadenceLabels[slabel];
@@ -1640,9 +1629,13 @@ m_humdrum_text << "!!!EEE" << endl;
 				cadence += "\\n";
 			}
 		}
-		cadenceline << "!!LO:TX:a:B:rj:color=red:cadence:t=" << cadence;
+		bool isPhrygian = getPhrygian(infile, index);
+		cadenceline << "!!LO:TX:a:B:rj:color=red:cadence:t=";
+		if (isPhrygian) {
+			cadenceline << "Phrygian\\n";
+		}
+		cadenceline << cadence;
 	}
-m_humdrum_text << "!!!FFF" << endl;
 
 	stringstream dissonanceline;
 	if (m_showSuspensionsQ && foundDissonanceQ) {
@@ -1675,11 +1668,10 @@ m_humdrum_text << "!!!FFF" << endl;
 			}
 		}
 	}
-m_humdrum_text << "!!!GGG" << endl;
 
 	stringstream lastmelline;
 	int lastcount = 0;
-	if ((1) || m_lastMelodyQ) {
+	if (m_melodyQ) {
 		for (int i=0; i<fcount; i++) {
 			if (i != 0) {
 				lastmelline << "\t";
@@ -1703,9 +1695,10 @@ m_humdrum_text << "!!!GGG" << endl;
 				continue;
 			} else {
 				lastcount++;
-				lastmelline << "!LO:TX:b:lastmel:vgrp=7";
-				if (interval == "4" || interval == "-5") {
-					lastmelline << ":B:";
+				lastmelline << "!LO:TX:b:lastmel:cj:vgrp=7";
+				if ((interval == "17" || interval == "P4") ||
+				   (interval == "-23" || interval == "-P5")) {
+					lastmelline << ":B";
 					lastmelline << ":color=" << m_lastMelColor;
 				} else {
 					lastmelline << ":color=gray";
@@ -1714,37 +1707,38 @@ m_humdrum_text << "!!!GGG" << endl;
 			}
 		}
 	}
-m_humdrum_text << "!!!HHH" << endl;
 
-m_humdrum_text << "!!MLINE: " << to_string(index) << endl;
 	if (!cadenceline.str().empty()) {
-		m_humdrum_text << "!!!AA1" << endl;
 		m_humdrum_text << cadenceline.str() << endl;
-		m_humdrum_text << "!!!BB1" << endl;
 	}
 	if (!dissonanceline.str().empty()) {
-		m_humdrum_text << "!!!AA2" << endl;
 		m_humdrum_text << dissonanceline.str() << endl;
-		m_humdrum_text << "!!!BB2" << endl;
 	}
 	if (!labelline.str().empty()) {
-		m_humdrum_text << "!!!AA3" << endl;
 		m_humdrum_text << labelline.str() << endl;
-		m_humdrum_text << "!!!BB3" << endl;
 	}
 	if (lastcount > 0) {
-		m_humdrum_text << "!!!AA5" << endl;
 		m_humdrum_text << lastmelline.str() << endl;
-		m_humdrum_text << "!!!BB5" << endl;
 	}
 
 	if (!dataline.str().empty()) {
-		m_humdrum_text << "!!!AA4" << endl;
 		m_humdrum_text << dataline.str() << endl;
-		m_humdrum_text << "!!!BB4" << endl;
 	}
+}
 
 
+//////////////////////////////
+//
+// Tool_autocadence::getPhrygian -- true if approached by a m2.
+//
+
+bool Tool_autocadence::getPhrygian(HumdrumFile& infile, int index) {
+	for (int i=0; i<(int)m_lastmel.at(index).size(); i++) {
+		if (m_lastmel.at(index).at(i) == "-5") {
+			return true;
+		}
+	}
+	return false;
 }
 
 
@@ -2479,19 +2473,19 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("Abz",  "Altizans Only");
 	m_cadenceLabels.emplace("ABz",  "Reinterpreted");
 	m_cadenceLabels.emplace("ACt",  "Evaded Clausula Vera");
-	m_cadenceLabels.emplace("ACT",  "Phrygian Clausula Vera");
+	m_cadenceLabels.emplace("ACT",  "Clausula Vera");// Phrygian
 	m_cadenceLabels.emplace("ACTt", "Double Leading Tone");
 	m_cadenceLabels.emplace("ACTtz","Double Leading Tone");
 	m_cadenceLabels.emplace("ACtz", "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("ACz",  "Abandoned Double Leading Tone");
-	m_cadenceLabels.emplace("AT",   "Phrygian Altizans");
+	m_cadenceLabels.emplace("AT",   "Altizans");// Phrygian
 	m_cadenceLabels.emplace("ATx",  "Altizans Only");
 	m_cadenceLabels.emplace("ATxy", "Altizans Only");
 	m_cadenceLabels.emplace("ATxyz","Altizans Only");
 	m_cadenceLabels.emplace("ATxz", "Altizans Only");
-	m_cadenceLabels.emplace("ATy",  "Phrygian Altizans");
-	m_cadenceLabels.emplace("ATyz", "Phrygian Altizans");
-	m_cadenceLabels.emplace("ATz",  "Phrygian Altizans");
+	m_cadenceLabels.emplace("ATy",  "Altizans");// Phrygian
+	m_cadenceLabels.emplace("ATyz", "Altizans");// Phrygian
+	m_cadenceLabels.emplace("ATz",  "Altizans");// Phrygian
 	m_cadenceLabels.emplace("BC",   "Authentic");
 	m_cadenceLabels.emplace("BCT",   "Authentic");
 	m_cadenceLabels.emplace("CTb",   "Authentic");
@@ -2509,10 +2503,10 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("CLTz", "Leaping Contratenor");
 	m_cadenceLabels.emplace("Cp",   "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("Cpt",  "Evaded Clausula Vera");
-	m_cadenceLabels.emplace("CPT",  "Phrygian");
-	m_cadenceLabels.emplace("CPTz", "Phrygian");
+	m_cadenceLabels.emplace("CPT",  "Phrygian");// Phrygian
+	m_cadenceLabels.emplace("CPTz", "Phrygian");// Phrygian
 	m_cadenceLabels.emplace("Ct",   "Evaded Clausula Vera");
-	m_cadenceLabels.emplace("CT",   "Phrygian Clausula Vera");
+	m_cadenceLabels.emplace("CT",   "Clausula Vera");// Phrygian
 	m_cadenceLabels.emplace("CTa",  "Clausula Vera");
 	m_cadenceLabels.emplace("CTaz", "Clausula Vera");
 	m_cadenceLabels.emplace("CTp",  "Evaded Clausula Vera");
@@ -2523,7 +2517,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("CTx",  "Clausula Vera");
 	m_cadenceLabels.emplace("Ctxz", "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("Ctz",  "Evaded Clausula Vera");
-	m_cadenceLabels.emplace("CTz",  "Phrygian Clausula Vera");
+	m_cadenceLabels.emplace("CTz",  "Clausula Vera");// Phrygian
 	m_cadenceLabels.emplace("Cu",   "Evaded Authentic");
 	m_cadenceLabels.emplace("cx",   "Abandoned Authentic");
 	m_cadenceLabels.emplace("Cx",   "Abandoned Authentic");
@@ -2736,12 +2730,15 @@ void Tool_autocadence::fillInLastMelodicInterval(HumdrumFile& infile) {
 
 	vector<HTp> sstarts;
 	infile.getKernSpineStartList(sstarts);
+
+	// Fill in the notes for each part
 	vector<vector<HTp>> notes(sstarts.size());
 	for (int i=0; i<(int)notes.size(); i++) {
 		notes[i].reserve(infile.getLineCount());
 		getTokenList(sstarts[i], notes[i]);
 	}
 
+	// Calculate the diatonic interval for each note in each part:
 	vector<vector<int>> diatonic(notes.size());
 	vector<vector<string>> interval(notes.size());
 	for (int i=0; i<(int)notes.size(); i++) {
@@ -2772,7 +2769,10 @@ void Tool_autocadence::fillInLastMelodicInterval(HumdrumFile& infile) {
 			int row = notes.at(i).at(j)->getLineIndex();
 			int col = notes.at(i).at(j)->getFieldIndex();
 			HTp token = infile.token(row,col);
-			token->setValue("auto", "lastmel", interval.at(i).at(j));
+			//string iname = interval.at(i).at(j);
+			string iname = getIntervalName(interval.at(i).at(j));
+			token->setValue("auto", "lastmel", iname);
+
 			m_lastmel.at(row).at(col) = interval.at(i).at(j);
 		}
 	}
@@ -2783,18 +2783,59 @@ void Tool_autocadence::fillInLastMelodicInterval(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_autocadence::calculateIntervals --
+// Tool_autocadence::getIntervalName --
+//
+
+string Tool_autocadence::getIntervalName(const string& b40) {
+	if (b40 == "0")   return "1";
+
+	if (b40 == "5")   return "2";
+	if (b40 == "6")   return "2";
+	if (b40 == "-5")  return "-2";
+	if (b40 == "-6")  return "-2";
+
+	if (b40 == "11")  return "3";
+	if (b40 == "-11") return "-3";
+	if (b40 == "12")  return "3";
+	if (b40 == "-12") return "-3";
+
+	if (b40 == "17")  return "4";
+	if (b40 == "-17")  return "-4";
+	if (b40 == "23")  return "5";
+	if (b40 == "-23") return "-5";
+
+	if (b40 == "29") return "6";
+	if (b40 == "28") return "6";
+	if (b40 == "-29") return "-6";
+	if (b40 == "-28") return "-6";
+
+	if (b40 == "35") return "7";
+	if (b40 == "34") return "7";
+	if (b40 == "-35") return "-7";
+	if (b40 == "-34") return "-7";
+
+	if (b40 == "40") return "8";
+	if (b40 == "-40") return "-8";
+
+	return b40;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::calculateVoiceIntervals --
 //
 
 void Tool_autocadence::calculateVoiceIntervals(const std::vector<HTp>& contents,
-		std::vector<int>& diatonic, std::vector<std::string>& interval) {
+		std::vector<int>& diatonic, std::vector<string>& interval) {
 
 	diatonic.resize(contents.size());
 	for (int i=0; i<(int)contents.size(); i++) {
 		if (contents[i]->find("r") == string::npos) {
-			int octave = Convert::kernToOctaveNumber(contents[i]);
-			diatonic[i] = Convert::kernToDiatonicPC(contents[i]);
-			diatonic[i] += octave * 7;
+			//int octave = Convert::kernToOctaveNumber(contents[i]);
+			diatonic[i] = Convert::kernToBase40(contents[i]);
+			// diatonic[i] += octave * 40;
 		}
 	}
 
@@ -2806,16 +2847,16 @@ void Tool_autocadence::calculateVoiceIntervals(const std::vector<HTp>& contents,
 			interval.at(i) = "R";
 		} else {
 			int inv = diatonic[i] - diatonic[i-1];
-			if (inv  < 0) {
-				inv--;
-			} else {
-				inv++;
-			}
+			//if (inv  < 0) {
+			//	inv--;
+			//} else {
+			//	inv++;
+			//}
 			interval.at(i) =  to_string(inv);
 		}
 	}
 
-	// repeat intervals for secondarty tied notes
+	// duplicate intervals for secondarty tied notes
 	for (int i=1; i<(int)contents.size(); i++) {
 		if ((contents[i]->find('_') != string::npos) || 
 			(contents[i]->find(']') != string::npos)) {
