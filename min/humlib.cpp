@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat May 16 13:10:17 PDT 2026
+// Last Modified: Sun May 17 03:43:45 PDT 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -32562,7 +32562,7 @@ cerr << "Quality = " << output << endl;
 	}
 
 	// Extract unique pitch classes.
-	vector<int> pcs;
+	vector<bool> pcs(12);
 	for (int i=0; i<(int)notes.size(); i++) {
 		int pc = notes[i];
 		if (pc == 0) {
@@ -32570,32 +32570,30 @@ cerr << "Quality = " << output << endl;
 			continue;
 		}
 		if (pc < 0) {
-			// ignore sustains
+			// ignore sustains information
 			pc = -pc;
 		}
-		pc = notes[i] % 12;
+		pc = pc % 12;
+		pcs.at(pc) = true;
+	}
 
-		bool found = false;
-
-		for (int j=0; j<(int)pcs.size(); j++) {
-			if (pcs[j] == pc) {
-				found = true;
-				break;
-			}
-			if (!found) {
-				pcs.push_back(pc);
-			}
+	vector<int> pcs_new;
+	for (int i=0; i<(int)pcs.size(); i++) {
+		if (pcs[i]) {
+			pcs_new.push_back(i);
 		}
 	}
 
-	sort(pcs.begin(), pcs.end());
-
 	if (classQ) {
 		string output = "{";
-		for (int i=0; i<(int)pcs.size(); i++) {
-			output += to_string(pcs[i]) + " ";
+		for (int i=0; i<(int)pcs_new.size(); i++) {
+			output += to_string(pcs_new[i]) + " ";
 		}
-		output.back() = '}';
+		if (output.size() == 1) {
+			output += "}";
+		} else {
+			output.back() = '}';
+		}
 		return output;
 	}
 
@@ -32604,7 +32602,7 @@ cerr << "Quality = " << output << endl;
 		"F#", "G", "A-", "A", "B-", "B"
 	};
 
-	if (pcs.size() == 0) {
+	if (pcs_new.size() == 0) {
 		if (restQ) {
 			quality = "R";
 			return "";
@@ -32613,14 +32611,14 @@ cerr << "Quality = " << output << endl;
 		}
 	}
 
-	if (pcs.size() == 1) {
+	if (pcs_new.size() == 1) {
 		quality = "U";
-		root = pcnames[pcs[0]];
+		root = pcnames[pcs_new[0]];
 		return "";
 	}
 
-	if (pcs.size() == 2) {
-		int interval = (pcs[1] - pcs[0] + 12) % 12;
+	if (pcs_new.size() == 2) {
+		int interval = (pcs_new[1] - pcs_new[0] + 12) % 12;
 
 		if (interval == 7) {
 			quality = "-5";   // missing third
@@ -32632,11 +32630,11 @@ cerr << "Quality = " << output << endl;
 			quality = "?";    // non-triadic dyad:
 		}
 
-		root = pcnames[pcs[0]];
+		root = pcnames[pcs_new[0]];
 		return "";
 	}
 
-	if (pcs.size() > 3) {
+	if (pcs_new.size() > 3) {
 		quality = "+";
 		return "";
 	}
@@ -32645,7 +32643,7 @@ cerr << "Quality = " << output << endl;
 
 	for (int i=0; i<3; i++) {
 
-		int r = pcs[i];
+		int r = pcs_new[i];
 
 		bool has3 = false;
 		bool has4 = false;
@@ -32654,7 +32652,7 @@ cerr << "Quality = " << output << endl;
 		bool has8 = false;
 
 		for (int j=0; j<3; j++) {
-			int interval = (pcs[j] - r + 12) % 12;
+			int interval = (pcs_new[j] - r + 12) % 12;
 
 			if (interval == 3) {
 				has3 = true;
@@ -62537,6 +62535,7 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 	if (!clabel.empty()) {
 		string slabel = sortUniqueChars(clabel);
 		string cadence = m_cadenceLabels[slabel];
+cerr << "XXX" << "\t" << slabel << "\t" << cadence << endl;
 		if (m_infoQ) {
 			m_info << "M=" << m_barnum.at(index) << "\tclabel=" << clabel << "\tslabel=" << slabel << "\tcadence=" << cadence << endl;
 			cerr << "M=" << m_barnum.at(index) << "\tclabel=" << clabel << "\tslabel=" << slabel << "\tcadence=" << cadence << endl;
@@ -62655,8 +62654,12 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 
 bool Tool_autocadence::getPhrygian(HumdrumFile& infile, int index) {
 	for (int i=0; i<(int)m_lastmel.at(index).size(); i++) {
-		if (m_lastmel.at(index).at(i) == "-5") {
-			return true;
+		HTp token = infile[index].token(i);
+		string cvf = token->getValue("auto", "cvf");
+		if ((cvf == "T") || (cvf == "t") || (cvf == "z")) {
+			if (m_lastmel.at(index).at(i) == "-5") {
+				return true;
+			}
 		}
 	}
 	return false;
@@ -63409,6 +63412,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("ATz",  "Altizans");// Phrygian
 	m_cadenceLabels.emplace("BC",   "Authentic");
 	m_cadenceLabels.emplace("BCT",   "Authentic");
+	m_cadenceLabels.emplace("BCTu",  "Authentic");
 	m_cadenceLabels.emplace("CTb",   "Authentic");
 	m_cadenceLabels.emplace("BCt",   "Authentic");
 	m_cadenceLabels.emplace("Bc",   "Evaded Authentic");

@@ -1635,6 +1635,7 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 	if (!clabel.empty()) {
 		string slabel = sortUniqueChars(clabel);
 		string cadence = m_cadenceLabels[slabel];
+cerr << "XXX" << "\t" << slabel << "\t" << cadence << endl;
 		if (m_infoQ) {
 			m_info << "M=" << m_barnum.at(index) << "\tclabel=" << clabel << "\tslabel=" << slabel << "\tcadence=" << cadence << endl;
 			cerr << "M=" << m_barnum.at(index) << "\tclabel=" << clabel << "\tslabel=" << slabel << "\tcadence=" << cadence << endl;
@@ -1753,8 +1754,12 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 
 bool Tool_autocadence::getPhrygian(HumdrumFile& infile, int index) {
 	for (int i=0; i<(int)m_lastmel.at(index).size(); i++) {
-		if (m_lastmel.at(index).at(i) == "-5") {
-			return true;
+		HTp token = infile[index].token(i);
+		string cvf = token->getValue("auto", "cvf");
+		if ((cvf == "T") || (cvf == "t") || (cvf == "z")) {
+			if (m_lastmel.at(index).at(i) == "-5") {
+				return true;
+			}
 		}
 	}
 	return false;
@@ -2507,6 +2512,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("ATz",  "Altizans");// Phrygian
 	m_cadenceLabels.emplace("BC",   "Authentic");
 	m_cadenceLabels.emplace("BCT",   "Authentic");
+	m_cadenceLabels.emplace("BCTu",  "Authentic");
 	m_cadenceLabels.emplace("CTb",   "Authentic");
 	m_cadenceLabels.emplace("BCt",   "Authentic");
 	m_cadenceLabels.emplace("Bc",   "Evaded Authentic");
