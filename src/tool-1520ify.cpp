@@ -228,9 +228,9 @@ void Tool_1520ify::processFile(HumdrumFile& infile) {
 		bool hasMet = false;
 		for (int j = 0; j < infile[i].getFieldCount(); ++j) {
 			HTp tok = infile.token(i, j);
-			if (tok->compare(0, 5, "*met(") == 0) { 
-				hasMet = true; 
-				break; 
+			if (tok->compare(0, 5, "*met(") == 0) {
+				hasMet = true;
+				break;
 			}
 		}
 		if (!hasMet) continue;
@@ -270,13 +270,13 @@ void Tool_1520ify::processFile(HumdrumFile& infile) {
 		bool emptyLine = true;
 		for (int j = 0; j < infile[i].getFieldCount(); ++j) {
 			HTp tok = infile.token(i, j);
-			if (tok && *tok != "*") { 
-				emptyLine = false; 
-				break; 
+			if (tok && *tok != "*") {
+				emptyLine = false;
+				break;
 			}
 		}
-		if (emptyLine) { 
-			infile.deleteLine(i); --i; continue; 
+		if (emptyLine) {
+			infile.deleteLine(i); --i; continue;
 		}
 
 		// If another *met line immediately follows, remove the later duplicate(s)
@@ -284,9 +284,9 @@ void Tool_1520ify::processFile(HumdrumFile& infile) {
 			bool nextHasMet = false;
 			for (int j = 0; j < infile[i + 1].getFieldCount(); ++j) {
 				HTp tok = infile.token(i + 1, j);
-				if (tok && tok->compare(0, 5, "*met(") == 0) { 
-					nextHasMet = true; 
-					break; 
+				if (tok && tok->compare(0, 5, "*met(") == 0) {
+					nextHasMet = true;
+					break;
 				}
 			}
 			if (!nextHasMet) {
@@ -307,8 +307,8 @@ void Tool_1520ify::processFile(HumdrumFile& infile) {
 		bool hasMens = false;
 		for (int j = 0; j < infile[i].getFieldCount(); ++j) {
 			HTp tok = infile.token(i, j);
-			if (tok && tok->compare(0, 2, "*M") == 0) { 
-				hasMens = true; 
+			if (tok && tok->compare(0, 2, "*M") == 0) {
+				hasMens = true;
 				break;
 			}
 		}
@@ -321,9 +321,9 @@ void Tool_1520ify::processFile(HumdrumFile& infile) {
 			bool nextHasMet = false;
 			for (int k = 0; k < infile[i + 1].getFieldCount(); ++k) {
 				HTp nt = infile.token(i + 1, k);
-				if (nt && nt->compare(0, 5, "*met(") == 0) { 
-					nextHasMet = true; 
-					break; 
+				if (nt && nt->compare(0, 5, "*met(") == 0) {
+					nextHasMet = true;
+					break;
 				}
 			}
 			if (nextHasMet) {
@@ -339,13 +339,13 @@ void Tool_1520ify::processFile(HumdrumFile& infile) {
 			HTp tok = infile.token(i, j);
 			const char* out = "*";
 			if (tok && !tok->isNull()) {
-				if (*tok == "*M2/1") { 
-					out = "*met(C|)"; 
-					willInsert = true; 
+				if (*tok == "*M2/1") {
+					out = "*met(C|)";
+					willInsert = true;
 				}
-				else if (*tok == "*M3/1") { 
-					out = "*met(O)"; 
-					willInsert = true; 
+				else if (*tok == "*M3/1") {
+					out = "*met(O)";
+					willInsert = true;
 				}
 			}
 			newline += out;
@@ -629,7 +629,7 @@ void Tool_1520ify::fixInstrumentAbbreviations(HumdrumFile& infile) {
 	}
 	if (aline < 0){
 		return;
-	} 
+	}
 	if (infile[iline].getFieldCount() != infile[aline].getFieldCount()){
 		return;
 	}
@@ -645,8 +645,8 @@ void Tool_1520ify::fixInstrumentAbbreviations(HumdrumFile& infile) {
 		std::string tmp;
 		for (char c : s) {
 			if (std::isspace((unsigned char)c)) {
-				if (!tmp.empty()) { 
-					words.push_back(tmp); tmp.clear(); 
+				if (!tmp.empty()) {
+					words.push_back(tmp); tmp.clear();
 				}
 			} else {
 				tmp.push_back(c);
@@ -654,7 +654,7 @@ void Tool_1520ify::fixInstrumentAbbreviations(HumdrumFile& infile) {
 		}
 		if (!tmp.empty()){
 			words.push_back(tmp);
-		} 
+		}
 
 		std::string base;
 		std::string roman;
@@ -697,22 +697,28 @@ void Tool_1520ify::fixInstrumentAbbreviations(HumdrumFile& infile) {
 		return { base, roman };
 	};
 
-	// Abbreviation rules
-	auto baseToAbbr = [&](const std::string& base) -> std::string {
+	// Abbreviation rules:
+	// - plain SATB uses no period (S A T B)
+	// - numbered voices use period before Roman numeral (S. I, A. II, ...)
+	auto baseToAbbr = [&](const std::string& base, bool numbered) -> std::string {
 		if (base == "Superius"){
-			return "S.";
-		} 
-		if (base == "Altus"){
-			return "A.";
-		}    
-		if (base == "Tenor"){
-			return "T.";
-		}   
-		if (base == "Bassus"){
-			return "B.";
+			return numbered ? "S." : "S";
 		}
-		// fallback: first letter + .
-		return std::string(1, std::toupper(base[0])) + ".";
+		if (base == "Altus"){
+			return numbered ? "A." : "A";
+		}
+		if (base == "Tenor"){
+			return numbered ? "T." : "T";
+		}
+		if (base == "Bassus"){
+			return numbered ? "B." : "B";
+		}
+		// fallback: first letter, with period only for numbered voices
+		std::string letter(1, std::toupper((unsigned char)base[0]));
+		if (numbered) {
+			letter += ".";
+		}
+		return letter;
 	};
 
 	// Process each spine and rewrite abbreviation
@@ -738,7 +744,7 @@ void Tool_1520ify::fixInstrumentAbbreviations(HumdrumFile& infile) {
 		std::string roman = parsed.second;
 
 		std::string abbr = "*I'";
-		abbr += baseToAbbr(base);
+		abbr += baseToAbbr(base, !roman.empty());
 		if (!roman.empty()){
 			abbr += " " + roman;
 		}
@@ -787,7 +793,7 @@ void Tool_1520ify::deleteBreaks(HumdrumFile& infile) {
 // !!!RDF**kern: l = terminal long        (if needed)
 // !!!RDF**kern: i = editorial accidental (if needed)
 // !!!ENC: Benjamin Ory
-// !!!END: 
+// !!!END:
 // !!!EED: Benjamin Ory
 // !!!EEV: <DATE>
 // !!!YEC: Copyright <YEAR> Benjamin Ory, All Rights Reserved
@@ -853,7 +859,7 @@ void Tool_1520ify::addBibliographicRecords(HumdrumFile& infile) {
 		}
 	}
 
-	// Create !!!!SEGMENT 
+	// Create !!!!SEGMENT
 	// Try to get a usable "basename" for this piece.
 	// 1) Prefer the actual filename if present.
 	// 2) If reading from stdin (pipelines), fall back to existing !!!OTL: value.
@@ -963,19 +969,19 @@ void Tool_1520ify::addBibliographicRecords(HumdrumFile& infile) {
 	    size_t start = 0;
 	    while (true) {
 	        size_t pos = mainPart.find('-', start);
-	        if (pos == std::string::npos) { 
-	        	chunks.push_back(mainPart.substr(start)); 
-	        	break; 
-	        }
+		        if (pos == std::string::npos) {
+		            chunks.push_back(mainPart.substr(start));
+		            break;
+		        }
 	        chunks.push_back(mainPart.substr(start, pos - start));
 	        start = pos + 1;
 	    }
 	}
 
 	// helper: underscores → spaces
-	auto us2sp = [](std::string s) { 
-		std::replace(s.begin(), s.end(), '_', ' '); 
-		return s; 
+	auto us2sp = [](std::string s) {
+		std::replace(s.begin(), s.end(), '_', ' ');
+		return s;
 	};
 
 	// Compute desired OTL / OPR
@@ -1137,7 +1143,7 @@ void Tool_1520ify::addBibliographicRecords(HumdrumFile& infile) {
 
 
 	// --- Auto-fill AGN (genre + optional movement name) based on numeric id ---
-	
+
 	{
 	    // Extract first 4 digits from id (e.g., Con2008 → 2008)
 	    int workNumber = -1;
@@ -1252,7 +1258,7 @@ void Tool_1520ify::addBibliographicRecords(HumdrumFile& infile) {
 
 	        if (tok->compare(0, 7, "!!!ENC:") == 0) {
 	            std::string text = tok->getText();  // "!!!ENC: Last, First"
-	            
+
 	            // Extract the part after the colon
 	            size_t colon = text.find(':');
 	            if (colon == std::string::npos) {
@@ -1339,7 +1345,7 @@ void Tool_1520ify::addBibliographicRecords(HumdrumFile& infile) {
 	for (int i = 0; i < infile.getLineCount(); ++i) {
 	    if (!infile[i].isReference()) {
 	    	continue;
-	    } 
+	    }
 	    HTp tok = infile.token(i, 0);
 	    if (!tok) {
 	    	continue;
@@ -1747,7 +1753,7 @@ string Tool_1520ify::getDate(void) {
 	std::time_t now_time = std::chrono::system_clock::to_time_t(now);
 	std::tm* local_time = std::localtime(&now_time);
 	int year = local_time->tm_year + 1900;
-	int month = local_time->tm_mon + 1; 
+	int month = local_time->tm_mon + 1;
 	int day = local_time->tm_mday;
 	stringstream ss;
 	ss << year << "/";
