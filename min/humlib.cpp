@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jun 14 23:22:55 PDT 2026
+// Last Modified: Tue Jun 30 10:40:09 CEST 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -56903,6 +56903,417 @@ ostream& operator<<(ostream& out, PixelColor apixel) {
 
 
 
+static void splitEncoderDate(HumdrumFile& infile) {
+	HumRegex hre;
+	int encLine = -1;
+	int endLine = -1;
+	std::string encoder;
+	std::string endDate;
+
+	for (int i=0; i<infile.getLineCount(); ++i) {
+		if (!infile[i].isReference()) {
+			continue;
+		}
+		HTp tok = infile.token(i, 0);
+		if (!tok) {
+			continue;
+		}
+		if ((encLine < 0) && (tok->compare(0, 7, "!!!ENC:") == 0)) {
+			std::string text = tok->getText().substr(7);
+			while (!text.empty() && std::isspace(static_cast<unsigned char>(text.front()))) {
+				text.erase(text.begin());
+			}
+			while (!text.empty() && std::isspace(static_cast<unsigned char>(text.back()))) {
+				text.pop_back();
+			}
+			if (hre.search(text, "^(.+?)\\s+((?:\\d{4}/\\d{1,2}/\\d{1,2})|(?:\\d{1,2}-\\d{1,2}-\\d{4}))/?$")) {
+				encoder = hre.getMatch(1);
+				endDate = hre.getMatch(2);
+				encLine = i;
+			}
+		} else if ((endLine < 0) && (tok->compare(0, 7, "!!!END:") == 0)) {
+			endLine = i;
+		}
+	}
+
+	if (encLine < 0) {
+		return;
+	}
+
+	while (!encoder.empty() && std::isspace(static_cast<unsigned char>(encoder.back()))) {
+		encoder.pop_back();
+	}
+	infile.token(encLine, 0)->setText("!!!ENC: " + encoder);
+
+	if (endLine >= 0) {
+		HTp tok = infile.token(endLine, 0);
+		std::string text = tok ? tok->getText() : "";
+		size_t colon = text.find(':');
+		bool hasContent = false;
+		if (colon != std::string::npos) {
+			for (size_t p=colon + 1; p<text.size(); ++p) {
+				if (!std::isspace(static_cast<unsigned char>(text[p]))) {
+					hasContent = true;
+					break;
+				}
+			}
+		}
+		if (!hasContent && tok) {
+			tok->setText("!!!END: " + endDate);
+		}
+	} else {
+		infile.insertLine(encLine + 1, "!!!END: " + endDate);
+	}
+}
+
+
+static std::string getMetForMensurationLabel(const std::string& text) {
+	static const std::vector<std::pair<std::string, std::string>> mappings = {
+		{"MenCircleOver3", "*met(O/3)"},
+		{"MenCutCircle3", "*met(O|3)"},
+		{"MenCircleDot", "*met(O.)"},
+		{"MenCutCDot", "*met(C.|)"},
+		{"MenReverseC", "*met(Cr)"},
+		{"Men3Over2", "*met(3/2)"},
+		{"MenCutCircle", "*met(O|)"},
+		{"MenCutC3", "*met(C|3)"},
+		{"MenCutC2", "*met(C|2)"},
+		{"MenCircle3", "*met(O3)"},
+		{"MenCircle2", "*met(O2)"},
+		{"MenCutC", "*met(C|)"},
+		{"MenCDot", "*met(C.)"},
+		{"MenC3", "*met(C3)"},
+		{"MenC2", "*met(C2)"},
+		{"MenCircle", "*met(O)"},
+		{"MenC", "*met(C)"},
+		{"Men3", "*met(3)"},
+		{"Men2", "*met(2)"}
+	};
+
+	for (const auto& mapping : mappings) {
+		size_t pos = text.find(mapping.first);
+		if (pos == std::string::npos) {
+			continue;
+		}
+		size_t end = pos + mapping.first.size();
+		if ((end < text.size()) && std::isalnum(static_cast<unsigned char>(text[end]))) {
+			continue;
+		}
+		return mapping.second;
+	}
+
+	return "";
+}
+
+
+static std::string getNearbyMensurationLabelMet(HumdrumFile& infile, int mensline) {
+	for (int i=mensline + 1; i<infile.getLineCount(); ++i) {
+		if (infile[i].isData() || infile[i].isBarline() || infile[i].isTerminator()) {
+			break;
+		}
+		if (infile[i].isInterpretation()) {
+			continue;
+		}
+		if (!infile[i].isLocalComment() && !infile[i].isGlobalComment()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); ++j) {
+			HTp tok = infile.token(i, j);
+			if (!tok) {
+				continue;
+			}
+			std::string met = getMetForMensurationLabel(tok->getText());
+			if (!met.empty()) {
+				return met;
+			}
+		}
+	}
+
+	return "";
+}
+
+
+static void deleteNearbyMensurationLabel(HumdrumFile& infile, int mensline) {
+	for (int i=mensline + 1; i<infile.getLineCount(); ++i) {
+		if (infile[i].isData() || infile[i].isBarline() || infile[i].isTerminator()) {
+			break;
+		}
+		if (infile[i].isInterpretation()) {
+			continue;
+		}
+		if (!infile[i].isLocalComment() && !infile[i].isGlobalComment()) {
+			continue;
+		}
+
+		bool changed = false;
+		for (int j=0; j<infile[i].getFieldCount(); ++j) {
+			HTp tok = infile.token(i, j);
+			if (!tok) {
+				continue;
+			}
+			if (getMetForMensurationLabel(tok->getText()).empty()) {
+				continue;
+			}
+			if (infile[i].isGlobalComment()) {
+				infile.deleteLine(i);
+				return;
+			}
+			tok->setText("!");
+			changed = true;
+		}
+
+		if (!changed) {
+			continue;
+		}
+
+		bool empty = true;
+		for (int j=0; j<infile[i].getFieldCount(); ++j) {
+			HTp tok = infile.token(i, j);
+			if (tok && (*tok != "!")) {
+				empty = false;
+				break;
+			}
+		}
+		if (empty) {
+			infile.deleteLine(i);
+		}
+		return;
+	}
+}
+
+
+static void applyMensurationLabelMetOverrides(HumdrumFile& infile) {
+	for (int i=0; i<infile.getLineCount(); ++i) {
+		if (!infile[i].isInterpretation()) {
+			continue;
+		}
+
+		bool hasMens = false;
+		for (int j=0; j<infile[i].getFieldCount(); ++j) {
+			HTp tok = infile.token(i, j);
+			if (tok && (tok->compare(0, 2, "*M") == 0)) {
+				hasMens = true;
+				break;
+			}
+		}
+		if (!hasMens) {
+			continue;
+		}
+
+		std::string labelMet = getNearbyMensurationLabelMet(infile, i);
+		if (labelMet.empty()) {
+			continue;
+		}
+
+		for (int j=i + 1; j<infile.getLineCount(); ++j) {
+			if (infile[j].isData() || infile[j].isBarline() || infile[j].isTerminator()) {
+				break;
+			}
+			if (!infile[j].isInterpretation()) {
+				continue;
+			}
+
+			bool hasMet = false;
+			for (int k=0; k<infile[j].getFieldCount(); ++k) {
+				HTp tok = infile.token(j, k);
+				if (tok && (tok->compare(0, 5, "*met(") == 0)) {
+					hasMet = true;
+					break;
+				}
+			}
+			if (!hasMet) {
+				continue;
+			}
+
+			for (int k=0; k<infile[j].getFieldCount(); ++k) {
+				HTp tok = infile.token(j, k);
+				if (tok && !tok->isNull()) {
+					tok->setText(labelMet);
+				}
+			}
+			deleteNearbyMensurationLabel(infile, i);
+			break;
+		}
+	}
+}
+
+
+static std::string addMeasureNumberToBarlineToken(const std::string& text, int number) {
+	std::string output;
+	for (int i=0; i<(int)text.size(); ++i) {
+		if ((text[i] == '=') && ((i + 1 >= (int)text.size()) || (text[i + 1] != '='))) {
+			output += '=';
+			output += std::to_string(number);
+		} else if (!std::isdigit(static_cast<unsigned char>(text[i]))) {
+			output += text[i];
+		}
+	}
+	return output;
+}
+
+
+static void addAllMeasureNumbers(HumdrumFile& infile) {
+	int number = 1;
+	for (int i=0; i<infile.getLineCount(); ++i) {
+		if (!infile[i].isBarline()) {
+			continue;
+		}
+
+		bool finalQ = false;
+		for (int j=0; j<infile[i].getFieldCount(); ++j) {
+			HTp tok = infile.token(i, j);
+			if (tok && (tok->find("==") != std::string::npos)) {
+				finalQ = true;
+				break;
+			}
+		}
+		if (finalQ) {
+			continue;
+		}
+
+		for (int j=0; j<infile[i].getFieldCount(); ++j) {
+			HTp tok = infile.token(i, j);
+			if (tok) {
+				tok->setText(addMeasureNumberToBarlineToken(tok->getText(), number));
+			}
+		}
+		number++;
+	}
+}
+
+
+static std::string getDefaultMetForMensuration(HTp token) {
+	if (!token || token->isNull()) {
+		return "";
+	}
+	if (*token == "*M2/1") {
+		return "*met(C|)";
+	}
+	if (*token == "*M3/1") {
+		return "*met(O)";
+	}
+	if (*token == "*M6/2") {
+		return "*met(C.)";
+	}
+	if (*token == "*M9/2") {
+		return "*met(O.)";
+	}
+	return "";
+}
+
+
+static bool hasNonemptyReference(HumdrumFile& infile, const std::string& key) {
+	std::string prefix = "!!!" + key + ":";
+	for (int i=0; i<infile.getLineCount(); ++i) {
+		if (!infile[i].isReference()) {
+			continue;
+		}
+		HTp tok = infile.token(i, 0);
+		if (!tok || (tok->compare(0, prefix.size(), prefix) != 0)) {
+			continue;
+		}
+		std::string text = tok->getText();
+		size_t colon = text.find(':');
+		if (colon == std::string::npos) {
+			return false;
+		}
+		for (size_t p=colon + 1; p<text.size(); ++p) {
+			if (!std::isspace(static_cast<unsigned char>(text[p]))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	return false;
+}
+
+
+static bool hasMuse2psRecord(HumdrumFile& infile) {
+	for (int i=0; i<infile.getLineCount(); ++i) {
+		if (!infile[i].isGlobalComment()) {
+			continue;
+		}
+		HTp tok = infile.token(i, 0);
+		if (tok && (tok->compare(0, 10, "!!muse2ps:") == 0)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+
+static bool hasTextSpines(HumdrumFile& infile) {
+	for (int i=0; i<infile.getLineCount(); ++i) {
+		if (!infile[i].isExclusive()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); ++j) {
+			HTp tok = infile.token(i, j);
+			if (tok && (*tok == "**text")) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+
+static std::string getMuse2psSpacing(int voices, bool texted) {
+	if (texted) {
+		if (voices == 3) {
+			return "i2I150v90,90,120c122z18l2700t130";
+		}
+		if (voices == 4) {
+			return "i2I150v90,90,90,120c122z18l2700t130";
+		}
+		if (voices == 5) {
+			return "i2I150v75,75,75,75,110c122z18l2780t100";
+		}
+		if (voices == 6) {
+			return "i2I150v85,85,85,85,85,100z18l2550t200c122";
+		}
+		return "";
+	}
+
+	if (voices == 3) {
+		return "i2I150v90,90,120c120z18l2770t130";
+	}
+	if (voices == 4) {
+		return "i2I150v90,90,90,120c120z18l2770t130";
+	}
+	if (voices == 5) {
+		return "i2I150v90,90,90,90,120c120z18l2770t130";
+	}
+	if (voices == 6) {
+		return "i2I150v85,85,85,85,85,100z18l2550t200c122";
+	}
+
+	return "";
+}
+
+
+static void addMuse2psRecord(HumdrumFile& infile) {
+	if (hasMuse2psRecord(infile)) {
+		return;
+	}
+
+	int voices = (int)infile.getKernSpineStartList().size();
+	std::string spacing = getMuse2psSpacing(voices, hasTextSpines(infile));
+	if (spacing.empty()) {
+		return;
+	}
+
+	std::string prefix = "C^@{COM}^";
+	if (hasNonemptyReference(infile, "OPR")) {
+		prefix = "T^@{OPR}^u^@{ONM}{. }@{OTL}^C^@{COM}^";
+	}
+
+	infile.appendLine("!!muse2ps: " + prefix + spacing);
+}
+
 
 /////////////////////////////////
 //
@@ -57109,29 +57520,31 @@ void Tool_1520ify::processFile(HumdrumFile& infile) {
 		// If there is a mensuration line just above, use it to decide canonical *met(...)
 		int mensLine = i - 1;
 		if (mensLine >= 0 && infile[mensLine].isInterpretation()) {
+			std::string labelMet = getNearbyMensurationLabelMet(infile, mensLine);
 			for (int j = 0; j < infile[i].getFieldCount(); ++j) {
 				HTp metTok  = infile.token(i, j);
 				HTp mensTok = infile.token(mensLine, j);
 
-				// Default: leave non-*met tokens alone on this line
+				// Default: leave non-*met tokens alone on this line unless a
+				// mensuration label applies to the whole mensuration block.
 				if (!metTok || metTok->isNull()) {
 				    continue;
 				}
 
-				if (metTok->compare(0, 5, "*met(") != 0) {
+				if (labelMet.empty() && (metTok->compare(0, 5, "*met(") != 0)) {
 				    continue;
 				}
 
 				// Decide canonical met from the mensuration just above
 				const char* repl = "*";   // if we can’t decide, blank it
 
-				if (mensTok && !mensTok->isNull()) {
-				    if (*mensTok == "*M2/1") {
-				        repl = "*met(C|)";
-				    }
-				    else if (*mensTok == "*M3/1") {
-				        repl = "*met(O)";
-				    }
+				if (!labelMet.empty()) {
+					repl = labelMet.c_str();
+				} else {
+					std::string defaultMet = getDefaultMetForMensuration(mensTok);
+					if (!defaultMet.empty()) {
+						repl = defaultMet.c_str();
+					}
 				}
 				metTok->setText(repl);
 			}
@@ -57202,21 +57615,24 @@ void Tool_1520ify::processFile(HumdrumFile& infile) {
 			}
 		}
 
-		// Build a *met(...) line (post-normalization we only need to check *M2/1 and *M3/1)
+		// Build a *met(...) line for recognized mensuration signs.
 		std::string newline;
 		bool willInsert = false;
+		std::string labelMet = getNearbyMensurationLabelMet(infile, i);
 
 		for (int j = 0; j < infile[i].getFieldCount(); ++j) {
 			HTp tok = infile.token(i, j);
-			const char* out = "*";
+			std::string out = "*";
 			if (tok && !tok->isNull()) {
-				if (*tok == "*M2/1") { 
-					out = "*met(C|)"; 
+				if (!labelMet.empty() && (tok->compare(0, 2, "*M") == 0)) {
+					out = labelMet;
 					willInsert = true; 
-				}
-				else if (*tok == "*M3/1") { 
-					out = "*met(O)"; 
-					willInsert = true; 
+				} else {
+					std::string defaultMet = getDefaultMetForMensuration(tok);
+					if (!defaultMet.empty()) {
+						out = defaultMet;
+						willInsert = true;
+					}
 				}
 			}
 			newline += out;
@@ -57230,6 +57646,8 @@ void Tool_1520ify::processFile(HumdrumFile& infile) {
 			i++;  // skip the line we just inserted
 		}
 	}
+
+	applyMensurationLabelMetOverrides(infile);
 
 	// Convert LO:TX Section lines in-place to !!section and !!!OMD
 	for (int i = 0; i < infile.getLineCount(); ++i) {
@@ -57280,6 +57698,48 @@ void Tool_1520ify::processFile(HumdrumFile& infile) {
 		i += 1;
 	}
 
+	// Refresh token/line relationships after structural edits so section-based
+	// voice counting sees correct line indexes.
+	infile.createLinesFromTokens();
+
+	// Populate !!!voices after labelled section comments have been created.
+	{
+		std::string voiceText = getVoicesReference(infile);
+
+		if (!voiceText.empty()) {
+			for (int li = 0; li < infile.getLineCount(); ++li) {
+				if (!infile[li].isReference()) {
+					continue;
+				}
+				HTp tok = infile.token(li, 0);
+				if (!tok) {
+					continue;
+				}
+				if (tok->compare(0, 10, "!!!voices:") != 0) {
+					continue;
+				}
+
+				std::string cur = tok->getText();
+				size_t colon = cur.find(':');
+				bool hasContent = false;
+				if (colon != std::string::npos) {
+					for (size_t p = colon + 1; p < cur.size(); ++p) {
+						if (!std::isspace(static_cast<unsigned char>(cur[p]))) {
+							hasContent = true;
+							break;
+						}
+					}
+				}
+
+				bool overwriteQ = (voiceText.find('-') != std::string::npos);
+				if (!hasContent || overwriteQ) {
+					tok->setText("!!!voices: " + voiceText);
+				}
+				break;
+			}
+		}
+	}
+
 	// Input lyrics may contain "=" signs which are to be converted into
 	// spaces in **text data, and into elisions when displaying with verovio.
 	Tool_shed shed;
@@ -57291,6 +57751,8 @@ void Tool_1520ify::processFile(HumdrumFile& infile) {
 	argv.push_back("s/=/ /g");
 	shed.process(argv);
 	shed.run(infile);
+
+	addAllMeasureNumbers(infile);
 }
 
 
@@ -57426,6 +57888,22 @@ void Tool_1520ify::fixEditorialAccidentals(HumdrumFile& infile) {
 //
 
 void Tool_1520ify::addTerminalLongs(HumdrumFile& infile) {
+	for (int i=0; i<infile.getLineCount(); ++i) {
+		if (!isInternalSectionBoundary(infile, i)) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); ++j) {
+			HTp token = infile.token(i, j);
+			if (!token || !token->isKern()) {
+				continue;
+			}
+			if (token->find("||") == string::npos) {
+				continue;
+			}
+			markPreviousNoteAsLong(token, true);
+		}
+	}
+
 	int scount = infile.getStrandCount();
 	for (int i=0; i<scount; i++) {
 		HTp cur = infile.getStrandEnd(i);
@@ -57435,34 +57913,273 @@ void Tool_1520ify::addTerminalLongs(HumdrumFile& infile) {
 		if (!cur->isKern()) {
 			continue;
 		}
-		while (cur) {
-			if (!cur->isData()) {
-				cur = cur->getPreviousToken();
-				continue;
-			}
-			if (cur->isNull()) {
-				cur = cur->getPreviousToken();
-				continue;
-			}
-			if (cur->isRest()) {
-				cur = cur->getPreviousToken();
-				continue;
-			}
-			if (cur->isSecondaryTiedNote()) {
-				cur = cur->getPreviousToken();
-				continue;
-			}
-			if (cur->find("l") != std::string::npos) {
-				// already marked so do not do it again
-				break;
-			}
-			// mark this note with "l"
-			string newtext = *cur;
-			newtext += "l";
-			cur->setText(newtext);
+		markPreviousNoteAsLong(cur, false);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_1520ify::isInternalSectionBoundary -- Identify internal double barlines
+//    that are followed by a new section rather than score termination.
+//
+
+bool Tool_1520ify::isInternalSectionBoundary(HumdrumFile& infile, int lineindex) {
+	if ((lineindex < 0) || (lineindex >= infile.getLineCount())) {
+		return false;
+	}
+	if (!infile[lineindex].isBarline()) {
+		return false;
+	}
+
+	bool doubleQ = false;
+	for (int j=0; j<infile[lineindex].getFieldCount(); ++j) {
+		HTp token = infile.token(lineindex, j);
+		if (token && token->find("||") != string::npos) {
+			doubleQ = true;
 			break;
 		}
 	}
+	if (!doubleQ) {
+		return false;
+	}
+
+	bool restartQ = false;
+	for (int i=lineindex + 1; i<infile.getLineCount(); ++i) {
+		if (infile[i].isTerminator()) {
+			return false;
+		}
+		if (infile[i].isBarline()) {
+			return false;
+		}
+		if (infile[i].isGlobalComment()) {
+			HTp token = infile.token(i, 0);
+			if (!token) {
+				continue;
+			}
+			if ((token->compare(0, 10, "!!section:") == 0) ||
+			    (token->compare(0, 7, "!!!OMD:") == 0)) {
+				restartQ = true;
+			}
+			continue;
+		}
+		if (infile[i].isLocalComment() || infile[i].isReference() || infile[i].isEmpty()) {
+			continue;
+		}
+		if (infile[i].isInterpretation()) {
+			for (int j=0; j<infile[i].getFieldCount(); ++j) {
+				HTp token = infile.token(i, j);
+				if (!token || token->isNull()) {
+					continue;
+				}
+				if ((token->compare(0, 2, "*M") == 0) ||
+				    (token->compare(0, 5, "*met(") == 0)) {
+					restartQ = true;
+				}
+			}
+			continue;
+		}
+		if (infile[i].isData()) {
+			return restartQ;
+		}
+	}
+
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_1520ify::markPreviousNoteAsLong -- Walk backwards within a strand
+//    and mark the last note attack as a long.  For internal boundaries,
+//    stopAtRest prevents adding a long when the voice has already dropped
+//    out into rests before the section break.
+//
+
+bool Tool_1520ify::markPreviousNoteAsLong(HTp token, bool stopAtRest) {
+	if (!token) {
+		return false;
+	}
+
+	HTp cur = token->getPreviousToken();
+	while (cur) {
+		if (!cur->isData()) {
+			cur = cur->getPreviousToken();
+			continue;
+		}
+		if (cur->isNull()) {
+			cur = cur->getPreviousToken();
+			continue;
+		}
+		if (cur->isRest()) {
+			if (stopAtRest) {
+				return false;
+			}
+			cur = cur->getPreviousToken();
+			continue;
+		}
+		if (cur->isSecondaryTiedNote()) {
+			cur = cur->getPreviousToken();
+			continue;
+		}
+		if (cur->find("l") != std::string::npos) {
+			return true;
+		}
+
+		string newtext = *cur;
+		newtext += "l";
+		cur->setText(newtext);
+		return true;
+	}
+
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_1520ify::getVoicesReference -- Return a voice-count reference string
+//    based on active voices in labelled internal sections.  If sections
+//    differ in active voice counts, report a range such as "2-4".
+//
+
+std::string Tool_1520ify::getVoicesReference(HumdrumFile& infile) {
+	std::vector<HTp> kerns = infile.getKernSpineStartList();
+	if (kerns.empty()) {
+		return "";
+	}
+
+	auto isLabeledSectionBoundary = [&](int lineindex) -> bool {
+		if ((lineindex < 0) || (lineindex >= infile.getLineCount())) {
+			return false;
+		}
+		if (!infile[lineindex].isBarline()) {
+			return false;
+		}
+
+		bool doubleQ = false;
+		for (int j=0; j<infile[lineindex].getFieldCount(); ++j) {
+			HTp token = infile.token(lineindex, j);
+			if (token && token->find("||") != string::npos) {
+				doubleQ = true;
+				break;
+			}
+		}
+		if (!doubleQ) {
+			return false;
+		}
+
+		for (int i=lineindex + 1; i<infile.getLineCount(); ++i) {
+			if (infile[i].isTerminator()) {
+				return false;
+			}
+			if (infile[i].isBarline()) {
+				return false;
+			}
+			if (infile[i].isGlobalComment()) {
+				HTp token = infile.token(i, 0);
+				if (!token) {
+					continue;
+				}
+				if ((token->compare(0, 10, "!!section:") == 0) ||
+				    (token->compare(0, 7, "!!!OMD:") == 0)) {
+					return true;
+				}
+				continue;
+			}
+			if (infile[i].isLocalComment() || infile[i].isReference() ||
+			    infile[i].isInterpretation() || infile[i].isEmpty()) {
+				continue;
+			}
+			if (infile[i].isData()) {
+				return false;
+			}
+		}
+		return false;
+	};
+
+	std::vector<std::pair<int, int>> sections;
+	int startline = -1;
+	for (int i=0; i<infile.getLineCount(); ++i) {
+		if (infile[i].isData()) {
+			startline = i;
+			break;
+		}
+	}
+	if (startline < 0) {
+		return "";
+	}
+
+	for (int i=0; i<infile.getLineCount(); ++i) {
+		if (!isLabeledSectionBoundary(i)) {
+			continue;
+		}
+		sections.push_back(std::make_pair(startline, i));
+		for (int j=i + 1; j<infile.getLineCount(); ++j) {
+			if (infile[j].isData()) {
+				startline = j;
+				break;
+			}
+		}
+	}
+
+	int endline = -1;
+	for (int i=infile.getLineCount() - 1; i>=0; --i) {
+		if (infile[i].isData()) {
+			endline = i;
+			break;
+		}
+	}
+	if ((startline >= 0) && (endline >= startline)) {
+		sections.push_back(std::make_pair(startline, endline));
+	}
+
+	if (sections.empty()) {
+		return std::to_string((int)kerns.size());
+	}
+
+	int minVoices = (int)kerns.size();
+	int maxVoices = 0;
+
+	for (int i=0; i<(int)sections.size(); ++i) {
+		std::vector<bool> active(kerns.size(), false);
+		for (int line=sections[i].first; line<=sections[i].second; ++line) {
+			if (!infile[line].isData()) {
+				continue;
+			}
+			int kindex = 0;
+			for (int field=0; field<infile[line].getFieldCount(); ++field) {
+				HTp tok = infile.token(line, field);
+				if (!tok || !tok->isKern()) {
+					continue;
+				}
+				if (kindex >= (int)active.size()) {
+					break;
+				}
+				if (!tok->isNull() && !tok->isRest() && !tok->isSecondaryTiedNote()) {
+					active[kindex] = true;
+				}
+				kindex++;
+			}
+		}
+
+		int activeCount = 0;
+		for (int j=0; j<(int)active.size(); ++j) {
+			if (active[j]) {
+				activeCount++;
+			}
+		}
+		minVoices = std::min(minVoices, activeCount);
+		maxVoices = std::max(maxVoices, activeCount);
+	}
+
+	if (minVoices == maxVoices) {
+		return std::to_string(minVoices);
+	}
+	return std::to_string(minVoices) + "-" + std::to_string(maxVoices);
 }
 
 
@@ -57768,6 +58485,17 @@ void Tool_1520ify::addBibliographicRecords(HumdrumFile& infile) {
 		}
 	}
 
+	if (!basename.empty()) {
+		size_t dot = basename.find_last_of('.');
+		if ((dot != std::string::npos) && (basename.substr(dot) == ".krn")) {
+			// already in the desired form
+		} else if (dot != std::string::npos) {
+			basename = basename.substr(0, dot) + ".krn";
+		} else {
+			basename += ".krn";
+		}
+	}
+
 	// Build the segment line
 	std::string segmentLine = "!!!!SEGMENT: " + basename;
 
@@ -57961,51 +58689,6 @@ void Tool_1520ify::addBibliographicRecords(HumdrumFile& infile) {
 	} else if (foundOPR) {
 	    infile.deleteLine(oprLine);
 	}
-
-	// --- Populate voices from number of **kern spines ---
-	{
-		// Count **kern spines
-		std::vector<HTp> kerns = infile.getKernSpineStartList();
-		int voiceCount = static_cast<int>(kerns.size());
-
-		if (voiceCount > 0) {
-			for (int li = 0; li < infile.getLineCount(); ++li) {
-				if (!infile[li].isReference()) {
-					continue;
-				}
-				HTp tok = infile.token(li, 0);
-				if (!tok) {
-					continue;
-				}
-
-				// Find the !!!voices: line
-				if (tok->compare(0, 10, "!!!voices:") != 0){
-					continue;
-				}
-
-				std::string cur = tok->getText();
-
-				// Check if there is already non-whitespace content after the colon
-				size_t colon = cur.find(':');
-				bool hasContent = false;
-				if (colon != std::string::npos) {
-					for (size_t p = colon + 1; p < cur.size(); ++p) {
-						if (!std::isspace(static_cast<unsigned char>(cur[p]))) {
-							hasContent = true;
-							break;
-						}
-					}
-				}
-
-				// Only auto-fill if it was effectively empty
-				if (!hasContent) {
-					tok->setText("!!!voices: " + std::to_string(voiceCount));
-				}
-				break; // done with voices
-			}
-		}
-	}
-
 
 	// --- Auto-fill AGN (genre + optional movement name) based on numeric id ---
 	
@@ -58273,6 +58956,8 @@ void Tool_1520ify::addBibliographicRecords(HumdrumFile& infile) {
 		infile.appendLine(line);
 	}
 
+	splitEncoderDate(infile);
+
 	// --- Remove !!!SMS: if it contains no content ---
 	{
 	    for (int li = 0; li < infile.getLineCount(); ++li) {
@@ -58309,6 +58994,8 @@ void Tool_1520ify::addBibliographicRecords(HumdrumFile& infile) {
 	        }
 	    }
 	}
+
+	addMuse2psRecord(infile);
 }
 
 

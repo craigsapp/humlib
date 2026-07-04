@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jun 14 23:22:55 PDT 2026
+// Last Modified: Tue Jun 30 10:40:09 CEST 2026
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -5936,6 +5936,9 @@ class Tool_1520ify : public HumTool {
 		void        fixEditorialAccidentals(HumdrumFile& infile);
 		void        fixInstrumentAbbreviations(HumdrumFile& infile);
 		void        addTerminalLongs   (HumdrumFile& infile);
+		bool        isInternalSectionBoundary(HumdrumFile& infile, int lineindex);
+		bool        markPreviousNoteAsLong(HTp token, bool stopAtRest);
+		std::string getVoicesReference(HumdrumFile& infile);
 		void        deleteDummyTranspositions(HumdrumFile& infile);
 		std::string getDate            (void);
 		int         getYear            (void);
