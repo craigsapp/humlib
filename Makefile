@@ -1201,7 +1201,7 @@ tool-filter.o: tool-filter.cpp tool-filter.h \
   tool-meter.h tool-metlev.h tool-modori.h \
   tool-msearch.h Convert.h tool-myank.h \
   tool-nproof.h tool-ordergps.h tool-phrase.h \
-  tool-pline.h tool-recip.h tool-restfill.h \
+  tool-pline.h tool-pliner.h tool-recip.h tool-restfill.h \
   tool-rid.h tool-sab2gs.h tool-satb2gs.h \
   tool-scordatura.h HumTransposer.h HumPitch.h \
   tool-semitones.h tool-shed.h tool-sic.h \
