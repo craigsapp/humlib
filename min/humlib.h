@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Jul 20 10:35:12 CEST 2026
+// Last Modified: Sat Jul 25 08:37:05 CEST 2026
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -12148,6 +12148,69 @@ class Tool_textdur : public HumTool {
 		bool m_interleaveQ   = false;  // used with -i option
 		HumNum m_RhythmFactor = 1;     // uwed with -1, -2, -8, and later -f #
 
+};
+
+
+class Tool_textract : public HumTool {
+	public:
+		         Tool_textract    (void);
+		        ~Tool_textract    () {};
+
+		bool     run              (HumdrumFileSet& infiles);
+		bool     run              (HumdrumFile& infile);
+		bool     run              (const std::string& indata, std::ostream& out);
+		bool     run              (HumdrumFile& infile, std::ostream& out);
+
+	protected:
+		struct SungWord {
+			std::string original;
+			std::string norm;
+			int  syllables   = 0;
+			bool capitalized = false;
+			bool bis         = false;
+		};
+
+		struct Voice {
+			HTp textStart = NULL;
+			std::vector<SungWord> words;
+			std::vector<std::vector<SungWord>> lines;
+		};
+
+		struct LineCluster {
+			std::vector<std::vector<SungWord>> members; // one entry per contributing voice line
+			std::vector<int> voiceIds;
+			double avgPos = 0.0;
+		};
+
+		void     initialize       (void);
+		void     processFile      (HumdrumFile& infile);
+
+		void     getVoices        (HumdrumFile& infile, std::vector<Voice>& voices);
+		void     buildSungWords   (HTp textStart, std::vector<SungWord>& words);
+		std::string normalizeWord (const std::string& text);
+		std::string cleanOrigPiece(const std::string& text);
+		void     collapseRepeats  (std::vector<SungWord>& words);
+		void     segmentLines     (Voice& voice);
+		int      lineSyllables    (const std::vector<SungWord>& line);
+		int      expectedSyllables(int lineIndex);
+		int      distanceToAllowed(int syllables);
+		bool     isAllowedLength  (int syllables, int tol = 0);
+		bool     endsWithVowel    (const std::string& norm);
+		bool     startsWithVowel  (const std::string& norm);
+		bool     elidesWith       (const SungWord& left, const SungWord& right);
+		bool     likelyLineStart  (const std::string& norm);
+		bool     linesSimilar     (const std::vector<SungWord>& a,
+		                           const std::vector<SungWord>& b);
+		bool     isSubSequence    (const std::vector<SungWord>& shorter,
+		                           const std::vector<SungWord>& longer);
+		void     dedupeVoiceLines (Voice& voice);
+		void     reconstructText  (std::vector<Voice>& voices);
+		void     refineLines      (std::vector<std::vector<SungWord>>& lines);
+		std::vector<SungWord> consensusLine(LineCluster& cluster);
+		std::string lineToString  (const std::vector<SungWord>& line);
+
+	private:
+		std::vector<int> m_sylCounts; // empty = unused
 };
 
 
