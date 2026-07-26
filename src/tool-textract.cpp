@@ -700,7 +700,10 @@ void Tool_textract::segmentLines(Voice& voice) {
 					// being built).  Once it is at/near an allowed length,
 					// or has overshot the longest allowed length, break so
 					// a missed boundary cannot glue the rest of the poem
-					// into one mega-line.
+					// into one mega-line.  Mid-line capitals after a shorter
+					// allowed hit (e.g. "Amor" after a 7 when -s is 7,11)
+					// are repaired later in refineLines by folding a short
+					// trailing fragment back into the previous line.
 					int have = lineSyllables(cur);
 					if (!isAllowedLength(have, 1) &&
 							(have <= maxAllowedLength() + 1)) {
@@ -911,6 +914,18 @@ vector<Tool_textract::SungWord> Tool_textract::consensusLine(LineCluster& cluste
 		}
 		score -= 0.75 * fabs((double)m.size() - (double)medianLen);
 
+		// Prefer a reading whose metrical count hits an allowed -s length
+		// (e.g. full "Riso tra perle..." at 11 over a mid-entry
+		// "Tra perle..." at 9 when -s 7,11).
+		if (!m_sylCounts.empty()) {
+			int syl = lineSyllables(m);
+			if (isAllowedLength(syl, 1)) {
+				score += 3.0;
+			} else {
+				score -= distanceToAllowed(syl);
+			}
+		}
+
 		// Penalize an immediate repeated half of the line.
 		int n = (int)m.size();
 		if ((n >= 4) && (n % 2 == 0)) {
@@ -997,7 +1012,12 @@ void Tool_textract::reconstructText(vector<Voice>& voices) {
 				}
 				if (!line.empty() && !rep.empty() &&
 						line[0].capitalized && rep[0].capitalized &&
-						(line[0].norm != rep[0].norm)) {
+						(line[0].norm != rep[0].norm) &&
+						!lineInRep && !repInLine) {
+					// Different line openings usually mean different
+					// poem lines, but not when one reading is a mid-line
+					// entry into the other ("Tra perle..." vs
+					// "Riso tra perle...").
 					continue;
 				}
 				best = ci;
@@ -1065,7 +1085,8 @@ void Tool_textract::reconstructText(vector<Voice>& voices) {
 				}
 				if (!ri.empty() && !rj.empty() &&
 						ri[0].capitalized && rj[0].capitalized &&
-						(ri[0].norm != rj[0].norm)) {
+						(ri[0].norm != rj[0].norm) &&
+						!iInJ && !jInI) {
 					continue;
 				}
 				clusters[i].members.insert(clusters[i].members.end(),
@@ -1113,16 +1134,27 @@ void Tool_textract::reconstructText(vector<Voice>& voices) {
 		bool skip = false;
 		for (size_t pi=0; pi<poem.size(); pi++) {
 			auto& prev = poem[pi];
-			if (linesSimilar(line, prev)) {
-				skip = true;
-				break;
-			}
-			if (isSubSequence(line, prev)) {
-				skip = true;
-				break;
-			}
-			if (isSubSequence(prev, line)) {
-				poem[pi] = line;
+			if (linesSimilar(line, prev) || isSubSequence(line, prev) ||
+					isSubSequence(prev, line)) {
+				// Same poem line attested in fuller/partial forms: keep
+				// the metrically better (or longer) reading.
+				bool lineBetter = false;
+				if (!m_sylCounts.empty()) {
+					int sylNew = lineSyllables(line);
+					int sylOld = lineSyllables(prev);
+					int dNew = distanceToAllowed(sylNew);
+					int dOld = distanceToAllowed(sylOld);
+					if (dNew < dOld) {
+						lineBetter = true;
+					} else if ((dNew == dOld) && (line.size() > prev.size())) {
+						lineBetter = true;
+					}
+				} else if (line.size() > prev.size()) {
+					lineBetter = true;
+				}
+				if (lineBetter) {
+					poem[pi] = line;
+				}
 				skip = true;
 				break;
 			}
@@ -1164,6 +1196,24 @@ void Tool_textract::refineLines(vector<vector<SungWord>>& lines) {
 	int i = 0;
 	while (i < (int)lines.size()) {
 		int syl = lineSyllables(lines[i]);
+
+		// Short trailing fragment after a line that already hit a shorter
+		// allowed length (e.g. "Ma che…schivargli" at 7 + "Amor ci toglie"):
+		// fold back if the combination hits an allowed length and the
+		// fragment does not open with a typical line-starter.
+		if (!isAllowedLength(syl, 1) && !out.empty()) {
+			if (lines[i].empty() || !likelyLineStart(lines[i][0].norm)) {
+				vector<SungWord> combined = out.back();
+				combined.insert(combined.end(), lines[i].begin(), lines[i].end());
+				int combSyl = lineSyllables(combined);
+				if (isAllowedLength(combSyl, 1) &&
+						(distanceToAllowed(combSyl) <= distanceToAllowed(lineSyllables(out.back())))) {
+					out.back().swap(combined);
+					i++;
+					continue;
+				}
+			}
+		}
 
 		if (isAllowedLength(syl, 1)) {
 			out.push_back(lines[i]);

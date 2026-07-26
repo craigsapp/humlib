@@ -474,12 +474,12 @@ void Tool_pliner::buildSungWords(HTp textStart, vector<SungWord>& words) {
 //////////////////////////////
 //
 // Tool_pliner::alignVoice -- Align a voice's sequence of sung words
-//    against the poem, tracking a mostly-forward-moving pointer (repeats
-//    are assumed to stay close by: within the current line or the
-//    immediately preceding line), rather than depending on any
-//    pre-existing editorial markup.  Runs of consecutive words assigned
-//    to the same (line, repeat-state) are collapsed into "spans"; each
-//    span marks one *pline transition.
+//    against the poem, tracking a mostly-forward-moving pointer.  Local
+//    repeats are sought within the current line and a short lookback of
+//    preceding lines (a closing-stanza repeat may jump back more than
+//    one line, e.g. from line 14 back to line 12).  Runs of consecutive
+//    words assigned to the same (line, repeat-state) are collapsed into
+//    "spans"; each span marks one *pline transition.
 //
 //    A span only counts as a repeat ("r") if it does not, by the time it
 //    ends, reach any further into the line than this voice had already
@@ -493,7 +493,6 @@ void Tool_pliner::buildSungWords(HTp textStart, vector<SungWord>& words) {
 //    starts by re-treading already-sung words, because it ends up
 //    covering new ground.
 //
-
 void Tool_pliner::alignVoice(vector<SungWord>& words, vector<vector<PoemWord>>& poem,
 		vector<Span>& spans) {
 	spans.clear();
@@ -743,8 +742,13 @@ void Tool_pliner::alignVoice(vector<SungWord>& words, vector<vector<PoemWord>>& 
 			}
 
 			// bounded backward candidates: current line up to the
-			// pointer, then the immediately preceding line.
-			int lowLine = ptrLine - 1;
+			// pointer, then a short lookback of preceding lines.
+			// Capitalized re-entries (typical line openings of a
+			// repeated tercet/quatrain) may jump back several lines;
+			// non-capitals stay closer so common words do not snap to
+			// distant earlier matches.
+			int maxLineLookback = sw.capitalized ? 6 : 2;
+			int lowLine = ptrLine - maxLineLookback;
 			if (lowLine < 0) {
 				lowLine = 0;
 			}
@@ -753,7 +757,12 @@ void Tool_pliner::alignVoice(vector<SungWord>& words, vector<vector<PoemWord>>& 
 				for (int p = hi; p >= 0; p--) {
 					int s = scoreRun(wi, line, p);
 					if (s > 0) {
-						cands.push_back({line, p, s, 2});
+						int backDist = ptrLine - line;
+						// Near repeats (same/previous line) keep priority
+						// 2; farther lookbacks are weaker than forward
+						// progress so only a clearly better scoreRun wins.
+						int pri = (backDist <= 1) ? 2 : 5;
+						cands.push_back({line, p, s, pri});
 					}
 				}
 			}

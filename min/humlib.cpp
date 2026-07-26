@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jul 26 23:12:37 CEST 2026
+// Last Modified: Mon Jul 27 00:10:44 CEST 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -128272,12 +128272,12 @@ void Tool_pliner::buildSungWords(HTp textStart, vector<SungWord>& words) {
 //////////////////////////////
 //
 // Tool_pliner::alignVoice -- Align a voice's sequence of sung words
-//    against the poem, tracking a mostly-forward-moving pointer (repeats
-//    are assumed to stay close by: within the current line or the
-//    immediately preceding line), rather than depending on any
-//    pre-existing editorial markup.  Runs of consecutive words assigned
-//    to the same (line, repeat-state) are collapsed into "spans"; each
-//    span marks one *pline transition.
+//    against the poem, tracking a mostly-forward-moving pointer.  Local
+//    repeats are sought within the current line and a short lookback of
+//    preceding lines (a closing-stanza repeat may jump back more than
+//    one line, e.g. from line 14 back to line 12).  Runs of consecutive
+//    words assigned to the same (line, repeat-state) are collapsed into
+//    "spans"; each span marks one *pline transition.
 //
 //    A span only counts as a repeat ("r") if it does not, by the time it
 //    ends, reach any further into the line than this voice had already
@@ -128291,7 +128291,6 @@ void Tool_pliner::buildSungWords(HTp textStart, vector<SungWord>& words) {
 //    starts by re-treading already-sung words, because it ends up
 //    covering new ground.
 //
-
 void Tool_pliner::alignVoice(vector<SungWord>& words, vector<vector<PoemWord>>& poem,
 		vector<Span>& spans) {
 	spans.clear();
@@ -128541,8 +128540,13 @@ void Tool_pliner::alignVoice(vector<SungWord>& words, vector<vector<PoemWord>>& 
 			}
 
 			// bounded backward candidates: current line up to the
-			// pointer, then the immediately preceding line.
-			int lowLine = ptrLine - 1;
+			// pointer, then a short lookback of preceding lines.
+			// Capitalized re-entries (typical line openings of a
+			// repeated tercet/quatrain) may jump back several lines;
+			// non-capitals stay closer so common words do not snap to
+			// distant earlier matches.
+			int maxLineLookback = sw.capitalized ? 6 : 2;
+			int lowLine = ptrLine - maxLineLookback;
 			if (lowLine < 0) {
 				lowLine = 0;
 			}
@@ -128551,7 +128555,12 @@ void Tool_pliner::alignVoice(vector<SungWord>& words, vector<vector<PoemWord>>& 
 				for (int p = hi; p >= 0; p--) {
 					int s = scoreRun(wi, line, p);
 					if (s > 0) {
-						cands.push_back({line, p, s, 2});
+						int backDist = ptrLine - line;
+						// Near repeats (same/previous line) keep priority
+						// 2; farther lookbacks are weaker than forward
+						// progress so only a clearly better scoreRun wins.
+						int pri = (backDist <= 1) ? 2 : 5;
+						cands.push_back({line, p, s, pri});
 					}
 				}
 			}
@@ -144445,7 +144454,10 @@ void Tool_textract::segmentLines(Voice& voice) {
 					// being built).  Once it is at/near an allowed length,
 					// or has overshot the longest allowed length, break so
 					// a missed boundary cannot glue the rest of the poem
-					// into one mega-line.
+					// into one mega-line.  Mid-line capitals after a shorter
+					// allowed hit (e.g. "Amor" after a 7 when -s is 7,11)
+					// are repaired later in refineLines by folding a short
+					// trailing fragment back into the previous line.
 					int have = lineSyllables(cur);
 					if (!isAllowedLength(have, 1) &&
 							(have <= maxAllowedLength() + 1)) {
@@ -144656,6 +144668,18 @@ vector<Tool_textract::SungWord> Tool_textract::consensusLine(LineCluster& cluste
 		}
 		score -= 0.75 * fabs((double)m.size() - (double)medianLen);
 
+		// Prefer a reading whose metrical count hits an allowed -s length
+		// (e.g. full "Riso tra perle..." at 11 over a mid-entry
+		// "Tra perle..." at 9 when -s 7,11).
+		if (!m_sylCounts.empty()) {
+			int syl = lineSyllables(m);
+			if (isAllowedLength(syl, 1)) {
+				score += 3.0;
+			} else {
+				score -= distanceToAllowed(syl);
+			}
+		}
+
 		// Penalize an immediate repeated half of the line.
 		int n = (int)m.size();
 		if ((n >= 4) && (n % 2 == 0)) {
@@ -144742,7 +144766,12 @@ void Tool_textract::reconstructText(vector<Voice>& voices) {
 				}
 				if (!line.empty() && !rep.empty() &&
 						line[0].capitalized && rep[0].capitalized &&
-						(line[0].norm != rep[0].norm)) {
+						(line[0].norm != rep[0].norm) &&
+						!lineInRep && !repInLine) {
+					// Different line openings usually mean different
+					// poem lines, but not when one reading is a mid-line
+					// entry into the other ("Tra perle..." vs
+					// "Riso tra perle...").
 					continue;
 				}
 				best = ci;
@@ -144810,7 +144839,8 @@ void Tool_textract::reconstructText(vector<Voice>& voices) {
 				}
 				if (!ri.empty() && !rj.empty() &&
 						ri[0].capitalized && rj[0].capitalized &&
-						(ri[0].norm != rj[0].norm)) {
+						(ri[0].norm != rj[0].norm) &&
+						!iInJ && !jInI) {
 					continue;
 				}
 				clusters[i].members.insert(clusters[i].members.end(),
@@ -144858,16 +144888,27 @@ void Tool_textract::reconstructText(vector<Voice>& voices) {
 		bool skip = false;
 		for (size_t pi=0; pi<poem.size(); pi++) {
 			auto& prev = poem[pi];
-			if (linesSimilar(line, prev)) {
-				skip = true;
-				break;
-			}
-			if (isSubSequence(line, prev)) {
-				skip = true;
-				break;
-			}
-			if (isSubSequence(prev, line)) {
-				poem[pi] = line;
+			if (linesSimilar(line, prev) || isSubSequence(line, prev) ||
+					isSubSequence(prev, line)) {
+				// Same poem line attested in fuller/partial forms: keep
+				// the metrically better (or longer) reading.
+				bool lineBetter = false;
+				if (!m_sylCounts.empty()) {
+					int sylNew = lineSyllables(line);
+					int sylOld = lineSyllables(prev);
+					int dNew = distanceToAllowed(sylNew);
+					int dOld = distanceToAllowed(sylOld);
+					if (dNew < dOld) {
+						lineBetter = true;
+					} else if ((dNew == dOld) && (line.size() > prev.size())) {
+						lineBetter = true;
+					}
+				} else if (line.size() > prev.size()) {
+					lineBetter = true;
+				}
+				if (lineBetter) {
+					poem[pi] = line;
+				}
 				skip = true;
 				break;
 			}
@@ -144909,6 +144950,24 @@ void Tool_textract::refineLines(vector<vector<SungWord>>& lines) {
 	int i = 0;
 	while (i < (int)lines.size()) {
 		int syl = lineSyllables(lines[i]);
+
+		// Short trailing fragment after a line that already hit a shorter
+		// allowed length (e.g. "Ma che…schivargli" at 7 + "Amor ci toglie"):
+		// fold back if the combination hits an allowed length and the
+		// fragment does not open with a typical line-starter.
+		if (!isAllowedLength(syl, 1) && !out.empty()) {
+			if (lines[i].empty() || !likelyLineStart(lines[i][0].norm)) {
+				vector<SungWord> combined = out.back();
+				combined.insert(combined.end(), lines[i].begin(), lines[i].end());
+				int combSyl = lineSyllables(combined);
+				if (isAllowedLength(combSyl, 1) &&
+						(distanceToAllowed(combSyl) <= distanceToAllowed(lineSyllables(out.back())))) {
+					out.back().swap(combined);
+					i++;
+					continue;
+				}
+			}
+		}
 
 		if (isAllowedLength(syl, 1)) {
 			out.push_back(lines[i]);
