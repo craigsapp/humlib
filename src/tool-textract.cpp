@@ -687,7 +687,12 @@ void Tool_textract::segmentLines(Voice& voice) {
 			bool doBreak = true;
 			if (!likelyLineStart(w.norm)) {
 				// Mid-line exception, e.g. "Amore" in "Sciogli pietoso Amore".
-				if ((int)cur.size() <= 2) {
+				// Do not apply it to a lone capitalized word: that is usually
+				// an incomplete line-start (partial *pline:a* attempt) and
+				// must stay separate from the next capital ("Aviene" | "Sì").
+				if ((int)cur.size() == 1 && cur[0].capitalized) {
+					doBreak = true;
+				} else if ((int)cur.size() <= 2) {
 					doBreak = false;
 				} else if (!m_sylCounts.empty()) {
 					// With -s, suppress the break only while the current
@@ -723,10 +728,11 @@ void Tool_textract::segmentLines(Voice& voice) {
 bool Tool_textract::likelyLineStart(const string& norm) {
 	static const set<string> starters = {
 		"e", "ed", "a", "ad", "di", "de", "del", "che", "chi",
-		"la", "le", "il", "lo", "gli", "ne", "ma", "per", "se",
+		"la", "le", "il", "lo", "gli", "ne", "ma", "per", "se", "si",
 		"non", "un", "una", "uno", "i", "o", "oh", "ah", "deh", "quando",
 		"come", "cosi", "poi", "anzi", "hor", "or", "ora", "ore",
-		"sol", "solo", "su", "sul", "tra", "fra", "con", "da", "dal"
+		"sol", "solo", "su", "sul", "tra", "fra", "con", "da", "dal",
+		"lasso", "mentre"
 	};
 	if (starters.count(norm)) {
 		return true;
@@ -1168,12 +1174,24 @@ void Tool_textract::refineLines(vector<vector<SungWord>>& lines) {
 		// Too short: try merging following incomplete fragments until the
 		// combination hits an allowed length (or stops improving).
 		if ((syl < minAllow) && (i + 1 < (int)lines.size())) {
+			// Never glue two capital-started openings together (e.g. a
+			// partial "Aviene" onto "Sì duro...").
+			if (!lines[i].empty() && lines[i][0].capitalized &&
+					!lines[i+1].empty() && lines[i+1][0].capitalized) {
+				out.push_back(lines[i]);
+				i++;
+				continue;
+			}
 			vector<SungWord> combined = lines[i];
 			int j = i + 1;
 			while (j < (int)lines.size()) {
 				int nextSyl = lineSyllables(lines[j]);
 				// Do not absorb a following line that is already complete.
 				if (isAllowedLength(nextSyl, 1)) {
+					break;
+				}
+				if (!lines[j].empty() && lines[j][0].capitalized &&
+						!combined.empty() && combined[0].capitalized) {
 					break;
 				}
 				vector<SungWord> trial = combined;

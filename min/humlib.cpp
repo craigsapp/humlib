@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jul 26 23:03:28 CEST 2026
+// Last Modified: Sun Jul 26 23:12:37 CEST 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -143868,18 +143868,11 @@ void Tool_textract::processFile(HumdrumFile& infile) {
 	vector<Voice> voices;
 	getVoices(infile, voices);
 
-	for (int vi=0; vi<(int)voices.size(); vi++) {
-		Voice& voice = voices[vi];
+	for (Voice& voice : voices) {
 		buildSungWords(voice.textStart, voice.words);
 		collapseRepeats(voice.words);
 		segmentLines(voice);
 		dedupeVoiceLines(voice);
-		cerr << "VOICE " << vi << " lines:" << endl;
-		for (int li=0; li<(int)voice.lines.size(); li++) {
-			int syl = lineSyllables(voice.lines[li]);
-			cerr << "  [" << li << "] syl=" << syl << " "
-			     << lineToString(voice.lines[li]) << endl;
-		}
 	}
 
 	reconstructText(voices);
@@ -144439,7 +144432,12 @@ void Tool_textract::segmentLines(Voice& voice) {
 			bool doBreak = true;
 			if (!likelyLineStart(w.norm)) {
 				// Mid-line exception, e.g. "Amore" in "Sciogli pietoso Amore".
-				if ((int)cur.size() <= 2) {
+				// Do not apply it to a lone capitalized word: that is usually
+				// an incomplete line-start (partial *pline:a* attempt) and
+				// must stay separate from the next capital ("Aviene" | "Sì").
+				if ((int)cur.size() == 1 && cur[0].capitalized) {
+					doBreak = true;
+				} else if ((int)cur.size() <= 2) {
 					doBreak = false;
 				} else if (!m_sylCounts.empty()) {
 					// With -s, suppress the break only while the current
@@ -144475,10 +144473,11 @@ void Tool_textract::segmentLines(Voice& voice) {
 bool Tool_textract::likelyLineStart(const string& norm) {
 	static const set<string> starters = {
 		"e", "ed", "a", "ad", "di", "de", "del", "che", "chi",
-		"la", "le", "il", "lo", "gli", "ne", "ma", "per", "se",
+		"la", "le", "il", "lo", "gli", "ne", "ma", "per", "se", "si",
 		"non", "un", "una", "uno", "i", "o", "oh", "ah", "deh", "quando",
 		"come", "cosi", "poi", "anzi", "hor", "or", "ora", "ore",
-		"sol", "solo", "su", "sul", "tra", "fra", "con", "da", "dal"
+		"sol", "solo", "su", "sul", "tra", "fra", "con", "da", "dal",
+		"lasso", "mentre"
 	};
 	if (starters.count(norm)) {
 		return true;
@@ -144920,12 +144919,24 @@ void Tool_textract::refineLines(vector<vector<SungWord>>& lines) {
 		// Too short: try merging following incomplete fragments until the
 		// combination hits an allowed length (or stops improving).
 		if ((syl < minAllow) && (i + 1 < (int)lines.size())) {
+			// Never glue two capital-started openings together (e.g. a
+			// partial "Aviene" onto "Sì duro...").
+			if (!lines[i].empty() && lines[i][0].capitalized &&
+					!lines[i+1].empty() && lines[i+1][0].capitalized) {
+				out.push_back(lines[i]);
+				i++;
+				continue;
+			}
 			vector<SungWord> combined = lines[i];
 			int j = i + 1;
 			while (j < (int)lines.size()) {
 				int nextSyl = lineSyllables(lines[j]);
 				// Do not absorb a following line that is already complete.
 				if (isAllowedLength(nextSyl, 1)) {
+					break;
+				}
+				if (!lines[j].empty() && lines[j][0].capitalized &&
+						!combined.empty() && combined[0].capitalized) {
 					break;
 				}
 				vector<SungWord> trial = combined;
