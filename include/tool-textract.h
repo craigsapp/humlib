@@ -64,9 +64,10 @@ class Tool_textract : public HumTool {
 		void     collapseRepeats  (std::vector<SungWord>& words);
 		void     segmentLines     (Voice& voice);
 		int      lineSyllables    (const std::vector<SungWord>& line);
-		int      expectedSyllables(int lineIndex);
 		int      distanceToAllowed(int syllables);
 		bool     isAllowedLength  (int syllables, int tol = 0);
+		int      minAllowedLength (void);
+		int      maxAllowedLength (void);
 		bool     endsWithVowel    (const std::string& norm);
 		bool     startsWithVowel  (const std::string& norm);
 		bool     elidesWith       (const SungWord& left, const SungWord& right);

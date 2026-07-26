@@ -6,15 +6,17 @@
 // vim:           ts=3 noexpandtab
 //
 // Description:   Insert *pline poetic-line annotations into a **kern score
-//                by aligning the sung **text declamation of each voice
-//                against a poem given in a !!@VERSE: global comment block.
+//                by aligning each voice's **text declamation against the
+//                poem reconstructed by textract from the underlay.
 //
 
 #include "tool-pliner.h"
+#include "tool-textract.h"
 #include "HumRegex.h"
 
 #include <algorithm>
 #include <cctype>
+#include <sstream>
 
 using namespace std;
 
@@ -29,7 +31,7 @@ namespace hum {
 //
 
 Tool_pliner::Tool_pliner(void) {
-	// no options currently defined.
+	define("s|syllables|syl=s:", "allowed line lengths passed to textract (comma-separated set; e.g. 7,11)");
 }
 
 
@@ -99,9 +101,8 @@ void Tool_pliner::processFile(HumdrumFile& infile) {
 	m_poem.clear();
 	m_voices.clear();
 
-	bool haveVerse = parseVerse(infile, m_poem);
-	if (!haveVerse) {
-		// Nothing to do: no !!@VERSE: block found, so echo input unchanged.
+	bool havePoem = extractPoem(infile, m_poem);
+	if (!havePoem) {
 		m_humdrum_text << infile;
 		return;
 	}
@@ -160,59 +161,38 @@ void Tool_pliner::processFile(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_pliner::parseVerse -- Extract the poem lines/words from the
-//    !!@VERSE: global comment block.  The block starts on a line matching
-//    "!!@VERSE:" and continues on subsequent "!!<text>" global comment
-//    lines (not starting with another "!!@" tag) until the first line that
-//    does not match that pattern (typically a blank "!!" separator line or
-//    the next "!!@" tag).
+// Tool_pliner::extractPoem -- Reconstruct the poem via textract and
+//    split it into normalized PoemWord lines for alignment.
 //
 
-bool Tool_pliner::parseVerse(HumdrumFile& infile, vector<vector<PoemWord>>& poem) {
+bool Tool_pliner::extractPoem(HumdrumFile& infile, vector<vector<PoemWord>>& poem) {
 	poem.clear();
-	HumRegex hre;
 
-	int verseLine = -1;
-	for (int i=0; i<infile.getLineCount(); i++) {
-		if (!infile[i].isCommentGlobal()) {
-			continue;
-		}
-		HTp token = infile.token(i, 0);
-		if (hre.search(token, "^!!@VERSE:\\s*$")) {
-			verseLine = i;
-			break;
-		}
+	Tool_textract textract;
+	vector<string> argv;
+	argv.push_back("textract");
+	if (getBoolean("syllables")) {
+		argv.push_back("-s");
+		argv.push_back(getString("syllables"));
 	}
-	if (verseLine < 0) {
+	textract.process(argv);
+	textract.run(infile);
+
+	string text = textract.getFreeText();
+	if (text.empty()) {
 		return false;
 	}
 
+	HumRegex hre;
+	istringstream stream(text);
+	string line;
 	int lineNum = 0;
-	for (int i=verseLine+1; i<infile.getLineCount(); i++) {
-		if (!infile[i].isCommentGlobal()) {
-			break;
-		}
-		HTp token = infile.token(i, 0);
-		string text = *token;
-		if (hre.search(text, "^!!@VERSE:\\s*$")) {
-			// A poem may be split across multiple stanzas, each
-			// re-introduced by its own repeated "!!@VERSE:" tag; treat
-			// this as a stanza separator and keep collecting lines
-			// rather than stopping the poem here.
+	while (getline(stream, line)) {
+		if (line.empty()) {
 			continue;
 		}
-		if (hre.search(text, "^!!@")) {
-			// start of a different tagged section (e.g. "!!@TVERSE:").
-			break;
-		}
-		if (!hre.search(text, "^!!\\s*(\\S.*)$")) {
-			// blank "!!" separator line (or malformed line): end of poem.
-			break;
-		}
-		string content = hre.getMatch(1);
-
 		vector<string> rawwords;
-		hre.split(rawwords, content, "\\s+");
+		hre.split(rawwords, line, "\\s+");
 
 		vector<PoemWord> lineWords;
 		for (string& w : rawwords) {
@@ -224,12 +204,6 @@ bool Tool_pliner::parseVerse(HumdrumFile& infile, vector<vector<PoemWord>>& poem
 				continue;
 			}
 			if ((norm[0] == '\'') && !lineWords.empty()) {
-				// A word-initial apostrophe with nothing before it (e.g.
-				// the "'n" in "E 'n mia ragion...") is a typographical
-				// elision split off from the previous word by whitespace
-				// in the verse text; rejoin it so that "E" + "'n" reads
-				// as the single elided word "e'n", matching how the
-				// same elision is sung as one word in the **text spines.
 				lineWords.back().norm += norm;
 				lineWords.back().original += " " + w;
 				continue;
@@ -438,6 +412,33 @@ void Tool_pliner::buildSungWords(HTp textStart, vector<SungWord>& words) {
 				accum += normalizeWord(part);
 				if (!trailingDash) {
 					finalize();
+				}
+			} else if (wordOpen && !leadingDash) {
+				// Trailing '-' on the previous syllable already marked the
+				// word open; some files omit the leading '-' on the next
+				// syllable (e.g. "Quan-" / "d'ec-").  Continue unless this
+				// part clearly starts a new word (capital letter).
+				bool newCap = false;
+				for (char c : core) {
+					if (isalpha((unsigned char)c)) {
+						newCap = isupper((unsigned char)c) != 0;
+						break;
+					}
+				}
+				if (!newCap) {
+					accum += normalizeWord(part);
+					if (!trailingDash) {
+						finalize();
+					}
+				} else {
+					finalize();
+					startToken = cur;
+					accum = normalizeWord(part);
+					capitalized = true;
+					wordOpen = true;
+					if (!trailingDash) {
+						finalize();
+					}
 				}
 			} else {
 				// starts a new word (closing any dangling previous word).
@@ -764,16 +765,20 @@ void Tool_pliner::alignVoice(vector<SungWord>& words, vector<vector<PoemWord>>& 
 			// enter only partway into the line, e.g. singing just its
 			// tail).  Check every position of a short lookahead of
 			// upcoming lines for the best-confirmed placement.
-			if (sw.capitalized) {
-				int maxLineLookahead = 6;
-				for (int line = ptrLine + 1;
-						(line <= ptrLine + maxLineLookahead) && (line < (int)poem.size());
-						line++) {
-					for (int p = 0; p < lineWordCount(line); p++) {
-						int s = scoreRun(wi, line, p);
-						if (s > 0) {
-							cands.push_back({line, p, s, 3});
-						}
+			//
+			// Non-capitalized words can also land mid-line ahead of the
+			// pointer (e.g. singing "stille di gielo" of line 5 before
+			// that line's opening "Quand'ecco").  Search them too, but
+			// with lower priority so linear progress still wins ties.
+			int maxLineLookahead = sw.capitalized ? 6 : 2;
+			int lookaheadPriority = sw.capitalized ? 3 : 4;
+			for (int line = ptrLine + 1;
+					(line <= ptrLine + maxLineLookahead) && (line < (int)poem.size());
+					line++) {
+				for (int p = 0; p < lineWordCount(line); p++) {
+					int s = scoreRun(wi, line, p);
+					if (s > 0) {
+						cands.push_back({line, p, s, lookaheadPriority});
 					}
 				}
 			}

@@ -6,8 +6,8 @@
 // vim:           ts=3 noexpandtab
 //
 // Description:   Insert *pline poetic-line annotations into a **kern score
-//                by aligning the sung **text declamation of each voice
-//                against a poem given in a !!@VERSE: global comment block.
+//                by aligning each voice's **text declamation against the
+//                poem reconstructed by textract from the underlay.
 //
 
 #ifndef _TOOL_PLINER_H
@@ -47,7 +47,7 @@ class Tool_pliner : public HumTool {
 			int pos    = -1;
 		};
 
-		bool     parseVerse        (HumdrumFile& infile, std::vector<std::vector<PoemWord>>& poem);
+		bool     extractPoem       (HumdrumFile& infile, std::vector<std::vector<PoemWord>>& poem);
 
 		// voice model:
 		struct Voice {

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jul 25 08:37:05 CEST 2026
+// Last Modified: Sun Jul 26 23:03:28 CEST 2026
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -10978,7 +10978,7 @@ class Tool_pliner : public HumTool {
 			int pos    = -1;
 		};
 
-		bool     parseVerse        (HumdrumFile& infile, std::vector<std::vector<PoemWord>>& poem);
+		bool     extractPoem       (HumdrumFile& infile, std::vector<std::vector<PoemWord>>& poem);
 
 		// voice model:
 		struct Voice {
@@ -12192,9 +12192,10 @@ class Tool_textract : public HumTool {
 		void     collapseRepeats  (std::vector<SungWord>& words);
 		void     segmentLines     (Voice& voice);
 		int      lineSyllables    (const std::vector<SungWord>& line);
-		int      expectedSyllables(int lineIndex);
 		int      distanceToAllowed(int syllables);
 		bool     isAllowedLength  (int syllables, int tol = 0);
+		int      minAllowedLength (void);
+		int      maxAllowedLength (void);
 		bool     endsWithVowel    (const std::string& norm);
 		bool     startsWithVowel  (const std::string& norm);
 		bool     elidesWith       (const SungWord& left, const SungWord& right);

@@ -5,7 +5,7 @@
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab nowrap
 //
-// Description:   Insert *pline poetic-line annotations into a kern score.
+// Description:   Insert *pline annotations using textract-reconstructed text.
 //
 
 #include "humlib.h"

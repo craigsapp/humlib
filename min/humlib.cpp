@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jul 25 08:37:05 CEST 2026
+// Last Modified: Sun Jul 26 23:03:28 CEST 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -127829,7 +127829,7 @@ void Tool_pline::getPlineInterpretations(HumdrumFile& infile, vector<HTp>& token
 //
 
 Tool_pliner::Tool_pliner(void) {
-	// no options currently defined.
+	define("s|syllables|syl=s:", "allowed line lengths passed to textract (comma-separated set; e.g. 7,11)");
 }
 
 
@@ -127899,9 +127899,8 @@ void Tool_pliner::processFile(HumdrumFile& infile) {
 	m_poem.clear();
 	m_voices.clear();
 
-	bool haveVerse = parseVerse(infile, m_poem);
-	if (!haveVerse) {
-		// Nothing to do: no !!@VERSE: block found, so echo input unchanged.
+	bool havePoem = extractPoem(infile, m_poem);
+	if (!havePoem) {
 		m_humdrum_text << infile;
 		return;
 	}
@@ -127960,59 +127959,38 @@ void Tool_pliner::processFile(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_pliner::parseVerse -- Extract the poem lines/words from the
-//    !!@VERSE: global comment block.  The block starts on a line matching
-//    "!!@VERSE:" and continues on subsequent "!!<text>" global comment
-//    lines (not starting with another "!!@" tag) until the first line that
-//    does not match that pattern (typically a blank "!!" separator line or
-//    the next "!!@" tag).
+// Tool_pliner::extractPoem -- Reconstruct the poem via textract and
+//    split it into normalized PoemWord lines for alignment.
 //
 
-bool Tool_pliner::parseVerse(HumdrumFile& infile, vector<vector<PoemWord>>& poem) {
+bool Tool_pliner::extractPoem(HumdrumFile& infile, vector<vector<PoemWord>>& poem) {
 	poem.clear();
-	HumRegex hre;
 
-	int verseLine = -1;
-	for (int i=0; i<infile.getLineCount(); i++) {
-		if (!infile[i].isCommentGlobal()) {
-			continue;
-		}
-		HTp token = infile.token(i, 0);
-		if (hre.search(token, "^!!@VERSE:\\s*$")) {
-			verseLine = i;
-			break;
-		}
+	Tool_textract textract;
+	vector<string> argv;
+	argv.push_back("textract");
+	if (getBoolean("syllables")) {
+		argv.push_back("-s");
+		argv.push_back(getString("syllables"));
 	}
-	if (verseLine < 0) {
+	textract.process(argv);
+	textract.run(infile);
+
+	string text = textract.getFreeText();
+	if (text.empty()) {
 		return false;
 	}
 
+	HumRegex hre;
+	istringstream stream(text);
+	string line;
 	int lineNum = 0;
-	for (int i=verseLine+1; i<infile.getLineCount(); i++) {
-		if (!infile[i].isCommentGlobal()) {
-			break;
-		}
-		HTp token = infile.token(i, 0);
-		string text = *token;
-		if (hre.search(text, "^!!@VERSE:\\s*$")) {
-			// A poem may be split across multiple stanzas, each
-			// re-introduced by its own repeated "!!@VERSE:" tag; treat
-			// this as a stanza separator and keep collecting lines
-			// rather than stopping the poem here.
+	while (getline(stream, line)) {
+		if (line.empty()) {
 			continue;
 		}
-		if (hre.search(text, "^!!@")) {
-			// start of a different tagged section (e.g. "!!@TVERSE:").
-			break;
-		}
-		if (!hre.search(text, "^!!\\s*(\\S.*)$")) {
-			// blank "!!" separator line (or malformed line): end of poem.
-			break;
-		}
-		string content = hre.getMatch(1);
-
 		vector<string> rawwords;
-		hre.split(rawwords, content, "\\s+");
+		hre.split(rawwords, line, "\\s+");
 
 		vector<PoemWord> lineWords;
 		for (string& w : rawwords) {
@@ -128024,12 +128002,6 @@ bool Tool_pliner::parseVerse(HumdrumFile& infile, vector<vector<PoemWord>>& poem
 				continue;
 			}
 			if ((norm[0] == '\'') && !lineWords.empty()) {
-				// A word-initial apostrophe with nothing before it (e.g.
-				// the "'n" in "E 'n mia ragion...") is a typographical
-				// elision split off from the previous word by whitespace
-				// in the verse text; rejoin it so that "E" + "'n" reads
-				// as the single elided word "e'n", matching how the
-				// same elision is sung as one word in the **text spines.
 				lineWords.back().norm += norm;
 				lineWords.back().original += " " + w;
 				continue;
@@ -128238,6 +128210,33 @@ void Tool_pliner::buildSungWords(HTp textStart, vector<SungWord>& words) {
 				accum += normalizeWord(part);
 				if (!trailingDash) {
 					finalize();
+				}
+			} else if (wordOpen && !leadingDash) {
+				// Trailing '-' on the previous syllable already marked the
+				// word open; some files omit the leading '-' on the next
+				// syllable (e.g. "Quan-" / "d'ec-").  Continue unless this
+				// part clearly starts a new word (capital letter).
+				bool newCap = false;
+				for (char c : core) {
+					if (isalpha((unsigned char)c)) {
+						newCap = isupper((unsigned char)c) != 0;
+						break;
+					}
+				}
+				if (!newCap) {
+					accum += normalizeWord(part);
+					if (!trailingDash) {
+						finalize();
+					}
+				} else {
+					finalize();
+					startToken = cur;
+					accum = normalizeWord(part);
+					capitalized = true;
+					wordOpen = true;
+					if (!trailingDash) {
+						finalize();
+					}
 				}
 			} else {
 				// starts a new word (closing any dangling previous word).
@@ -128564,16 +128563,20 @@ void Tool_pliner::alignVoice(vector<SungWord>& words, vector<vector<PoemWord>>& 
 			// enter only partway into the line, e.g. singing just its
 			// tail).  Check every position of a short lookahead of
 			// upcoming lines for the best-confirmed placement.
-			if (sw.capitalized) {
-				int maxLineLookahead = 6;
-				for (int line = ptrLine + 1;
-						(line <= ptrLine + maxLineLookahead) && (line < (int)poem.size());
-						line++) {
-					for (int p = 0; p < lineWordCount(line); p++) {
-						int s = scoreRun(wi, line, p);
-						if (s > 0) {
-							cands.push_back({line, p, s, 3});
-						}
+			//
+			// Non-capitalized words can also land mid-line ahead of the
+			// pointer (e.g. singing "stille di gielo" of line 5 before
+			// that line's opening "Quand'ecco").  Search them too, but
+			// with lower priority so linear progress still wins ties.
+			int maxLineLookahead = sw.capitalized ? 6 : 2;
+			int lookaheadPriority = sw.capitalized ? 3 : 4;
+			for (int line = ptrLine + 1;
+					(line <= ptrLine + maxLineLookahead) && (line < (int)poem.size());
+					line++) {
+				for (int p = 0; p < lineWordCount(line); p++) {
+					int s = scoreRun(wi, line, p);
+					if (s > 0) {
+						cands.push_back({line, p, s, lookaheadPriority});
 					}
 				}
 			}
@@ -143776,7 +143779,7 @@ HumNum Tool_textdur::getDuration(HTp tok1, HTp tok2) {
 //
 
 Tool_textract::Tool_textract(void) {
-	define("s|syllables|syl=s:", "expected line lengths in syllables (comma-separated, cycles; e.g. 11,7)");
+	define("s|syllables|syl=s:", "allowed line lengths in syllables (comma-separated set; e.g. 7,11)");
 }
 
 
@@ -143865,11 +143868,18 @@ void Tool_textract::processFile(HumdrumFile& infile) {
 	vector<Voice> voices;
 	getVoices(infile, voices);
 
-	for (Voice& voice : voices) {
+	for (int vi=0; vi<(int)voices.size(); vi++) {
+		Voice& voice = voices[vi];
 		buildSungWords(voice.textStart, voice.words);
 		collapseRepeats(voice.words);
 		segmentLines(voice);
 		dedupeVoiceLines(voice);
+		cerr << "VOICE " << vi << " lines:" << endl;
+		for (int li=0; li<(int)voice.lines.size(); li++) {
+			int syl = lineSyllables(voice.lines[li]);
+			cerr << "  [" << li << "] syl=" << syl << " "
+			     << lineToString(voice.lines[li]) << endl;
+		}
 	}
 
 	reconstructText(voices);
@@ -144013,7 +144023,7 @@ void Tool_textract::buildSungWords(HTp textStart, vector<SungWord>& words) {
 	int sylCount = 0;
 	bool capitalized = false;
 	bool bis = false;
-	bool inBis = false;
+	int bisDepth = 0;
 
 	auto finalize = [&]() {
 		if (wordOpen && !accumNorm.empty()) {
@@ -144041,9 +144051,6 @@ void Tool_textract::buildSungWords(HTp textStart, vector<SungWord>& words) {
 		}
 
 		string raw = *cur;
-		if (raw.find('<') != string::npos) {
-			inBis = true;
-		}
 
 		vector<string> parts;
 		size_t pos = 0;
@@ -144062,6 +144069,12 @@ void Tool_textract::buildSungWords(HTp textStart, vector<SungWord>& words) {
 			if (part.empty()) {
 				continue;
 			}
+			for (char c : part) {
+				if (c == '<') {
+					bisDepth++;
+				}
+			}
+			bool inBis = (bisDepth > 0);
 			string core = part;
 			if (!core.empty() && (core[0] == '<')) {
 				core = core.substr(1);
@@ -144070,6 +144083,13 @@ void Tool_textract::buildSungWords(HTp textStart, vector<SungWord>& words) {
 			bool trailingDash = endsWithContinuationDash(core);
 			string n = normalizeWord(part);
 			string o = cleanOrigPiece(part);
+			for (char c : part) {
+				if (c == '>') {
+					if (bisDepth > 0) {
+						bisDepth--;
+					}
+				}
+			}
 			if (n.empty() && o.empty()) {
 				continue;
 			}
@@ -144080,6 +144100,34 @@ void Tool_textract::buildSungWords(HTp textStart, vector<SungWord>& words) {
 				sylCount++;
 				if (!trailingDash) {
 					finalize();
+				}
+			} else if (wordOpen && !leadingDash) {
+				// Previous syllable had trailing '-'; next may omit leading '-'.
+				bool newCap = false;
+				for (char c : core) {
+					if (isalpha((unsigned char)c)) {
+						newCap = isupper((unsigned char)c) != 0;
+						break;
+					}
+				}
+				if (!newCap) {
+					accumNorm += n;
+					accumOrig += o;
+					sylCount++;
+					if (!trailingDash) {
+						finalize();
+					}
+				} else {
+					finalize();
+					capitalized = true;
+					bis = inBis;
+					accumNorm = n;
+					accumOrig = o;
+					sylCount = 1;
+					wordOpen = true;
+					if (!trailingDash) {
+						finalize();
+					}
 				}
 			} else {
 				if (wordOpen) {
@@ -144103,9 +144151,6 @@ void Tool_textract::buildSungWords(HTp textStart, vector<SungWord>& words) {
 			}
 		}
 
-		if (raw.find('>') != string::npos) {
-			inBis = false;
-		}
 		cur = cur->getNextToken();
 	}
 	finalize();
@@ -144297,20 +144342,6 @@ int Tool_textract::lineSyllables(const vector<SungWord>& line) {
 
 //////////////////////////////
 //
-// Tool_textract::expectedSyllables -- Positional target; list cycles.
-//
-
-int Tool_textract::expectedSyllables(int lineIndex) {
-	if (m_sylCounts.empty()) {
-		return 0;
-	}
-	return m_sylCounts[lineIndex % (int)m_sylCounts.size()];
-}
-
-
-
-//////////////////////////////
-//
 // Tool_textract::distanceToAllowed -- Min distance to any -s length.
 //
 
@@ -144348,6 +144379,42 @@ bool Tool_textract::isAllowedLength(int syllables, int tol) {
 
 //////////////////////////////
 //
+// Tool_textract::minAllowedLength -- Smallest length in the -s set.
+//
+
+int Tool_textract::minAllowedLength(void) {
+	if (m_sylCounts.empty()) {
+		return 0;
+	}
+	int m = m_sylCounts[0];
+	for (int t : m_sylCounts) {
+		m = min(m, t);
+	}
+	return m;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_textract::maxAllowedLength -- Largest length in the -s set.
+//
+
+int Tool_textract::maxAllowedLength(void) {
+	if (m_sylCounts.empty()) {
+		return 0;
+	}
+	int m = m_sylCounts[0];
+	for (int t : m_sylCounts) {
+		m = max(m, t);
+	}
+	return m;
+}
+
+
+
+//////////////////////////////
+//
 // Tool_textract::segmentLines -- Split a voice on capitalized words.
 //    Mid-line capitals (not common line-starters) may stay in the current
 //    line.  Syllable targets (-s) are applied later in refineLines.
@@ -144375,8 +144442,15 @@ void Tool_textract::segmentLines(Voice& voice) {
 				if ((int)cur.size() <= 2) {
 					doBreak = false;
 				} else if (!m_sylCounts.empty()) {
+					// With -s, suppress the break only while the current
+					// line is still short of every allowed length (still
+					// being built).  Once it is at/near an allowed length,
+					// or has overshot the longest allowed length, break so
+					// a missed boundary cannot glue the rest of the poem
+					// into one mega-line.
 					int have = lineSyllables(cur);
-					if (!isAllowedLength(have, 1)) {
+					if (!isAllowedLength(have, 1) &&
+							(have <= maxAllowedLength() + 1)) {
 						doBreak = false;
 					}
 				}
@@ -144402,16 +144476,17 @@ bool Tool_textract::likelyLineStart(const string& norm) {
 	static const set<string> starters = {
 		"e", "ed", "a", "ad", "di", "de", "del", "che", "chi",
 		"la", "le", "il", "lo", "gli", "ne", "ma", "per", "se",
-		"non", "un", "una", "uno", "i", "o", "oh", "ah", "quando",
+		"non", "un", "una", "uno", "i", "o", "oh", "ah", "deh", "quando",
 		"come", "cosi", "poi", "anzi", "hor", "or", "ora", "ore",
 		"sol", "solo", "su", "sul", "tra", "fra", "con", "da", "dal"
 	};
 	if (starters.count(norm)) {
 		return true;
 	}
-	// "E'n", "Né", "Sol' io" folded forms.
+	// "E'n", "Né", "Sol' io", "Quand'ecco" folded forms.
 	if ((norm == "ne") || (norm.rfind("sol", 0) == 0) ||
-			(norm.rfind("e'", 0) == 0) || (norm.rfind("ne'", 0) == 0)) {
+			(norm.rfind("e'", 0) == 0) || (norm.rfind("ne'", 0) == 0) ||
+			(norm.rfind("quand", 0) == 0)) {
 		return true;
 	}
 	return false;
@@ -144458,7 +144533,7 @@ bool Tool_textract::linesSimilar(const vector<SungWord>& a,
 		}
 	}
 	double ratio = (double)dp[a.size()][b.size()] / (double)maxLen;
-	return ratio >= 0.75;
+	return ratio >= 0.65;
 }
 
 
@@ -144635,8 +144710,8 @@ vector<Tool_textract::SungWord> Tool_textract::consensusLine(LineCluster& cluste
 
 //////////////////////////////
 //
-// Tool_textract::reconstructText -- Cluster lines across voices, keep
-//    majority-supported lines, order by typical singing order, emit text.
+// Tool_textract::reconstructText -- Cluster lines across voices, resolve
+//    wording conflicts by majority, order by typical singing order, emit text.
 //
 
 void Tool_textract::reconstructText(vector<Voice>& voices) {
@@ -144658,7 +144733,6 @@ void Tool_textract::reconstructText(vector<Voice>& voices) {
 				if (!similar && !lineInRep && !repInLine) {
 					continue;
 				}
-				// Short fragments only merge if they cover most of the other line.
 				if (!similar && lineInRep &&
 						((int)line.size() * 2 < (int)rep.size())) {
 					continue;
@@ -144667,7 +144741,6 @@ void Tool_textract::reconstructText(vector<Voice>& voices) {
 						((int)rep.size() * 2 < (int)line.size())) {
 					continue;
 				}
-				// Require shared first word when both are capitalized starts.
 				if (!line.empty() && !rep.empty() &&
 						line[0].capitalized && rep[0].capitalized &&
 						(line[0].norm != rep[0].norm)) {
@@ -144679,7 +144752,6 @@ void Tool_textract::reconstructText(vector<Voice>& voices) {
 			if (best >= 0) {
 				clusters[best].members.push_back(line);
 				clusters[best].voiceIds.push_back(vi);
-				// Prefer storing fuller versions first for later consensus.
 				if (line.size() > clusters[best].members[0].size()) {
 					swap(clusters[best].members[0],
 							clusters[best].members.back());
@@ -144693,10 +144765,6 @@ void Tool_textract::reconstructText(vector<Voice>& voices) {
 		}
 	}
 
-	int nVoices = (int)voices.size();
-	int majority = (nVoices + 1) / 2;
-
-	// Compute average position among contributing voices.
 	for (LineCluster& c : clusters) {
 		double sum = 0;
 		int count = 0;
@@ -144707,7 +144775,6 @@ void Tool_textract::reconstructText(vector<Voice>& voices) {
 				continue;
 			}
 			seen.insert(vi);
-			// position = index of this line among that voice's lines
 			auto rep = consensusLine(c);
 			for (int li=0; li<(int)voices[vi].lines.size(); li++) {
 				if (linesSimilar(voices[vi].lines[li], rep) ||
@@ -144722,17 +144789,62 @@ void Tool_textract::reconstructText(vector<Voice>& voices) {
 		c.avgPos = (count > 0) ? (sum / count) : 0;
 	}
 
+	// Merge clusters that are conflicting readings of the same line.
+	bool merged = true;
+	while (merged) {
+		merged = false;
+		for (int i=0; i<(int)clusters.size() && !merged; i++) {
+			auto ri = consensusLine(clusters[i]);
+			for (int j=i+1; j<(int)clusters.size(); j++) {
+				auto rj = consensusLine(clusters[j]);
+				bool similar = linesSimilar(ri, rj);
+				bool iInJ = isSubSequence(ri, rj);
+				bool jInI = isSubSequence(rj, ri);
+				if (!similar && !iInJ && !jInI) {
+					continue;
+				}
+				if (!similar && iInJ && ((int)ri.size() * 2 < (int)rj.size())) {
+					continue;
+				}
+				if (!similar && jInI && ((int)rj.size() * 2 < (int)ri.size())) {
+					continue;
+				}
+				if (!ri.empty() && !rj.empty() &&
+						ri[0].capitalized && rj[0].capitalized &&
+						(ri[0].norm != rj[0].norm)) {
+					continue;
+				}
+				clusters[i].members.insert(clusters[i].members.end(),
+						clusters[j].members.begin(), clusters[j].members.end());
+				clusters[i].voiceIds.insert(clusters[i].voiceIds.end(),
+						clusters[j].voiceIds.begin(), clusters[j].voiceIds.end());
+				int ni = (int)set<int>(clusters[i].voiceIds.begin(),
+						clusters[i].voiceIds.end()).size();
+				int nj = (int)set<int>(clusters[j].voiceIds.begin(),
+						clusters[j].voiceIds.end()).size();
+				clusters[i].avgPos = (clusters[i].avgPos * ni + clusters[j].avgPos * nj)
+						/ max(ni + nj, 1);
+				clusters.erase(clusters.begin() + j);
+				merged = true;
+				break;
+			}
+		}
+	}
+
 	vector<int> keep;
 	for (int ci=0; ci<(int)clusters.size(); ci++) {
-		set<int> uniqVoices(clusters[ci].voiceIds.begin(), clusters[ci].voiceIds.end());
-		if ((int)uniqVoices.size() >= majority) {
-			keep.push_back(ci);
-		}
+		keep.push_back(ci);
 	}
 
 	stable_sort(keep.begin(), keep.end(), [&](int a, int b) {
 		if (fabs(clusters[a].avgPos - clusters[b].avgPos) > 1e-6) {
 			return clusters[a].avgPos < clusters[b].avgPos;
+		}
+		// More widely attested readings first on a position tie.
+		int na = (int)set<int>(clusters[a].voiceIds.begin(), clusters[a].voiceIds.end()).size();
+		int nb = (int)set<int>(clusters[b].voiceIds.begin(), clusters[b].voiceIds.end()).size();
+		if (na != nb) {
+			return na > nb;
 		}
 		return a < b;
 	});
@@ -144741,7 +144853,27 @@ void Tool_textract::reconstructText(vector<Voice>& voices) {
 	for (int ci : keep) {
 		auto line = consensusLine(clusters[ci]);
 		collapseRepeats(line);
-		if (!line.empty()) {
+		if (line.empty()) {
+			continue;
+		}
+		bool skip = false;
+		for (size_t pi=0; pi<poem.size(); pi++) {
+			auto& prev = poem[pi];
+			if (linesSimilar(line, prev)) {
+				skip = true;
+				break;
+			}
+			if (isSubSequence(line, prev)) {
+				skip = true;
+				break;
+			}
+			if (isSubSequence(prev, line)) {
+				poem[pi] = line;
+				skip = true;
+				break;
+			}
+		}
+		if (!skip) {
 			poem.push_back(line);
 		}
 	}
@@ -144759,9 +144891,11 @@ void Tool_textract::reconstructText(vector<Voice>& voices) {
 
 //////////////////////////////
 //
-// Tool_textract::refineLines -- Apply -s lengths (list cycles; any listed
-//    length is allowed).  Metrical counts subtract synaloepha/apostrophe
-//    elision between adjacent words, including across a merge boundary.
+// Tool_textract::refineLines -- Apply -s lengths as a set of allowed
+//    metrical counts (not an alternating cycle).  Too-short lines may be
+//    merged; too-long lines may be split on capitals.  Metrical counts
+//    subtract synaloepha/apostrophe elision between adjacent words,
+//    including across a merge boundary.
 //
 
 void Tool_textract::refineLines(vector<vector<SungWord>>& lines) {
@@ -144769,62 +144903,57 @@ void Tool_textract::refineLines(vector<vector<SungWord>>& lines) {
 		return;
 	}
 
+	const int minAllow = minAllowedLength();
+	const int maxAllow = maxAllowedLength();
+
 	vector<vector<SungWord>> out;
 	int i = 0;
 	while (i < (int)lines.size()) {
-		int target = expectedSyllables((int)out.size());
 		int syl = lineSyllables(lines[i]);
 
-		if (isAllowedLength(syl) || (syl == target)) {
+		if (isAllowedLength(syl, 1)) {
 			out.push_back(lines[i]);
 			i++;
 			continue;
 		}
 
-		if (i + 1 < (int)lines.size()) {
-			int nextSyl = lineSyllables(lines[i+1]);
-			bool nextComplete = isAllowedLength(nextSyl);
+		// Too short: try merging following incomplete fragments until the
+		// combination hits an allowed length (or stops improving).
+		if ((syl < minAllow) && (i + 1 < (int)lines.size())) {
 			vector<SungWord> combined = lines[i];
-			combined.insert(combined.end(), lines[i+1].begin(), lines[i+1].end());
-			int combSyl = lineSyllables(combined); // includes cross-line elision
-			bool hits = isAllowedLength(combSyl) || (combSyl == target);
-			bool improves = distanceToAllowed(combSyl) < distanceToAllowed(syl);
-
-			// Never absorb a complete following line unless the merge exactly hits.
-			bool allowMerge = hits || (improves && !nextComplete);
-			if (allowMerge && !hits && !lines[i+1].empty() &&
-					likelyLineStart(lines[i+1][0].norm) && nextComplete) {
-				allowMerge = false;
-			}
-
-			if (allowMerge) {
-				int j = i + 2;
-				while (j < (int)lines.size() && !isAllowedLength(lineSyllables(combined))) {
-					if (isAllowedLength(lineSyllables(lines[j]))) {
-						break;
-					}
-					vector<SungWord> trial = combined;
-					trial.insert(trial.end(), lines[j].begin(), lines[j].end());
-					int t2 = lineSyllables(combined);
-					int t3 = lineSyllables(trial);
-					if (distanceToAllowed(t3) <= distanceToAllowed(t2)) {
-						combined.swap(trial);
-						j++;
-					} else {
-						break;
-					}
+			int j = i + 1;
+			while (j < (int)lines.size()) {
+				int nextSyl = lineSyllables(lines[j]);
+				// Do not absorb a following line that is already complete.
+				if (isAllowedLength(nextSyl, 1)) {
+					break;
 				}
+				vector<SungWord> trial = combined;
+				trial.insert(trial.end(), lines[j].begin(), lines[j].end());
+				int combSyl = lineSyllables(trial);
+				if (isAllowedLength(combSyl, 1)) {
+					combined.swap(trial);
+					j++;
+					break;
+				}
+				if (distanceToAllowed(combSyl) < distanceToAllowed(lineSyllables(combined))
+						&& (combSyl <= maxAllow + 1)) {
+					combined.swap(trial);
+					j++;
+					continue;
+				}
+				break;
+			}
+			if (j > i + 1 || isAllowedLength(lineSyllables(combined), 1)) {
 				out.push_back(combined);
 				i = j;
 				continue;
 			}
 		}
 
-		int maxAllowed = m_sylCounts[0];
-		for (int t : m_sylCounts) {
-			maxAllowed = max(maxAllowed, t);
-		}
-		if (syl > maxAllowed + 1) {
+		// Too long: split on a capital so the left side matches an allowed
+		// length (prefer the earliest such break).
+		if (syl > maxAllow + 1) {
 			int bestBreak = -1;
 			int bestDist = 9999;
 			for (int k=1; k<(int)lines[i].size(); k++) {
@@ -144837,6 +144966,10 @@ void Tool_textract::refineLines(vector<vector<SungWord>>& lines) {
 				if (isAllowedLength(leftSyl, 1) && (dist < bestDist)) {
 					bestDist = dist;
 					bestBreak = k;
+					// Earliest exact-ish hit is enough.
+					if (dist == 0) {
+						break;
+					}
 				}
 			}
 			if (bestBreak > 0) {
