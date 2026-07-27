@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Di. 28 Juli 2026 01:02:39 CEST
+// Last Modified: Di. 28 Juli 2026 01:41:32 CEST
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -111535,7 +111535,8 @@ Tool_metweight::Tool_metweight(void) {
 	define("s|spine|spines=s", "process only the specified spines");
 	define("n|null=b",         "always use the null token . for unclassified positions");
 	define("t|tied=b",         "label secondary tied notes instead of giving them the null token .");
-	define("c|composite=b",    "add a **kern-comp spine (composite rhythm of all voices) below the voices and label only that spine");
+	define("C|composite=b",    "add a **kern-comp spine (composite rhythm of all voices) below the voices and label only that spine");
+	define("c|color=b",        "add a **color spine with a color for each weight class after every **metweight spine");
 }
 
 
@@ -111594,6 +111595,7 @@ void Tool_metweight::initialize(void) {
 	m_nullQ      = getBoolean("null");
 	m_tiedQ      = getBoolean("tied");
 	m_compositeQ = getBoolean("composite");
+	m_colorQ     = getBoolean("color");
 
 	if (getBoolean("spine")) {
 		m_spineTracks = getString("spine");
@@ -111608,7 +111610,7 @@ void Tool_metweight::initialize(void) {
 //
 // Tool_metweight::processFile -- Insert a **metweight spine after every
 //    processed **kern spine, containing the metric weight of the current
-//    note/rest attack.  With -c only a composite spine is added below the
+//    note/rest attack.  With -C only a composite spine is added below the
 //    voices, and only that spine gets a **metweight spine.
 //
 
@@ -111632,16 +111634,31 @@ void Tool_metweight::processFile(HumdrumFile& infile) {
 	meterTool.process("-r");
 	meterTool.run(infile);
 
-	vector<vector<string>> results;
+	vector<vector<int>> results;
 	fillVoiceResults(results, infile, voices);
+
+	int format = FORMAT_ABBREVIATION;
+	if (m_integerQ) {
+		format = FORMAT_INTEGER;
+	} else if (m_fullQ) {
+		format = FORMAT_FULL;
+	}
 
 	// Insert each voice's spine right after its own track, processing from
 	// last to first so that earlier (not-yet-processed) voices' track
 	// numbers are not shifted by a later insertion.
 	string exinterp = m_cdataQ ? "**cdata-metweight" : "**metweight";
+	vector<string> tokens;
 	for (int i = (int)voices.size() - 1; i >= 0; i--) {
 		int track = voices[i]->getTrack();
-		infile.insertDataSpineAfter(track, results[i], ".", exinterp);
+		if (m_colorQ) {
+			// Inserted first so that the **metweight spine inserted below
+			// ends up between the voice and its **color spine.
+			formatWeights(tokens, results[i], FORMAT_COLOR);
+			infile.insertDataSpineAfter(track, tokens, ".", "**color");
+		}
+		formatWeights(tokens, results[i], format);
+		infile.insertDataSpineAfter(track, tokens, ".", exinterp);
 	}
 	infile.createLinesFromTokens();
 
@@ -111653,7 +111670,7 @@ void Tool_metweight::processFile(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_metweight::addCompositeSpine -- -c option: replace the input with the
+// Tool_metweight::addCompositeSpine -- -C option: replace the input with the
 //    output of the composite tool, which adds a **kern-comp spine (the merged
 //    rhythm of all voices) below the existing voices.  Without "-a" the
 //    composite spine is prepended, which places it below the input voices in
@@ -111676,7 +111693,7 @@ void Tool_metweight::addCompositeSpine(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_metweight::getVoices -- The spines to label: with -c only the
+// Tool_metweight::getVoices -- The spines to label: with -C only the
 //    composite spine, otherwise the **kern spines selected by -k or -s (all
 //    of them when neither option is given).  The composite rhythm is always
 //    built from all **kern spines, so -k/-s do not apply in that mode.
@@ -111730,19 +111747,20 @@ void Tool_metweight::getVoices(vector<HTp>& voices, HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_metweight::fillVoiceResults -- Calculate the **metweight tokens for
-//    each selected **kern spine, one value per line, for
-//    appendDataSpine()/insertDataSpineBefore() to consume.
+// Tool_metweight::fillVoiceResults -- Calculate the metric weight class of
+//    each selected **kern spine, one value per line.  Lines without a weight
+//    (non-data lines, null tokens, tie continuations) get 0, which is not a
+//    weight class; formatWeights() turns the classes into spine tokens.
 //
 
-void Tool_metweight::fillVoiceResults(vector<vector<string>>& results, HumdrumFile& infile,
+void Tool_metweight::fillVoiceResults(vector<vector<int>>& results, HumdrumFile& infile,
 		const vector<HTp>& voices) {
 
 	int lineCount = infile.getLineCount();
 	results.clear();
 	results.resize(voices.size());
 	for (int v = 0; v < (int)voices.size(); v++) {
-		results[v].resize(lineCount, ".");
+		results[v].resize(lineCount, 0);
 	}
 
 	for (int i = 0; i < lineCount; i++) {
@@ -111750,7 +111768,7 @@ void Tool_metweight::fillVoiceResults(vector<vector<string>>& results, HumdrumFi
 			continue;
 		}
 		for (int v = 0; v < (int)voices.size(); v++) {
-			results[v][i] = getWeightToken(infile, i, voices[v]->getTrack());
+			results[v][i] = getTokenWeightClass(infile, i, voices[v]->getTrack());
 		}
 	}
 }
@@ -111759,13 +111777,41 @@ void Tool_metweight::fillVoiceResults(vector<vector<string>>& results, HumdrumFi
 
 //////////////////////////////
 //
-// Tool_metweight::getWeightToken -- Metric weight token for the track's
-//    **kern token on this line, using the position Tool_meter annotated.
-//    Null tokens return "."; non-attacks/unrecognized meters return
-//    WEIGHT_UNCLASSIFIED.
+// Tool_metweight::formatWeights -- Convert a voice's weight classes into the
+//    tokens of one data spine.  Positions without a weight get the null
+//    token ".", and so do unclassified positions when -n is given -- except
+//    in the **color spine, where a null token would make a note keep the
+//    color of the previous one instead of leaving it uncolored.
 //
 
-string Tool_metweight::getWeightToken(HumdrumFile& infile, int line, int track) {
+void Tool_metweight::formatWeights(vector<string>& tokens, const vector<int>& weightClasses,
+		int format) {
+
+	bool nullUnclassifiedQ = m_nullQ && (format != FORMAT_COLOR);
+
+	tokens.clear();
+	tokens.resize(weightClasses.size());
+	for (int i = 0; i < (int)weightClasses.size(); i++) {
+		int weightClass = weightClasses[i];
+		if ((weightClass == 0) || (nullUnclassifiedQ && (weightClass == WEIGHT_UNCLASSIFIED))) {
+			tokens[i] = ".";
+		} else {
+			tokens[i] = formatWeightClass(weightClass, format);
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_metweight::getTokenWeightClass -- Metric weight class of the track's
+//    **kern token on this line, using the position Tool_meter annotated.
+//    Null tokens and tie continuations have no weight at all (0);
+//    non-attacks/unrecognized meters are WEIGHT_UNCLASSIFIED.
+//
+
+int Tool_metweight::getTokenWeightClass(HumdrumFile& infile, int line, int track) {
 	HTp token = NULL;
 	for (int j = 0; j < infile[line].getFieldCount(); j++) {
 		HTp tok = infile.token(line, j);
@@ -111775,11 +111821,11 @@ string Tool_metweight::getWeightToken(HumdrumFile& infile, int line, int track) 
 		}
 	}
 	if (!token) {
-		return ".";
+		return 0;
 	}
 
 	if (token->isNull()) {
-		return ".";
+		return 0;
 	}
 
 	// The continuation of a tie is not a new attack, so it has no metric
@@ -111787,7 +111833,7 @@ string Tool_metweight::getWeightToken(HumdrumFile& infile, int line, int track) 
 	// isSecondaryTiedNote() only accepts plain **kern, so test the token
 	// text directly to cover **kern-comp spines as well.
 	if (!m_tiedQ && Convert::isKernSecondaryTiedNote(*token)) {
-		return ".";
+		return 0;
 	}
 
 	HTp position = token;
@@ -111799,14 +111845,14 @@ string Tool_metweight::getWeightToken(HumdrumFile& infile, int line, int track) 
 		position = getMeterToken(infile, line);
 	}
 	if (!position || !position->getValueBool("auto", "hasData")) {
-		return formatWeightClass(WEIGHT_UNCLASSIFIED);
+		return WEIGHT_UNCLASSIFIED;
 	}
 
 	int top = position->getValueInt("auto", "numerator");
 	int bot = position->getValueInt("auto", "denominator");
 	HumNum beat(position->getValue("auto", "zeroBeat"));
 
-	return formatWeightClass(getWeightClass(top, bot, beat));
+	return getWeightClass(top, bot, beat);
 }
 
 
@@ -111924,32 +111970,41 @@ int Tool_metweight::getWeightClass(int top, int bot, HumNum beat) {
 
 //////////////////////////////
 //
-// Tool_metweight::formatWeightClass -- Convert a weight class into the
-//    token representation selected by the -f/-i options (abbreviated
-//    strong/half-strong/weak codes by default); -n forces the null
-//    token "." for unclassified positions in all three modes.
+// Tool_metweight::formatWeightClass -- Convert a weight class into one of
+//    its token representations: the abbreviations used by the **metweight
+//    spine by default, the full labels of -f, the integer ranks of -i, or
+//    the colors of the **color spine added by -c.
 //
 
-string Tool_metweight::formatWeightClass(int weightClass) {
-	if (m_nullQ && (weightClass == WEIGHT_UNCLASSIFIED)) {
-		return ".";
-	}
-	if (m_integerQ) {
-		return to_string(weightClass);
-	} else if (m_fullQ) {
-		switch (weightClass) {
-			case WEIGHT_STRONG:      return "strong";
-			case WEIGHT_HALF_STRONG: return "half-strong";
-			case WEIGHT_WEAK:        return "weak";
-			default:                 return "unclassified";
-		}
-	} else {
-		switch (weightClass) {
-			case WEIGHT_STRONG:      return "s";
-			case WEIGHT_HALF_STRONG: return "hs";
-			case WEIGHT_WEAK:        return "w";
-			default:                 return "u";
-		}
+string Tool_metweight::formatWeightClass(int weightClass, int format) {
+	switch (format) {
+
+		case FORMAT_INTEGER:
+			return to_string(weightClass);
+
+		case FORMAT_FULL:
+			switch (weightClass) {
+				case WEIGHT_STRONG:      return "strong";
+				case WEIGHT_HALF_STRONG: return "half-strong";
+				case WEIGHT_WEAK:        return "weak";
+				default:                 return "unclassified";
+			}
+
+		case FORMAT_COLOR:
+			switch (weightClass) {
+				case WEIGHT_STRONG:      return "crimson";
+				case WEIGHT_HALF_STRONG: return "orange";
+				case WEIGHT_WEAK:        return "limegreen";
+				default:                 return "black";
+			}
+
+		default:
+			switch (weightClass) {
+				case WEIGHT_STRONG:      return "s";
+				case WEIGHT_HALF_STRONG: return "hs";
+				case WEIGHT_WEAK:        return "w";
+				default:                 return "u";
+			}
 	}
 }
 
