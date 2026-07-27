@@ -179,6 +179,22 @@ int main(int argc, char** argv) {                                          \
 	bool status = true;                                                     \
 	while (instream.readSingleSegment(infiles)) {                           \
 		status &= interface.run(infiles);                                    \
+		if (interface.hasWarning()) {                                       \
+			interface.getWarning(std::cerr);                                \
+		}                                                                   \
+		if (interface.hasAnyText()) {                                       \
+		   interface.getAllText(std::cout);                                 \
+		}                                                                   \
+		if (interface.hasError()) {                                         \
+			interface.getError(std::cerr);                                  \
+	        return -1;                                                      \
+		}                                                                   \
+		if (!interface.hasAnyText()) {                                      \
+			for (int i=0; i<infiles.getCount(); i++) {                      \
+				cout << infiles[i];                                         \
+			}                                                               \
+		}                                                                   \
+		interface.clearOutput();                                            \
 	}                                                                       \
 	interface.finally();                                                    \
 	if (interface.hasWarning()) {                                           \
@@ -190,11 +206,6 @@ int main(int argc, char** argv) {                                          \
 	if (interface.hasError()) {                                             \
 		interface.getError(std::cerr);                                       \
         return -1;                                                         \
-	}                                                                       \
-	if (!interface.hasAnyText()) {                                          \
-		for (int i=0; i<infiles.getCount(); i++) {                           \
-			cout << infiles[i];                                               \
-		}                                                                    \
 	}                                                                       \
 	interface.clearOutput();                                                \
 	return !status;                                                         \

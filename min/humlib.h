@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jul 25 17:02:33 CEST 2026
+// Last Modified: Mo. 27 Juli 2026 21:07:56 CEST
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -5732,6 +5732,22 @@ int main(int argc, char** argv) {                                          \
 	bool status = true;                                                     \
 	while (instream.readSingleSegment(infiles)) {                           \
 		status &= interface.run(infiles);                                    \
+		if (interface.hasWarning()) {                                       \
+			interface.getWarning(std::cerr);                                \
+		}                                                                   \
+		if (interface.hasAnyText()) {                                       \
+		   interface.getAllText(std::cout);                                 \
+		}                                                                   \
+		if (interface.hasError()) {                                         \
+			interface.getError(std::cerr);                                  \
+	        return -1;                                                      \
+		}                                                                   \
+		if (!interface.hasAnyText()) {                                      \
+			for (int i=0; i<infiles.getCount(); i++) {                      \
+				cout << infiles[i];                                         \
+			}                                                               \
+		}                                                                   \
+		interface.clearOutput();                                            \
 	}                                                                       \
 	interface.finally();                                                    \
 	if (interface.hasWarning()) {                                           \
@@ -5743,11 +5759,6 @@ int main(int argc, char** argv) {                                          \
 	if (interface.hasError()) {                                             \
 		interface.getError(std::cerr);                                       \
         return -1;                                                         \
-	}                                                                       \
-	if (!interface.hasAnyText()) {                                          \
-		for (int i=0; i<infiles.getCount(); i++) {                           \
-			cout << infiles[i];                                               \
-		}                                                                    \
 	}                                                                       \
 	interface.clearOutput();                                                \
 	return !status;                                                         \
