@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jul 25 17:02:33 CEST 2026
+// Last Modified: Di. 28 Juli 2026 01:41:32 CEST
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -9727,6 +9727,65 @@ class Tool_metlev : public HumTool {
 
 };
 
+
+
+class Tool_metweight : public HumTool {
+
+	public:
+		     Tool_metweight  (void);
+		     ~Tool_metweight () {};
+
+		bool run     (HumdrumFileSet& infiles);
+		bool run     (HumdrumFile& infile);
+		bool run     (const std::string& indata, std::ostream& out);
+		bool run     (HumdrumFile& infile, std::ostream& out);
+
+	protected:
+		void        initialize       (void);
+		void        processFile      (HumdrumFile& infile);
+		void        addCompositeSpine(HumdrumFile& infile);
+		void        getVoices        (std::vector<HTp>& voices, HumdrumFile& infile);
+		void        fillVoiceResults (std::vector<std::vector<int>>& results,
+		                             HumdrumFile& infile,
+		                             const std::vector<HTp>& voices);
+		void        formatWeights    (std::vector<std::string>& tokens,
+		                             const std::vector<int>& weightClasses,
+		                             int format);
+		int         getTokenWeightClass(HumdrumFile& infile, int line, int track);
+		HTp         getMeterToken    (HumdrumFile& infile, int line);
+		std::string formatWeightClass(int weightClass, int format);
+		int         getWeightClass   (int top, int bot, HumNum beat);
+
+		// Metric weight classes (in order from strongest to weakest):
+		enum {
+			WEIGHT_STRONG       = 1,
+			WEIGHT_HALF_STRONG  = 2,
+			WEIGHT_WEAK         = 3,
+			WEIGHT_UNCLASSIFIED = 4
+		};
+
+		// Token representations of a weight class (see formatWeightClass):
+		enum {
+			FORMAT_ABBREVIATION, // abbreviations: s/hs/w/u (default)
+			FORMAT_FULL,         // -f option: strong/half-strong/weak/unclassified
+			FORMAT_INTEGER,      // -i option: the weight class values 1/2/3/4
+			FORMAT_COLOR         // -c option: a color for each weight class
+		};
+
+	private:
+		bool m_fullQ      = false; // -f option: print full text labels instead of abbreviations
+		bool m_integerQ   = false; // -i option: print integer rank labels instead of abbreviations
+		bool m_cdataQ     = false; // -x option: label the spine **cdata-metweight instead of **metweight
+		bool m_nullQ      = false; // -n option: always use the null token . for unclassified positions
+		bool m_tiedQ      = false; // -t option: label secondary tied notes instead of giving them the null token .
+		bool m_compositeQ = false; // -C option: add a **kern-comp spine below the voices and label only that spine
+		bool m_colorQ     = false; // -c option: add a **color spine after each **metweight spine
+
+		std::string       m_kernTracks  = ""; // used with -k option
+		std::string       m_spineTracks = ""; // used with -s option
+		std::vector<bool> m_selectedKernSpines; // used with -k and -s option
+
+};
 
 
 class Tool_mint : public HumTool {
