@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mo. 27 Juli 2026 23:38:23 CEST
+// Last Modified: Di. 28 Juli 2026 00:12:50 CEST
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -111534,6 +111534,7 @@ Tool_metweight::Tool_metweight(void) {
 	define("k|kern-tracks=s",  "process only the specified kern spines");
 	define("s|spine|spines=s", "process only the specified spines");
 	define("n|null=b",         "always use the null token . for unclassified positions");
+	define("t|tied=b",         "label secondary tied notes instead of giving them the null token .");
 }
 
 
@@ -111590,6 +111591,7 @@ void Tool_metweight::initialize(void) {
 	m_integerQ = getBoolean("integer");
 	m_cdataQ   = getBoolean("cdata");
 	m_nullQ    = getBoolean("null");
+	m_tiedQ    = getBoolean("tied");
 
 	if (getBoolean("spine")) {
 		m_spineTracks = getString("spine");
@@ -111719,6 +111721,12 @@ string Tool_metweight::getWeightToken(HumdrumFile& infile, int line, int track) 
 	}
 
 	if (token->isNull()) {
+		return ".";
+	}
+
+	if (!m_tiedQ && token->isSecondaryTiedNote()) {
+		// The continuation of a tie is not a new attack, so it has no
+		// metric weight of its own (-t restores labeling it anyway).
 		return ".";
 	}
 

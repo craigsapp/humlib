@@ -60,6 +60,7 @@ class Tool_metweight : public HumTool {
 		bool m_integerQ = false; // -i option: print integer rank labels instead of abbreviations
 		bool m_cdataQ   = false; // -x option: label the spine **cdata-metweight instead of **metweight
 		bool m_nullQ    = false; // -n option: always use the null token . for unclassified positions
+		bool m_tiedQ    = false; // -t option: label secondary tied notes instead of giving them the null token .
 
 		std::string       m_kernTracks  = ""; // used with -k option
 		std::string       m_spineTracks = ""; // used with -s option
