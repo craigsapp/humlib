@@ -40,10 +40,13 @@ class Tool_metweight : public HumTool {
 	protected:
 		void        initialize       (void);
 		void        processFile      (HumdrumFile& infile);
+		void        addCompositeSpine(HumdrumFile& infile);
+		void        getVoices        (std::vector<HTp>& voices, HumdrumFile& infile);
 		void        fillVoiceResults (std::vector<std::vector<std::string>>& results,
 		                             HumdrumFile& infile,
 		                             const std::vector<HTp>& voices);
 		std::string getWeightToken   (HumdrumFile& infile, int line, int track);
+		HTp         getMeterToken    (HumdrumFile& infile, int line);
 		std::string formatWeightClass(int weightClass);
 		int         getWeightClass   (int top, int bot, HumNum beat);
 
@@ -56,11 +59,12 @@ class Tool_metweight : public HumTool {
 		};
 
 	private:
-		bool m_fullQ    = false; // -f option: print full text labels instead of abbreviations
-		bool m_integerQ = false; // -i option: print integer rank labels instead of abbreviations
-		bool m_cdataQ   = false; // -x option: label the spine **cdata-metweight instead of **metweight
-		bool m_nullQ    = false; // -n option: always use the null token . for unclassified positions
-		bool m_tiedQ    = false; // -t option: label secondary tied notes instead of giving them the null token .
+		bool m_fullQ      = false; // -f option: print full text labels instead of abbreviations
+		bool m_integerQ   = false; // -i option: print integer rank labels instead of abbreviations
+		bool m_cdataQ     = false; // -x option: label the spine **cdata-metweight instead of **metweight
+		bool m_nullQ      = false; // -n option: always use the null token . for unclassified positions
+		bool m_tiedQ      = false; // -t option: label secondary tied notes instead of giving them the null token .
+		bool m_compositeQ = false; // -c option: add a **kern-comp spine below the voices and label only that spine
 
 		std::string       m_kernTracks  = ""; // used with -k option
 		std::string       m_spineTracks = ""; // used with -s option

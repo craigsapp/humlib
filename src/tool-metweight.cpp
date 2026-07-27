@@ -12,8 +12,11 @@
 //
 
 #include "tool-metweight.h"
+#include "tool-composite.h"
 #include "tool-meter.h"
 #include "Convert.h"
+
+#include <sstream>
 
 using namespace std;
 
@@ -35,6 +38,7 @@ Tool_metweight::Tool_metweight(void) {
 	define("s|spine|spines=s", "process only the specified spines");
 	define("n|null=b",         "always use the null token . for unclassified positions");
 	define("t|tied=b",         "label secondary tied notes instead of giving them the null token .");
+	define("c|composite=b",    "add a **kern-comp spine (composite rhythm of all voices) below the voices and label only that spine");
 }
 
 
@@ -87,11 +91,12 @@ bool Tool_metweight::run(HumdrumFile& infile) {
 //
 
 void Tool_metweight::initialize(void) {
-	m_fullQ    = getBoolean("full");
-	m_integerQ = getBoolean("integer");
-	m_cdataQ   = getBoolean("cdata");
-	m_nullQ    = getBoolean("null");
-	m_tiedQ    = getBoolean("tied");
+	m_fullQ      = getBoolean("full");
+	m_integerQ   = getBoolean("integer");
+	m_cdataQ     = getBoolean("cdata");
+	m_nullQ      = getBoolean("null");
+	m_tiedQ      = getBoolean("tied");
+	m_compositeQ = getBoolean("composite");
 
 	if (getBoolean("spine")) {
 		m_spineTracks = getString("spine");
@@ -106,41 +111,20 @@ void Tool_metweight::initialize(void) {
 //
 // Tool_metweight::processFile -- Insert a **metweight spine after every
 //    processed **kern spine, containing the metric weight of the current
-//    note/rest attack.
+//    note/rest attack.  With -c only a composite spine is added below the
+//    voices, and only that spine gets a **metweight spine.
 //
 
 void Tool_metweight::processFile(HumdrumFile& infile) {
-	int maxTrack = infile.getMaxTrack();
-
-	m_selectedKernSpines.resize(maxTrack + 1); // +1 since track=0 is not used
-	fill(m_selectedKernSpines.begin(), m_selectedKernSpines.end(), true);
-
-	vector<HTp> kernspines = infile.getKernSpineStartList();
-
-	// Calculate which input spines to process based on -k or -s option:
-	if (!m_kernTracks.empty()) {
-		vector<int> ktracks = Convert::extractIntegerList(m_kernTracks, maxTrack);
-		fill(m_selectedKernSpines.begin(), m_selectedKernSpines.end(), false);
-		for (int i = 0; i < (int)ktracks.size(); i++) {
-			int index = ktracks[i] - 1;
-			if ((index < 0) || (index >= (int)kernspines.size())) {
-				continue;
-			}
-			int track = kernspines.at(index)->getTrack();
-			m_selectedKernSpines.at(track) = true;
-		}
-	} else if (!m_spineTracks.empty()) {
-		fill(m_selectedKernSpines.begin(), m_selectedKernSpines.end(), false);
-		infile.makeBooleanTrackList(m_selectedKernSpines, m_spineTracks);
+	if (m_compositeQ) {
+		addCompositeSpine(infile);
 	}
 
 	vector<HTp> voices;
-	for (int i = 0; i < (int)kernspines.size(); i++) {
-		if (m_selectedKernSpines.at(kernspines[i]->getTrack())) {
-			voices.push_back(kernspines[i]);
-		}
-	}
+	getVoices(voices, infile);
 	if (voices.empty()) {
+		// Nothing to label, but pass the input on unchanged.
+		m_humdrum_text << infile;
 		return;
 	}
 
@@ -166,6 +150,83 @@ void Tool_metweight::processFile(HumdrumFile& infile) {
 
 	// Enable usage in verovio (`!!!filter: metweight`)
 	m_humdrum_text << infile;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_metweight::addCompositeSpine -- -c option: replace the input with the
+//    output of the composite tool, which adds a **kern-comp spine (the merged
+//    rhythm of all voices) below the existing voices.  Without "-a" the
+//    composite spine is prepended, which places it below the input voices in
+//    the rendered score.
+//
+
+void Tool_metweight::addCompositeSpine(HumdrumFile& infile) {
+	if (infile.getKernSpineStartList().empty()) {
+		return;
+	}
+
+	stringstream composite;
+	Tool_composite compositeTool;
+	compositeTool.process("");
+	compositeTool.run(infile, composite);
+	infile.readString(composite.str());
+}
+
+
+
+//////////////////////////////
+//
+// Tool_metweight::getVoices -- The spines to label: with -c only the
+//    composite spine, otherwise the **kern spines selected by -k or -s (all
+//    of them when neither option is given).  The composite rhythm is always
+//    built from all **kern spines, so -k/-s do not apply in that mode.
+//
+
+void Tool_metweight::getVoices(vector<HTp>& voices, HumdrumFile& infile) {
+	voices.clear();
+
+	if (m_compositeQ) {
+		vector<HTp> spinestarts = infile.getKernLikeSpineStartList();
+		for (int i = 0; i < (int)spinestarts.size(); i++) {
+			if (*spinestarts[i] == "**kern-comp") {
+				voices.push_back(spinestarts[i]);
+			}
+		}
+		return;
+	}
+
+	int maxTrack = infile.getMaxTrack();
+
+	m_selectedKernSpines.resize(maxTrack + 1); // +1 since track=0 is not used
+	fill(m_selectedKernSpines.begin(), m_selectedKernSpines.end(), true);
+
+	vector<HTp> kernspines = infile.getKernSpineStartList();
+
+	// Calculate which input spines to process based on -k or -s option:
+	if (!m_kernTracks.empty()) {
+		vector<int> ktracks = Convert::extractIntegerList(m_kernTracks, maxTrack);
+		fill(m_selectedKernSpines.begin(), m_selectedKernSpines.end(), false);
+		for (int i = 0; i < (int)ktracks.size(); i++) {
+			int index = ktracks[i] - 1;
+			if ((index < 0) || (index >= (int)kernspines.size())) {
+				continue;
+			}
+			int track = kernspines.at(index)->getTrack();
+			m_selectedKernSpines.at(track) = true;
+		}
+	} else if (!m_spineTracks.empty()) {
+		fill(m_selectedKernSpines.begin(), m_selectedKernSpines.end(), false);
+		infile.makeBooleanTrackList(m_selectedKernSpines, m_spineTracks);
+	}
+
+	for (int i = 0; i < (int)kernspines.size(); i++) {
+		if (m_selectedKernSpines.at(kernspines[i]->getTrack())) {
+			voices.push_back(kernspines[i]);
+		}
+	}
 }
 
 
@@ -224,21 +285,50 @@ string Tool_metweight::getWeightToken(HumdrumFile& infile, int line, int track) 
 		return ".";
 	}
 
-	if (!m_tiedQ && token->isSecondaryTiedNote()) {
-		// The continuation of a tie is not a new attack, so it has no
-		// metric weight of its own (-t restores labeling it anyway).
+	// The continuation of a tie is not a new attack, so it has no metric
+	// weight of its own (-t restores labeling it anyway).  HumdrumToken::
+	// isSecondaryTiedNote() only accepts plain **kern, so test the token
+	// text directly to cover **kern-comp spines as well.
+	if (!m_tiedQ && Convert::isKernSecondaryTiedNote(*token)) {
 		return ".";
 	}
 
-	if (!token->getValueBool("auto", "hasData")) {
+	HTp position = token;
+	if (m_compositeQ && !position->getValueBool("auto", "hasData")) {
+		// The meter tool only analyzes **kern spines, so a **kern-comp
+		// token is never annotated itself.  The metric position is a
+		// property of the line rather than of a particular voice, so read
+		// it from a **kern attack on the same line instead.
+		position = getMeterToken(infile, line);
+	}
+	if (!position || !position->getValueBool("auto", "hasData")) {
 		return formatWeightClass(WEIGHT_UNCLASSIFIED);
 	}
 
-	int top = token->getValueInt("auto", "numerator");
-	int bot = token->getValueInt("auto", "denominator");
-	HumNum beat(token->getValue("auto", "zeroBeat"));
+	int top = position->getValueInt("auto", "numerator");
+	int bot = position->getValueInt("auto", "denominator");
+	HumNum beat(position->getValue("auto", "zeroBeat"));
 
 	return formatWeightClass(getWeightClass(top, bot, beat));
+}
+
+
+
+//////////////////////////////
+//
+// Tool_metweight::getMeterToken -- First token on the line that the meter
+//    tool annotated with a metric position, or NULL if there is none (for
+//    example when every voice is sustaining a note across this line).
+//
+
+HTp Tool_metweight::getMeterToken(HumdrumFile& infile, int line) {
+	for (int j = 0; j < infile[line].getFieldCount(); j++) {
+		HTp token = infile.token(line, j);
+		if (token->getValueBool("auto", "hasData")) {
+			return token;
+		}
+	}
+	return NULL;
 }
 
 
