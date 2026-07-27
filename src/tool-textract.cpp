@@ -1224,25 +1224,39 @@ void Tool_textract::refineLines(vector<vector<SungWord>>& lines) {
 		// Too short: try merging following incomplete fragments until the
 		// combination hits an allowed length (or stops improving).
 		if ((syl < minAllow) && (i + 1 < (int)lines.size())) {
-			// Never glue two capital-started openings together (e.g. a
-			// partial "Aviene" onto "Sì duro...").
+			vector<SungWord> combined = lines[i];
+			combined.insert(combined.end(), lines[i+1].begin(), lines[i+1].end());
+			int firstCombSyl = lineSyllables(combined);
+
+			// Two capital openings are usually different lines (e.g.
+			// partial "Aviene" before "Sì duro..."), but allow the merge
+			// when the combination itself hits an allowed length (e.g.
+			// "Tra" + "Giove in Cielo..." → 11).
 			if (!lines[i].empty() && lines[i][0].capitalized &&
-					!lines[i+1].empty() && lines[i+1][0].capitalized) {
+					!lines[i+1].empty() && lines[i+1][0].capitalized &&
+					!isAllowedLength(firstCombSyl, 1)) {
 				out.push_back(lines[i]);
 				i++;
 				continue;
 			}
-			vector<SungWord> combined = lines[i];
+
+			combined = lines[i];
 			int j = i + 1;
 			while (j < (int)lines.size()) {
 				int nextSyl = lineSyllables(lines[j]);
-				// Do not absorb a following line that is already complete.
-				if (isAllowedLength(nextSyl, 1)) {
+				// Do not absorb a following line that is already complete,
+				// unless attaching the short prefix makes an allowed length
+				// (handled by the first-iteration check above via hits).
+				if (isAllowedLength(nextSyl, 1) && j > i + 1) {
 					break;
 				}
-				if (!lines[j].empty() && lines[j][0].capitalized &&
+				if (j > i + 1 && !lines[j].empty() && lines[j][0].capitalized &&
 						!combined.empty() && combined[0].capitalized) {
-					break;
+					vector<SungWord> trialCap = combined;
+					trialCap.insert(trialCap.end(), lines[j].begin(), lines[j].end());
+					if (!isAllowedLength(lineSyllables(trialCap), 1)) {
+						break;
+					}
 				}
 				vector<SungWord> trial = combined;
 				trial.insert(trial.end(), lines[j].begin(), lines[j].end());
