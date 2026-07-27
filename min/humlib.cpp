@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fr. 17 Juli 2026 00:18:17 CEST
+// Last Modified: Mo. 27 Juli 2026 21:07:56 CEST
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -50911,8 +50911,8 @@ string MxmlEvent::getKernPitch(void) {
     			//    <accidental cautionary="yes">natural</accidental>
 				string caution = child.attribute("cautionary").value();
 				if (caution == "yes") {
-					editorialQ = 1;
-					reportEditorialAccidentalToOwner();
+					editorialQ = 0; // do not make caution editorial
+					// reportEditorialAccidentalToOwner();
 				}
 			}
 			child = child.next_sibling();
@@ -61476,7 +61476,7 @@ void Tool_autocadence::processFile(HumdrumFile& infile) {
 		fillInMajorMinor(infile);
 	}
 
-	// fill m_pitches and m_lowestPitch
+	// fill m_pitches and m_lowestPitch and m_lowestPitchIndex
 	preparePitchInfo(infile);
 	if (m_printRawDiatonicPitchesQ) {
 		printExtractedPitchInfo(infile);
@@ -62773,7 +62773,11 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 	}
 	if (!clabel.empty()) {
 		string slabel = sortUniqueChars(clabel);
-		string cadence = m_cadenceLabels[slabel];
+		string cadence = getCadenceLabel(slabel, infile, index);
+		//cerr << endl;
+		//cerr << "!! WLABEL" << slabel << endl;
+		//cerr << "!! Cadence" << cadence << endl;
+		//cerr << endl;
 		string infolabel = cadence;
 		if (cadence.empty()) {
 			cadence = "UNKNOWN";
@@ -62912,6 +62916,29 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 		m_humdrum_text << dataline.str() << endl;
 	}
 }
+
+
+//////////////////////////////
+//
+// Tool_autocadence::getCadenceLabel
+//
+// Ammdedation: If the CVF point forms an incorrect basizans, then label it AuthenticB
+//
+
+string Tool_autocadence::getCadenceLabel(const string& cvflabel, HumdrumFile &infile, int index) {
+	//cerr << "INDEX = " << index << endl;
+	string label = m_cadenceLabels[cvflabel];
+	int lowestIndex = m_lowestPitchIndex.at(index);
+	//cerr << "LOWESTINDEX = " << lowestIndex << endl;
+	HTp token = infile.token(index, lowestIndex);
+	int lastmel = token->getValueInt("auto", "lastmel");
+	if (lastmel == -5 || lastmel == 4) {
+		return "AuthenticB";
+	}
+	return label;
+
+}
+
 
 
 //////////////////////////////
@@ -63100,7 +63127,7 @@ void Tool_autocadence::preparePitchInfo(HumdrumFile& infile) {
 	prepareDiatonicPitches(infile);
 
 	// Now find the lowest sounding pitch for each data row in the file:
-	prepareLowestPitches();
+	prepareLowestPitches(infile);
 }
 
 
@@ -63112,30 +63139,42 @@ void Tool_autocadence::preparePitchInfo(HumdrumFile& infile) {
 //     with middle C being 28 (7 * 4).  Rests are 0.
 //
 
-void Tool_autocadence::prepareLowestPitches(void) {
+void Tool_autocadence::prepareLowestPitches(HumdrumFile& infile) {
 	m_lowestPitch.clear();
 	m_lowestPitch.resize(m_pitches.size());
 	std::fill(m_lowestPitch.begin(), m_lowestPitch.end(), 0);
 
-	for (int i=0; i<(int)m_pitches.size(); i++) {
-		int lowest = -1;
-		for (int j=0; j<(int)m_pitches[i].size(); j++) {
+	m_lowestPitchIndex.clear();
+	m_lowestPitchIndex.resize(m_pitches.size());
+	std::fill(m_lowestPitchIndex.begin(), m_lowestPitchIndex.end(), 0);
+
+	for (int line=0; line<(int)m_pitches.size(); line++) {
+		HTp token = infile.token(line, 0);
+		if (!token->getOwner()->hasSpines()) {
+			continue;
+		}
+		for (int j=0; j<(int)m_pitches[line].size(); j++) {
 			// Using abs since negative integers represent sustained notes:
-			int b7 = std::abs(m_pitches.at(i).at(j));
+			int b7 = std::abs(m_pitches.at(line).at(j));
 			if (b7 > 0) {
-				if (lowest == -1) {
-					lowest = b7;
-				} else if (b7 < lowest) {
-					lowest = b7;
+				// Warning: Not assuming chords
+				if (m_lowestPitch.at(line) == -1) {
+					m_lowestPitch.at(line) = b7;
+					m_lowestPitchIndex.at(line) = j;
+				} else if (b7 < m_lowestPitch.at(line)) {
+					m_lowestPitch.at(line) = b7;
+					m_lowestPitchIndex.at(line) = j;
 				}
 			}
+
 		}
-		if (lowest < 0) {
-			m_lowestPitch.at(i) = 0;
-		} else {
-			m_lowestPitch.at(i) = lowest;
-		}
+		HTp ltoken = infile.token(line, m_lowestPitchIndex.at(line));
+		ltoken->setValue("auto", "lowest", "xxx");
+		//cerr << ">>>>>>>> LINE : " << line << endl;
+		//cerr << "TOKEN: " << ltoken << endl;
+		////cerr << "!!LOWEST: " << m_lowestPitch.at(line) << "\tINDEX: " << m_lowestPitchIndex.at(line) << endl;
 	}
+
 }
 
 
@@ -116569,7 +116608,7 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 
 	for (int i=0; i<(int)partdata.size(); i++) {
 		if (partdata[i].hasEditorialAccidental()) {
-			out << "!!!RDF**kern: i = editorial accidental" << endl;
+			out << "!!!RDF**kern: i = editorial accidentalZ" << endl;
 			break;
 		}
 	}
@@ -118867,6 +118906,7 @@ void Tool_musicxml2hum::setEditorialAccidental(int accidental, GridSlice* slice,
 		int partindex, int staffindex, int voiceindex) {
 
 	HTp tok = slice->at(partindex)->at(staffindex)->at(voiceindex)->getToken();
+cerr << "!!TOK  " << tok << endl;
 
 	if ((accidental < 0) && (tok->find("-") == string::npos))  {
 		cerr << "Editorial error for " << tok << ": no flat to mark" << endl;
@@ -118888,15 +118928,16 @@ void Tool_musicxml2hum::setEditorialAccidental(int accidental, GridSlice* slice,
 		auto loc = newtok.find("-");
 		if (loc < newtok.size()) {
 			if (newtok[loc+1] == 'X') {
-				// replace explicit accidental with editorial accidental
-				newtok[loc+1] = 'i';
-				tok->setText(newtok);
-				m_hasEditorial = 'i';
+				// Don't replace cautionary with editorial.
+				// // replace explicit accidental with editorial accidental
+				// newtok[loc+1] = 'i';
+				// tok->setText(newtok);
+				// m_hasEditorial = 'i';
 			} else {
-				// append i after -:
-				newtok.insert(loc+1, "i");
-				tok->setText(newtok);
-				m_hasEditorial = 'i';
+				// // append i after -:
+				// newtok.insert(loc+1, "i");
+				// tok->setText(newtok);
+				// m_hasEditorial = 'i';
 			}
 		}
 		return;
@@ -118907,14 +118948,14 @@ void Tool_musicxml2hum::setEditorialAccidental(int accidental, GridSlice* slice,
 		if (loc < newtok.size()) {
 			if (newtok[loc+1] == 'X') {
 				// replace explicit accidental with editorial accidental
-				newtok[loc+1] = 'i';
-				tok->setText(newtok);
-				m_hasEditorial = 'i';
+				//newtok[loc+1] = 'i';
+				//tok->setText(newtok);
+				//m_hasEditorial = 'i';
 			} else {
 				// append i after -:
-				newtok.insert(loc+1, "i");
-				tok->setText(newtok);
-				m_hasEditorial = 'i';
+				//newtok.insert(loc+1, "i");
+				//tok->setText(newtok);
+				//m_hasEditorial = 'i';
 			}
 		}
 		return;
@@ -118925,24 +118966,24 @@ void Tool_musicxml2hum::setEditorialAccidental(int accidental, GridSlice* slice,
 		if (loc < newtok.size()) {
 			if (newtok[loc+1] == 'X') {
 				// replace explicit accidental with editorial accidental
-				newtok[loc+1] = 'i';
-				tok->setText(newtok);
-				m_hasEditorial = 'i';
+				//newtok[loc+1] = 'i';
+				//tok->setText(newtok);
+				//m_hasEditorial = 'i';
 			} else {
 				// append i after -:
-				newtok.insert(loc+1, "i");
-				tok->setText(newtok);
-				m_hasEditorial = 'i';
+				//newtok.insert(loc+1, "i");
+				//tok->setText(newtok);
+				//m_hasEditorial = 'i';
 			}
 		} else {
 			// no natural sign, so add it after any pitch classes.
-			HumRegex hre;
-			hre.search(newtok, R"(([a-gA-G]+))");
-			string diatonic = hre.getMatch(1);
-			string newacc = diatonic + "i";
-			hre.replaceDestructive(newtok, newacc, diatonic);
-			tok->setText(newtok);
-			m_hasEditorial = 'i';
+			//HumRegex hre;
+			//hre.search(newtok, R"(([a-gA-G]+))");
+			//string diatonic = hre.getMatch(1);
+			//string newacc = diatonic + "i";
+			//hre.replaceDestructive(newtok, newacc, diatonic);
+			//tok->setText(newtok);
+			//m_hasEditorial = 'i';
 		}
 		return;
 	}
@@ -119520,7 +119561,7 @@ string Tool_musicxml2hum::getFiguredBassString(xml_node fnode) {
 	if (pattr) {
 		string pval = pattr.value();
 		if (pval == "yes") {
-			editorial = "i";
+			editorial = "iZ";
 		}
 	}
 	// There is no bracket for FB in musicxml (3.0).

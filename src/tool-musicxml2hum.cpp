@@ -277,7 +277,7 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 
 	for (int i=0; i<(int)partdata.size(); i++) {
 		if (partdata[i].hasEditorialAccidental()) {
-			out << "!!!RDF**kern: i = editorial accidental" << endl;
+			out << "!!!RDF**kern: i = editorial accidentalZ" << endl;
 			break;
 		}
 	}
@@ -2575,6 +2575,7 @@ void Tool_musicxml2hum::setEditorialAccidental(int accidental, GridSlice* slice,
 		int partindex, int staffindex, int voiceindex) {
 
 	HTp tok = slice->at(partindex)->at(staffindex)->at(voiceindex)->getToken();
+cerr << "!!TOK  " << tok << endl;
 
 	if ((accidental < 0) && (tok->find("-") == string::npos))  {
 		cerr << "Editorial error for " << tok << ": no flat to mark" << endl;
@@ -2596,15 +2597,16 @@ void Tool_musicxml2hum::setEditorialAccidental(int accidental, GridSlice* slice,
 		auto loc = newtok.find("-");
 		if (loc < newtok.size()) {
 			if (newtok[loc+1] == 'X') {
-				// replace explicit accidental with editorial accidental
-				newtok[loc+1] = 'i';
-				tok->setText(newtok);
-				m_hasEditorial = 'i';
+				// Don't replace cautionary with editorial.
+				// // replace explicit accidental with editorial accidental
+				// newtok[loc+1] = 'i';
+				// tok->setText(newtok);
+				// m_hasEditorial = 'i';
 			} else {
-				// append i after -:
-				newtok.insert(loc+1, "i");
-				tok->setText(newtok);
-				m_hasEditorial = 'i';
+				// // append i after -:
+				// newtok.insert(loc+1, "i");
+				// tok->setText(newtok);
+				// m_hasEditorial = 'i';
 			}
 		}
 		return;
@@ -2615,14 +2617,14 @@ void Tool_musicxml2hum::setEditorialAccidental(int accidental, GridSlice* slice,
 		if (loc < newtok.size()) {
 			if (newtok[loc+1] == 'X') {
 				// replace explicit accidental with editorial accidental
-				newtok[loc+1] = 'i';
-				tok->setText(newtok);
-				m_hasEditorial = 'i';
+				//newtok[loc+1] = 'i';
+				//tok->setText(newtok);
+				//m_hasEditorial = 'i';
 			} else {
 				// append i after -:
-				newtok.insert(loc+1, "i");
-				tok->setText(newtok);
-				m_hasEditorial = 'i';
+				//newtok.insert(loc+1, "i");
+				//tok->setText(newtok);
+				//m_hasEditorial = 'i';
 			}
 		}
 		return;
@@ -2633,24 +2635,24 @@ void Tool_musicxml2hum::setEditorialAccidental(int accidental, GridSlice* slice,
 		if (loc < newtok.size()) {
 			if (newtok[loc+1] == 'X') {
 				// replace explicit accidental with editorial accidental
-				newtok[loc+1] = 'i';
-				tok->setText(newtok);
-				m_hasEditorial = 'i';
+				//newtok[loc+1] = 'i';
+				//tok->setText(newtok);
+				//m_hasEditorial = 'i';
 			} else {
 				// append i after -:
-				newtok.insert(loc+1, "i");
-				tok->setText(newtok);
-				m_hasEditorial = 'i';
+				//newtok.insert(loc+1, "i");
+				//tok->setText(newtok);
+				//m_hasEditorial = 'i';
 			}
 		} else {
 			// no natural sign, so add it after any pitch classes.
-			HumRegex hre;
-			hre.search(newtok, R"(([a-gA-G]+))");
-			string diatonic = hre.getMatch(1);
-			string newacc = diatonic + "i";
-			hre.replaceDestructive(newtok, newacc, diatonic);
-			tok->setText(newtok);
-			m_hasEditorial = 'i';
+			//HumRegex hre;
+			//hre.search(newtok, R"(([a-gA-G]+))");
+			//string diatonic = hre.getMatch(1);
+			//string newacc = diatonic + "i";
+			//hre.replaceDestructive(newtok, newacc, diatonic);
+			//tok->setText(newtok);
+			//m_hasEditorial = 'i';
 		}
 		return;
 	}
@@ -3228,7 +3230,7 @@ string Tool_musicxml2hum::getFiguredBassString(xml_node fnode) {
 	if (pattr) {
 		string pval = pattr.value();
 		if (pval == "yes") {
-			editorial = "i";
+			editorial = "iZ";
 		}
 	}
 	// There is no bracket for FB in musicxml (3.0).

@@ -73,7 +73,7 @@ class Tool_autocadence : public HumTool {
 		void        addCadenceLabel            (std::string definition, std::string label);
 		void        addCadenceDefinition       (const std::string& funcL, const std::string& funcU,
 		                                        const std::string& name, const std::string& regex);
-		void        prepareLowestPitches       (void);
+		void        prepareLowestPitches       (HumdrumFile& infile);
 		void        preparePitchInfo           (HumdrumFile& infile);
 		void        prepareDiatonicPitches     (HumdrumFile& infile);
 		void        printExtractedPitchInfo    (HumdrumFile& infile);
@@ -117,6 +117,7 @@ class Tool_autocadence : public HumTool {
 		bool        getPhrygian                (HumdrumFile& infile, int index);
 		std::string getIntervalName            (const std::string& b40);
 		std::string getTriadData               (HumdrumFile& infile, int line);
+		std::string getCadenceLabel            (const std::string& cvflabel, HumdrumFile& infile, int index);
 
 	private:
 
@@ -132,6 +133,9 @@ class Tool_autocadence : public HumTool {
 		// m_lowestPitch: the lowest sounding pitch at every instance in the score.
 		// the pitch is stored as an absolute diatonic pitch, middle C is 28, 0 is a rest
 		std::vector<int> m_lowestPitch;
+
+		// m_lowestPitchIndex: the lowest sounding pitch field index.
+		std::vector<int> m_lowestPitchIndex;
 
 		// m_intervals: The counterpoint intervals for each pair of notes.
 		// The data is store in a 3-D vector, where the first dimension is the
@@ -229,6 +233,7 @@ class Tool_autocadence : public HumTool {
 		std::vector<std::string> m_root;
 		bool m_foundEmpytTriad = false;
 		bool m_hasTriadColor = false;
+		bool m_removeWeakQ = false;
 };
 
 // END_MERGE

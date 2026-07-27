@@ -392,7 +392,7 @@ void Tool_autocadence::processFile(HumdrumFile& infile) {
 		fillInMajorMinor(infile);
 	}
 
-	// fill m_pitches and m_lowestPitch
+	// fill m_pitches and m_lowestPitch and m_lowestPitchIndex
 	preparePitchInfo(infile);
 	if (m_printRawDiatonicPitchesQ) {
 		printExtractedPitchInfo(infile);
@@ -1689,7 +1689,11 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 	}
 	if (!clabel.empty()) {
 		string slabel = sortUniqueChars(clabel);
-		string cadence = m_cadenceLabels[slabel];
+		string cadence = getCadenceLabel(slabel, infile, index);
+		//cerr << endl;
+		//cerr << "!! WLABEL" << slabel << endl;
+		//cerr << "!! Cadence" << cadence << endl;
+		//cerr << endl;
 		string infolabel = cadence;
 		if (cadence.empty()) {
 			cadence = "UNKNOWN";
@@ -1828,6 +1832,29 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 		m_humdrum_text << dataline.str() << endl;
 	}
 }
+
+
+//////////////////////////////
+//
+// Tool_autocadence::getCadenceLabel
+//
+// Ammdedation: If the CVF point forms an incorrect basizans, then label it AuthenticB
+//
+
+string Tool_autocadence::getCadenceLabel(const string& cvflabel, HumdrumFile &infile, int index) {
+	//cerr << "INDEX = " << index << endl;
+	string label = m_cadenceLabels[cvflabel];
+	int lowestIndex = m_lowestPitchIndex.at(index);
+	//cerr << "LOWESTINDEX = " << lowestIndex << endl;
+	HTp token = infile.token(index, lowestIndex);
+	int lastmel = token->getValueInt("auto", "lastmel");
+	if (lastmel == -5 || lastmel == 4) {
+		return "AuthenticB";
+	}
+	return label;
+
+}
+
 
 
 //////////////////////////////
@@ -2016,7 +2043,7 @@ void Tool_autocadence::preparePitchInfo(HumdrumFile& infile) {
 	prepareDiatonicPitches(infile);
 
 	// Now find the lowest sounding pitch for each data row in the file:
-	prepareLowestPitches();
+	prepareLowestPitches(infile);
 }
 
 
@@ -2028,30 +2055,42 @@ void Tool_autocadence::preparePitchInfo(HumdrumFile& infile) {
 //     with middle C being 28 (7 * 4).  Rests are 0.
 //
 
-void Tool_autocadence::prepareLowestPitches(void) {
+void Tool_autocadence::prepareLowestPitches(HumdrumFile& infile) {
 	m_lowestPitch.clear();
 	m_lowestPitch.resize(m_pitches.size());
 	std::fill(m_lowestPitch.begin(), m_lowestPitch.end(), 0);
 
-	for (int i=0; i<(int)m_pitches.size(); i++) {
-		int lowest = -1;
-		for (int j=0; j<(int)m_pitches[i].size(); j++) {
+	m_lowestPitchIndex.clear();
+	m_lowestPitchIndex.resize(m_pitches.size());
+	std::fill(m_lowestPitchIndex.begin(), m_lowestPitchIndex.end(), 0);
+
+	for (int line=0; line<(int)m_pitches.size(); line++) {
+		HTp token = infile.token(line, 0);
+		if (!token->getOwner()->hasSpines()) {
+			continue;
+		}
+		for (int j=0; j<(int)m_pitches[line].size(); j++) {
 			// Using abs since negative integers represent sustained notes:
-			int b7 = std::abs(m_pitches.at(i).at(j));
+			int b7 = std::abs(m_pitches.at(line).at(j));
 			if (b7 > 0) {
-				if (lowest == -1) {
-					lowest = b7;
-				} else if (b7 < lowest) {
-					lowest = b7;
+				// Warning: Not assuming chords
+				if (m_lowestPitch.at(line) == -1) {
+					m_lowestPitch.at(line) = b7;
+					m_lowestPitchIndex.at(line) = j;
+				} else if (b7 < m_lowestPitch.at(line)) {
+					m_lowestPitch.at(line) = b7;
+					m_lowestPitchIndex.at(line) = j;
 				}
 			}
+
 		}
-		if (lowest < 0) {
-			m_lowestPitch.at(i) = 0;
-		} else {
-			m_lowestPitch.at(i) = lowest;
-		}
+		HTp ltoken = infile.token(line, m_lowestPitchIndex.at(line));
+		ltoken->setValue("auto", "lowest", "xxx");
+		//cerr << ">>>>>>>> LINE : " << line << endl;
+		//cerr << "TOKEN: " << ltoken << endl;
+		////cerr << "!!LOWEST: " << m_lowestPitch.at(line) << "\tINDEX: " << m_lowestPitchIndex.at(line) << endl;
 	}
+
 }
 
 

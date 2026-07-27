@@ -1473,8 +1473,8 @@ string MxmlEvent::getKernPitch(void) {
     			//    <accidental cautionary="yes">natural</accidental>
 				string caution = child.attribute("cautionary").value();
 				if (caution == "yes") {
-					editorialQ = 1;
-					reportEditorialAccidentalToOwner();
+					editorialQ = 0; // do not make caution editorial
+					// reportEditorialAccidentalToOwner();
 				}
 			}
 			child = child.next_sibling();
