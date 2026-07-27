@@ -90,25 +90,27 @@ make
 # Minimal downloading
 
 For minimal use of the library with your own project, you can download just the composite
-header and source files (and pugixml library).  In a terminal you can download with
-[wget](https://en.wikipedia.org/wiki/Wget) (on linux):
+header and source files (and pugixml library).  These files are published on the
+[min](https://github.com/craigsapp/humlib/tree/min) branch, which contains nothing
+but the composite files and is updated automatically whenever `master` changes.  In a
+terminal you can download with [wget](https://en.wikipedia.org/wiki/Wget) (on linux):
 
 ```console
-wget https://raw.githubusercontent.com/craigsapp/humlib/master/min/humlib.h
-wget https://raw.githubusercontent.com/craigsapp/humlib/master/min/humlib.cpp
-wget https://raw.githubusercontent.com/craigsapp/humlib/master/min/pugixml.cpp
-wget https://raw.githubusercontent.com/craigsapp/humlib/master/min/pugixml.hpp
-wget https://raw.githubusercontent.com/craigsapp/humlib/master/min/pugiconfig.hpp
+wget https://raw.githubusercontent.com/craigsapp/humlib/min/humlib.h
+wget https://raw.githubusercontent.com/craigsapp/humlib/min/humlib.cpp
+wget https://raw.githubusercontent.com/craigsapp/humlib/min/pugixml.cpp
+wget https://raw.githubusercontent.com/craigsapp/humlib/min/pugixml.hpp
+wget https://raw.githubusercontent.com/craigsapp/humlib/min/pugiconfig.hpp
 ```
 
 Or with [curl](https://en.wikipedia.org/wiki/CURL) (most common method downloading on the comnmand line in MacOS):
 
 ```console
-curl https://raw.githubusercontent.com/craigsapp/humlib/master/min/humlib.h -o humlib.h
-curl https://raw.githubusercontent.com/craigsapp/humlib/master/min/humlib.cpp -o humlib.cpp
-curl https://raw.githubusercontent.com/craigsapp/humlib/master/min/pugixml.hpp -o pugixml.hpp
-curl https://raw.githubusercontent.com/craigsapp/humlib/master/min/pugixml.hpp -o pugixml.hpp
-curl https://raw.githubusercontent.com/craigsapp/humlib/master/min/pugiconfig.cpp -o pugiconfig.cpp
+curl https://raw.githubusercontent.com/craigsapp/humlib/min/humlib.h -o humlib.h
+curl https://raw.githubusercontent.com/craigsapp/humlib/min/humlib.cpp -o humlib.cpp
+curl https://raw.githubusercontent.com/craigsapp/humlib/min/pugixml.cpp -o pugixml.cpp
+curl https://raw.githubusercontent.com/craigsapp/humlib/min/pugixml.hpp -o pugixml.hpp
+curl https://raw.githubusercontent.com/craigsapp/humlib/min/pugiconfig.hpp -o pugiconfig.hpp
 ```
 
 The source code uses some C++11-specific features, so add the

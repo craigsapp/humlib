@@ -1,0 +1,63 @@
+name: Publish min distribution
+
+on:
+    push:
+        branches:
+            - master
+    workflow_dispatch:
+
+permissions:
+    contents: write
+
+concurrency:
+    group: min-build
+    cancel-in-progress: false
+
+jobs:
+    publish:
+        runs-on: ubuntu-latest
+
+        steps:
+            -
+                name: Checkout
+                uses: actions/checkout@v4
+
+            -
+                name: Create min distribution
+                run: make min
+
+            -
+                name: Prepare min branch worktree
+                run: |
+                    set -e
+                    git fetch origin min || true
+                    if git show-ref --verify --quiet refs/remotes/origin/min; then
+                        git worktree add ../min-branch -B min origin/min
+                    else
+                        git worktree add --detach ../min-branch
+                        git -C ../min-branch switch --orphan min
+                    fi
+
+            -
+                name: Copy min build
+                run: |
+                    set -e
+                    git -C ../min-branch rm -rq --ignore-unmatch .
+                    cp -a min/. ../min-branch/
+
+            -
+                name: Commit and push
+                run: |
+                    set -e
+                    cd ../min-branch
+                    git config user.name "github-actions[bot]"
+                    git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+                    git add -A
+                    # "Last Modified" timestamps change on every run, so only commit when
+                    # something else changed as well.
+                    if [ -z "$(git diff --cached -U0 | grep -E '^[+-]' | grep -Ev '^(\+\+\+|---)' | grep -v 'Last Modified:' || true)" ]; then
+                        echo "No changes in min build."
+                        exit 0
+                    fi
+                    git commit -m "Update min build" -m "Generated from ${GITHUB_SHA}."
+                    git push -u origin min
