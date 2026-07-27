@@ -32,6 +32,7 @@ namespace hum {
 
 Tool_pliner::Tool_pliner(void) {
 	define("s|syllables|syl=s:", "allowed line lengths passed to textract (comma-separated set; e.g. 7,11)");
+	define("l|lines=i:0", "expected poem line count passed to textract (0=auto; sonetto→14)");
 }
 
 
@@ -174,6 +175,11 @@ bool Tool_pliner::extractPoem(HumdrumFile& infile, vector<vector<PoemWord>>& poe
 	if (getBoolean("syllables")) {
 		argv.push_back("-s");
 		argv.push_back(getString("syllables"));
+	}
+	int linesOpt = getInteger("lines");
+	if (linesOpt > 0) {
+		argv.push_back("-l");
+		argv.push_back(to_string(linesOpt));
 	}
 	textract.process(argv);
 	textract.run(infile);

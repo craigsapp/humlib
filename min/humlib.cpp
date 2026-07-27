@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Jul 27 00:21:27 CEST 2026
+// Last Modified: Mon Jul 27 13:54:29 CEST 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -127830,6 +127830,7 @@ void Tool_pline::getPlineInterpretations(HumdrumFile& infile, vector<HTp>& token
 
 Tool_pliner::Tool_pliner(void) {
 	define("s|syllables|syl=s:", "allowed line lengths passed to textract (comma-separated set; e.g. 7,11)");
+	define("l|lines=i:0", "expected poem line count passed to textract (0=auto; sonetto→14)");
 }
 
 
@@ -127972,6 +127973,11 @@ bool Tool_pliner::extractPoem(HumdrumFile& infile, vector<vector<PoemWord>>& poe
 	if (getBoolean("syllables")) {
 		argv.push_back("-s");
 		argv.push_back(getString("syllables"));
+	}
+	int linesOpt = getInteger("lines");
+	if (linesOpt > 0) {
+		argv.push_back("-l");
+		argv.push_back(to_string(linesOpt));
 	}
 	textract.process(argv);
 	textract.run(infile);
@@ -143789,6 +143795,7 @@ HumNum Tool_textdur::getDuration(HTp tok1, HTp tok2) {
 
 Tool_textract::Tool_textract(void) {
 	define("s|syllables|syl=s:", "allowed line lengths in syllables (comma-separated set; e.g. 7,11)");
+	define("l|lines=i:0", "expected number of poem lines (0=auto; !!@GENRE sonetto→14)");
 }
 
 
@@ -143845,6 +143852,7 @@ bool Tool_textract::run(HumdrumFile& infile) {
 
 void Tool_textract::initialize(void) {
 	m_sylCounts.clear();
+	m_expectedLines = 0;
 
 	if (getBoolean("syllables")) {
 		HumRegex hre;
@@ -143864,6 +143872,11 @@ void Tool_textract::initialize(void) {
 			}
 		}
 	}
+
+	int linesOpt = getInteger("lines");
+	if (linesOpt > 0) {
+		m_expectedLines = linesOpt;
+	}
 }
 
 
@@ -143882,6 +143895,10 @@ void Tool_textract::processFile(HumdrumFile& infile) {
 		collapseRepeats(voice.words);
 		segmentLines(voice);
 		dedupeVoiceLines(voice);
+	}
+
+	if (m_expectedLines <= 0) {
+		m_expectedLines = detectGenreLineCount(infile);
 	}
 
 	reconstructText(voices);
@@ -144919,6 +144936,7 @@ void Tool_textract::reconstructText(vector<Voice>& voices) {
 	}
 
 	refineLines(poem);
+	enforceLineCount(poem);
 
 	for (auto& line : poem) {
 		if (!line.empty()) {
@@ -145069,6 +145087,177 @@ void Tool_textract::refineLines(vector<vector<SungWord>>& lines) {
 		i++;
 	}
 	lines.swap(out);
+}
+
+
+
+//////////////////////////////
+//
+// Tool_textract::detectGenreLineCount -- If the score has
+//    !!@GENRE: sonetto (spaces or tabs after the colon), return 14;
+//    otherwise 0.
+//
+
+int Tool_textract::detectGenreLineCount(HumdrumFile& infile) {
+	HumRegex hre;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		const string& line = infile[i].getText();
+		if (hre.search(line, "^!!@GENRE:\\s*sonetto\\b", "i")) {
+			return 14;
+		}
+	}
+	return 0;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_textract::enforceLineCount -- Nudge the poem toward
+//    m_expectedLines by merging extras or splitting shorts.
+//
+
+void Tool_textract::enforceLineCount(vector<vector<SungWord>>& lines) {
+	if (lines.empty() || (m_expectedLines <= 0)) {
+		return;
+	}
+
+	auto mergeScore = [&](int i) -> double {
+		// Lower is better.  Prefer merges that hit -s lengths; avoid
+		// gluing two strong line-starters when possible.
+		if ((i < 0) || (i + 1 >= (int)lines.size())) {
+			return 1e9;
+		}
+		vector<SungWord> combined = lines[i];
+		combined.insert(combined.end(), lines[i+1].begin(), lines[i+1].end());
+		int combSyl = lineSyllables(combined);
+		double score = 0;
+		if (!m_sylCounts.empty()) {
+			score += distanceToAllowed(combSyl);
+			if (isAllowedLength(combSyl, 1)) {
+				score -= 3.0;
+			}
+		} else {
+			score += (double)combined.size() * 0.01;
+		}
+		bool leftStart = !lines[i].empty() && likelyLineStart(lines[i][0].norm);
+		bool rightStart = !lines[i+1].empty() && likelyLineStart(lines[i+1][0].norm);
+		if (leftStart && rightStart) {
+			score += 5.0;
+		} else if (!lines[i+1].empty() && lines[i+1][0].capitalized &&
+				!likelyLineStart(lines[i+1][0].norm)) {
+			// Mid-line capital continuation — good merge candidate.
+			score -= 1.0;
+		}
+		// Prefer merging a very short fragment.
+		int leftSyl = lineSyllables(lines[i]);
+		int rightSyl = lineSyllables(lines[i+1]);
+		if (!m_sylCounts.empty()) {
+			if (!isAllowedLength(leftSyl, 1)) {
+				score -= 1.5;
+			}
+			if (!isAllowedLength(rightSyl, 1)) {
+				score -= 1.5;
+			}
+		} else {
+			if (lines[i].size() <= 2) {
+				score -= 1.0;
+			}
+			if (lines[i+1].size() <= 2) {
+				score -= 1.0;
+			}
+		}
+		return score;
+	};
+
+	// Too many lines: repeatedly merge the best adjacent pair.
+	int guard = 0;
+	while (((int)lines.size() > m_expectedLines) && (guard++ < 100)) {
+		int best = -1;
+		double bestScore = 1e9;
+		for (int i=0; i+1 < (int)lines.size(); i++) {
+			double s = mergeScore(i);
+			if (s < bestScore) {
+				bestScore = s;
+				best = i;
+			}
+		}
+		if (best < 0) {
+			break;
+		}
+		// If every remaining pair is two strong starters and we still
+		// must reduce count, take the least-bad (already chosen).
+		lines[best].insert(lines[best].end(),
+				lines[best+1].begin(), lines[best+1].end());
+		lines.erase(lines.begin() + best + 1);
+	}
+
+	auto splitCandidate = [&](int li, int& breakAt) -> double {
+		// Lower is better.  Returns 1e9 if no capital split exists.
+		breakAt = -1;
+		if ((li < 0) || (li >= (int)lines.size()) || (lines[li].size() < 2)) {
+			return 1e9;
+		}
+		double best = 1e9;
+		for (int k=1; k<(int)lines[li].size(); k++) {
+			if (!lines[li][k].capitalized) {
+				continue;
+			}
+			vector<SungWord> left(lines[li].begin(), lines[li].begin() + k);
+			vector<SungWord> right(lines[li].begin() + k, lines[li].end());
+			if (left.empty() || right.empty()) {
+				continue;
+			}
+			int leftSyl = lineSyllables(left);
+			int rightSyl = lineSyllables(right);
+			double score = 0;
+			if (!m_sylCounts.empty()) {
+				score += distanceToAllowed(leftSyl) + distanceToAllowed(rightSyl);
+				if (isAllowedLength(leftSyl, 1)) {
+					score -= 2.0;
+				}
+				if (isAllowedLength(rightSyl, 1)) {
+					score -= 2.0;
+				}
+			} else {
+				score += fabs((double)left.size() - (double)right.size()) * 0.1;
+			}
+			if (likelyLineStart(lines[li][k].norm)) {
+				score -= 1.5;
+			}
+			if (score < best) {
+				best = score;
+				breakAt = k;
+			}
+		}
+		return best;
+	};
+
+	// Too few lines: split the best oversized / capital-bearing line.
+	guard = 0;
+	while (((int)lines.size() < m_expectedLines) && (guard++ < 100)) {
+		int bestLine = -1;
+		int bestBreak = -1;
+		double bestScore = 1e9;
+		for (int li=0; li<(int)lines.size(); li++) {
+			int br = -1;
+			double s = splitCandidate(li, br);
+			if ((br > 0) && (s < bestScore)) {
+				bestScore = s;
+				bestLine = li;
+				bestBreak = br;
+			}
+		}
+		if ((bestLine < 0) || (bestBreak <= 0)) {
+			break;
+		}
+		vector<SungWord> left(lines[bestLine].begin(),
+				lines[bestLine].begin() + bestBreak);
+		vector<SungWord> right(lines[bestLine].begin() + bestBreak,
+				lines[bestLine].end());
+		lines[bestLine] = left;
+		lines.insert(lines.begin() + bestLine + 1, right);
+	}
 }
 
 

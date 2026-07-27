@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Jul 27 00:21:27 CEST 2026
+// Last Modified: Mon Jul 27 13:54:29 CEST 2026
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -12207,11 +12207,14 @@ class Tool_textract : public HumTool {
 		void     dedupeVoiceLines (Voice& voice);
 		void     reconstructText  (std::vector<Voice>& voices);
 		void     refineLines      (std::vector<std::vector<SungWord>>& lines);
+		int      detectGenreLineCount(HumdrumFile& infile);
+		void     enforceLineCount (std::vector<std::vector<SungWord>>& lines);
 		std::vector<SungWord> consensusLine(LineCluster& cluster);
 		std::string lineToString  (const std::vector<SungWord>& line);
 
 	private:
 		std::vector<int> m_sylCounts; // empty = unused
+		int m_expectedLines = 0;      // 0 = unset / auto
 };
 
 

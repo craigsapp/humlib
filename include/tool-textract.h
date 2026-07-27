@@ -79,11 +79,14 @@ class Tool_textract : public HumTool {
 		void     dedupeVoiceLines (Voice& voice);
 		void     reconstructText  (std::vector<Voice>& voices);
 		void     refineLines      (std::vector<std::vector<SungWord>>& lines);
+		int      detectGenreLineCount(HumdrumFile& infile);
+		void     enforceLineCount (std::vector<std::vector<SungWord>>& lines);
 		std::vector<SungWord> consensusLine(LineCluster& cluster);
 		std::string lineToString  (const std::vector<SungWord>& line);
 
 	private:
 		std::vector<int> m_sylCounts; // empty = unused
+		int m_expectedLines = 0;      // 0 = unset / auto
 };
 
 // END_MERGE
