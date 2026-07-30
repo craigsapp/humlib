@@ -30,6 +30,10 @@ after_build:
   - mkdir -p include/pugixml
   - mkdir -p arc/pugixml
   - copy "build\\%config%\\humlib.lib" lib
+  - if not exist lib mkdir lib
+  - if not exist include\\pugixml mkdir include\\pugixml
+  - if not exist arc\\pugixml mkdir arc\\pugixml
+  - copy "build\\%config%\\humlib.lib" lib
   - 7z a "%PACKAGE_NAME%.zip" include include/pugixml arc/pugixml lib README.md LICENSE.txt
 
 artifacts:
