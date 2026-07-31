@@ -4,12 +4,12 @@ image: Visual Studio 2019
 
 environment:
   matrix:
-  - generator: "Visual Studio 16"
+  - generator: "Visual Studio 16 2019"
     config: Release
     arch: x86
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
 
-  - generator: "Visual Studio 16 Win64"
+  - generator: "Visual Studio 16 2019"
     config: Release
     arch: x64
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
@@ -18,7 +18,7 @@ init:
   - git config --global core.autocrlf input
 
 build_script:
-  - cmake -G"%generator%" -H. -Bbuild -DCMAKE_BUILD_TYPE="%config%"
+  - cmake -G"%generator%" -A "%arch%" -H. -Bbuild -DCMAKE_BUILD_TYPE="%config%"
   - cmake --build build --config "%config%" --parallel
 
 after_build:
