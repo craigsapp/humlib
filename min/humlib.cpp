@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Jul 27 13:54:29 CEST 2026
+// Last Modified: Fri Jul 31 14:13:03 CEST 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -127831,6 +127831,7 @@ void Tool_pline::getPlineInterpretations(HumdrumFile& infile, vector<HTp>& token
 Tool_pliner::Tool_pliner(void) {
 	define("s|syllables|syl=s:", "allowed line lengths passed to textract (comma-separated set; e.g. 7,11)");
 	define("l|lines=i:0", "expected poem line count passed to textract (0=auto; sonetto→14)");
+	define("t|text=s:", "poem text file (skip textract; empty lines discarded, lines trimmed)");
 }
 
 
@@ -127960,29 +127961,46 @@ void Tool_pliner::processFile(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_pliner::extractPoem -- Reconstruct the poem via textract and
-//    split it into normalized PoemWord lines for alignment.
+// Tool_pliner::extractPoem -- Load the poem either from a user-specified
+//    text file (-t/--text) or via textract from the underlay, then split
+//    it into normalized PoemWord lines for alignment.
 //
 
 bool Tool_pliner::extractPoem(HumdrumFile& infile, vector<vector<PoemWord>>& poem) {
 	poem.clear();
 
-	Tool_textract textract;
-	vector<string> argv;
-	argv.push_back("textract");
-	if (getBoolean("syllables")) {
-		argv.push_back("-s");
-		argv.push_back(getString("syllables"));
+	string text;
+	if (getBoolean("text")) {
+		string path = getString("text");
+		if (path.empty()) {
+			return false;
+		}
+		ifstream in(path.c_str());
+		if (!in) {
+			cerr << "Error: cannot open text file: " << path << endl;
+			return false;
+		}
+		ostringstream oss;
+		oss << in.rdbuf();
+		text = oss.str();
+	} else {
+		Tool_textract textract;
+		vector<string> argv;
+		argv.push_back("textract");
+		if (getBoolean("syllables")) {
+			argv.push_back("-s");
+			argv.push_back(getString("syllables"));
+		}
+		int linesOpt = getInteger("lines");
+		if (linesOpt > 0) {
+			argv.push_back("-l");
+			argv.push_back(to_string(linesOpt));
+		}
+		textract.process(argv);
+		textract.run(infile);
+		text = textract.getFreeText();
 	}
-	int linesOpt = getInteger("lines");
-	if (linesOpt > 0) {
-		argv.push_back("-l");
-		argv.push_back(to_string(linesOpt));
-	}
-	textract.process(argv);
-	textract.run(infile);
 
-	string text = textract.getFreeText();
 	if (text.empty()) {
 		return false;
 	}
@@ -127992,9 +128010,14 @@ bool Tool_pliner::extractPoem(HumdrumFile& infile, vector<vector<PoemWord>>& poe
 	string line;
 	int lineNum = 0;
 	while (getline(stream, line)) {
-		if (line.empty()) {
+		// Trim leading/trailing whitespace; skip empty lines.
+		size_t start = line.find_first_not_of(" \t\r\n");
+		if (start == string::npos) {
 			continue;
 		}
+		size_t end = line.find_last_not_of(" \t\r\n");
+		line = line.substr(start, end - start + 1);
+
 		vector<string> rawwords;
 		hre.split(rawwords, line, "\\s+");
 
