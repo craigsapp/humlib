@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jul 25 17:02:33 CEST 2026
+// Last Modified: Fri Jul 31 14:13:03 CEST 2026
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -10956,6 +10956,68 @@ class Tool_pline : public HumTool {
 };
 
 
+class Tool_pliner : public HumTool {
+	public:
+		         Tool_pliner     (void);
+		        ~Tool_pliner     () {};
+
+		bool     run               (HumdrumFileSet& infiles);
+		bool     run               (HumdrumFile& infile);
+		bool     run               (const std::string& indata, std::ostream& out);
+		bool     run               (HumdrumFile& infile, std::ostream& out);
+
+	protected:
+		void     initialize        (void);
+		void     processFile       (HumdrumFile& infile);
+
+		// poem model:
+		struct PoemWord {
+			std::string original;
+			std::string norm;
+			int line   = -1;
+			int pos    = -1;
+		};
+
+		bool     extractPoem       (HumdrumFile& infile, std::vector<std::vector<PoemWord>>& poem);
+
+		// voice model:
+		struct Voice {
+			HTp kernStart = NULL;
+			HTp textStart = NULL;
+		};
+
+		struct SungWord {
+			HTp token       = NULL; // starting token of the reconstructed word
+			std::string norm;
+			bool capitalized = false;
+		};
+
+		struct Span {
+			int line      = -1;
+			int startPos  = -1;
+			int endPos    = -1;
+			bool repeat   = false;
+			HTp startToken = NULL;
+		};
+
+		void     getVoices          (HumdrumFile& infile, std::vector<Voice>& voices);
+		void     buildSungWords     (HTp textStart, std::vector<SungWord>& words);
+		std::string cleanSyllable   (const std::string& text);
+		std::string normalizeWord   (const std::string& text);
+		void     alignVoice         (std::vector<SungWord>& words,
+		                             std::vector<std::vector<PoemWord>>& poem,
+		                             std::vector<Span>& spans);
+		std::string getModifier     (std::vector<std::vector<PoemWord>>& poem, Span& span);
+		void     emitOutput         (HumdrumFile& infile,
+		                             std::map<int, std::map<int, std::string>>& insertions);
+
+	private:
+		std::vector<std::vector<PoemWord>> m_poem;
+		std::vector<Voice> m_voices;
+
+};
+
+
 class Tool_pnum : public HumTool {
 	public:
 		      Tool_pnum               (void);
@@ -12086,6 +12148,73 @@ class Tool_textdur : public HumTool {
 		bool m_interleaveQ   = false;  // used with -i option
 		HumNum m_RhythmFactor = 1;     // uwed with -1, -2, -8, and later -f #
 
+};
+
+
+class Tool_textract : public HumTool {
+	public:
+		         Tool_textract    (void);
+		        ~Tool_textract    () {};
+
+		bool     run              (HumdrumFileSet& infiles);
+		bool     run              (HumdrumFile& infile);
+		bool     run              (const std::string& indata, std::ostream& out);
+		bool     run              (HumdrumFile& infile, std::ostream& out);
+
+	protected:
+		struct SungWord {
+			std::string original;
+			std::string norm;
+			int  syllables   = 0;
+			bool capitalized = false;
+			bool bis         = false;
+		};
+
+		struct Voice {
+			HTp textStart = NULL;
+			std::vector<SungWord> words;
+			std::vector<std::vector<SungWord>> lines;
+		};
+
+		struct LineCluster {
+			std::vector<std::vector<SungWord>> members; // one entry per contributing voice line
+			std::vector<int> voiceIds;
+			double avgPos = 0.0;
+		};
+
+		void     initialize       (void);
+		void     processFile      (HumdrumFile& infile);
+
+		void     getVoices        (HumdrumFile& infile, std::vector<Voice>& voices);
+		void     buildSungWords   (HTp textStart, std::vector<SungWord>& words);
+		std::string normalizeWord (const std::string& text);
+		std::string cleanOrigPiece(const std::string& text);
+		void     collapseRepeats  (std::vector<SungWord>& words);
+		void     segmentLines     (Voice& voice);
+		int      lineSyllables    (const std::vector<SungWord>& line);
+		int      distanceToAllowed(int syllables);
+		bool     isAllowedLength  (int syllables, int tol = 0);
+		int      minAllowedLength (void);
+		int      maxAllowedLength (void);
+		bool     endsWithVowel    (const std::string& norm);
+		bool     startsWithVowel  (const std::string& norm);
+		bool     elidesWith       (const SungWord& left, const SungWord& right);
+		bool     likelyLineStart  (const std::string& norm);
+		bool     linesSimilar     (const std::vector<SungWord>& a,
+		                           const std::vector<SungWord>& b);
+		bool     isSubSequence    (const std::vector<SungWord>& shorter,
+		                           const std::vector<SungWord>& longer);
+		void     dedupeVoiceLines (Voice& voice);
+		void     reconstructText  (std::vector<Voice>& voices);
+		void     refineLines      (std::vector<std::vector<SungWord>>& lines);
+		int      detectGenreLineCount(HumdrumFile& infile);
+		void     enforceLineCount (std::vector<std::vector<SungWord>>& lines);
+		std::vector<SungWord> consensusLine(LineCluster& cluster);
+		std::string lineToString  (const std::vector<SungWord>& line);
+
+	private:
+		std::vector<int> m_sylCounts; // empty = unused
+		int m_expectedLines = 0;      // 0 = unset / auto
 };
 
 

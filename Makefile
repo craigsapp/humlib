@@ -1312,7 +1312,7 @@ tool-filter.o: tool-filter.cpp tool-filter.h \
   tool-mint.h tool-modori.h tool-msearch.h \
   Convert.h tool-myank.h tool-nproof.h \
   tool-ordergps.h tool-pbar.h tool-phrase.h \
-  tool-pline.h tool-prange.h tool-recip.h \
+  tool-pline.h tool-pliner.h tool-prange.h tool-recip.h \
   tool-restfill.h tool-rmask.h tool-rid.h \
   tool-rphrase.h tool-sab2gs.h tool-satb2gs.h \
   tool-scordatura.h HumTransposer.h HumPitch.h \

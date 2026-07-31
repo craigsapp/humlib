@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 
 project(humlib C CXX)
 #set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 #set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -175,11 +176,13 @@ set(HDRS
 add_library(humlib STATIC ${SRCS} ${HDRS})
 
 # Create a WebAssembly-compatible executable
-#add_executable(humlib-wasm main.cpp ${SRCS})
+if(EMSCRIPTEN)
+    add_executable(humlib-wasm main.cpp ${SRCS})
 
-# Link the static library and set properties for Emscripten
-target_link_libraries(humlib-wasm humlib)
-set_target_properties(humlib-wasm PROPERTIES LINK_FLAGS "-s MODULARIZE=1 -s EXPORT_NAME=humlib -s EXPORTED_RUNTIME_METHODS=ccall,cwrap -s ENVIRONMENT=web")
+    # Link the static library and set properties for Emscripten
+    target_link_libraries(humlib-wasm humlib)
+    set_target_properties(humlib-wasm PROPERTIES LINK_FLAGS "-s MODULARIZE=1 -s EXPORT_NAME=humlib -s EXPORTED_RUNTIME_METHODS=ccall,cwrap -s ENVIRONMENT=web")
+endif()
 
 
 ##############################
