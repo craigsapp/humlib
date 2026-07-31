@@ -26,10 +26,6 @@ after_build:
       $git_hash = $env:APPVEYOR_REPO_COMMIT.Substring(0, 8)
       $my_version = "$($env:APPVEYOR_BUILD_VERSION)-$git_hash"
       $env:PACKAGE_NAME = "humlib-$my_version-$($env:arch)"
-  - mkdir lib
-  - mkdir -p include/pugixml
-  - mkdir -p arc/pugixml
-  - copy "build\\%config%\\humlib.lib" lib
   - if not exist lib mkdir lib
   - if not exist include\\pugixml mkdir include\\pugixml
   - if not exist arc\\pugixml mkdir arc\\pugixml
