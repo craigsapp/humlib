@@ -18,7 +18,11 @@ init:
   - git config --global core.autocrlf input
 
 build_script:
-  - cmake -G"%generator%" -A "%arch%" -H. -Bbuild -DCMAKE_BUILD_TYPE="%config%"
+  - if "%arch%"=="x64" (
+      cmake -G"%generator%" -A x64 -H. -Bbuild -DCMAKE_BUILD_TYPE="%config%"
+    ) else (
+      cmake -G"%generator%" -H. -Bbuild -DCMAKE_BUILD_TYPE="%config%"
+    )
   - cmake --build build --config "%config%" --parallel
 
 after_build:
