@@ -44,6 +44,7 @@ Tool_pliner::Tool_pliner(void) {
 // Tool_pliner::run -- Do the main work of the tool.
 //
 
+
 bool Tool_pliner::run(HumdrumFileSet& infiles) {
 	bool status = true;
 	for (int i=0; i<infiles.getCount(); i++) {
@@ -51,6 +52,7 @@ bool Tool_pliner::run(HumdrumFileSet& infiles) {
 	}
 	return status;
 }
+
 
 
 bool Tool_pliner::run(const string& indata, ostream& out) {
