@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Aug 16 11:39:45 CEST 2026
+// Last Modified: Sun Aug 16 12:57:50 CEST 2026
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -6863,16 +6863,12 @@ class Tool_closing : public HumTool {
 		void     countClosingVoices  (HumdrumFile& infile);
 		void     markClosingEvents   (HumdrumFile& infile);
 		void     addAnalysisSpine    (HumdrumFile& infile);
-		void     printRawAnalysis    (HumdrumFile& infile);
 
 	private:
 		// m_counts: closing voice count for each line, or -1 for lines that get
 		// no analysis value (such as non-data lines).
 		std::vector<int> m_counts;
-		bool        m_prependQ     = false;
 		bool        m_markQ        = false;
-		bool        m_rawQ         = false;
-		int         m_minimum      = 0;
 		std::string m_attackMarker = "@";
 		std::string m_restMarker   = "N";
 		std::string m_attackColor  = "dodgerblue";

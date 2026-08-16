@@ -37,10 +37,7 @@ namespace hum {
 //
 
 Tool_closing::Tool_closing(void) {
-	define("p|prepend=b",    "prepend analysis spine instead of appending it");
-	define("m|mark=b",       "mark closing attacks and closing rests in the score");
-	define("r|raw=b",        "print analysis as a plain text table");
-	define("n|minimum=i:0",  "only report counts of at least this size");
+	define("m|mark=b", "mark closing attacks and closing rests in the score");
 }
 
 
@@ -97,14 +94,7 @@ bool Tool_closing::run(HumdrumFile& infile) {
 //
 
 void Tool_closing::initialize(void) {
-	m_prependQ = getBoolean("prepend");
-	m_markQ    = getBoolean("mark");
-	m_rawQ     = getBoolean("raw");
-	m_minimum  = getInteger("minimum");
-	if (m_minimum < 0) {
-		// keep non-negative so that the -1 of non-data lines is never printed
-		m_minimum = 0;
-	}
+	m_markQ = getBoolean("mark");
 }
 
 
@@ -117,11 +107,6 @@ void Tool_closing::initialize(void) {
 void Tool_closing::processFile(HumdrumFile& infile) {
 	infile.analyzeClosingRests();
 	countClosingVoices(infile);
-
-	if (m_rawQ) {
-		printRawAnalysis(infile);
-		return;
-	}
 
 	if (m_markQ) {
 		markClosingEvents(infile);
@@ -211,40 +196,12 @@ void Tool_closing::markClosingEvents(HumdrumFile& infile) {
 void Tool_closing::addAnalysisSpine(HumdrumFile& infile) {
 	vector<string> data(infile.getLineCount());
 	for (int i=0; i<infile.getLineCount(); i++) {
-		if (m_counts[i] < m_minimum) {
+		if (m_counts[i] < 0) {
 			continue;
 		}
 		data[i] = to_string(m_counts[i]);
 	}
-	if (m_prependQ) {
-		infile.prependDataSpine(data, "", "**closing");
-	} else {
-		infile.appendDataSpine(data, "", "**closing");
-	}
-}
-
-
-
-//////////////////////////////
-//
-// Tool_closing::printRawAnalysis -- Print one line for each reported observation
-//     point: its line number in the input, its time in quarter notes from the
-//     start of the score, and the number of closing voices.
-//
-
-void Tool_closing::printRawAnalysis(HumdrumFile& infile) {
-	m_humdrum_text << "!!!voice-count: " << infile.getKernSpineStartList().size() << endl;
-	m_humdrum_text << "**line\t**qbeat\t**closing" << endl;
-	for (int i=0; i<infile.getLineCount(); i++) {
-		if (m_counts[i] < m_minimum) {
-			continue;
-		}
-		m_humdrum_text << i+1
-		               << "\t" << infile[i].getDurationFromStart().getFloat()
-		               << "\t" << m_counts[i]
-		               << endl;
-	}
-	m_humdrum_text << "*-\t*-\t*-" << endl;
+	infile.appendDataSpine(data, "", "**closing");
 }
 
 
