@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Jul 16 11:57:52 CEST 2026
+// Last Modified: Sun Aug 16 12:52:36 CEST 2026
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -2538,6 +2538,13 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		// in HumdrumFileContent-hand.cpp
 		bool   doHandAnalysis             (bool attacksOnlyQ = false);
 		bool   doHandAnalysis             (HTp startSpine, bool attacksOnlyQ = false);
+
+		// in HumdrumFileContent-closing.cpp
+		bool  analyzeClosingRests         (void);
+		bool  analyzeClosingRests         (HTp spinestart);
+		bool  isClosingRest               (HTp token);
+		bool  isClosingAttack             (HTp token);
+		bool  isClosingEvent              (HTp token);
 
 		// in HumdrumFileContent-kern.cpp
 		std::vector<int> getTrackToKernIndex (void);
@@ -6182,7 +6189,7 @@ class Tool_autocadence : public HumTool {
 		void        addCadenceLabel            (std::string definition, std::string label);
 		void        addCadenceDefinition       (const std::string& funcL, const std::string& funcU,
 		                                        const std::string& name, const std::string& regex);
-		void        prepareLowestPitches       (void);
+		void        prepareLowestPitches       (HumdrumFile& infile);
 		void        preparePitchInfo           (HumdrumFile& infile);
 		void        prepareDiatonicPitches     (HumdrumFile& infile);
 		void        printExtractedPitchInfo    (HumdrumFile& infile);
@@ -6226,6 +6233,7 @@ class Tool_autocadence : public HumTool {
 		bool        getPhrygian                (HumdrumFile& infile, int index);
 		std::string getIntervalName            (const std::string& b40);
 		std::string getTriadData               (HumdrumFile& infile, int line);
+		std::string getCadenceLabel            (const std::string& cvflabel, HumdrumFile& infile, int index);
 
 	private:
 
@@ -6241,6 +6249,9 @@ class Tool_autocadence : public HumTool {
 		// m_lowestPitch: the lowest sounding pitch at every instance in the score.
 		// the pitch is stored as an absolute diatonic pitch, middle C is 28, 0 is a rest
 		std::vector<int> m_lowestPitch;
+
+		// m_lowestPitchIndex: the lowest sounding pitch field index.
+		std::vector<int> m_lowestPitchIndex;
 
 		// m_intervals: The counterpoint intervals for each pair of notes.
 		// The data is store in a 3-D vector, where the first dimension is the
@@ -6338,6 +6349,7 @@ class Tool_autocadence : public HumTool {
 		std::vector<std::string> m_root;
 		bool m_foundEmpytTriad = false;
 		bool m_hasTriadColor = false;
+		bool m_removeWeakQ = false;
 };
 
 
@@ -6832,6 +6844,35 @@ class Tool_cint : public HumTool {
 		std::string SearchString;
 		std::string Spacer;
 
+};
+
+
+class Tool_closing : public HumTool {
+	public:
+		         Tool_closing        (void);
+		        ~Tool_closing        () {};
+
+		bool     run                 (HumdrumFileSet& infiles);
+		bool     run                 (HumdrumFile& infile);
+		bool     run                 (const std::string& indata, std::ostream& out);
+		bool     run                 (HumdrumFile& infile, std::ostream& out);
+
+	protected:
+		void     initialize          (void);
+		void     processFile         (HumdrumFile& infile);
+		void     countClosingVoices  (HumdrumFile& infile);
+		void     markClosingEvents   (HumdrumFile& infile);
+		void     addAnalysisSpine    (HumdrumFile& infile);
+
+	private:
+		// m_counts: closing voice count for each line, or -1 for lines that get
+		// no analysis value (such as non-data lines).
+		std::vector<int> m_counts;
+		bool        m_markQ        = false;
+		std::string m_attackMarker = "@";
+		std::string m_restMarker   = "N";
+		std::string m_attackColor  = "dodgerblue";
+		std::string m_restColor    = "orange";
 };
 
 
@@ -10973,7 +11014,7 @@ class Tool_pliner : public HumTool {
 			int pos    = -1;
 		};
 
-		bool     parseVerse        (HumdrumFile& infile, std::vector<std::vector<PoemWord>>& poem);
+		bool     extractPoem       (HumdrumFile& infile, std::vector<std::vector<PoemWord>>& poem);
 
 		// voice model:
 		struct Voice {
@@ -12143,6 +12184,73 @@ class Tool_textdur : public HumTool {
 		bool m_interleaveQ   = false;  // used with -i option
 		HumNum m_RhythmFactor = 1;     // uwed with -1, -2, -8, and later -f #
 
+};
+
+
+class Tool_textract : public HumTool {
+	public:
+		         Tool_textract    (void);
+		        ~Tool_textract    () {};
+
+		bool     run              (HumdrumFileSet& infiles);
+		bool     run              (HumdrumFile& infile);
+		bool     run              (const std::string& indata, std::ostream& out);
+		bool     run              (HumdrumFile& infile, std::ostream& out);
+
+	protected:
+		struct SungWord {
+			std::string original;
+			std::string norm;
+			int  syllables   = 0;
+			bool capitalized = false;
+			bool bis         = false;
+		};
+
+		struct Voice {
+			HTp textStart = NULL;
+			std::vector<SungWord> words;
+			std::vector<std::vector<SungWord>> lines;
+		};
+
+		struct LineCluster {
+			std::vector<std::vector<SungWord>> members; // one entry per contributing voice line
+			std::vector<int> voiceIds;
+			double avgPos = 0.0;
+		};
+
+		void     initialize       (void);
+		void     processFile      (HumdrumFile& infile);
+
+		void     getVoices        (HumdrumFile& infile, std::vector<Voice>& voices);
+		void     buildSungWords   (HTp textStart, std::vector<SungWord>& words);
+		std::string normalizeWord (const std::string& text);
+		std::string cleanOrigPiece(const std::string& text);
+		void     collapseRepeats  (std::vector<SungWord>& words);
+		void     segmentLines     (Voice& voice);
+		int      lineSyllables    (const std::vector<SungWord>& line);
+		int      distanceToAllowed(int syllables);
+		bool     isAllowedLength  (int syllables, int tol = 0);
+		int      minAllowedLength (void);
+		int      maxAllowedLength (void);
+		bool     endsWithVowel    (const std::string& norm);
+		bool     startsWithVowel  (const std::string& norm);
+		bool     elidesWith       (const SungWord& left, const SungWord& right);
+		bool     likelyLineStart  (const std::string& norm);
+		bool     linesSimilar     (const std::vector<SungWord>& a,
+		                           const std::vector<SungWord>& b);
+		bool     isSubSequence    (const std::vector<SungWord>& shorter,
+		                           const std::vector<SungWord>& longer);
+		void     dedupeVoiceLines (Voice& voice);
+		void     reconstructText  (std::vector<Voice>& voices);
+		void     refineLines      (std::vector<std::vector<SungWord>>& lines);
+		int      detectGenreLineCount(HumdrumFile& infile);
+		void     enforceLineCount (std::vector<std::vector<SungWord>>& lines);
+		std::vector<SungWord> consensusLine(LineCluster& cluster);
+		std::string lineToString  (const std::vector<SungWord>& line);
+
+	private:
+		std::vector<int> m_sylCounts; // empty = unused
+		int m_expectedLines = 0;      // 0 = unset / auto
 };
 
 

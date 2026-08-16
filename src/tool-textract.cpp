@@ -289,7 +289,7 @@ void Tool_textract::buildSungWords(HTp textStart, vector<SungWord>& words) {
 			SungWord sw;
 			sw.original = accumOrig;
 			sw.norm = accumNorm;
-			sw.syllables = max(sylCount, 1);
+			sw.syllables = std::max(sylCount, 1);
 			sw.capitalized = capitalized;
 			sw.bis = bis;
 			words.push_back(sw);
@@ -610,7 +610,7 @@ int Tool_textract::distanceToAllowed(int syllables) {
 	}
 	int best = abs(syllables - m_sylCounts[0]);
 	for (int t : m_sylCounts) {
-		best = min(best, abs(syllables - t));
+		best = std::min(best, abs(syllables - t));
 	}
 	return best;
 }
@@ -647,7 +647,7 @@ int Tool_textract::minAllowedLength(void) {
 	}
 	int m = m_sylCounts[0];
 	for (int t : m_sylCounts) {
-		m = min(m, t);
+		m = std::min(m, t);
 	}
 	return m;
 }
@@ -665,7 +665,7 @@ int Tool_textract::maxAllowedLength(void) {
 	}
 	int m = m_sylCounts[0];
 	for (int t : m_sylCounts) {
-		m = max(m, t);
+		m = std::max(m, t);
 	}
 	return m;
 }
@@ -784,9 +784,9 @@ bool Tool_textract::linesSimilar(const vector<SungWord>& a,
 			return true;
 		}
 	}
-	int maxLen = (int)max(a.size(), b.size());
-	int minLen = (int)min(a.size(), b.size());
-	if (maxLen - minLen > max(2, minLen / 2)) {
+	int maxLen = (int)std::max(a.size(), b.size());
+	int minLen = (int)std::min(a.size(), b.size());
+	if (maxLen - minLen > std::max(2, minLen / 2)) {
 		return false;
 	}
 	// LCS length
@@ -796,7 +796,7 @@ bool Tool_textract::linesSimilar(const vector<SungWord>& a,
 			if (a[i-1].norm == b[j-1].norm) {
 				dp[i][j] = dp[i-1][j-1] + 1;
 			} else {
-				dp[i][j] = max(dp[i-1][j], dp[i][j-1]);
+				dp[i][j] = std::max(dp[i-1][j], dp[i][j-1]);
 			}
 		}
 	}
@@ -1109,7 +1109,7 @@ void Tool_textract::reconstructText(vector<Voice>& voices) {
 				int nj = (int)set<int>(clusters[j].voiceIds.begin(),
 						clusters[j].voiceIds.end()).size();
 				clusters[i].avgPos = (clusters[i].avgPos * ni + clusters[j].avgPos * nj)
-						/ max(ni + nj, 1);
+						/ std::max(ni + nj, 1);
 				clusters.erase(clusters.begin() + j);
 				merged = true;
 				break;
