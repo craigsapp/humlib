@@ -48,6 +48,13 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		bool   doHandAnalysis             (bool attacksOnlyQ = false);
 		bool   doHandAnalysis             (HTp startSpine, bool attacksOnlyQ = false);
 
+		// in HumdrumFileContent-closing.cpp
+		bool  analyzeClosingRests         (void);
+		bool  analyzeClosingRests         (HTp spinestart);
+		bool  isClosingRest               (HTp token);
+		bool  isClosingAttack             (HTp token);
+		bool  isClosingEvent              (HTp token);
+
 		// in HumdrumFileContent-kern.cpp
 		std::vector<int> getTrackToKernIndex (void);
 

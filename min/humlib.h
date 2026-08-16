@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Jul 31 14:13:03 CEST 2026
+// Last Modified: Sun Aug 16 11:39:45 CEST 2026
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -2538,6 +2538,13 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		// in HumdrumFileContent-hand.cpp
 		bool   doHandAnalysis             (bool attacksOnlyQ = false);
 		bool   doHandAnalysis             (HTp startSpine, bool attacksOnlyQ = false);
+
+		// in HumdrumFileContent-closing.cpp
+		bool  analyzeClosingRests         (void);
+		bool  analyzeClosingRests         (HTp spinestart);
+		bool  isClosingRest               (HTp token);
+		bool  isClosingAttack             (HTp token);
+		bool  isClosingEvent              (HTp token);
 
 		// in HumdrumFileContent-kern.cpp
 		std::vector<int> getTrackToKernIndex (void);
@@ -6837,6 +6844,39 @@ class Tool_cint : public HumTool {
 		std::string SearchString;
 		std::string Spacer;
 
+};
+
+
+class Tool_closing : public HumTool {
+	public:
+		         Tool_closing        (void);
+		        ~Tool_closing        () {};
+
+		bool     run                 (HumdrumFileSet& infiles);
+		bool     run                 (HumdrumFile& infile);
+		bool     run                 (const std::string& indata, std::ostream& out);
+		bool     run                 (HumdrumFile& infile, std::ostream& out);
+
+	protected:
+		void     initialize          (void);
+		void     processFile         (HumdrumFile& infile);
+		void     countClosingVoices  (HumdrumFile& infile);
+		void     markClosingEvents   (HumdrumFile& infile);
+		void     addAnalysisSpine    (HumdrumFile& infile);
+		void     printRawAnalysis    (HumdrumFile& infile);
+
+	private:
+		// m_counts: closing voice count for each line, or -1 for lines that get
+		// no analysis value (such as non-data lines).
+		std::vector<int> m_counts;
+		bool        m_prependQ     = false;
+		bool        m_markQ        = false;
+		bool        m_rawQ         = false;
+		int         m_minimum      = 0;
+		std::string m_attackMarker = "@";
+		std::string m_restMarker   = "N";
+		std::string m_attackColor  = "dodgerblue";
+		std::string m_restColor    = "orange";
 };
 
 

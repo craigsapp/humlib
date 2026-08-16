@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Jul 31 14:13:03 CEST 2026
+// Last Modified: Sun Aug 16 11:39:45 CEST 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -26703,6 +26703,128 @@ void HumdrumFileContent::markBeamSpanMembers(HTp beamstart, HTp beamend) {
 	}
 }
 
+
+
+
+
+
+//////////////////////////////
+//
+// HumdrumFileContent::analyzeClosingRests -- Mark the closing rests and closing
+//     attacks in every **kern voice.  Returns true if there was a voice to
+//     process.
+//
+
+bool HumdrumFileContent::analyzeClosingRests(void) {
+	bool output = false;
+	for (HTp kernstart : getKernSpineStartList()) {
+		output |= analyzeClosingRests(kernstart);
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileContent::analyzeClosingRests -- Process a single voice, marking
+//     each closingRest (the first rest after one or more notes) and the matching
+//     closingAttack (the last note attack before that rest).  The end of the
+//     voice counts as a rest, so the last attack of the voice is a closingAttack
+//     even when no rest follows it.
+//
+//     Subspines (layers) are followed as separate paths, and a path stops where
+//     it meets a token that another path already processed (i.e., where
+//     subspines merge again).
+//
+
+bool HumdrumFileContent::analyzeClosingRests(HTp spinestart) {
+	if (!spinestart || !spinestart->isStaffLike()) {
+		return false;
+	}
+
+	// Each entry is a token to process, paired with the most recent note attack
+	// before it (NULL if the previous event was a rest or there was no note).
+	vector<pair<HTp, HTp>> tovisit;
+	tovisit.push_back(make_pair(spinestart, (HTp)NULL));
+	set<HTp> visited;
+
+	while (!tovisit.empty()) {
+		HTp current    = tovisit.back().first;
+		HTp lastattack = tovisit.back().second;
+		tovisit.pop_back();
+		if (!current || visited.count(current)) {
+			continue;
+		}
+		visited.insert(current);
+
+		if (current->isData() && !current->isNull()) {
+			if (current->isRest()) {
+				if (lastattack) {
+					current->setValue("auto", "closingRest", "1");
+					lastattack->setValue("auto", "closingAttack", "1");
+					lastattack = NULL;
+				}
+			} else if (current->isNoteAttack()) {
+				lastattack = current;
+			}
+			// A tied continuation keeps the attack that started it.
+		}
+
+		int count = current->getNextTokenCount();
+		if ((count == 0) && lastattack) {
+			// The end of the voice acts as a rest, so its last attack closes.
+			lastattack->setValue("auto", "closingAttack", "1");
+		}
+
+		// Pushed in reverse so that the first subspine is processed first and
+		// its state is the one that carries past a merge.
+		for (int i=count-1; i>=0; i--) {
+			tovisit.push_back(make_pair(current->getNextToken(i), lastattack));
+		}
+	}
+
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileContent::isClosingRest -- Returns true if the token is the first
+//     rest after one or more notes in its voice.  Run analyzeClosingRests()
+//     first.
+//
+
+bool HumdrumFileContent::isClosingRest(HTp token) {
+	return token && token->getValueBool("auto", "closingRest");
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileContent::isClosingAttack -- Returns true if the token is the last
+//     note attack in its voice before a closing rest or before the end of the
+//     voice.  Run analyzeClosingRests() first.
+//
+
+bool HumdrumFileContent::isClosingAttack(HTp token) {
+	return token && token->getValueBool("auto", "closingAttack");
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileContent::isClosingEvent -- Returns true if the token is a
+//     closingAttack or a closingRest, meaning that its voice stops sounding at
+//     this event or at its next attack.  Run analyzeClosingRests() first.
+//
+
+bool HumdrumFileContent::isClosingEvent(HTp token) {
+	return isClosingAttack(token) || isClosingRest(token);
+}
 
 
 
@@ -71021,6 +71143,225 @@ void Tool_cint::usage(const string& command) {
 
 
 
+
+/////////////////////////////////
+//
+// Tool_closing::Tool_closing -- Set the recognized options for the tool.
+//
+
+Tool_closing::Tool_closing(void) {
+	define("p|prepend=b",    "prepend analysis spine instead of appending it");
+	define("m|mark=b",       "mark closing attacks and closing rests in the score");
+	define("r|raw=b",        "print analysis as a plain text table");
+	define("n|minimum=i:0",  "only report counts of at least this size");
+}
+
+
+
+/////////////////////////////////
+//
+// Tool_closing::run -- Do the main work of the tool.
+//
+
+bool Tool_closing::run(HumdrumFileSet& infiles) {
+	bool status = true;
+	for (int i=0; i<infiles.getCount(); i++) {
+		status &= run(infiles[i]);
+	}
+	return status;
+}
+
+
+bool Tool_closing::run(const string& indata, ostream& out) {
+	HumdrumFile infile;
+	infile.readString(indata);
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_closing::run(HumdrumFile& infile, ostream& out) {
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_closing::run(HumdrumFile& infile) {
+	initialize();
+	processFile(infile);
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_closing::initialize --
+//
+
+void Tool_closing::initialize(void) {
+	m_prependQ = getBoolean("prepend");
+	m_markQ    = getBoolean("mark");
+	m_rawQ     = getBoolean("raw");
+	m_minimum  = getInteger("minimum");
+	if (m_minimum < 0) {
+		// keep non-negative so that the -1 of non-data lines is never printed
+		m_minimum = 0;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_closing::processFile --
+//
+
+void Tool_closing::processFile(HumdrumFile& infile) {
+	infile.analyzeClosingRests();
+	countClosingVoices(infile);
+
+	if (m_rawQ) {
+		printRawAnalysis(infile);
+		return;
+	}
+
+	if (m_markQ) {
+		markClosingEvents(infile);
+	}
+	addAnalysisSpine(infile);
+	m_humdrum_text << infile;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_closing::countClosingVoices -- For each observation point in the
+//     composite rhythm of all of the parts, count the voices whose event at
+//     that point is a closingAttack or a closingRest.  Every data line is an
+//     observation point, including lines where all of the voices are resting.
+//
+
+void Tool_closing::countClosingVoices(HumdrumFile& infile) {
+	m_counts.clear();
+	m_counts.resize(infile.getLineCount(), -1);
+
+	// A staff with more than one layer can have several closing events on the
+	// same line, but it is a single voice, so count each track only once.
+	vector<bool> counted(infile.getTrackCount() + 1, false);
+
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isData()) {
+			continue;
+		}
+		fill(counted.begin(), counted.end(), false);
+		int sum = 0;
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (!infile.isClosingEvent(token)) {
+				continue;
+			}
+			int track = token->getTrack();
+			if (counted[track]) {
+				continue;
+			}
+			counted[track] = true;
+			sum++;
+		}
+		m_counts[i] = sum;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_closing::markClosingEvents -- Mark each closing attack and each closing
+//     rest so that they can be seen in the notation.
+//
+
+void Tool_closing::markClosingEvents(HumdrumFile& infile) {
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isData()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (infile.isClosingAttack(token)) {
+				token->setText(*token + m_attackMarker);
+			} else if (infile.isClosingRest(token)) {
+				token->setText(*token + m_restMarker);
+			}
+		}
+	}
+	infile.createLinesFromTokens();
+
+	infile.appendLine("!!!RDF**kern: " + m_attackMarker
+			+ " = marked note, closing attack, color=\"" + m_attackColor + "\"");
+	infile.appendLine("!!!RDF**kern: " + m_restMarker
+			+ " = marked note, closing rest, color=\"" + m_restColor + "\"");
+}
+
+
+
+//////////////////////////////
+//
+// Tool_closing::addAnalysisSpine -- Add a **closing spine containing the number
+//     of closing voices at each observation point.
+//
+
+void Tool_closing::addAnalysisSpine(HumdrumFile& infile) {
+	vector<string> data(infile.getLineCount());
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (m_counts[i] < m_minimum) {
+			continue;
+		}
+		data[i] = to_string(m_counts[i]);
+	}
+	if (m_prependQ) {
+		infile.prependDataSpine(data, "", "**closing");
+	} else {
+		infile.appendDataSpine(data, "", "**closing");
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_closing::printRawAnalysis -- Print one line for each reported observation
+//     point: its line number in the input, its time in quarter notes from the
+//     start of the score, and the number of closing voices.
+//
+
+void Tool_closing::printRawAnalysis(HumdrumFile& infile) {
+	m_humdrum_text << "!!!voice-count: " << infile.getKernSpineStartList().size() << endl;
+	m_humdrum_text << "**line\t**qbeat\t**closing" << endl;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (m_counts[i] < m_minimum) {
+			continue;
+		}
+		m_humdrum_text << i+1
+		               << "\t" << infile[i].getDurationFromStart().getFloat()
+		               << "\t" << m_counts[i]
+		               << endl;
+	}
+	m_humdrum_text << "*-\t*-\t*-" << endl;
+}
+
+
+
 double cmr_note_info::m_syncopationWeight = 1.0;
 double cmr_note_info::m_leapWeight = 0.5;
 
@@ -95307,6 +95648,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(chord, infile, commands[i].second, status);
 		} else if (commands[i].first == "cint") {
 			RUNTOOL(cint, infile, commands[i].second, status);
+		} else if (commands[i].first == "closing") {
+			RUNTOOL(closing, infile, commands[i].second, status);
 		} else if (commands[i].first == "cmr") {
 			RUNTOOL(cmr, infile, commands[i].second, status);
 		} else if (commands[i].first == "composite") {
@@ -127841,6 +128184,7 @@ Tool_pliner::Tool_pliner(void) {
 // Tool_pliner::run -- Do the main work of the tool.
 //
 
+
 bool Tool_pliner::run(HumdrumFileSet& infiles) {
 	bool status = true;
 	for (int i=0; i<infiles.getCount(); i++) {
@@ -127848,6 +128192,7 @@ bool Tool_pliner::run(HumdrumFileSet& infiles) {
 	}
 	return status;
 }
+
 
 
 bool Tool_pliner::run(const string& indata, ostream& out) {
@@ -127980,7 +128325,7 @@ bool Tool_pliner::extractPoem(HumdrumFile& infile, vector<vector<PoemWord>>& poe
 			cerr << "Error: cannot open text file: " << path << endl;
 			return false;
 		}
-		ostringstream oss;
+		std::ostringstream oss;
 		oss << in.rdbuf();
 		text = oss.str();
 	} else {
@@ -128006,7 +128351,7 @@ bool Tool_pliner::extractPoem(HumdrumFile& infile, vector<vector<PoemWord>>& poe
 	}
 
 	HumRegex hre;
-	istringstream stream(text);
+	std::istringstream stream(text);
 	string line;
 	int lineNum = 0;
 	while (getline(stream, line)) {
@@ -144072,7 +144417,7 @@ void Tool_textract::buildSungWords(HTp textStart, vector<SungWord>& words) {
 			SungWord sw;
 			sw.original = accumOrig;
 			sw.norm = accumNorm;
-			sw.syllables = max(sylCount, 1);
+			sw.syllables = std::max(sylCount, 1);
 			sw.capitalized = capitalized;
 			sw.bis = bis;
 			words.push_back(sw);
@@ -144393,7 +144738,7 @@ int Tool_textract::distanceToAllowed(int syllables) {
 	}
 	int best = abs(syllables - m_sylCounts[0]);
 	for (int t : m_sylCounts) {
-		best = min(best, abs(syllables - t));
+		best = std::min(best, abs(syllables - t));
 	}
 	return best;
 }
@@ -144430,7 +144775,7 @@ int Tool_textract::minAllowedLength(void) {
 	}
 	int m = m_sylCounts[0];
 	for (int t : m_sylCounts) {
-		m = min(m, t);
+		m = std::min(m, t);
 	}
 	return m;
 }
@@ -144448,7 +144793,7 @@ int Tool_textract::maxAllowedLength(void) {
 	}
 	int m = m_sylCounts[0];
 	for (int t : m_sylCounts) {
-		m = max(m, t);
+		m = std::max(m, t);
 	}
 	return m;
 }
@@ -144567,9 +144912,9 @@ bool Tool_textract::linesSimilar(const vector<SungWord>& a,
 			return true;
 		}
 	}
-	int maxLen = (int)max(a.size(), b.size());
-	int minLen = (int)min(a.size(), b.size());
-	if (maxLen - minLen > max(2, minLen / 2)) {
+	int maxLen = (int)std::max(a.size(), b.size());
+	int minLen = (int)std::min(a.size(), b.size());
+	if (maxLen - minLen > std::max(2, minLen / 2)) {
 		return false;
 	}
 	// LCS length
@@ -144579,7 +144924,7 @@ bool Tool_textract::linesSimilar(const vector<SungWord>& a,
 			if (a[i-1].norm == b[j-1].norm) {
 				dp[i][j] = dp[i-1][j-1] + 1;
 			} else {
-				dp[i][j] = max(dp[i-1][j], dp[i][j-1]);
+				dp[i][j] = std::max(dp[i-1][j], dp[i][j-1]);
 			}
 		}
 	}
@@ -144892,7 +145237,7 @@ void Tool_textract::reconstructText(vector<Voice>& voices) {
 				int nj = (int)set<int>(clusters[j].voiceIds.begin(),
 						clusters[j].voiceIds.end()).size();
 				clusters[i].avgPos = (clusters[i].avgPos * ni + clusters[j].avgPos * nj)
-						/ max(ni + nj, 1);
+						/ std::max(ni + nj, 1);
 				clusters.erase(clusters.begin() + j);
 				merged = true;
 				break;

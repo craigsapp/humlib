@@ -185,7 +185,7 @@ bool Tool_pliner::extractPoem(HumdrumFile& infile, vector<vector<PoemWord>>& poe
 			cerr << "Error: cannot open text file: " << path << endl;
 			return false;
 		}
-		ostringstream oss;
+		std::ostringstream oss;
 		oss << in.rdbuf();
 		text = oss.str();
 	} else {
@@ -211,7 +211,7 @@ bool Tool_pliner::extractPoem(HumdrumFile& infile, vector<vector<PoemWord>>& poe
 	}
 
 	HumRegex hre;
-	istringstream stream(text);
+	std::istringstream stream(text);
 	string line;
 	int lineNum = 0;
 	while (getline(stream, line)) {

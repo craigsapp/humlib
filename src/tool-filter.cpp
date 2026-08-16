@@ -30,6 +30,7 @@
 #include "tool-chooser.h"
 #include "tool-chord.h"
 #include "tool-cint.h"
+#include "tool-closing.h"
 #include "tool-cmr.h"
 #include "tool-colorgroups.h"
 #include "tool-colortriads.h"
@@ -283,6 +284,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(chord, infile, commands[i].second, status);
 		} else if (commands[i].first == "cint") {
 			RUNTOOL(cint, infile, commands[i].second, status);
+		} else if (commands[i].first == "closing") {
+			RUNTOOL(closing, infile, commands[i].second, status);
 		} else if (commands[i].first == "cmr") {
 			RUNTOOL(cmr, infile, commands[i].second, status);
 		} else if (commands[i].first == "composite") {
