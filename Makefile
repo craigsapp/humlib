@@ -54,6 +54,9 @@ endif
 # BINDIR: Location where compiled programs will be place.
 BINDIR = bin
 
+# MINDIR: Location where compiled min files will be created.
+MINDIR = min
+
 # OBJDIR: Location where object files will be place.
 OBJDIR = obj
 
@@ -372,7 +375,7 @@ library: makedirs min pugixml midifile $(OBJS)
 
 m: min
 min:
-	@$(BINDIR)/makeMinDistribution
+	@$(MINDIR)/makeMinDistribution
 
 
 
