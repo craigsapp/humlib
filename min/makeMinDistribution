@@ -306,7 +306,6 @@ EOT
 
 	my @files = getFiles("$sourceDir/$SrcDir");
 	foreach my $file (@files) {
-print "FILE = $file\n";
 		next if $file =~ /^humlib.cpp$/;
 		my $lines = getMergeContents("$sourceDir/$SrcDir/$file");
 		if ($lines =~ /^\s*$/) {
