@@ -304,14 +304,15 @@ namespace hum {
 
 EOT
 
-	my @files = getFiles($sourceDir);
+	my @files = getFiles("$sourceDir/$SrcDir");
 	foreach my $file (@files) {
+print "FILE = $file\n";
 		next if $file =~ /^humlib.cpp$/;
-		my $lines = getMergeContents("$sourceDir/$file");
+		my $lines = getMergeContents("$sourceDir/$SrcDir/$file");
 		if ($lines =~ /^\s*$/) {
 			# print "$sourceDir/$file is not correctly formatted\n";
 		}
-		print SFILE getMergeContents("$sourceDir/$file");
+		print SFILE getMergeContents("$sourceDir/$SrcDir/$file");
 	}
 
 print SFILE "\n} // end namespace hum\n";
