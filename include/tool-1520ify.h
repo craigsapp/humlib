@@ -45,6 +45,8 @@ class Tool_1520ify : public HumTool {
 		void        fixEditorialAccidentals(HumdrumFile& infile);
 		void        fixInstrumentAbbreviations(HumdrumFile& infile);
 		void        addTerminalLongs   (HumdrumFile& infile);
+		bool        isInternalSectionBoundary(HumdrumFile& infile, int lineindex);
+		bool        markPreviousNoteAsLong(HTp token, bool stopAtRest);
 		void        deleteDummyTranspositions(HumdrumFile& infile);
 		std::string getDate            (void);
 		int         getYear            (void);
@@ -62,6 +64,4 @@ class Tool_1520ify : public HumTool {
 } // end namespace hum
 
 #endif /* _TOOL_1520IFY_H_INCLUDED */
-
-
 

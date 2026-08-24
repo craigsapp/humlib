@@ -845,11 +845,28 @@ void Tool_1520ify::fixEditorialAccidentals(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_1520ify::addTerminalLongs -- Convert all last notes to terminal longs
-//    Also probably add terminal longs before double barlines as in JRP.
+// Tool_1520ify::addTerminalLongs -- Convert final sounding notes to terminal
+//    longs.  In addition to the final note before *-, also mark the last
+//    sounding note before internal section-ending double barlines.
 //
 
 void Tool_1520ify::addTerminalLongs(HumdrumFile& infile) {
+	for (int i=0; i<infile.getLineCount(); ++i) {
+		if (!isInternalSectionBoundary(infile, i)) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); ++j) {
+			HTp token = infile.token(i, j);
+			if (!token || !token->isKern()) {
+				continue;
+			}
+			if (token->find("||") == string::npos) {
+				continue;
+			}
+			markPreviousNoteAsLong(token, true);
+		}
+	}
+
 	int scount = infile.getStrandCount();
 	for (int i=0; i<scount; i++) {
 		HTp cur = infile.getStrandEnd(i);
@@ -859,34 +876,130 @@ void Tool_1520ify::addTerminalLongs(HumdrumFile& infile) {
 		if (!cur->isKern()) {
 			continue;
 		}
-		while (cur) {
-			if (!cur->isData()) {
-				cur = cur->getPreviousToken();
-				continue;
-			}
-			if (cur->isNull()) {
-				cur = cur->getPreviousToken();
-				continue;
-			}
-			if (cur->isRest()) {
-				cur = cur->getPreviousToken();
-				continue;
-			}
-			if (cur->isSecondaryTiedNote()) {
-				cur = cur->getPreviousToken();
-				continue;
-			}
-			if (cur->find("l") != std::string::npos) {
-				// already marked so do not do it again
-				break;
-			}
-			// mark this note with "l"
-			string newtext = *cur;
-			newtext += "l";
-			cur->setText(newtext);
+		markPreviousNoteAsLong(cur, false);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_1520ify::isInternalSectionBoundary -- Identify internal double barlines
+//    that are followed by a new labelled section rather than score termination.
+//    This lets terminal longs be added at section endings without treating the
+//    final double barline as an internal boundary.
+//
+
+bool Tool_1520ify::isInternalSectionBoundary(HumdrumFile& infile, int lineindex) {
+	if ((lineindex < 0) || (lineindex >= infile.getLineCount())) {
+		return false;
+	}
+	if (!infile[lineindex].isBarline()) {
+		return false;
+	}
+
+	bool doubleQ = false;
+	for (int j=0; j<infile[lineindex].getFieldCount(); ++j) {
+		HTp token = infile.token(lineindex, j);
+		if (token && token->find("||") != string::npos) {
+			doubleQ = true;
 			break;
 		}
 	}
+	if (!doubleQ) {
+		return false;
+	}
+
+	bool restartQ = false;
+	for (int i=lineindex + 1; i<infile.getLineCount(); ++i) {
+		if (infile[i].isTerminator()) {
+			return false;
+		}
+		if (infile[i].isBarline()) {
+			return false;
+		}
+		if (infile[i].isGlobalComment()) {
+			HTp token = infile.token(i, 0);
+			if (!token) {
+				continue;
+			}
+			if ((token->compare(0, 10, "!!section:") == 0) ||
+			    (token->compare(0, 7, "!!!OMD:") == 0)) {
+				restartQ = true;
+			}
+			continue;
+		}
+		if (infile[i].isLocalComment() || infile[i].isReference() || infile[i].isEmpty()) {
+			continue;
+		}
+		if (infile[i].isInterpretation()) {
+			for (int j=0; j<infile[i].getFieldCount(); ++j) {
+				HTp token = infile.token(i, j);
+				if (!token || token->isNull()) {
+					continue;
+				}
+				if ((token->compare(0, 2, "*M") == 0) ||
+				    (token->compare(0, 5, "*met(") == 0)) {
+					restartQ = true;
+				}
+			}
+			continue;
+		}
+		if (infile[i].isData()) {
+			return restartQ;
+		}
+	}
+
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_1520ify::markPreviousNoteAsLong -- Walk backwards within a strand and
+//    mark the last note attack as a long.  For internal boundaries, stopAtRest
+//    prevents adding a long to a voice that has already dropped out and rests
+//    through the section break.
+//
+
+bool Tool_1520ify::markPreviousNoteAsLong(HTp token, bool stopAtRest) {
+	if (!token) {
+		return false;
+	}
+
+	HTp cur = token->getPreviousToken();
+	while (cur) {
+		if (!cur->isData()) {
+			cur = cur->getPreviousToken();
+			continue;
+		}
+		if (cur->isNull()) {
+			cur = cur->getPreviousToken();
+			continue;
+		}
+		if (cur->isRest()) {
+			if (stopAtRest) {
+				return false;
+			}
+			cur = cur->getPreviousToken();
+			continue;
+		}
+		if (cur->isSecondaryTiedNote()) {
+			cur = cur->getPreviousToken();
+			continue;
+		}
+		if (cur->find("l") != std::string::npos) {
+			return true;
+		}
+
+		string newtext = *cur;
+		newtext += "l";
+		cur->setText(newtext);
+		return true;
+	}
+
+	return false;
 }
 
 
