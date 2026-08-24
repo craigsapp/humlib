@@ -702,6 +702,48 @@ void Tool_1520ify::processFile(HumdrumFile& infile) {
 		i += 1;
 	}
 
+	// Refresh token/line relationships after structural edits so section-based
+	// voice counting sees correct line indexes.
+	infile.createLinesFromTokens();
+
+	// Populate !!!voices after labelled section comments have been created.
+	{
+		std::string voiceText = getVoicesReference(infile);
+
+		if (!voiceText.empty()) {
+			for (int li = 0; li < infile.getLineCount(); ++li) {
+				if (!infile[li].isReference()) {
+					continue;
+				}
+				HTp tok = infile.token(li, 0);
+				if (!tok) {
+					continue;
+				}
+				if (tok->compare(0, 10, "!!!voices:") != 0) {
+					continue;
+				}
+
+				std::string cur = tok->getText();
+				size_t colon = cur.find(':');
+				bool hasContent = false;
+				if (colon != std::string::npos) {
+					for (size_t p = colon + 1; p < cur.size(); ++p) {
+						if (!std::isspace(static_cast<unsigned char>(cur[p]))) {
+							hasContent = true;
+							break;
+						}
+					}
+				}
+
+				bool overwriteQ = (voiceText.find('-') != std::string::npos);
+				if (!hasContent || overwriteQ) {
+					tok->setText("!!!voices: " + voiceText);
+				}
+				break;
+			}
+		}
+	}
+
 	// Input lyrics may contain "=" signs which are to be converted into
 	// spaces in **text data, and into elisions when displaying with verovio.
 	Tool_shed shed;
@@ -1000,6 +1042,152 @@ bool Tool_1520ify::markPreviousNoteAsLong(HTp token, bool stopAtRest) {
 	}
 
 	return false;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_1520ify::getVoicesReference -- Return the !!!voices: value for the
+//    whole file.  Count only voices that have sounding attacks in each labelled
+//    internal section; if the section counts differ, report the min/max range
+//    such as "2-4".
+//
+
+std::string Tool_1520ify::getVoicesReference(HumdrumFile& infile) {
+	std::vector<HTp> kerns = infile.getKernSpineStartList();
+	if (kerns.empty()) {
+		return "";
+	}
+
+	auto isLabeledSectionBoundary = [&](int lineindex) -> bool {
+		if ((lineindex < 0) || (lineindex >= infile.getLineCount())) {
+			return false;
+		}
+		if (!infile[lineindex].isBarline()) {
+			return false;
+		}
+
+		bool doubleQ = false;
+		for (int j=0; j<infile[lineindex].getFieldCount(); ++j) {
+			HTp token = infile.token(lineindex, j);
+			if (token && token->find("||") != string::npos) {
+				doubleQ = true;
+				break;
+			}
+		}
+		if (!doubleQ) {
+			return false;
+		}
+
+		for (int i=lineindex + 1; i<infile.getLineCount(); ++i) {
+			if (infile[i].isTerminator()) {
+				return false;
+			}
+			if (infile[i].isBarline()) {
+				return false;
+			}
+			if (infile[i].isGlobalComment()) {
+				HTp token = infile.token(i, 0);
+				if (!token) {
+					continue;
+				}
+				if ((token->compare(0, 10, "!!section:") == 0) ||
+				    (token->compare(0, 7, "!!!OMD:") == 0)) {
+					return true;
+				}
+				continue;
+			}
+			if (infile[i].isLocalComment() || infile[i].isReference() ||
+			    infile[i].isInterpretation() || infile[i].isEmpty()) {
+				continue;
+			}
+			if (infile[i].isData()) {
+				return false;
+			}
+		}
+		return false;
+	};
+
+	std::vector<std::pair<int, int>> sections;
+	int startline = -1;
+	for (int i=0; i<infile.getLineCount(); ++i) {
+		if (infile[i].isData()) {
+			startline = i;
+			break;
+		}
+	}
+	if (startline < 0) {
+		return "";
+	}
+
+	for (int i=0; i<infile.getLineCount(); ++i) {
+		if (!isLabeledSectionBoundary(i)) {
+			continue;
+		}
+		sections.push_back(std::make_pair(startline, i));
+		for (int j=i + 1; j<infile.getLineCount(); ++j) {
+			if (infile[j].isData()) {
+				startline = j;
+				break;
+			}
+		}
+	}
+
+	int endline = -1;
+	for (int i=infile.getLineCount() - 1; i>=0; --i) {
+		if (infile[i].isData()) {
+			endline = i;
+			break;
+		}
+	}
+	if ((startline >= 0) && (endline >= startline)) {
+		sections.push_back(std::make_pair(startline, endline));
+	}
+
+	if (sections.empty()) {
+		return std::to_string((int)kerns.size());
+	}
+
+	int minVoices = (int)kerns.size();
+	int maxVoices = 0;
+
+	for (int i=0; i<(int)sections.size(); ++i) {
+		std::vector<bool> active(kerns.size(), false);
+		for (int line=sections[i].first; line<=sections[i].second; ++line) {
+			if (!infile[line].isData()) {
+				continue;
+			}
+			int kindex = 0;
+			for (int field=0; field<infile[line].getFieldCount(); ++field) {
+				HTp tok = infile.token(line, field);
+				if (!tok || !tok->isKern()) {
+					continue;
+				}
+				if (kindex >= (int)active.size()) {
+					break;
+				}
+				if (!tok->isNull() && !tok->isRest() && !tok->isSecondaryTiedNote()) {
+					active[kindex] = true;
+				}
+				kindex++;
+			}
+		}
+
+		int activeCount = 0;
+		for (int j=0; j<(int)active.size(); ++j) {
+			if (active[j]) {
+				activeCount++;
+			}
+		}
+		minVoices = std::min(minVoices, activeCount);
+		maxVoices = std::max(maxVoices, activeCount);
+	}
+
+	if (minVoices == maxVoices) {
+		return std::to_string(minVoices);
+	}
+	return std::to_string(minVoices) + "-" + std::to_string(maxVoices);
 }
 
 
@@ -1498,51 +1686,6 @@ void Tool_1520ify::addBibliographicRecords(HumdrumFile& infile) {
 	} else if (foundOPR) {
 	    infile.deleteLine(oprLine);
 	}
-
-	// --- Populate voices from number of **kern spines ---
-	{
-		// Count **kern spines
-		std::vector<HTp> kerns = infile.getKernSpineStartList();
-		int voiceCount = static_cast<int>(kerns.size());
-
-		if (voiceCount > 0) {
-			for (int li = 0; li < infile.getLineCount(); ++li) {
-				if (!infile[li].isReference()) {
-					continue;
-				}
-				HTp tok = infile.token(li, 0);
-				if (!tok) {
-					continue;
-				}
-
-				// Find the !!!voices: line
-				if (tok->compare(0, 10, "!!!voices:") != 0){
-					continue;
-				}
-
-				std::string cur = tok->getText();
-
-				// Check if there is already non-whitespace content after the colon
-				size_t colon = cur.find(':');
-				bool hasContent = false;
-				if (colon != std::string::npos) {
-					for (size_t p = colon + 1; p < cur.size(); ++p) {
-						if (!std::isspace(static_cast<unsigned char>(cur[p]))) {
-							hasContent = true;
-							break;
-						}
-					}
-				}
-
-				// Only auto-fill if it was effectively empty
-				if (!hasContent) {
-					tok->setText("!!!voices: " + std::to_string(voiceCount));
-				}
-				break; // done with voices
-			}
-		}
-	}
-
 
 	// --- Auto-fill AGN (genre + optional movement name) based on numeric id ---
 	
