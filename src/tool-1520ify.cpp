@@ -32,6 +32,234 @@ namespace hum {
 
 // START_MERGE
 
+//////////////////////////////
+//
+// getMetForMensurationLabel -- Convert text labels exported from notation
+//    programs into the corresponding mensuration interpretation.  These
+//    labels usually arrive in nearby LO:TX/comment material rather than as
+//    Humdrum interpretations, so they need to override the default *M mapping.
+//
+
+static std::string getMetForMensurationLabel(const std::string& text) {
+	static const std::vector<std::pair<std::string, std::string>> mappings = {
+		{"MenCircleOver3", "*met(O/3)"},
+		{"MenCutCircle3", "*met(O|3)"},
+		{"MenCircleDot", "*met(O.)"},
+		{"MenCutCDot", "*met(C.|)"},
+		{"MenReverseC", "*met(Cr)"},
+		{"Men3Over2", "*met(3/2)"},
+		{"MenCutCircle", "*met(O|)"},
+		{"MenCutC3", "*met(C|3)"},
+		{"MenCutC2", "*met(C|2)"},
+		{"MenCircle3", "*met(O3)"},
+		{"MenCircle2", "*met(O2)"},
+		{"MenCutC", "*met(C|)"},
+		{"MenCDot", "*met(C.)"},
+		{"MenC3", "*met(C3)"},
+		{"MenC2", "*met(C2)"},
+		{"MenCircle", "*met(O)"},
+		{"MenC", "*met(C)"},
+		{"Men3", "*met(3)"},
+		{"Men2", "*met(2)"}
+	};
+
+	for (const auto& mapping : mappings) {
+		size_t pos = text.find(mapping.first);
+		if (pos == std::string::npos) {
+			continue;
+		}
+		size_t end = pos + mapping.first.size();
+		if ((end < text.size()) && std::isalnum(static_cast<unsigned char>(text[end]))) {
+			continue;
+		}
+		return mapping.second;
+	}
+
+	return "";
+}
+
+
+//////////////////////////////
+//
+// getNearbyMensurationLabelMet -- Look below a mensuration line for a text
+//    label that specifies the actual mensuration sign.  Stop at music,
+//    barlines, or spine termination so a later section cannot affect the
+//    current mensuration block.
+//
+
+static std::string getNearbyMensurationLabelMet(HumdrumFile& infile, int mensline) {
+	for (int i=mensline + 1; i<infile.getLineCount(); ++i) {
+		if (infile[i].isData() || infile[i].isBarline() || infile[i].isTerminator()) {
+			break;
+		}
+		if (infile[i].isInterpretation()) {
+			continue;
+		}
+		if (!infile[i].isLocalComment() && !infile[i].isGlobalComment()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); ++j) {
+			HTp tok = infile.token(i, j);
+			if (!tok) {
+				continue;
+			}
+			std::string met = getMetForMensurationLabel(tok->getText());
+			if (!met.empty()) {
+				return met;
+			}
+		}
+	}
+
+	return "";
+}
+
+
+//////////////////////////////
+//
+// deleteNearbyMensurationLabel -- After a text mensuration label has been
+//    converted into *met(...), remove the source label so it is not rendered as
+//    redundant display text.  For local comments, only delete the whole line if
+//    all fields became empty comments.
+//
+
+static void deleteNearbyMensurationLabel(HumdrumFile& infile, int mensline) {
+	for (int i=mensline + 1; i<infile.getLineCount(); ++i) {
+		if (infile[i].isData() || infile[i].isBarline() || infile[i].isTerminator()) {
+			break;
+		}
+		if (infile[i].isInterpretation()) {
+			continue;
+		}
+		if (!infile[i].isLocalComment() && !infile[i].isGlobalComment()) {
+			continue;
+		}
+
+		bool changed = false;
+		for (int j=0; j<infile[i].getFieldCount(); ++j) {
+			HTp tok = infile.token(i, j);
+			if (!tok) {
+				continue;
+			}
+			if (getMetForMensurationLabel(tok->getText()).empty()) {
+				continue;
+			}
+			if (infile[i].isGlobalComment()) {
+				infile.deleteLine(i);
+				return;
+			}
+			tok->setText("!");
+			changed = true;
+		}
+
+		if (!changed) {
+			continue;
+		}
+
+		bool empty = true;
+		for (int j=0; j<infile[i].getFieldCount(); ++j) {
+			HTp tok = infile.token(i, j);
+			if (tok && (*tok != "!")) {
+				empty = false;
+				break;
+			}
+		}
+		if (empty) {
+			infile.deleteLine(i);
+		}
+		return;
+	}
+}
+
+
+//////////////////////////////
+//
+// applyMensurationLabelMetOverrides -- Replace an existing generated *met(...)
+//    line when a nearby text mensuration label gives a more specific sign than
+//    the default meter-based mapping.
+//
+
+static void applyMensurationLabelMetOverrides(HumdrumFile& infile) {
+	for (int i=0; i<infile.getLineCount(); ++i) {
+		if (!infile[i].isInterpretation()) {
+			continue;
+		}
+
+		bool hasMens = false;
+		for (int j=0; j<infile[i].getFieldCount(); ++j) {
+			HTp tok = infile.token(i, j);
+			if (tok && (tok->compare(0, 2, "*M") == 0)) {
+				hasMens = true;
+				break;
+			}
+		}
+		if (!hasMens) {
+			continue;
+		}
+
+		std::string labelMet = getNearbyMensurationLabelMet(infile, i);
+		if (labelMet.empty()) {
+			continue;
+		}
+
+		for (int j=i + 1; j<infile.getLineCount(); ++j) {
+			if (infile[j].isData() || infile[j].isBarline() || infile[j].isTerminator()) {
+				break;
+			}
+			if (!infile[j].isInterpretation()) {
+				continue;
+			}
+
+			bool hasMet = false;
+			for (int k=0; k<infile[j].getFieldCount(); ++k) {
+				HTp tok = infile.token(j, k);
+				if (tok && (tok->compare(0, 5, "*met(") == 0)) {
+					hasMet = true;
+					break;
+				}
+			}
+			if (!hasMet) {
+				continue;
+			}
+
+			for (int k=0; k<infile[j].getFieldCount(); ++k) {
+				HTp tok = infile.token(j, k);
+				if (tok && !tok->isNull()) {
+					tok->setText(labelMet);
+				}
+			}
+			deleteNearbyMensurationLabel(infile, i);
+			break;
+		}
+	}
+}
+
+
+//////////////////////////////
+//
+// getDefaultMetForMensuration -- Supply the standard *met(...) value for the
+//    mensuration signatures that are common in 1520s Project imports when no
+//    explicit text label is available.
+//
+
+static std::string getDefaultMetForMensuration(HTp token) {
+	if (!token || token->isNull()) {
+		return "";
+	}
+	if (*token == "*M2/1") {
+		return "*met(C|)";
+	}
+	if (*token == "*M3/1") {
+		return "*met(O)";
+	}
+	if (*token == "*M6/2") {
+		return "*met(C.)";
+	}
+	if (*token == "*M9/2") {
+		return "*met(O.)";
+	}
+	return "";
+}
+
 
 /////////////////////////////////
 //
@@ -238,29 +466,31 @@ void Tool_1520ify::processFile(HumdrumFile& infile) {
 		// If there is a mensuration line just above, use it to decide canonical *met(...)
 		int mensLine = i - 1;
 		if (mensLine >= 0 && infile[mensLine].isInterpretation()) {
+			std::string labelMet = getNearbyMensurationLabelMet(infile, mensLine);
 			for (int j = 0; j < infile[i].getFieldCount(); ++j) {
 				HTp metTok  = infile.token(i, j);
 				HTp mensTok = infile.token(mensLine, j);
 
-				// Default: leave non-*met tokens alone on this line
+				// Default: leave non-*met tokens alone on this line unless a
+				// mensuration label applies to the whole mensuration block.
 				if (!metTok || metTok->isNull()) {
 				    continue;
 				}
 
-				if (metTok->compare(0, 5, "*met(") != 0) {
+				if (labelMet.empty() && (metTok->compare(0, 5, "*met(") != 0)) {
 				    continue;
 				}
 
 				// Decide canonical met from the mensuration just above
 				const char* repl = "*";   // if we can’t decide, blank it
 
-				if (mensTok && !mensTok->isNull()) {
-				    if (*mensTok == "*M2/1") {
-				        repl = "*met(C|)";
-				    }
-				    else if (*mensTok == "*M3/1") {
-				        repl = "*met(O)";
-				    }
+				if (!labelMet.empty()) {
+					repl = labelMet.c_str();
+				} else {
+					std::string defaultMet = getDefaultMetForMensuration(mensTok);
+					if (!defaultMet.empty()) {
+						repl = defaultMet.c_str();
+					}
 				}
 				metTok->setText(repl);
 			}
@@ -331,21 +561,24 @@ void Tool_1520ify::processFile(HumdrumFile& infile) {
 			}
 		}
 
-		// Build a *met(...) line (post-normalization we only need to check *M2/1 and *M3/1)
+		// Build a *met(...) line for recognized mensuration signs.
 		std::string newline;
 		bool willInsert = false;
+		std::string labelMet = getNearbyMensurationLabelMet(infile, i);
 
 		for (int j = 0; j < infile[i].getFieldCount(); ++j) {
 			HTp tok = infile.token(i, j);
-			const char* out = "*";
+			std::string out = "*";
 			if (tok && !tok->isNull()) {
-				if (*tok == "*M2/1") { 
-					out = "*met(C|)"; 
+				if (!labelMet.empty() && (tok->compare(0, 2, "*M") == 0)) {
+					out = labelMet;
 					willInsert = true; 
-				}
-				else if (*tok == "*M3/1") { 
-					out = "*met(O)"; 
-					willInsert = true; 
+				} else {
+					std::string defaultMet = getDefaultMetForMensuration(tok);
+					if (!defaultMet.empty()) {
+						out = defaultMet;
+						willInsert = true;
+					}
 				}
 			}
 			newline += out;
@@ -359,6 +592,8 @@ void Tool_1520ify::processFile(HumdrumFile& infile) {
 			i++;  // skip the line we just inserted
 		}
 	}
+
+	applyMensurationLabelMetOverrides(infile);
 
 	// Convert LO:TX Section lines in-place to !!section and !!!OMD
 	for (int i = 0; i < infile.getLineCount(); ++i) {
