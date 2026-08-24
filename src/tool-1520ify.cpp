@@ -261,6 +261,64 @@ static std::string getDefaultMetForMensuration(HTp token) {
 }
 
 
+//////////////////////////////
+//
+// addMeasureNumberToBarlineToken -- Add a barnum -a style number to ordinary
+//    barline tokens while preserving non-digit styling characters.  Final
+//    barlines are handled by the caller and are left unnumbered.
+//
+
+static std::string addMeasureNumberToBarlineToken(const std::string& text, int number) {
+	std::string output;
+	for (int i=0; i<(int)text.size(); ++i) {
+		if ((text[i] == '=') && ((i + 1 >= (int)text.size()) || (text[i + 1] != '='))) {
+			output += '=';
+			output += std::to_string(number);
+		} else if (!std::isdigit(static_cast<unsigned char>(text[i]))) {
+			output += text[i];
+		}
+	}
+	return output;
+}
+
+
+//////////////////////////////
+//
+// addAllMeasureNumbers -- Number all non-final barlines from the start of the
+//    file.  This mirrors the cleanup normally done with barnum -a, but keeps
+//    final double barlines unchanged.
+//
+
+static void addAllMeasureNumbers(HumdrumFile& infile) {
+	int number = 1;
+	for (int i=0; i<infile.getLineCount(); ++i) {
+		if (!infile[i].isBarline()) {
+			continue;
+		}
+
+		bool finalQ = false;
+		for (int j=0; j<infile[i].getFieldCount(); ++j) {
+			HTp tok = infile.token(i, j);
+			if (tok && (tok->find("==") != std::string::npos)) {
+				finalQ = true;
+				break;
+			}
+		}
+		if (finalQ) {
+			continue;
+		}
+
+		for (int j=0; j<infile[i].getFieldCount(); ++j) {
+			HTp tok = infile.token(i, j);
+			if (tok) {
+				tok->setText(addMeasureNumberToBarlineToken(tok->getText(), number));
+			}
+		}
+		number++;
+	}
+}
+
+
 /////////////////////////////////
 //
 // Tool_1520ify::Tool_1520ify -- Set the recognized options for the tool.
@@ -655,6 +713,8 @@ void Tool_1520ify::processFile(HumdrumFile& infile) {
 	argv.push_back("s/=/ /g");
 	shed.process(argv);
 	shed.run(infile);
+
+	addAllMeasureNumbers(infile);
 }
 
 
