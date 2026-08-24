@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <chrono>
 #include <iomanip>
+#include <sstream>
 
 // include filesystem for grabbing the filename
 #include <filesystem>
@@ -31,6 +32,78 @@ using namespace std;
 namespace hum {
 
 // START_MERGE
+
+//////////////////////////////
+//
+// splitEncoderDate -- The 1520s Project workflow has often stored the encoder
+//    name and encoding date together in !!!ENC:.  Keep !!!ENC: for the person
+//    and move the trailing date to !!!END:, without replacing a non-empty
+//    !!!END: record that is already present.
+//
+
+static void splitEncoderDate(HumdrumFile& infile) {
+	HumRegex hre;
+	int encLine = -1;
+	int endLine = -1;
+	std::string encoder;
+	std::string endDate;
+
+	for (int i=0; i<infile.getLineCount(); ++i) {
+		if (!infile[i].isReference()) {
+			continue;
+		}
+		HTp tok = infile.token(i, 0);
+		if (!tok) {
+			continue;
+		}
+		if ((encLine < 0) && (tok->compare(0, 7, "!!!ENC:") == 0)) {
+			std::string text = tok->getText().substr(7);
+			while (!text.empty() && std::isspace(static_cast<unsigned char>(text.front()))) {
+				text.erase(text.begin());
+			}
+			while (!text.empty() && std::isspace(static_cast<unsigned char>(text.back()))) {
+				text.pop_back();
+			}
+			if (hre.search(text, "^(.+?)\\s+((?:\\d{4}/\\d{1,2}/\\d{1,2})|(?:\\d{1,2}-\\d{1,2}-\\d{4}))/?$")) {
+				encoder = hre.getMatch(1);
+				endDate = hre.getMatch(2);
+				encLine = i;
+			}
+		} else if ((endLine < 0) && (tok->compare(0, 7, "!!!END:") == 0)) {
+			endLine = i;
+		}
+	}
+
+	if (encLine < 0) {
+		return;
+	}
+
+	while (!encoder.empty() && std::isspace(static_cast<unsigned char>(encoder.back()))) {
+		encoder.pop_back();
+	}
+	infile.token(encLine, 0)->setText("!!!ENC: " + encoder);
+
+	if (endLine >= 0) {
+		HTp tok = infile.token(endLine, 0);
+		std::string text = tok ? tok->getText() : "";
+		size_t colon = text.find(':');
+		bool hasContent = false;
+		if (colon != std::string::npos) {
+			for (size_t p=colon + 1; p<text.size(); ++p) {
+				if (!std::isspace(static_cast<unsigned char>(text[p]))) {
+					hasContent = true;
+					break;
+				}
+			}
+		}
+		if (!hasContent && tok) {
+			tok->setText("!!!END: " + endDate);
+		}
+	} else {
+		infile.insertLine(encLine + 1, "!!!END: " + endDate);
+	}
+}
+
 
 //////////////////////////////
 //
@@ -236,33 +309,6 @@ static void applyMensurationLabelMetOverrides(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// getDefaultMetForMensuration -- Supply the standard *met(...) value for the
-//    mensuration signatures that are common in 1520s Project imports when no
-//    explicit text label is available.
-//
-
-static std::string getDefaultMetForMensuration(HTp token) {
-	if (!token || token->isNull()) {
-		return "";
-	}
-	if (*token == "*M2/1") {
-		return "*met(C|)";
-	}
-	if (*token == "*M3/1") {
-		return "*met(O)";
-	}
-	if (*token == "*M6/2") {
-		return "*met(C.)";
-	}
-	if (*token == "*M9/2") {
-		return "*met(O.)";
-	}
-	return "";
-}
-
-
-//////////////////////////////
-//
 // addMeasureNumberToBarlineToken -- Add a barnum -a style number to ordinary
 //    barline tokens while preserving non-digit styling characters.  Final
 //    barlines are handled by the caller and are left unnumbered.
@@ -316,6 +362,178 @@ static void addAllMeasureNumbers(HumdrumFile& infile) {
 		}
 		number++;
 	}
+}
+
+
+//////////////////////////////
+//
+// getDefaultMetForMensuration -- Supply the standard *met(...) value for the
+//    mensuration signatures that are common in 1520s Project imports when no
+//    explicit text label is available.
+//
+
+static std::string getDefaultMetForMensuration(HTp token) {
+	if (!token || token->isNull()) {
+		return "";
+	}
+	if (*token == "*M2/1") {
+		return "*met(C|)";
+	}
+	if (*token == "*M3/1") {
+		return "*met(O)";
+	}
+	if (*token == "*M6/2") {
+		return "*met(C.)";
+	}
+	if (*token == "*M9/2") {
+		return "*met(O.)";
+	}
+	return "";
+}
+
+
+//////////////////////////////
+//
+// hasNonemptyReference -- True when a reference record exists and has content
+//    after the colon.  Used before choosing defaults that depend on whether
+//    title/opera metadata is actually present.
+//
+
+static bool hasNonemptyReference(HumdrumFile& infile, const std::string& key) {
+	std::string prefix = "!!!" + key + ":";
+	for (int i=0; i<infile.getLineCount(); ++i) {
+		if (!infile[i].isReference()) {
+			continue;
+		}
+		HTp tok = infile.token(i, 0);
+		if (!tok || (tok->compare(0, prefix.size(), prefix) != 0)) {
+			continue;
+		}
+		std::string text = tok->getText();
+		size_t colon = text.find(':');
+		if (colon == std::string::npos) {
+			return false;
+		}
+		for (size_t p=colon + 1; p<text.size(); ++p) {
+			if (!std::isspace(static_cast<unsigned char>(text[p]))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	return false;
+}
+
+
+//////////////////////////////
+//
+// hasMuse2psRecord -- Check for an existing muse2ps layout comment so the
+//    filter does not add duplicate spacing instructions.
+//
+
+static bool hasMuse2psRecord(HumdrumFile& infile) {
+	for (int i=0; i<infile.getLineCount(); ++i) {
+		if (!infile[i].isGlobalComment()) {
+			continue;
+		}
+		HTp tok = infile.token(i, 0);
+		if (tok && (tok->compare(0, 10, "!!muse2ps:") == 0)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+
+//////////////////////////////
+//
+// hasTextSpines -- Texted scores need slightly different muse2ps spacing from
+//    untexted scores, since **text spines change the vertical layout.
+//
+
+static bool hasTextSpines(HumdrumFile& infile) {
+	for (int i=0; i<infile.getLineCount(); ++i) {
+		if (!infile[i].isExclusive()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); ++j) {
+			HTp tok = infile.token(i, j);
+			if (tok && (*tok == "**text")) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+
+//////////////////////////////
+//
+// getMuse2psSpacing -- Return the 1520s Project default muse2ps spacing string
+//    for the current number of voices, with separate defaults for texted and
+//    untexted scores.
+//
+
+static std::string getMuse2psSpacing(int voices, bool texted) {
+	if (texted) {
+		if (voices == 3) {
+			return "i2I150v90,90,120c122z18l2700t130";
+		}
+		if (voices == 4) {
+			return "i2I150v90,90,90,120c122z18l2700t130";
+		}
+		if (voices == 5) {
+			return "i2I150v75,75,75,75,110c122z18l2780t100";
+		}
+		if (voices == 6) {
+			return "i2I150v85,85,85,85,85,100z18l2550t200c122";
+		}
+		return "";
+	}
+
+	if (voices == 3) {
+		return "i2I150v90,90,120c120z18l2770t130";
+	}
+	if (voices == 4) {
+		return "i2I150v90,90,90,120c120z18l2770t130";
+	}
+	if (voices == 5) {
+		return "i2I150v90,90,90,90,120c120z18l2770t130";
+	}
+	if (voices == 6) {
+		return "i2I150v85,85,85,85,85,100z18l2550t200c122";
+	}
+
+	return "";
+}
+
+
+//////////////////////////////
+//
+// addMuse2psRecord -- Add a project-default muse2ps layout line when one is
+//    absent and the voice count has a known spacing profile.
+//
+
+static void addMuse2psRecord(HumdrumFile& infile) {
+	if (hasMuse2psRecord(infile)) {
+		return;
+	}
+
+	int voices = (int)infile.getKernSpineStartList().size();
+	std::string spacing = getMuse2psSpacing(voices, hasTextSpines(infile));
+	if (spacing.empty()) {
+		return;
+	}
+
+	std::string prefix = "C^@{COM}^";
+	if (hasNonemptyReference(infile, "OPR")) {
+		prefix = "T^@{OPR}^u^@{ONM}{. }@{OTL}^C^@{COM}^";
+	}
+
+	infile.appendLine("!!muse2ps: " + prefix + spacing);
 }
 
 
@@ -1493,6 +1711,17 @@ void Tool_1520ify::addBibliographicRecords(HumdrumFile& infile) {
 		}
 	}
 
+	if (!basename.empty()) {
+		size_t dot = basename.find_last_of('.');
+		if ((dot != std::string::npos) && (basename.substr(dot) == ".krn")) {
+			// already in the desired form
+		} else if (dot != std::string::npos) {
+			basename = basename.substr(0, dot) + ".krn";
+		} else {
+			basename += ".krn";
+		}
+	}
+
 	// Build the segment line
 	std::string segmentLine = "!!!!SEGMENT: " + basename;
 
@@ -1953,6 +2182,8 @@ void Tool_1520ify::addBibliographicRecords(HumdrumFile& infile) {
 		infile.appendLine(line);
 	}
 
+	splitEncoderDate(infile);
+
 	// --- Remove !!!SMS: if it contains no content ---
 	{
 	    for (int li = 0; li < infile.getLineCount(); ++li) {
@@ -1989,6 +2220,8 @@ void Tool_1520ify::addBibliographicRecords(HumdrumFile& infile) {
 	        }
 	    }
 	}
+
+	addMuse2psRecord(infile);
 }
 
 
