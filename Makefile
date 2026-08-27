@@ -612,8 +612,8 @@ GridMeasure.o: GridMeasure.cpp HumGrid.h \
   HumSignifier.h HumdrumLine.h HumdrumToken.h \
   HumNum.h HumAddress.h HumHash.h \
   HumParamSet.h GridSlice.h MxmlPart.h \
-  MxmlMeasure.h pugixml/ \
-  pugixml/ GridPart.h GridStaff.h \
+  MxmlMeasure.h \
+  GridPart.h GridStaff.h \
   GridSide.h GridVoice.h
 
 GridPart.o: GridPart.cpp GridPart.h GridStaff.h \
@@ -628,8 +628,8 @@ GridSide.o: GridSide.cpp HumGrid.h GridMeasure.h \
   HumSignifier.h HumdrumLine.h HumdrumToken.h \
   HumNum.h HumAddress.h HumHash.h \
   HumParamSet.h GridSlice.h MxmlPart.h \
-  MxmlMeasure.h pugixml/ \
-  pugixml/ GridPart.h GridStaff.h \
+  MxmlMeasure.h \
+  GridPart.h GridStaff.h \
   GridSide.h GridVoice.h
 
 GridSlice.o: GridSlice.cpp GridPart.h GridStaff.h \
@@ -641,7 +641,7 @@ GridSlice.o: GridSlice.cpp GridPart.h GridStaff.h \
   HumdrumFileBase.h HumSignifiers.h \
   HumSignifier.h HumdrumLine.h GridSlice.h \
   MxmlPart.h MxmlMeasure.h \
-  pugixml/ pugixml/
+  
 
 GridStaff.o: GridStaff.cpp HumGrid.h GridMeasure.h \
   GridCommon.h HumdrumFile.h \
@@ -650,8 +650,8 @@ GridStaff.o: GridStaff.cpp HumGrid.h GridMeasure.h \
   HumSignifier.h HumdrumLine.h HumdrumToken.h \
   HumNum.h HumAddress.h HumHash.h \
   HumParamSet.h GridSlice.h MxmlPart.h \
-  MxmlMeasure.h pugixml/ \
-  pugixml/ GridPart.h GridStaff.h \
+  MxmlMeasure.h \
+  GridPart.h GridStaff.h \
   GridSide.h GridVoice.h HumRegex.h
 
 GridVoice.o: GridVoice.cpp GridVoice.h HumdrumToken.h \
@@ -863,8 +863,8 @@ HumGrid.o: HumGrid.cpp HumGrid.h GridMeasure.h \
   HumSignifier.h HumdrumLine.h HumdrumToken.h \
   HumNum.h HumAddress.h HumHash.h \
   HumParamSet.h GridSlice.h MxmlPart.h \
-  MxmlMeasure.h pugixml/ \
-  pugixml/ GridPart.h GridStaff.h \
+  MxmlMeasure.h \
+  GridPart.h GridStaff.h \
   GridSide.h GridVoice.h Convert.h
 
 HumHash.o: HumHash.cpp Convert.h HumNum.h \
@@ -977,16 +977,16 @@ MuseRecordBasic.o: MuseRecordBasic.cpp MuseRecordBasic.h \
 MxmlEvent.o: MxmlEvent.cpp Convert.h HumNum.h \
   HumdrumToken.h HumAddress.h HumHash.h \
   HumParamSet.h MxmlEvent.h GridCommon.h \
-  pugixml/ pugixml/ \
+  \
   MxmlMeasure.h MxmlPart.h
 
 MxmlMeasure.o: MxmlMeasure.cpp MxmlEvent.h \
-  GridCommon.h HumNum.h pugixml/ \
-  pugixml/ MxmlMeasure.h MxmlPart.h
+  GridCommon.h HumNum.h \
+  MxmlMeasure.h MxmlPart.h
 
 MxmlPart.o: MxmlPart.cpp MxmlMeasure.h GridCommon.h \
-  HumNum.h pugixml/ \
-  pugixml/ MxmlPart.h
+  HumNum.h \
+  MxmlPart.h
 
 NoteCell.o: NoteCell.cpp Convert.h HumNum.h \
   HumdrumToken.h HumAddress.h HumHash.h \
@@ -1306,7 +1306,7 @@ tool-filter.o: tool-filter.cpp tool-filter.h \
   tool-humtr.h tool-imitation.h tool-instinfo.h \
   tool-kern2mens.h tool-kernify.h \
   tool-kernview.h tool-mei2hum.h \
-  pugixml/ pugixml/ \
+  \
   MxmlPart.h MxmlMeasure.h GridCommon.h \
   MxmlEvent.h HumGrid.h GridMeasure.h \
   GridSlice.h GridPart.h GridStaff.h \
@@ -1514,7 +1514,7 @@ tool-mei2hum.o: tool-mei2hum.cpp tool-mei2hum.h \
   HumSignifiers.h HumSignifier.h HumdrumLine.h \
   HumdrumToken.h HumNum.h HumAddress.h \
   HumHash.h HumParamSet.h HumdrumFileStream.h \
-  pugixml/ pugixml/ \
+  \
   MxmlPart.h MxmlMeasure.h GridCommon.h \
   MxmlEvent.h HumGrid.h GridMeasure.h \
   GridSlice.h GridPart.h GridStaff.h \
@@ -1595,8 +1595,8 @@ tool-musedata2hum.o: tool-musedata2hum.cpp \
   HumSignifiers.h HumSignifier.h HumdrumLine.h \
   HumdrumFileStream.h HumGrid.h GridMeasure.h \
   GridCommon.h GridSlice.h MxmlPart.h \
-  MxmlMeasure.h pugixml/ \
-  pugixml/ GridPart.h GridStaff.h \
+  MxmlMeasure.h \
+  GridPart.h GridStaff.h \
   GridSide.h tool-trillspell.h Convert.h
 
 tool-musicxml2hum.o: tool-musicxml2hum.cpp tool-autobeam.h \
@@ -1607,7 +1607,7 @@ tool-musicxml2hum.o: tool-musicxml2hum.cpp tool-autobeam.h \
   HumdrumToken.h HumNum.h HumAddress.h \
   HumHash.h HumParamSet.h HumdrumFileStream.h \
   tool-chord.h tool-musicxml2hum.h \
-  pugixml/ pugixml/ \
+  \
   MxmlPart.h MxmlMeasure.h GridCommon.h \
   MxmlEvent.h HumGrid.h GridMeasure.h \
   GridSlice.h GridPart.h GridStaff.h \
@@ -1666,8 +1666,8 @@ tool-periodicity.o: tool-periodicity.cpp tool-periodicity.h \
   HumSignifiers.h HumSignifier.h HumdrumLine.h \
   HumdrumToken.h HumNum.h HumAddress.h \
   HumHash.h HumParamSet.h HumdrumFileStream.h \
-  Convert.h pugixml/ \
-  pugixml/
+  Convert.h \
+  
 
 tool-phrase.o: tool-phrase.cpp tool-phrase.h \
   HumTool.h Options.h HumdrumFileSet.h \
@@ -1821,8 +1821,8 @@ tool-simat.o: tool-simat.cpp tool-simat.h HumTool.h \
   HumSignifier.h HumdrumLine.h HumdrumToken.h \
   HumNum.h HumAddress.h HumHash.h \
   HumParamSet.h HumdrumFileStream.h Convert.h \
-  HumRegex.h pugixml/ \
-  pugixml/
+  HumRegex.h \
+  
 
 tool-slurcheck.o: tool-slurcheck.cpp tool-slurcheck.h \
   HumTool.h Options.h HumdrumFileSet.h \
