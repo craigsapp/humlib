@@ -19,6 +19,7 @@
 // #include <algorithm>
 #include <map>
 #include <ostream>
+#include <regex>
 #include <set>
 #include <string>
 #include <tuple>
@@ -35,12 +36,14 @@ class Tool_autocadence : public HumTool {
 			std::string m_funcU;
 			std::string m_name;
 			std::string m_regex;
+			std::regex  m_compiled;
 			void setDefinition(const std::string& funcL, const std::string& funcU,
 					const std::string& name, const std::string& regex) {
 				m_funcL = funcL;
 				m_funcU = funcU;
 				m_name = name;
 				m_regex = regex;
+				m_compiled.assign(regex);
 				// int count = std::count(text.begin(), text.end(), target);
 			}
 	};
@@ -127,6 +130,7 @@ class Tool_autocadence : public HumTool {
 		bool        hasNoEnsuingSuspension     (HumdrumFile& infile, int index);
 		bool        hasPreviousMajorSonority   (int index);
 		bool        hasLeadingToneToRoot       (HumdrumFile& infile, int index);
+		int         arrivalRootPitchClass      (HumdrumFile& infile, int index);
 		bool        isUppercaseRootObservation (const std::string& root);
 		int         rootObservationToPitchClass(const std::string& root);
 		bool        isSuspensionLabel          (const std::string& label);
