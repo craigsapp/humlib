@@ -3106,7 +3106,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/* 131 */ addCadenceDefinition("z", "y",	"zy1",	R"(^(?:R_1|-?\d+_-?[^1]):1, -2_1:-2, -3_1:1, -3_R:R, R_)");
 	/* 132 */ addCadenceDefinition("z", "y",	"zy2",	R"(^(?:R_1|-?\d+_-?[^1]):1, -2_1:-2, -3_R:R, R_)");
 	/* 133 */ addCadenceDefinition("t", "y",	"ty1",	R"(^(?:R_1|-?\d+_-?[^1]):1, 7_1:-2, 6_(?!-2:)-?\d+:R, R_)");
-	/* 133 */ addCadenceDefinition("t", "y",	"ty1",	R"(^(?:R_1|-?\d+_-?[^1]):1, -2_1:-2, -3_2:R, R_)");
+	/* 133 */ addCadenceDefinition("t", "y",	"ty2",	R"(^(?:R_1|-?\d+_-?[^1]):1, -2_1:-2, -3_2:R, R_)");
 }
 
 
@@ -3142,6 +3142,8 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("ATz",  "Altizans");// Phrygian
 	m_cadenceLabels.emplace("BC",   "Authentic");
 	m_cadenceLabels.emplace("BCT",  "Authentic");
+	m_cadenceLabels.emplace("BCTt", "Authentic");
+	m_cadenceLabels.emplace("BCTtu","Authentic");
 	m_cadenceLabels.emplace("BCTu", "Authentic");
 	m_cadenceLabels.emplace("BCt",  "Authentic");
 	m_cadenceLabels.emplace("BCtz", "Authentic");
