@@ -72,6 +72,7 @@
 #include "tool-pbar.h"
 #include "tool-phrase.h"
 #include "tool-pline.h"
+#include "tool-pliner.h"
 #include "tool-prange.h"
 #include "tool-recip.h"
 #include "tool-restfill.h"
@@ -94,6 +95,7 @@
 #include "tool-tassoize.h"
 #include "tool-text.h"
 #include "tool-textdur.h"
+#include "tool-textract.h"
 #include "tool-thru.h"
 #include "tool-tie.h"
 #include "tool-timebase.h"
@@ -356,6 +358,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(phrase, infile, commands[i].second, status);
 		} else if (commands[i].first == "pline") {
 			RUNTOOL(pline, infile, commands[i].second, status);
+		} else if (commands[i].first == "pliner") {
+			RUNTOOL(pliner, infile, commands[i].second, status);
 		} else if (commands[i].first == "prange") {
 			RUNTOOL(prange, infile, commands[i].second, status);
 		} else if (commands[i].first == "recip") {
@@ -402,6 +406,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(text, infile, commands[i].second, status);
 		} else if (commands[i].first == "textdur") {
 			RUNTOOL(textdur, infile, commands[i].second, status);
+		} else if (commands[i].first == "textract") {
+			RUNTOOL(textract, infile, commands[i].second, status);
 		} else if (commands[i].first == "tie") {
 			RUNTOOL(tie, infile, commands[i].second, status);
 		} else if (commands[i].first == "triad") {

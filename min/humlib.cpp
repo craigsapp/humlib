@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Sep 11 15:17:31 CEST 2026
+// Last Modified: Fri Sep 11 17:48:07 CEST 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -96206,6 +96206,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(phrase, infile, commands[i].second, status);
 		} else if (commands[i].first == "pline") {
 			RUNTOOL(pline, infile, commands[i].second, status);
+		} else if (commands[i].first == "pliner") {
+			RUNTOOL(pliner, infile, commands[i].second, status);
 		} else if (commands[i].first == "prange") {
 			RUNTOOL(prange, infile, commands[i].second, status);
 		} else if (commands[i].first == "recip") {
@@ -96252,6 +96254,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(text, infile, commands[i].second, status);
 		} else if (commands[i].first == "textdur") {
 			RUNTOOL(textdur, infile, commands[i].second, status);
+		} else if (commands[i].first == "textract") {
+			RUNTOOL(textract, infile, commands[i].second, status);
 		} else if (commands[i].first == "tie") {
 			RUNTOOL(tie, infile, commands[i].second, status);
 		} else if (commands[i].first == "triad") {
