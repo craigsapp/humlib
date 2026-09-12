@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Sep 12 22:05:30 CEST 2026
+// Last Modified: Sat Sep 12 23:39:32 CEST 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -87334,6 +87334,13 @@ RECONSIDER:
 			ternAgent = true;
 		}
 
+		// Eighth-note potential agent approached and left by step down at the
+		// same moment as the potential patient: do not label as g/s (passing
+		// motion rather than suspension agent; e.g. Trm1688d m.27).
+		bool pairedDescendingEighthAgent =
+			(intp == -1) && (dur == 0.5) && (intn == -1) &&
+			(oattackindexn >= 0) && (attackindexn == oattackindexn);
+
 		// Do not overwrite fake-suspension labels with weaker dissonance types.
 		bool keepFakeSus =
 			(results[vindex][lineindex] == m_labels[FAKE_SUSPENSION_STEP]) ||
@@ -87410,7 +87417,8 @@ RECONSIDER:
 		//// Code to apply binary or ternary suspension and agent labels and
 		//// also suspension ornament and chanson idiom labels
 
-		else if (valid_sus_acc && ((ointn == -1) || ((ointn == -2) && (ointnn == 1)))) {
+		else if ((!pairedDescendingEighthAgent) && valid_sus_acc &&
+				((ointn == -1) || ((ointn == -2) && (ointnn == 1)))) {
 			if ((durpp == 1) && (durp == 1) && (intpp == -1) && (intp == 1) &&
 					((results[vindex][lineindexpp] == m_labels[THIRD_Q_PASS_DOWN]) ||
 					(results[vindex][lineindexpp] == m_labels[ACC_PASSING_DOWN]) ||
@@ -87434,7 +87442,8 @@ RECONSIDER:
 				results[vindex][lineindex] = m_labels[AGENT_BIN];
 				results[ovoiceindex][lineindex] = m_labels[SUS_BIN];
 			}
-		} else if (valid_ornam_sus_acc && ((ointn == 0) && (ointnn == -1))) {
+		} else if ((!pairedDescendingEighthAgent) && valid_ornam_sus_acc &&
+				((ointn == 0) && (ointnn == -1))) {
 			if ((durpp == 1) && (durp == 1) && (intpp == -1) && (intp == 1) &&
 					((results[vindex][lineindexpp] == m_labels[THIRD_Q_PASS_DOWN]) ||
 					(results[vindex][lineindexpp] == m_labels[ACC_PASSING_DOWN]) ||
@@ -87450,7 +87459,8 @@ RECONSIDER:
 				results[ovoiceindex][lineindex] = m_labels[SUS_BIN];
 			} // repeated-note of suspension
 			results[ovoiceindex][olineindexn] = m_labels[SUSPENSION_REP];
-		} else if (valid_ornam_sus_acc && ((ointn == 1) && (ointnn == -2))) {
+		} else if ((!pairedDescendingEighthAgent) && valid_ornam_sus_acc &&
+				((ointn == 1) && (ointnn == -2))) {
 			if ((durpp == 1) && (durp == 1) && (intpp == -1) && (intp == 1) &&
 					((results[vindex][lineindexpp] == m_labels[THIRD_Q_PASS_DOWN]) ||
 					(results[vindex][lineindexpp] == m_labels[ACC_PASSING_DOWN]) ||
@@ -87486,13 +87496,15 @@ RECONSIDER:
 
 		// Decide whether to give an unexplained dissonance label to the ref.
 		// voice if none of the dissonant conditions above apply.
-		// Lower notes of dissonant fourths do not get unexplained labels.
+		// Lower notes of dissonant fourths do not get unexplained labels,
+		// except when a paired descending-eighth agent was refused g/s so a
+		// later pass can still identify an accented passing tone.
 		bool refLeaptTo = fabs(intp) > 1 ? true : false;
 		bool othLeaptTo = fabs(ointp) > 1 ? true : false;
 		bool refLeaptFrom = fabs(intn) > 1 ? true : false;
 		bool othLeaptFrom = fabs(ointn) > 1 ? true : false;
 
-		if ((!lowerOfDissFourth) &&
+		if (((!lowerOfDissFourth) || pairedDescendingEighthAgent) &&
 				(results[vindex][lineindex] == "") && // this voice doesn't already have a dissonance label
 				((olineindexc < lineindex) || // other voice does not attack at this point
 				((olineindexc == lineindex) && (dur < odur)) || // both voices attack together, but ref voice leaves dissonance first
