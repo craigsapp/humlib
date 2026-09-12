@@ -6217,6 +6217,7 @@ class Tool_autocadence : public HumTool {
 		void        searchIntervalSequences    (void);
 		void        printScore                 (HumdrumFile& infile);
 		void        printMatchCount            (void);
+		void        printCadenceTable          (void);
 		void        markupScore                (HumdrumFile& infile);
 		void        addMatchToScore            (HumdrumFile& infile, int matchIndex);
 		int         getRegexSliceCount         (const std::string& regex);
@@ -6360,6 +6361,7 @@ class Tool_autocadence : public HumTool {
 		bool m_lowestQ                  = false; // -l: use lowest note to define suspensions instead of dissonance analysis
 		bool m_repeatQ                  = false; // -r: allow repeated notes
 		bool m_infoQ                    = false; // -i print info only
+		bool m_tableQ                   = false; // -t: print cadence-type count table
 		bool m_fileQ                    = false; // -f print filename info
 		bool m_lastQ                    = false;  // -L
 		bool m_markupQ                  = false; // -M
@@ -6368,6 +6370,7 @@ class Tool_autocadence : public HumTool {
 		bool m_triadQ                   = false; // -q|--root
 
 		int         m_cadenceCount = 0;
+		std::map<std::string, int> m_cadenceTypeCounts;
 		std::string m_marker = "@";
 		std::string m_suspensionMarker = "N";
 		std::string m_suspensionColor  = "crimson";

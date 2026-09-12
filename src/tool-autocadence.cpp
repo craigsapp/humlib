@@ -277,6 +277,7 @@ Tool_autocadence::Tool_autocadence(void) {
 	define("color=s:dodgerblue",         "Color cadence formula notes with given color");
 	define("count|match-count=b",        "Return number of cadence formulas that match");
 	define("i|info=b",                   "Show only information not score");
+	define("t|cadence-table=b",          "Show a table of the counts of each cadence label");
 
 	define("M|analytic-markup|markup=b", "Show melodic interval to last note");
 	define("L|last-melody=b",            "Show melodic interval to last note");
@@ -354,6 +355,7 @@ void Tool_autocadence::initialize(void) {
 	m_showFormulaIndexQ        =  getBoolean("show-formula-index");
 	m_repeatQ                  =  getBoolean("repeat");
 	m_infoQ                    =  getBoolean("info");
+	m_tableQ                   =  getBoolean("cadence-table");
 	m_lowestQ                  =  getBoolean("lowest");
 	m_showSuspensionsQ         = !getBoolean("do-not-show-suspensions");
 	m_markupQ                  =  getBoolean("analytic-markup");
@@ -385,6 +387,7 @@ void Tool_autocadence::initialize(void) {
 
 void Tool_autocadence::processFile(HumdrumFile& infile) {
 	m_info.str("");
+	m_cadenceTypeCounts.clear();
 	m_barnum = infile.getMeasureNumbers();
 	m_root.resize(infile.getLineCount());
 
@@ -436,6 +439,11 @@ void Tool_autocadence::processFile(HumdrumFile& infile) {
 	// markup score with matches and CVF
 	markupScore(infile);
 	printScore(infile);
+	if (m_tableQ) {
+		// Cadence-type counts are collected while printing the score.
+		printCadenceTable();
+		return;
+	}
 
 	if (m_infoQ) {
 		m_humdrum_text.str("");
@@ -1086,6 +1094,33 @@ void Tool_autocadence::printMatchCount(void) {
 
 //////////////////////////////
 //
+// Tool_autocadence::printCadenceTable -- Print cadence-label counts
+//      sorted by count descending.  Only labels that occur at least once
+//      are listed.
+//
+
+void Tool_autocadence::printCadenceTable(void) {
+	vector<pair<string, int>> rows(m_cadenceTypeCounts.begin(),
+			m_cadenceTypeCounts.end());
+	sort(rows.begin(), rows.end(),
+			[](const pair<string, int>& a, const pair<string, int>& b) {
+				if (a.second != b.second) {
+					return a.second > b.second;
+				}
+				return a.first < b.first;
+			});
+
+	m_humdrum_text.str("");
+	m_humdrum_text << "Count\tCadence Type" << endl;
+	for (int i=0; i<(int)rows.size(); i++) {
+		m_humdrum_text << rows[i].second << "\t" << rows[i].first << endl;
+	}
+}
+
+
+
+//////////////////////////////
+//
 // Tool_autocadence::searchIntervalSequences --
 //
 //
@@ -1713,11 +1748,17 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 			infolabel = "Phrygian " + infolabel;
 		}
 		cadenceline << cadence;
+		if (m_tableQ) {
+			m_cadenceTypeCounts[infolabel]++;
+		}
 		if (m_infoQ) {
 			m_info << "cvf=" << slabel << "\tcadence=" << infolabel << "\\nZZZ" << "\tM=" << m_barnum.at(index) << "\tfile=" << infile.getFilename() << endl;
 		}
 	} else if (meetsAuthenticBCriteria(infile, index)) {
 		cadenceline << "!!LO:TX:a:B:rj:color=red:cadence:t=AuthenticB";
+		if (m_tableQ) {
+			m_cadenceTypeCounts["AuthenticB"]++;
+		}
 		if (m_infoQ) {
 			m_info << "cvf=\tcadence=AuthenticB\\nZZZ" << "\tM=" << m_barnum.at(index) << "\tfile=" << infile.getFilename() << endl;
 		}
