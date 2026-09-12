@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Sep 13 00:57:49 CEST 2026
+// Last Modified: Sun Sep 13 01:17:05 CEST 2026
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -2054,6 +2054,7 @@ class HumdrumFileBase : public HumHash {
 		bool          isStructureAnalyzed      (void);
 		bool          isRhythmAnalyzed         (void);
 		bool          areStrandsAnalyzed       (void);
+		bool          areNullTokensAnalyzed    (void);
 		bool          areStrophesAnalyzed      (void);
 		void          setFilenameFromSegment   (void);
 
@@ -2430,7 +2431,8 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		int           tpq                          (void);
 		int           getTpq                       (void) { return tpq(); }
 
-		void          resolveNullTokens (void);
+		void          resolveNullTokens    (void);
+		void          invalidateNullTokens (void);
 
 		// strand functionality:
 		int           getStrandCount    (void);

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Sep 13 00:57:49 CEST 2026
+// Last Modified: Sun Sep 13 01:17:05 CEST 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -22881,7 +22881,18 @@ bool HumdrumFileBase::areStrandsAnalyzed(void) {
 
 //////////////////////////////
 //
-// HumdrumFileBase::areStrandsAnalyzed --
+// HumdrumFileBase::areNullTokensAnalyzed --
+//
+
+bool HumdrumFileBase::areNullTokensAnalyzed(void) {
+	return m_analyses.m_nulls_analyzed;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::areStrophesAnalyzed --
 //
 
 bool HumdrumFileBase::areStrophesAnalyzed(void) {
@@ -32258,13 +32269,26 @@ bool HumdrumFileStructure::analyzeStrands(void) {
 
 ///////////////////////////////
 //
+// HumdrumFileStructure::invalidateNullTokens -- Mark null-resolution as
+//   stale so the next resolveNullTokens() recomputes sustain links.  Call
+//   after changing tokens to/from "." (e.g. dissonant -s merges).
+//
+
+void HumdrumFileStructure::invalidateNullTokens(void) {
+	m_analyses.m_nulls_analyzed = false;
+}
+
+
+
+///////////////////////////////
+//
 // HumdrumFileStructure::resolveNullTokens --
 //
 
 void HumdrumFileStructure::resolveNullTokens(void) {
-	// Always recompute.  Tokens may have been changed to null (".") after
-	// the initial analysis (e.g. dissonant -s merges); those need fresh
-	// sustain links or NoteGrid will treat them as rests.
+	if (m_analyses.m_nulls_analyzed) {
+		return;
+	}
 	m_analyses.m_nulls_analyzed = true;
 	if (!areStrandsAnalyzed()) {
 		analyzeStrands();
@@ -40084,21 +40108,17 @@ HTp HumdrumToken::getPhraseEndToken(int number) {
 //
 
 HTp HumdrumToken::resolveNull(void) {
-	if (m_nullresolve == NULL) {
-		HLp hline = getOwner();
-		if (hline) {
-			HumdrumFile* infile = hline->getOwner();
-			infile->resolveNullTokens();
-		}
-		if (m_nullresolve == NULL) {
-			return this;
-		} else {
-			return m_nullresolve;
-		}
-		return this;
-	} else {
-		return m_nullresolve;
+	HLp hline = getOwner();
+	HumdrumFile* infile = hline ? hline->getOwner() : NULL;
+	// Recompute when null links were invalidated (e.g. after merges), or
+	// when this token has never been linked.
+	if (infile && ((!infile->areNullTokensAnalyzed()) || (m_nullresolve == NULL))) {
+		infile->resolveNullTokens();
 	}
+	if (m_nullresolve == NULL) {
+		return this;
+	}
+	return m_nullresolve;
 }
 
 
@@ -85790,11 +85810,13 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 	if (suppressQ) {
 		suppressDissonances(infile, grid, attacks, results);
 
-		// Merges update token text and cached durations; rebuild lines
-		// and null-resolution links before re-analyzing for the second pass.
-		// Without re-resolving nulls, notes turned into "." still point at
-		// themselves and NoteGrid treats mid-note sustains as rests.
-		infile.createLinesFromTokens();
+		// Merges update token text and cached durations in place.  NoteGrid
+		// and the second analysis read tokens, not line strings, so defer
+		// createLinesFromTokens until score output (and skip it entirely for
+		// -c counts).  Invalidate then recompute null-resolution links: notes
+		// turned into "." still point at themselves otherwise, and NoteGrid
+		// treats mid-note sustains as rests.
+		infile.invalidateNullTokens();
 		infile.resolveNullTokens();
 		infile.analyzeStructure();
 
@@ -85824,6 +85846,8 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 			printColorLegend(infile);
 
 			adjustColorization(infile);
+			// Rebuild line strings once for Humdrum emission (merged pitches
+			// / durations and newly inserted dissonance spines).
 			infile.createLinesFromTokens();
 			m_humdrum_text << infile;
 
@@ -86663,6 +86687,23 @@ void Tool_dissonant::adjustBeamsAfterMerge(HTp survivor, HTp removed) {
 		text.erase(std::remove(text.begin(), text.end(), mark), text.end());
 		note->setText(text);
 	};
+
+	bool moveL = hasBeamChar(survivor, 'L') || hasBeamChar(removed, 'L');
+	bool moveJ = hasBeamChar(survivor, 'J') || hasBeamChar(removed, 'J');
+	if (!(moveL || moveJ)) {
+		return;
+	}
+
+	// Fast path: merged pair carried both beam ends (typical two-note
+	// beam → quarter).  Drop L/J; nothing remains to re-attach.
+	if (moveL && moveJ) {
+		removeBeamChar(survivor, 'L');
+		removeBeamChar(survivor, 'J');
+		removeBeamChar(removed, 'L');
+		removeBeamChar(removed, 'J');
+		return;
+	}
+
 	auto addBeamChar = [&hasBeamChar](HTp note, char mark) {
 		if ((!note) || hasBeamChar(note, mark)) {
 			return;
@@ -86790,9 +86831,6 @@ void Tool_dissonant::adjustBeamsAfterMerge(HTp survivor, HTp removed) {
 		}
 		return NULL;
 	};
-
-	bool moveL = hasBeamChar(survivor, 'L') || hasBeamChar(removed, 'L');
-	bool moveJ = hasBeamChar(survivor, 'J') || hasBeamChar(removed, 'J');
 
 	removeBeamChar(survivor, 'L');
 	removeBeamChar(survivor, 'J');

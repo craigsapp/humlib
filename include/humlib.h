@@ -2054,6 +2054,7 @@ class HumdrumFileBase : public HumHash {
 		bool          isStructureAnalyzed      (void);
 		bool          isRhythmAnalyzed         (void);
 		bool          areStrandsAnalyzed       (void);
+		bool          areNullTokensAnalyzed    (void);
 		bool          areStrophesAnalyzed      (void);
 		void          setFilenameFromSegment   (void);
 
@@ -2430,7 +2431,8 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		int           tpq                          (void);
 		int           getTpq                       (void) { return tpq(); }
 
-		void          resolveNullTokens (void);
+		void          resolveNullTokens    (void);
+		void          invalidateNullTokens (void);
 
 		// strand functionality:
 		int           getStrandCount    (void);

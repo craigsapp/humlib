@@ -191,6 +191,7 @@ class HumdrumFileBase : public HumHash {
 		bool          isStructureAnalyzed      (void);
 		bool          isRhythmAnalyzed         (void);
 		bool          areStrandsAnalyzed       (void);
+		bool          areNullTokensAnalyzed    (void);
 		bool          areStrophesAnalyzed      (void);
 		void          setFilenameFromSegment   (void);
 

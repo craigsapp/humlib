@@ -167,11 +167,13 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 	if (suppressQ) {
 		suppressDissonances(infile, grid, attacks, results);
 
-		// Merges update token text and cached durations; rebuild lines
-		// and null-resolution links before re-analyzing for the second pass.
-		// Without re-resolving nulls, notes turned into "." still point at
-		// themselves and NoteGrid treats mid-note sustains as rests.
-		infile.createLinesFromTokens();
+		// Merges update token text and cached durations in place.  NoteGrid
+		// and the second analysis read tokens, not line strings, so defer
+		// createLinesFromTokens until score output (and skip it entirely for
+		// -c counts).  Invalidate then recompute null-resolution links: notes
+		// turned into "." still point at themselves otherwise, and NoteGrid
+		// treats mid-note sustains as rests.
+		infile.invalidateNullTokens();
 		infile.resolveNullTokens();
 		infile.analyzeStructure();
 
@@ -201,6 +203,8 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 			printColorLegend(infile);
 
 			adjustColorization(infile);
+			// Rebuild line strings once for Humdrum emission (merged pitches
+			// / durations and newly inserted dissonance spines).
 			infile.createLinesFromTokens();
 			m_humdrum_text << infile;
 

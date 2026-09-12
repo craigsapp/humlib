@@ -87,7 +87,8 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		int           tpq                          (void);
 		int           getTpq                       (void) { return tpq(); }
 
-		void          resolveNullTokens (void);
+		void          resolveNullTokens    (void);
+		void          invalidateNullTokens (void);
 
 		// strand functionality:
 		int           getStrandCount    (void);

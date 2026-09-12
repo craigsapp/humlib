@@ -210,7 +210,18 @@ bool HumdrumFileBase::areStrandsAnalyzed(void) {
 
 //////////////////////////////
 //
-// HumdrumFileBase::areStrandsAnalyzed --
+// HumdrumFileBase::areNullTokensAnalyzed --
+//
+
+bool HumdrumFileBase::areNullTokensAnalyzed(void) {
+	return m_analyses.m_nulls_analyzed;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::areStrophesAnalyzed --
 //
 
 bool HumdrumFileBase::areStrophesAnalyzed(void) {

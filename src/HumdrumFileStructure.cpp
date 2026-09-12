@@ -1493,13 +1493,26 @@ bool HumdrumFileStructure::analyzeStrands(void) {
 
 ///////////////////////////////
 //
+// HumdrumFileStructure::invalidateNullTokens -- Mark null-resolution as
+//   stale so the next resolveNullTokens() recomputes sustain links.  Call
+//   after changing tokens to/from "." (e.g. dissonant -s merges).
+//
+
+void HumdrumFileStructure::invalidateNullTokens(void) {
+	m_analyses.m_nulls_analyzed = false;
+}
+
+
+
+///////////////////////////////
+//
 // HumdrumFileStructure::resolveNullTokens --
 //
 
 void HumdrumFileStructure::resolveNullTokens(void) {
-	// Always recompute.  Tokens may have been changed to null (".") after
-	// the initial analysis (e.g. dissonant -s merges); those need fresh
-	// sustain links or NoteGrid will treat them as rests.
+	if (m_analyses.m_nulls_analyzed) {
+		return;
+	}
 	m_analyses.m_nulls_analyzed = true;
 	if (!areStrandsAnalyzed()) {
 		analyzeStrands();

@@ -4062,21 +4062,17 @@ HTp HumdrumToken::getPhraseEndToken(int number) {
 //
 
 HTp HumdrumToken::resolveNull(void) {
-	if (m_nullresolve == NULL) {
-		HLp hline = getOwner();
-		if (hline) {
-			HumdrumFile* infile = hline->getOwner();
-			infile->resolveNullTokens();
-		}
-		if (m_nullresolve == NULL) {
-			return this;
-		} else {
-			return m_nullresolve;
-		}
-		return this;
-	} else {
-		return m_nullresolve;
+	HLp hline = getOwner();
+	HumdrumFile* infile = hline ? hline->getOwner() : NULL;
+	// Recompute when null links were invalidated (e.g. after merges), or
+	// when this token has never been linked.
+	if (infile && ((!infile->areNullTokensAnalyzed()) || (m_nullresolve == NULL))) {
+		infile->resolveNullTokens();
 	}
+	if (m_nullresolve == NULL) {
+		return this;
+	}
+	return m_nullresolve;
 }
 
 
