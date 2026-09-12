@@ -935,6 +935,7 @@ void Tool_dissonant::simplePreviousMerge(HTp pnote, HTp cnote) {
 	HumNum pdur = pnote->getDuration();
 	HumNum dur = cdur + pdur;
 	changeDurationOfNote(pnote, dur);
+	adjustBeamsAfterMerge(pnote, cnote);
 
 	if (cnote->find("[") == string::npos) {
 		// current note is not the start of a tie group, so
@@ -1000,9 +1001,133 @@ void Tool_dissonant::simpleNextMerge(HTp cnote, HTp nnote) {
 	HumNum dur = cdur + ndur;
 	changeDurationOfNote(cnote, dur);
 	changePitch(cnote, nnote);
+	adjustBeamsAfterMerge(cnote, nnote);
 	nnote->setText(".");
 	nnote->setDuration(0);
 	return;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_dissonant::adjustBeamsAfterMerge -- When a merge produces a note of
+//   a quarter note or longer, beam start/stop markers (L/J) cannot remain on
+//   that note.  Move an L to the next remaining beamable note, and a J to the
+//   previous remaining beamable note.  If a note ends up with both L and J,
+//   remove both (degenerate one-note beam).
+//
+
+void Tool_dissonant::adjustBeamsAfterMerge(HTp survivor, HTp removed) {
+	if ((!survivor) || (!removed)) {
+		return;
+	}
+	if (survivor->getDuration() < 1) {
+		return;
+	}
+
+	auto hasBeamChar = [](HTp note, char mark) -> bool {
+		return note && note->find(mark) != string::npos;
+	};
+	auto removeBeamChar = [](HTp note, char mark) {
+		if (!note) {
+			return;
+		}
+		string text = *note;
+		text.erase(std::remove(text.begin(), text.end(), mark), text.end());
+		note->setText(text);
+	};
+	auto addBeamChar = [&hasBeamChar](HTp note, char mark) {
+		if ((!note) || hasBeamChar(note, mark)) {
+			return;
+		}
+		note->setText(*note + mark);
+	};
+	auto clearIfBothBeamEnds = [&hasBeamChar, &removeBeamChar](HTp note) {
+		if (hasBeamChar(note, 'L') && hasBeamChar(note, 'J')) {
+			removeBeamChar(note, 'L');
+			removeBeamChar(note, 'J');
+		}
+	};
+	auto nextBeamable = [removed](HTp start) -> HTp {
+		HTp tok = start;
+		while (tok) {
+			tok = tok->getNextNNDT();
+			if (!tok) {
+				return NULL;
+			}
+			if (tok == removed) {
+				continue;
+			}
+			if (tok->isNull()) {
+				continue;
+			}
+			if (!tok->isNote()) {
+				return NULL;
+			}
+			if (tok->getDuration() >= 1) {
+				continue;
+			}
+			return tok;
+		}
+		return NULL;
+	};
+	auto prevBeamable = [removed](HTp start) -> HTp {
+		HTp tok = start;
+		while (tok) {
+			tok = tok->getPreviousNNDT();
+			if (!tok) {
+				return NULL;
+			}
+			if (tok == removed) {
+				continue;
+			}
+			if (tok->isNull()) {
+				continue;
+			}
+			if (!tok->isNote()) {
+				return NULL;
+			}
+			if (tok->getDuration() >= 1) {
+				continue;
+			}
+			return tok;
+		}
+		return NULL;
+	};
+
+	bool moveL = hasBeamChar(survivor, 'L') || hasBeamChar(removed, 'L');
+	bool moveJ = hasBeamChar(survivor, 'J') || hasBeamChar(removed, 'J');
+
+	removeBeamChar(survivor, 'L');
+	removeBeamChar(survivor, 'J');
+	removeBeamChar(removed, 'L');
+	removeBeamChar(removed, 'J');
+
+	HTp lTarget = NULL;
+	HTp jTarget = NULL;
+	if (moveL) {
+		lTarget = nextBeamable(survivor);
+		if (lTarget) {
+			addBeamChar(lTarget, 'L');
+			clearIfBothBeamEnds(lTarget);
+		}
+	}
+	if (moveJ) {
+		// Prefer previous of removed (end of former beam), else of survivor.
+		jTarget = prevBeamable(removed);
+		if (!jTarget) {
+			jTarget = prevBeamable(survivor);
+		}
+		if (jTarget) {
+			addBeamChar(jTarget, 'J');
+			clearIfBothBeamEnds(jTarget);
+		}
+	}
+
+	if (lTarget && jTarget && (lTarget == jTarget)) {
+		clearIfBothBeamEnds(lTarget);
+	}
 }
 
 
