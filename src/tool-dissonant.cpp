@@ -167,9 +167,9 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 	if (suppressQ) {
 		suppressDissonances(infile, grid, attacks, results);
 
-		// should update low-level durations in suppressDissonances, but
-		// being lazy and re-analyze spines.  If there was any error in
-		// the durations, there will be no output from the program probably.
+		// Merges update token text and cached durations; rebuild lines
+		// before re-analyzing structure for the second dissonance pass.
+		infile.createLinesFromTokens();
 		infile.analyzeStructure();
 
 		NoteGrid grid2(infile);
@@ -199,6 +199,7 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 
 			adjustColorization(infile);
 			infile.createLinesFromTokens();
+			m_humdrum_text << infile;
 
 			return true;
 		}
@@ -229,6 +230,7 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 		infile.createLinesFromTokens();
 
 		infile.createLinesFromTokens();
+		m_humdrum_text << infile;
 		return true;
 	} else {
 		if (getBoolean("count")) {
@@ -245,6 +247,7 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 			printColorLegend(infile);
 			adjustColorization(infile);
 			infile.createLinesFromTokens();
+			m_humdrum_text << infile;
 			return true;
 		}
 	}
@@ -719,17 +722,17 @@ void Tool_dissonant::suppressSusOrnamentsInVoice(HumdrumFile& infile,
 				(intn == -1) && (intnn == -1) && (intnnn == 1) ) { // turn figure anticipation of resolution phase
 				if ((results[lineindexnn] == ".") && (!tokennn->isNull()) &&
 					(tokennn->isNoteAttack()) ) {
-					mergeWithPreviousNote(infile, lineindexnn, vindex);
+					mergeWithPreviousNote(infile, lineindexnn, fieldindex);
 				}
 				if ((results[lineindexn] == ".") && (!tokenn->isNull()) &&
 					(tokenn->isNoteAttack()) ) {
-					mergeWithPreviousNote(infile, lineindexn, vindex);
+					mergeWithPreviousNote(infile, lineindexn, fieldindex);
 				}
 			} else if ((durn == durnn) && (durn == durnnn) && (levn > levnn) &&
 				(levnn < levnnn) && (intn == -1) && (intnn == 0) &&
 				(intnnn == -1) && (results[lineindexnnn] == ".") &&
 				(!tokennnn->isNull()) && (tokennnn->isNoteAttack()) ) { // Du Fay ornament
-				mergeWithPreviousNote(infile, lineindexnnn, vindex);
+				mergeWithPreviousNote(infile, lineindexnnn, fieldindex);
 			}
 		}
 		if (((results[lineindex] == m_labels[SUS_BIN]) ||
@@ -747,7 +750,7 @@ void Tool_dissonant::suppressSusOrnamentsInVoice(HumdrumFile& infile,
 			if ((durn <= durnn) && (levn >= levnn) && (intn == -1) &&
 				(intnn == 0) && (results[lineindexn] == ".") &&
 				(!tokenn->isNull()) && (tokenn->isNoteAttack()) ) { // anticipation of resolution phase
-				mergeWithPreviousNote(infile, lineindexn, vindex);
+				mergeWithPreviousNote(infile, lineindexn, fieldindex);
 			}
 		}
 	}
@@ -789,7 +792,21 @@ void Tool_dissonant::mergeWithNextNote(HumdrumFile& infile, NoteCell* cell) {
 
 void Tool_dissonant::mergeWithPreviousNote(HumdrumFile& infile, int line, int field) {
 	HTp cnote = infile.token(line, field);  // current note (attack)
+	if (!cnote || cnote->isNull() || !cnote->isKern() || cnote->isRest()) {
+		return;
+	}
 	HTp pnote = cnote->getPreviousNNDT();   // previous note (not necessarily attack)
+
+	// NNDT links are not updated when notes are nullified during suppression,
+	// so skip any already-merged placeholders to find a real previous note.
+	while (pnote && (pnote->isNull() || !pnote->isKern())) {
+		HTp earlier = pnote->getPreviousNNDT();
+		if (!earlier || earlier == pnote) {
+			pnote = NULL;
+			break;
+		}
+		pnote = earlier;
+	}
 
 	if (pnote == NULL) {
 		// no previous note;
@@ -921,10 +938,9 @@ void Tool_dissonant::simplePreviousMerge(HTp pnote, HTp cnote) {
 
 	if (cnote->find("[") == string::npos) {
 		// current note is not the start of a tie group, so
-		// replace it with a null token and return.  Ideally
-		// the low-level duration of the token should also be
-		// set to zero.
+		// replace it with a null token and return.
 		cnote->setText(".");
+		cnote->setDuration(0);
 		return;
 	}
 
@@ -944,8 +960,8 @@ void Tool_dissonant::simplePreviousMerge(HTp pnote, HTp cnote) {
 
 	changePitchOfTieGroupFollowing(cnote, pitch);
 
-	// also should set the low-level duration of the token to 0.
 	cnote->setText(".");
+	cnote->setDuration(0);
 }
 
 
@@ -985,6 +1001,7 @@ void Tool_dissonant::simpleNextMerge(HTp cnote, HTp nnote) {
 	changeDurationOfNote(cnote, dur);
 	changePitch(cnote, nnote);
 	nnote->setText(".");
+	nnote->setDuration(0);
 	return;
 }
 
@@ -1045,6 +1062,7 @@ void Tool_dissonant::changeDurationOfNote(HTp note, HumNum dur) {
 		text += recip;
 		text += hre.getMatch(3);
 		note->setText(text);
+		note->setDuration(dur);
 	} else {
 		cerr << "STRANGE ERROR: no duration on note" << endl;
 		return;
@@ -1064,7 +1082,19 @@ void Tool_dissonant::mergeWithNextNote(HumdrumFile& infile, int line, int field)
 	if (!cnote) {
 		return;
 	}
+	if (cnote->isNull() || !cnote->isKern() || cnote->isRest()) {
+		return;
+	}
 	HTp nnote = cnote->getNextNNDT();   // next note
+	// NNDT links can point at notes already nullified earlier in suppression.
+	while (nnote && (nnote->isNull() || !nnote->isKern())) {
+		HTp later = nnote->getNextNNDT();
+		if (!later || later == nnote) {
+			nnote = NULL;
+			break;
+		}
+		nnote = later;
+	}
 	if (!nnote) {
 		return;
 	}

@@ -217,6 +217,8 @@ class HumdrumToken : public std::string, public HumHash {
 		HumNum   getBarlineDuration        (void);
 		HumNum   getBarlineDuration        (HumNum scale);
 
+		void     setDuration               (const HumNum& dur);
+
 		// metric-related functions:
 		HumNum   getBeat                   (HumNum scale = 1);
 
@@ -368,7 +370,6 @@ class HumdrumToken : public std::string, public HumHash {
 		void     setOwner                  (HLp aLine);
 		int      getState                  (void) const;
 		void     incrementState            (void);
-		void     setDuration               (const HumNum& dur);
 		void     setStrandIndex            (int index);
 
 		bool     analyzeDuration           (void);

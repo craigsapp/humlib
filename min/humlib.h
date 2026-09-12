@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Sep 11 17:48:07 CEST 2026
+// Last Modified: Sat Sep 12 18:36:47 CEST 2026
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -1662,6 +1662,8 @@ class HumdrumToken : public std::string, public HumHash {
 		HumNum   getBarlineDuration        (void);
 		HumNum   getBarlineDuration        (HumNum scale);
 
+		void     setDuration               (const HumNum& dur);
+
 		// metric-related functions:
 		HumNum   getBeat                   (HumNum scale = 1);
 
@@ -1813,7 +1815,6 @@ class HumdrumToken : public std::string, public HumHash {
 		void     setOwner                  (HLp aLine);
 		int      getState                  (void) const;
 		void     incrementState            (void);
-		void     setDuration               (const HumNum& dur);
 		void     setStrandIndex            (int index);
 
 		bool     analyzeDuration           (void);
@@ -6548,6 +6549,101 @@ class Tool_bstyle : public HumTool {
 	private:
 		bool  m_removeQ = false;  // used with -r option
 
+};
+
+
+class Tool_cadential_rhythm_profiler : public HumTool {
+	public:
+		         Tool_cadential_rhythm_profiler (void);
+		        ~Tool_cadential_rhythm_profiler () {};
+
+		bool     run                 (HumdrumFileSet& infiles);
+		bool     run                 (HumdrumFile& infile);
+		bool     run                 (const std::string& indata, std::ostream& out);
+		bool     run                 (HumdrumFile& infile, std::ostream& out);
+		bool     runFromArguments    (void);
+		void     finally             (void);
+
+	protected:
+		class WindowSpec {
+			public:
+				std::string m_id;
+				bool        m_measureQ = false;
+				double      m_minims   = 0.0;
+		};
+
+		class RatioAccum {
+			public:
+				double m_sumBefore = 0.0;
+				int    m_count     = 0;
+		};
+
+		class TypeStats {
+			public:
+				int m_numCadences = 0;
+				std::set<std::string> m_pieces;
+				std::map<std::string, RatioAccum> m_metrics;
+		};
+
+		void     initialize          (void);
+		void     processFile         (HumdrumFile& infile);
+		void     collectInputFiles   (std::vector<std::string>& files);
+		void     collectKernFiles    (const std::string& path,
+		                              std::vector<std::string>& files);
+		class CadenceHit {
+			public:
+				std::string m_label;
+				std::string m_cvf;
+				HumNum      m_arrivalTime = 0;
+		};
+
+		void     prepareWindows      (void);
+		void     fillCadenceHitsFromAutocadence(HumdrumFile& infile,
+		                              std::vector<CadenceHit>& hits);
+		std::string cadenceTypeName  (const CadenceHit& hit);
+		std::string normalizeCadenceLabel(const std::string& raw);
+		std::string extractCvfPair   (HumdrumLine& line);
+		std::string extractLayoutText(const std::string& token);
+		int      findLineAtTime      (HumdrumFile& infile, HumNum time);
+		void     fillPartAttackTimes (HumdrumFile& infile,
+		                              std::map<int, std::vector<HumNum> >& partTimes,
+		                              std::vector<int>& tracks);
+		void     fillCompositeAttackTimes(HumdrumFile& infile,
+		                              std::vector<HumNum>& times);
+		void     fillCompositeAttackTimesLocal(HumdrumFile& infile,
+		                              std::vector<HumNum>& times);
+		HumNum   getMeasureDuration  (HumdrumFile& infile, int line);
+		HumNum   windowDuration      (const WindowSpec& window, HumNum measureDur);
+		int      countAttacksInWindow(const std::vector<HumNum>& times,
+		                              HumNum t0, HumNum t1,
+		                              bool includeStart, bool includeEnd);
+		void     accumulateRatios    (TypeStats& stats, const std::string& metricId,
+		                              int beforeCount, int afterCount);
+		void     analyzeCadence      (TypeStats& stats, HumNum arrival,
+		                              HumNum measureDur,
+		                              const std::map<int, std::vector<HumNum> >& partTimes,
+		                              const std::vector<int>& tracks,
+		                              const std::vector<HumNum>& compositeTimes);
+		void     writeCsv            (std::ostream& out);
+		void     sortCadenceTypes    (std::vector<std::string>& types);
+		int      cadenceVariantRank  (const std::string& name);
+		std::string cadenceBaseName  (const std::string& name);
+		std::string csvEscape        (const std::string& value);
+		std::string formatRatio      (double value);
+		std::vector<std::string> metricColumnIds(void);
+
+	private:
+		std::map<std::string, TypeStats> m_stats;
+		int         m_totalCadences = 0;
+		bool        m_initializedQ  = false;
+
+		std::vector<WindowSpec> m_windows;
+		std::string m_grouping;
+		std::string m_outputFile;
+		int         m_precision     = 6;
+		bool        m_verboseQ      = false;
+		int         m_arrivalSide   = 1;
+		double      m_minimDur      = 2.0;
 };
 
 

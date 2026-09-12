@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Sep 11 17:48:07 CEST 2026
+// Last Modified: Sat Sep 12 18:36:47 CEST 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -61482,6 +61482,7 @@ Tool_autocadence::Tool_autocadence(void) {
 	define("color=s:dodgerblue",         "Color cadence formula notes with given color");
 	define("count|match-count=b",        "Return number of cadence formulas that match");
 	define("i|info=b",                   "Show only information not score");
+	define("t|cadence-table=b",          "Show a table of the counts of each cadence label");
 
 	define("M|analytic-markup|markup=b", "Show melodic interval to last note");
 	define("L|last-melody=b",            "Show melodic interval to last note");
@@ -61559,6 +61560,7 @@ void Tool_autocadence::initialize(void) {
 	m_showFormulaIndexQ        =  getBoolean("show-formula-index");
 	m_repeatQ                  =  getBoolean("repeat");
 	m_infoQ                    =  getBoolean("info");
+	m_tableQ                   =  getBoolean("cadence-table");
 	m_lowestQ                  =  getBoolean("lowest");
 	m_showSuspensionsQ         = !getBoolean("do-not-show-suspensions");
 	m_markupQ                  =  getBoolean("analytic-markup");
@@ -61590,6 +61592,7 @@ void Tool_autocadence::initialize(void) {
 
 void Tool_autocadence::processFile(HumdrumFile& infile) {
 	m_info.str("");
+	m_cadenceTypeCounts.clear();
 	m_barnum = infile.getMeasureNumbers();
 	m_root.resize(infile.getLineCount());
 
@@ -61641,6 +61644,11 @@ void Tool_autocadence::processFile(HumdrumFile& infile) {
 	// markup score with matches and CVF
 	markupScore(infile);
 	printScore(infile);
+	if (m_tableQ) {
+		// Cadence-type counts are collected while printing the score.
+		printCadenceTable();
+		return;
+	}
 
 	if (m_infoQ) {
 		m_humdrum_text.str("");
@@ -62291,6 +62299,33 @@ void Tool_autocadence::printMatchCount(void) {
 
 //////////////////////////////
 //
+// Tool_autocadence::printCadenceTable -- Print cadence-label counts
+//      sorted by count descending.  Only labels that occur at least once
+//      are listed.
+//
+
+void Tool_autocadence::printCadenceTable(void) {
+	vector<pair<string, int>> rows(m_cadenceTypeCounts.begin(),
+			m_cadenceTypeCounts.end());
+	sort(rows.begin(), rows.end(),
+			[](const pair<string, int>& a, const pair<string, int>& b) {
+				if (a.second != b.second) {
+					return a.second > b.second;
+				}
+				return a.first < b.first;
+			});
+
+	m_humdrum_text.str("");
+	m_humdrum_text << "Count\tCadence Type" << endl;
+	for (int i=0; i<(int)rows.size(); i++) {
+		m_humdrum_text << rows[i].second << "\t" << rows[i].first << endl;
+	}
+}
+
+
+
+//////////////////////////////
+//
 // Tool_autocadence::searchIntervalSequences --
 //
 //
@@ -62918,11 +62953,17 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 			infolabel = "Phrygian " + infolabel;
 		}
 		cadenceline << cadence;
+		if (m_tableQ) {
+			m_cadenceTypeCounts[infolabel]++;
+		}
 		if (m_infoQ) {
 			m_info << "cvf=" << slabel << "\tcadence=" << infolabel << "\\nZZZ" << "\tM=" << m_barnum.at(index) << "\tfile=" << infile.getFilename() << endl;
 		}
 	} else if (meetsAuthenticBCriteria(infile, index)) {
 		cadenceline << "!!LO:TX:a:B:rj:color=red:cadence:t=AuthenticB";
+		if (m_tableQ) {
+			m_cadenceTypeCounts["AuthenticB"]++;
+		}
 		if (m_infoQ) {
 			m_info << "cvf=\tcadence=AuthenticB\\nZZZ" << "\tM=" << m_barnum.at(index) << "\tfile=" << infile.getFilename() << endl;
 		}
@@ -66984,6 +67025,1110 @@ void Tool_bstyle::applyBarStylings(HTp spine) {
 		counter++;
 		current = current->getNextToken();
 	}
+}
+
+
+
+namespace fs = std::filesystem;
+
+
+///////////////////////////////////////////////////////////////////////////
+//
+// SETTINGS -- Edit these constants to change the analysis without
+//     hunting through the rest of the tool.  Command-line options can
+//     override several of them.
+//
+///////////////////////////////////////////////////////////////////////////
+
+// Duration of one minim in Humdrum quarter-note units.  **kern recip "2"
+// (a half note / minim) has duration 2.0.
+static const double kMinimDuration = 2.0;
+
+// Absolute windows measured in minims.  Add or remove values here to
+// change which fixed windows appear as CSV columns.
+static const vector<int> kMinimWindows = {1, 2, 4, 8};
+
+// Also report a window whose width is one measure of the active
+// mensuration / time signature at the cadence arrival.
+static const bool kIncludeMeasureWindow = true;
+
+// Where the cadence-arrival attack itself is counted:
+//   0 = in the before window  [T-W, T]
+//   1 = in the after window   [T, T+W)     (default)
+//   2 = excluded from both    [T-W, T) and (T, T+W)
+static const int kArrivalSide = 1;
+
+// Default cadence-type grouping:
+//   "label" = cadence name from autocadence markup (Authentic, Clausula Vera, ...)
+//   "pair"  = combined CVF letters from the same markup (CT, BC, ...)
+static const string kDefaultGrouping = "label";
+
+// Decimal places for ratio columns.
+static const int kDefaultPrecision = 6;
+
+
+/////////////////////////////////
+//
+// Tool_cadential_rhythm_profiler::Tool_cadential_rhythm_profiler --
+//
+
+Tool_cadential_rhythm_profiler::Tool_cadential_rhythm_profiler(void) {
+	define("o|output=s", "write CSV to the given file instead of stdout");
+	define("g|group=s:" + kDefaultGrouping,
+			"cadence-type grouping: label (Authentic) or pair (CT)");
+	define("p|precision=i:" + to_string(kDefaultPrecision),
+			"decimal places for rhythmic ratio columns");
+	define("v|verbose=b", "print per-file progress to stderr");
+}
+
+
+
+/////////////////////////////////
+//
+// Tool_cadential_rhythm_profiler::run --
+//
+
+bool Tool_cadential_rhythm_profiler::run(HumdrumFileSet& infiles) {
+	bool status = true;
+	for (int i=0; i<infiles.getCount(); i++) {
+		status &= run(infiles[i]);
+	}
+	return status;
+}
+
+
+bool Tool_cadential_rhythm_profiler::run(const string& indata, ostream& out) {
+	HumdrumFile infile;
+	infile.readString(indata);
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	}
+	return status;
+}
+
+
+bool Tool_cadential_rhythm_profiler::run(HumdrumFile& infile, ostream& out) {
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	}
+	return status;
+}
+
+
+bool Tool_cadential_rhythm_profiler::run(HumdrumFile& infile) {
+	initialize();
+	processFile(infile);
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cadential_rhythm_profiler::runFromArguments -- Expand files and
+//     directories given on the command line, then analyze the corpus.
+//     A directory is searched recursively for .krn files.  With no
+//     arguments, a single score is read from standard input.
+//
+
+bool Tool_cadential_rhythm_profiler::runFromArguments(void) {
+	initialize();
+	vector<string> files;
+	collectInputFiles(files);
+
+	if (files.empty()) {
+		HumdrumFile infile;
+		infile.read(cin);
+		processFile(infile);
+		return true;
+	}
+
+	bool status = true;
+	for (int i=0; i<(int)files.size(); i++) {
+		if (m_verboseQ) {
+			cerr << "Processing " << files[i] << endl;
+		}
+		HumdrumFile infile;
+		if (!infile.read(files[i])) {
+			cerr << "Warning: could not read " << files[i] << endl;
+			status = false;
+			continue;
+		}
+		infile.setFilename(files[i]);
+		processFile(infile);
+	}
+	return status;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cadential_rhythm_profiler::initialize --
+//
+
+void Tool_cadential_rhythm_profiler::initialize(void) {
+	if (m_initializedQ) {
+		return;
+	}
+	m_initializedQ = true;
+
+	m_grouping    = getString("group");
+	m_precision   = getInteger("precision");
+	m_verboseQ    = getBoolean("verbose");
+	m_minimDur    = kMinimDuration;
+	m_arrivalSide = kArrivalSide;
+
+	if (getBoolean("output")) {
+		m_outputFile = getString("output");
+	}
+
+	if ((m_grouping != "label") && (m_grouping != "pair")) {
+		cerr << "Warning: unknown grouping \"" << m_grouping
+		     << "\", using label" << endl;
+		m_grouping = "label";
+	}
+
+	prepareWindows();
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cadential_rhythm_profiler::prepareWindows -- Build the list of
+//     analysis windows from the SETTINGS constants.  Edit kMinimWindows
+//     and kIncludeMeasureWindow to change the CSV columns.
+//
+
+void Tool_cadential_rhythm_profiler::prepareWindows(void) {
+	m_windows.clear();
+	for (int i=0; i<(int)kMinimWindows.size(); i++) {
+		WindowSpec window;
+		int minims = kMinimWindows[i];
+		window.m_id = to_string(minims) + ((minims == 1) ? "minim" : "minims");
+		window.m_measureQ = false;
+		window.m_minims = (double)minims;
+		m_windows.push_back(window);
+	}
+	if (kIncludeMeasureWindow) {
+		WindowSpec window;
+		window.m_id = "1measure";
+		window.m_measureQ = true;
+		window.m_minims = 0.0;
+		m_windows.push_back(window);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cadential_rhythm_profiler::collectInputFiles --
+//
+
+void Tool_cadential_rhythm_profiler::collectInputFiles(vector<string>& files) {
+	files.clear();
+	for (int i=1; i<=getArgCount(); i++) {
+		collectKernFiles(getArg(i), files);
+	}
+	sort(files.begin(), files.end());
+	files.erase(unique(files.begin(), files.end()), files.end());
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cadential_rhythm_profiler::collectKernFiles -- If path is a
+//     directory, recursively collect *.krn files; if it is a file, add it.
+//
+
+void Tool_cadential_rhythm_profiler::collectKernFiles(const string& path,
+		vector<string>& files) {
+	error_code ec;
+	fs::path p(path);
+	if (fs::is_directory(p, ec)) {
+		for (auto& entry : fs::recursive_directory_iterator(p, ec)) {
+			if (!entry.is_regular_file(ec)) {
+				continue;
+			}
+			if (entry.path().extension() == ".krn") {
+				files.push_back(entry.path().string());
+			}
+		}
+		return;
+	}
+	if (fs::is_regular_file(p, ec)) {
+		files.push_back(path);
+		return;
+	}
+	cerr << "Warning: skipping missing path " << path << endl;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cadential_rhythm_profiler::processFile -- Detect cadences in one
+//     piece and accumulate before/after attack ratios by cadence type.
+//
+
+void Tool_cadential_rhythm_profiler::processFile(HumdrumFile& infile) {
+	vector<CadenceHit> hits;
+	fillCadenceHitsFromAutocadence(infile, hits);
+
+	if (m_verboseQ) {
+		cerr << "  " << hits.size() << " cadence(s) in "
+		     << infile.getFilename() << endl;
+	}
+
+	if (hits.empty()) {
+		return;
+	}
+
+	map<int, vector<HumNum> > partTimes;
+	vector<int> tracks;
+	fillPartAttackTimes(infile, partTimes, tracks);
+
+	vector<HumNum> compositeTimes;
+	fillCompositeAttackTimes(infile, compositeTimes);
+
+	string piece = infile.getFilename();
+	if (piece.empty()) {
+		piece = infile.getFilenameBase();
+	}
+	if (piece.empty()) {
+		piece = "stdin";
+	}
+
+	for (int i=0; i<(int)hits.size(); i++) {
+		string type = cadenceTypeName(hits[i]);
+		if (type.empty()) {
+			type = "UNKNOWN";
+		}
+		TypeStats& stats = m_stats[type];
+		stats.m_numCadences++;
+		stats.m_pieces.insert(piece);
+		m_totalCadences++;
+
+		int line = findLineAtTime(infile, hits[i].m_arrivalTime);
+		HumNum measureDur = getMeasureDuration(infile, line);
+		analyzeCadence(stats, hits[i].m_arrivalTime, measureDur, partTimes,
+				tracks, compositeTimes);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cadential_rhythm_profiler::fillCadenceHitsFromAutocadence -- Run
+//     autocadence as a standalone tool and parse its marked score.  Arrival
+//     points are the data lines immediately after !!LO cadence labels.
+//
+
+void Tool_cadential_rhythm_profiler::fillCadenceHitsFromAutocadence(HumdrumFile& infile,
+		vector<CadenceHit>& hits) {
+	hits.clear();
+
+	stringstream source;
+	source << infile;
+	HumdrumFile copy;
+	copy.readString(source.str());
+	copy.setFilename(infile.getFilename());
+
+	Tool_autocadence detector;
+	detector.process("autocadence");
+	detector.run(copy);
+	if (!detector.hasHumdrumText()) {
+		return;
+	}
+
+	HumdrumFile marked;
+	marked.readString(detector.getHumdrumText());
+
+	string pendingLabel;
+	string pendingCvf;
+	for (int i=0; i<marked.getLineCount(); i++) {
+		if ((!pendingLabel.empty()) && marked[i].isData()) {
+			CadenceHit hit;
+			hit.m_label = pendingLabel;
+			hit.m_cvf = pendingCvf;
+			hit.m_arrivalTime = marked[i].getDurationFromStart();
+			hits.push_back(hit);
+			pendingLabel.clear();
+			pendingCvf.clear();
+			continue;
+		}
+
+		if (!marked[i].hasSpines() && marked[i].isComment()) {
+			string line = (string)marked[i];
+			if (line.find("cadence:t=") != string::npos) {
+				pendingLabel = normalizeCadenceLabel(extractLayoutText(line));
+				pendingCvf.clear();
+			}
+			continue;
+		}
+
+		if ((!pendingLabel.empty()) && marked[i].isCommentLocal()) {
+			string cvf = extractCvfPair(marked[i]);
+			if (!cvf.empty()) {
+				pendingCvf = cvf;
+			}
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cadential_rhythm_profiler::cadenceTypeName --
+//
+
+string Tool_cadential_rhythm_profiler::cadenceTypeName(const CadenceHit& hit) {
+	if ((m_grouping == "pair") && !hit.m_cvf.empty()) {
+		return hit.m_cvf;
+	}
+	return hit.m_label;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cadential_rhythm_profiler::normalizeCadenceLabel -- Convert
+//     autocadence layout text such as "Phrygian\\nClausula\\nVera\\n" into
+//     a single CSV-friendly label.
+//
+
+string Tool_cadential_rhythm_profiler::normalizeCadenceLabel(const string& raw) {
+	string output;
+	for (int i=0; i<(int)raw.size(); i++) {
+		if ((raw[i] == '\\') && (i + 1 < (int)raw.size()) && (raw[i+1] == 'n')) {
+			if (!output.empty() && (output.back() != ' ')) {
+				output += ' ';
+			}
+			i++;
+			continue;
+		}
+		output += raw[i];
+	}
+
+	string collapsed;
+	bool space = false;
+	for (int i=0; i<(int)output.size(); i++) {
+		if (isspace((unsigned char)output[i])) {
+			space = true;
+			continue;
+		}
+		if (space && !collapsed.empty()) {
+			collapsed += ' ';
+		}
+		space = false;
+		collapsed += output[i];
+	}
+	return collapsed;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cadential_rhythm_profiler::extractLayoutText -- Return the t=
+//     parameter from a Humdrum layout comment.
+//
+
+string Tool_cadential_rhythm_profiler::extractLayoutText(const string& token) {
+	string key = ":t=";
+	size_t start = token.rfind(key);
+	if (start == string::npos) {
+		start = token.rfind("t=");
+		if (start == string::npos) {
+			return "";
+		}
+		start += 2;
+	} else {
+		start += key.size();
+	}
+	size_t stop = token.find(':', start);
+	if (stop == string::npos) {
+		return token.substr(start);
+	}
+	return token.substr(start, stop - start);
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cadential_rhythm_profiler::extractCvfPair -- Collect unique CVF
+//     letters from a local-comment line of autocadence markup.
+//
+
+string Tool_cadential_rhythm_profiler::extractCvfPair(HumdrumLine& line) {
+	set<char> uppers;
+	set<char> lowers;
+	for (int i=0; i<line.getFieldCount(); i++) {
+		string field = *line.token(i);
+		if (field.find("cvf") == string::npos) {
+			continue;
+		}
+		string text = extractLayoutText(field);
+		for (int j=0; j<(int)text.size(); j++) {
+			char c = text[j];
+			if (isupper((unsigned char)c)) {
+				uppers.insert(c);
+			} else if (islower((unsigned char)c)) {
+				lowers.insert(c);
+			}
+		}
+	}
+
+	string output;
+	for (char c : uppers) {
+		output += c;
+	}
+	for (char c : lowers) {
+		output += c;
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cadential_rhythm_profiler::findLineAtTime --
+//
+
+int Tool_cadential_rhythm_profiler::findLineAtTime(HumdrumFile& infile, HumNum time) {
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isData()) {
+			continue;
+		}
+		if (infile[i].getDurationFromStart() == time) {
+			return i;
+		}
+	}
+	return 0;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cadential_rhythm_profiler::fillPartAttackTimes -- Collect note-attack
+//     times for each **kern track.  Layers on the same staff belong to the
+//     same part.  Barlines and grace notes are not counted.
+//
+
+void Tool_cadential_rhythm_profiler::fillPartAttackTimes(HumdrumFile& infile,
+		map<int, vector<HumNum> >& partTimes, vector<int>& tracks) {
+	partTimes.clear();
+	tracks.clear();
+
+	vector<HTp> starts = infile.getKernSpineStartList();
+	for (int i=0; i<(int)starts.size(); i++) {
+		int track = starts[i]->getTrack();
+		tracks.push_back(track);
+		partTimes[track] = vector<HumNum>();
+	}
+
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isData()) {
+			continue;
+		}
+		if (infile[i].getDuration() == 0) {
+			continue;
+		}
+		HumNum t = infile[i].getDurationFromStart();
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (!token->isKern()) {
+				continue;
+			}
+			if (!token->isNoteAttack()) {
+				continue;
+			}
+			int track = token->getTrack();
+			if (partTimes.find(track) == partTimes.end()) {
+				continue;
+			}
+			partTimes[track].push_back(t);
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cadential_rhythm_profiler::fillCompositeAttackTimes -- Use the
+//     composite tool's full-composite spine, then record each composite
+//     note attack.  Falls back to the equivalent local calculation if the
+//     tool does not produce usable output.
+//
+
+void Tool_cadential_rhythm_profiler::fillCompositeAttackTimes(HumdrumFile& infile,
+		vector<HumNum>& times) {
+	times.clear();
+
+	stringstream source;
+	source << infile;
+	HumdrumFile copy;
+	copy.readString(source.str());
+
+	Tool_composite composite;
+	composite.process("composite -x -B");
+	composite.run(copy);
+
+	if (composite.hasHumdrumText()) {
+		HumdrumFile cfile;
+		cfile.readString(composite.getHumdrumText());
+		for (int i=0; i<cfile.getLineCount(); i++) {
+			if (!cfile[i].isData()) {
+				continue;
+			}
+			if (cfile[i].getDuration() == 0) {
+				continue;
+			}
+			bool attack = false;
+			for (int j=0; j<cfile[i].getFieldCount(); j++) {
+				HTp token = cfile.token(i, j);
+				if (!token->isKern()) {
+					continue;
+				}
+				if (token->isNoteAttack()) {
+					attack = true;
+					break;
+				}
+			}
+			if (attack) {
+				times.push_back(cfile[i].getDurationFromStart());
+			}
+		}
+	}
+
+	if (times.empty()) {
+		fillCompositeAttackTimesLocal(infile, times);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cadential_rhythm_profiler::fillCompositeAttackTimesLocal -- A line
+//     is a composite onset when any **kern token is a note attack.  This
+//     is the same definition Tool_composite uses for the full composite
+//     spine (barlines are not counted).
+//
+
+void Tool_cadential_rhythm_profiler::fillCompositeAttackTimesLocal(HumdrumFile& infile,
+		vector<HumNum>& times) {
+	times.clear();
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isData()) {
+			continue;
+		}
+		if (infile[i].getDuration() == 0) {
+			continue;
+		}
+		bool attack = false;
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (!token->isKern()) {
+				continue;
+			}
+			if (token->isNoteAttack()) {
+				attack = true;
+				break;
+			}
+		}
+		if (attack) {
+			times.push_back(infile[i].getDurationFromStart());
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cadential_rhythm_profiler::getMeasureDuration -- Duration of one
+//     measure in the active time signature / mensuration at the given
+//     line, in quarter notes.  Falls back to the written barline duration.
+//
+
+HumNum Tool_cadential_rhythm_profiler::getMeasureDuration(HumdrumFile& infile,
+		int line) {
+	vector<pair<int, HumNum> > timesigs;
+	infile.getTimeSigs(timesigs);
+	if ((line >= 0) && (line < (int)timesigs.size())) {
+		int top = timesigs[line].first;
+		HumNum bot = timesigs[line].second;
+		if ((top > 0) && bot.isNonZero()) {
+			HumNum beatDur(4, 1);
+			beatDur /= bot;
+			return beatDur * top;
+		}
+	}
+	if ((line >= 0) && (line < infile.getLineCount())) {
+		HumNum bardur = infile[line].getBarlineDuration();
+		if (bardur.isPositive()) {
+			return bardur;
+		}
+	}
+	return HumNum((int)(m_minimDur * 4));
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cadential_rhythm_profiler::windowDuration --
+//
+
+HumNum Tool_cadential_rhythm_profiler::windowDuration(const WindowSpec& window,
+		HumNum measureDur) {
+	if (window.m_measureQ) {
+		return measureDur;
+	}
+	return HumNum((int)(window.m_minims * m_minimDur));
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cadential_rhythm_profiler::countAttacksInWindow -- Count attacks in
+//     [t0, t1].  The arrival-side setting is applied by the caller when it
+//     chooses t0/t1, so this function is a closed interval on both ends
+//     except that a zero-width window yields 0.
+//
+//     Arrival placement (m_arrivalSide):
+//       0: before = [T-W, T],  after = (T, T+W]
+//       1: before = [T-W, T),  after = [T, T+W)
+//       2: before = [T-W, T),  after = (T, T+W]
+//
+
+int Tool_cadential_rhythm_profiler::countAttacksInWindow(const vector<HumNum>& times,
+		HumNum t0, HumNum t1, bool includeStart, bool includeEnd) {
+	int count = 0;
+	for (int i=0; i<(int)times.size(); i++) {
+		const HumNum& t = times[i];
+		if (t < t0) {
+			continue;
+		}
+		if (t > t1) {
+			continue;
+		}
+		if (!includeStart && (t == t0)) {
+			continue;
+		}
+		if (!includeEnd && (t == t1)) {
+			continue;
+		}
+		count++;
+	}
+	return count;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cadential_rhythm_profiler::analyzeCadence -- Compute before/after
+//     ratios for every window and every analysis method, and add them to
+//     the running totals for this cadence type.
+//
+
+void Tool_cadential_rhythm_profiler::analyzeCadence(TypeStats& stats,
+		HumNum arrival, HumNum measureDur,
+		const map<int, vector<HumNum> >& partTimes,
+		const vector<int>& tracks,
+		const vector<HumNum>& compositeTimes) {
+
+	for (int w=0; w<(int)m_windows.size(); w++) {
+		HumNum width = windowDuration(m_windows[w], measureDur);
+		if (!width.isPositive()) {
+			continue;
+		}
+
+		HumNum before0 = arrival - width;
+		HumNum before1 = arrival;
+		HumNum after0  = arrival;
+		HumNum after1  = arrival + width;
+
+		// Arrival-side: 0 = arrival in before, 1 = arrival in after,
+		// 2 = arrival excluded from both windows.
+		bool beforeIncStart = true;
+		bool beforeIncEnd   = (m_arrivalSide == 0);
+		bool afterIncStart  = (m_arrivalSide == 1);
+		bool afterIncEnd    = false;
+
+		// partwise_combined: ratio per active part, then average.
+		double partSum = 0.0;
+		int partCount = 0;
+		int bestBefore = 0;
+		int bestAfter = 0;
+		int bestTotal = -1;
+
+		for (int t=0; t<(int)tracks.size(); t++) {
+			int track = tracks[t];
+			auto it = partTimes.find(track);
+			if (it == partTimes.end()) {
+				continue;
+			}
+			int beforeN = countAttacksInWindow(it->second, before0, before1,
+					beforeIncStart, beforeIncEnd);
+			int afterN  = countAttacksInWindow(it->second, after0, after1,
+					afterIncStart, afterIncEnd);
+			int total   = beforeN + afterN;
+			if (total <= 0) {
+				continue;
+			}
+			partSum += (double)beforeN / (double)total;
+			partCount++;
+			if (total > bestTotal) {
+				bestTotal = total;
+				bestBefore = beforeN;
+				bestAfter = afterN;
+			}
+		}
+
+		string prefix = m_windows[w].m_id;
+		if (partCount > 0) {
+			RatioAccum& combined = stats.m_metrics["partwise_combined_" + prefix];
+			combined.m_sumBefore += partSum / (double)partCount;
+			combined.m_count++;
+		}
+
+		if (bestTotal > 0) {
+			accumulateRatios(stats, "most_active_part_" + prefix,
+					bestBefore, bestAfter);
+		}
+
+		int cBefore = countAttacksInWindow(compositeTimes, before0, before1,
+				beforeIncStart, beforeIncEnd);
+		int cAfter  = countAttacksInWindow(compositeTimes, after0, after1,
+				afterIncStart, afterIncEnd);
+		accumulateRatios(stats, "composite_" + prefix, cBefore, cAfter);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cadential_rhythm_profiler::accumulateRatios -- If the observation
+//     has at least one attack in the combined window, add its before-share
+//     to the running total for this metric.
+//
+
+void Tool_cadential_rhythm_profiler::accumulateRatios(TypeStats& stats,
+		const string& metricId, int beforeCount, int afterCount) {
+	int total = beforeCount + afterCount;
+	if (total <= 0) {
+		return;
+	}
+	RatioAccum& accum = stats.m_metrics[metricId];
+	accum.m_sumBefore += (double)beforeCount / (double)total;
+	accum.m_count++;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cadential_rhythm_profiler::metricColumnIds -- Ordered list of the
+//     metric ids (3 methods x 5 windows).  Each becomes one before-share
+//     column in the CSV.
+//
+
+vector<string> Tool_cadential_rhythm_profiler::metricColumnIds(void) {
+	vector<string> methods;
+	methods.push_back("composite");
+	methods.push_back("most_active_part");
+	methods.push_back("partwise_combined");
+
+	vector<string> ids;
+	for (int m=0; m<(int)methods.size(); m++) {
+		for (int w=0; w<(int)m_windows.size(); w++) {
+			ids.push_back(methods[m] + "_" + m_windows[w].m_id);
+		}
+	}
+	return ids;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cadential_rhythm_profiler::finally -- Write the compiled CSV.
+//
+
+void Tool_cadential_rhythm_profiler::finally(void) {
+	if (!m_outputFile.empty()) {
+		ofstream output(m_outputFile);
+		if (!output.is_open()) {
+			cerr << "Error: cannot write " << m_outputFile << endl;
+			return;
+		}
+		writeCsv(output);
+		if (m_verboseQ) {
+			cerr << "Wrote " << m_outputFile << endl;
+		}
+		return;
+	}
+	writeCsv(m_free_text);
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cadential_rhythm_profiler::cadenceVariantRank -- 0 = regular,
+//     1 = Evaded, 2 = Abandoned.  The modifier may be any whole word in
+//     the label (e.g. "Evaded Authentic" or "Phrygian Evaded Clausula Vera").
+//     Abandoned outranks Evaded if both words are present.
+//
+
+int Tool_cadential_rhythm_profiler::cadenceVariantRank(const string& name) {
+	int rank = 0;
+	string word;
+	for (int i=0; i<=(int)name.size(); i++) {
+		bool end = (i == (int)name.size()) || isspace((unsigned char)name[i]);
+		if (!end) {
+			word += name[i];
+			continue;
+		}
+		if (word.empty()) {
+			continue;
+		}
+		if (word == "Abandoned") {
+			rank = 2;
+		} else if ((word == "Evaded") && (rank < 1)) {
+			rank = 1;
+		}
+		word.clear();
+	}
+	return rank;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cadential_rhythm_profiler::cadenceBaseName -- Label with Evaded
+//     and Abandoned words removed, so variants share a family name.
+//
+
+string Tool_cadential_rhythm_profiler::cadenceBaseName(const string& name) {
+	string base;
+	string word;
+	for (int i=0; i<=(int)name.size(); i++) {
+		bool end = (i == (int)name.size()) || isspace((unsigned char)name[i]);
+		if (!end) {
+			word += name[i];
+			continue;
+		}
+		if (word.empty()) {
+			continue;
+		}
+		if ((word != "Evaded") && (word != "Abandoned")) {
+			if (!base.empty()) {
+				base += " ";
+			}
+			base += word;
+		}
+		word.clear();
+	}
+	if (base.empty()) {
+		return name;
+	}
+	return base;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cadential_rhythm_profiler::sortCadenceTypes -- Group Evaded and
+//     Abandoned variants immediately after their regular type.  Families
+//     are ordered by the regular name when it is present; otherwise by the
+//     Evaded name, then Abandoned.  Within a family the order is regular,
+//     Evaded, Abandoned.
+//
+
+void Tool_cadential_rhythm_profiler::sortCadenceTypes(vector<string>& types) {
+	map<string, int> bestRank;
+	map<string, string> groupKey;
+	for (int i=0; i<(int)types.size(); i++) {
+		string base = cadenceBaseName(types[i]);
+		int rank = cadenceVariantRank(types[i]);
+		auto found = bestRank.find(base);
+		if ((found == bestRank.end()) || (rank < found->second)) {
+			bestRank[base] = rank;
+			groupKey[base] = types[i];
+		}
+	}
+
+	vector<string> keys((int)types.size());
+	vector<int> ranks((int)types.size());
+	for (int i=0; i<(int)types.size(); i++) {
+		keys[i] = groupKey[cadenceBaseName(types[i])];
+		ranks[i] = cadenceVariantRank(types[i]);
+	}
+
+	vector<int> order;
+	for (int i=0; i<(int)types.size(); i++) {
+		order.push_back(i);
+	}
+	sort(order.begin(), order.end(),
+			[&keys, &ranks, &types](int a, int b) {
+		if (keys[a] != keys[b]) {
+			return keys[a] < keys[b];
+		}
+		if (ranks[a] != ranks[b]) {
+			return ranks[a] < ranks[b];
+		}
+		return types[a] < types[b];
+	});
+
+	vector<string> sorted;
+	for (int i=0; i<(int)order.size(); i++) {
+		sorted.push_back(types[order[i]]);
+	}
+	types = sorted;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cadential_rhythm_profiler::writeCsv -- Two header rows encode a
+//     column MultiIndex (Type / Durational_Window_Before).  Type is written
+//     once per analysis method; Durational_Window_Before once per window.
+//     Each data cell is the mean before-share for that method and window.
+//     Rows are grouped so Evaded and Abandoned variants follow their
+//     regular cadence type.
+//
+
+void Tool_cadential_rhythm_profiler::writeCsv(ostream& out) {
+	vector<string> methods;
+	methods.push_back("composite");
+	methods.push_back("most_active_part");
+	methods.push_back("partwise_combined");
+
+	vector<string> info;
+	info.push_back("cadence_type");
+	info.push_back("num_cadences");
+	info.push_back("num_pieces");
+	info.push_back("%_total_cadences");
+	int infoCount = (int)info.size();
+	int cellsPerMethod = (int)m_windows.size();
+
+	out << info[0];
+	for (int i=1; i<infoCount; i++) {
+		out << "," << info[i];
+	}
+	for (int m=0; m<(int)methods.size(); m++) {
+		out << "," << methods[m];
+		for (int i=1; i<cellsPerMethod; i++) {
+			out << ",";
+		}
+	}
+	out << "\n";
+
+	for (int i=0; i<infoCount; i++) {
+		if (i > 0) {
+			out << ",";
+		}
+	}
+	for (int m=0; m<(int)methods.size(); m++) {
+		for (int w=0; w<(int)m_windows.size(); w++) {
+			out << "," << m_windows[w].m_id;
+		}
+	}
+	out << "\n";
+
+	vector<string> metrics = metricColumnIds();
+
+	vector<string> types;
+	for (auto it = m_stats.begin(); it != m_stats.end(); it++) {
+		types.push_back(it->first);
+	}
+	sortCadenceTypes(types);
+
+	for (int i=0; i<(int)types.size(); i++) {
+		TypeStats& stats = m_stats[types[i]];
+		out << csvEscape(types[i]);
+		out << "," << stats.m_numCadences;
+		out << "," << stats.m_pieces.size();
+		double pct = 0.0;
+		if (m_totalCadences > 0) {
+			pct = 100.0 * (double)stats.m_numCadences / (double)m_totalCadences;
+		}
+		out << "," << formatRatio(pct);
+
+		for (int m=0; m<(int)metrics.size(); m++) {
+			auto found = stats.m_metrics.find(metrics[m]);
+			if ((found == stats.m_metrics.end()) || (found->second.m_count <= 0)) {
+				out << ",";
+				continue;
+			}
+			double before = found->second.m_sumBefore / (double)found->second.m_count;
+			if (before < 0.0) {
+				before = 0.0;
+			}
+			if (before > 1.0) {
+				before = 1.0;
+			}
+			out << "," << formatRatio(before);
+		}
+		out << "\n";
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cadential_rhythm_profiler::formatRatio --
+//
+
+string Tool_cadential_rhythm_profiler::formatRatio(double value) {
+	stringstream stream;
+	stream << fixed << setprecision(m_precision) << value;
+	return stream.str();
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cadential_rhythm_profiler::csvEscape --
+//
+
+string Tool_cadential_rhythm_profiler::csvEscape(const string& value) {
+	if (value.find_first_of(",\"\n") == string::npos) {
+		return value;
+	}
+	string output = "\"";
+	for (int i=0; i<(int)value.size(); i++) {
+		if (value[i] == '"') {
+			output += "\"\"";
+		} else {
+			output += value[i];
+		}
+	}
+	output += "\"";
+	return output;
 }
 
 
@@ -84677,6 +85822,7 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 
 			adjustColorization(infile);
 			infile.createLinesFromTokens();
+			m_humdrum_text << infile;
 
 			return true;
 		}
@@ -84707,6 +85853,7 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 		infile.createLinesFromTokens();
 
 		infile.createLinesFromTokens();
+		m_humdrum_text << infile;
 		return true;
 	} else {
 		if (getBoolean("count")) {
@@ -84723,6 +85870,7 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 			printColorLegend(infile);
 			adjustColorization(infile);
 			infile.createLinesFromTokens();
+			m_humdrum_text << infile;
 			return true;
 		}
 	}
@@ -86105,7 +87253,11 @@ RECONSIDER:
 				results[ovoiceindex][lineindex] = m_labels[SUS_TERN];
 			} else if (((odur == .5) || (odur == 1)) && // purely ornamental suspension
 						((odurn == .5) || (odurn == 1)) &&
-						(ointn == -1) && (ointnn == -1) ) {
+						(ointn == -1) && (ointnn == -1) &&
+						// rearticulated same-pitch quarters count as a minim, so not ornamental
+						!((ointp == 0) && (oattackindexp >= 0) &&
+						  (grid.cell(ovoiceindex, oattackindexp)->getDuration() == 1) &&
+						  (odur == 1))) {
 				results[vindex][lineindex] = m_labels[AGENT_BIN];
 				results[ovoiceindex][lineindex] = m_labels[ORNAMENTAL_SUS];
 			} else { // binary agent and suspension
