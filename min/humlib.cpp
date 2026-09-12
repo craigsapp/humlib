@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Sep 12 18:36:47 CEST 2026
+// Last Modified: Sat Sep 12 21:02:21 CEST 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -85790,9 +85790,9 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 	if (suppressQ) {
 		suppressDissonances(infile, grid, attacks, results);
 
-		// should update low-level durations in suppressDissonances, but
-		// being lazy and re-analyze spines.  If there was any error in
-		// the durations, there will be no output from the program probably.
+		// Merges update token text and cached durations; rebuild lines
+		// before re-analyzing structure for the second dissonance pass.
+		infile.createLinesFromTokens();
 		infile.analyzeStructure();
 
 		NoteGrid grid2(infile);
@@ -86345,17 +86345,17 @@ void Tool_dissonant::suppressSusOrnamentsInVoice(HumdrumFile& infile,
 				(intn == -1) && (intnn == -1) && (intnnn == 1) ) { // turn figure anticipation of resolution phase
 				if ((results[lineindexnn] == ".") && (!tokennn->isNull()) &&
 					(tokennn->isNoteAttack()) ) {
-					mergeWithPreviousNote(infile, lineindexnn, vindex);
+					mergeWithPreviousNote(infile, lineindexnn, fieldindex);
 				}
 				if ((results[lineindexn] == ".") && (!tokenn->isNull()) &&
 					(tokenn->isNoteAttack()) ) {
-					mergeWithPreviousNote(infile, lineindexn, vindex);
+					mergeWithPreviousNote(infile, lineindexn, fieldindex);
 				}
 			} else if ((durn == durnn) && (durn == durnnn) && (levn > levnn) &&
 				(levnn < levnnn) && (intn == -1) && (intnn == 0) &&
 				(intnnn == -1) && (results[lineindexnnn] == ".") &&
 				(!tokennnn->isNull()) && (tokennnn->isNoteAttack()) ) { // Du Fay ornament
-				mergeWithPreviousNote(infile, lineindexnnn, vindex);
+				mergeWithPreviousNote(infile, lineindexnnn, fieldindex);
 			}
 		}
 		if (((results[lineindex] == m_labels[SUS_BIN]) ||
@@ -86373,7 +86373,7 @@ void Tool_dissonant::suppressSusOrnamentsInVoice(HumdrumFile& infile,
 			if ((durn <= durnn) && (levn >= levnn) && (intn == -1) &&
 				(intnn == 0) && (results[lineindexn] == ".") &&
 				(!tokenn->isNull()) && (tokenn->isNoteAttack()) ) { // anticipation of resolution phase
-				mergeWithPreviousNote(infile, lineindexn, vindex);
+				mergeWithPreviousNote(infile, lineindexn, fieldindex);
 			}
 		}
 	}
@@ -86415,7 +86415,21 @@ void Tool_dissonant::mergeWithNextNote(HumdrumFile& infile, NoteCell* cell) {
 
 void Tool_dissonant::mergeWithPreviousNote(HumdrumFile& infile, int line, int field) {
 	HTp cnote = infile.token(line, field);  // current note (attack)
+	if (!cnote || cnote->isNull() || !cnote->isKern() || cnote->isRest()) {
+		return;
+	}
 	HTp pnote = cnote->getPreviousNNDT();   // previous note (not necessarily attack)
+
+	// NNDT links are not updated when notes are nullified during suppression,
+	// so skip any already-merged placeholders to find a real previous note.
+	while (pnote && (pnote->isNull() || !pnote->isKern())) {
+		HTp earlier = pnote->getPreviousNNDT();
+		if (!earlier || earlier == pnote) {
+			pnote = NULL;
+			break;
+		}
+		pnote = earlier;
+	}
 
 	if (pnote == NULL) {
 		// no previous note;
@@ -86544,13 +86558,13 @@ void Tool_dissonant::simplePreviousMerge(HTp pnote, HTp cnote) {
 	HumNum pdur = pnote->getDuration();
 	HumNum dur = cdur + pdur;
 	changeDurationOfNote(pnote, dur);
+	adjustBeamsAfterMerge(pnote, cnote);
 
 	if (cnote->find("[") == string::npos) {
 		// current note is not the start of a tie group, so
-		// replace it with a null token and return.  Ideally
-		// the low-level duration of the token should also be
-		// set to zero.
+		// replace it with a null token and return.
 		cnote->setText(".");
+		cnote->setDuration(0);
 		return;
 	}
 
@@ -86570,8 +86584,8 @@ void Tool_dissonant::simplePreviousMerge(HTp pnote, HTp cnote) {
 
 	changePitchOfTieGroupFollowing(cnote, pitch);
 
-	// also should set the low-level duration of the token to 0.
 	cnote->setText(".");
+	cnote->setDuration(0);
 }
 
 
@@ -86610,8 +86624,133 @@ void Tool_dissonant::simpleNextMerge(HTp cnote, HTp nnote) {
 	HumNum dur = cdur + ndur;
 	changeDurationOfNote(cnote, dur);
 	changePitch(cnote, nnote);
+	adjustBeamsAfterMerge(cnote, nnote);
 	nnote->setText(".");
+	nnote->setDuration(0);
 	return;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_dissonant::adjustBeamsAfterMerge -- When a merge produces a note of
+//   a quarter note or longer, beam start/stop markers (L/J) cannot remain on
+//   that note.  Move an L to the next remaining beamable note, and a J to the
+//   previous remaining beamable note.  If a note ends up with both L and J,
+//   remove both since it has become a one-note beam group.
+//
+
+void Tool_dissonant::adjustBeamsAfterMerge(HTp survivor, HTp removed) {
+	if ((!survivor) || (!removed)) {
+		return;
+	}
+	if (survivor->getDuration() < 1) {
+		return;
+	}
+
+	auto hasBeamChar = [](HTp note, char mark) -> bool {
+		return note && note->find(mark) != string::npos;
+	};
+	auto removeBeamChar = [](HTp note, char mark) {
+		if (!note) {
+			return;
+		}
+		string text = *note;
+		text.erase(std::remove(text.begin(), text.end(), mark), text.end());
+		note->setText(text);
+	};
+	auto addBeamChar = [&hasBeamChar](HTp note, char mark) {
+		if ((!note) || hasBeamChar(note, mark)) {
+			return;
+		}
+		note->setText(*note + mark);
+	};
+	auto clearIfBothBeamEnds = [&hasBeamChar, &removeBeamChar](HTp note) {
+		if (hasBeamChar(note, 'L') && hasBeamChar(note, 'J')) {
+			removeBeamChar(note, 'L');
+			removeBeamChar(note, 'J');
+		}
+	};
+	auto nextBeamable = [removed](HTp start) -> HTp {
+		HTp tok = start;
+		while (tok) {
+			tok = tok->getNextNNDT();
+			if (!tok) {
+				return NULL;
+			}
+			if (tok == removed) {
+				continue;
+			}
+			if (tok->isNull()) {
+				continue;
+			}
+			if (!tok->isNote()) {
+				return NULL;
+			}
+			if (tok->getDuration() >= 1) {
+				continue;
+			}
+			return tok;
+		}
+		return NULL;
+	};
+	auto prevBeamable = [removed](HTp start) -> HTp {
+		HTp tok = start;
+		while (tok) {
+			tok = tok->getPreviousNNDT();
+			if (!tok) {
+				return NULL;
+			}
+			if (tok == removed) {
+				continue;
+			}
+			if (tok->isNull()) {
+				continue;
+			}
+			if (!tok->isNote()) {
+				return NULL;
+			}
+			if (tok->getDuration() >= 1) {
+				continue;
+			}
+			return tok;
+		}
+		return NULL;
+	};
+
+	bool moveL = hasBeamChar(survivor, 'L') || hasBeamChar(removed, 'L');
+	bool moveJ = hasBeamChar(survivor, 'J') || hasBeamChar(removed, 'J');
+
+	removeBeamChar(survivor, 'L');
+	removeBeamChar(survivor, 'J');
+	removeBeamChar(removed, 'L');
+	removeBeamChar(removed, 'J');
+
+	HTp lTarget = NULL;
+	HTp jTarget = NULL;
+	if (moveL) {
+		lTarget = nextBeamable(survivor);
+		if (lTarget) {
+			addBeamChar(lTarget, 'L');
+			clearIfBothBeamEnds(lTarget);
+		}
+	}
+	if (moveJ) {
+		// Prefer previous of removed (end of former beam), else of survivor.
+		jTarget = prevBeamable(removed);
+		if (!jTarget) {
+			jTarget = prevBeamable(survivor);
+		}
+		if (jTarget) {
+			addBeamChar(jTarget, 'J');
+			clearIfBothBeamEnds(jTarget);
+		}
+	}
+
+	if (lTarget && jTarget && (lTarget == jTarget)) {
+		clearIfBothBeamEnds(lTarget);
+	}
 }
 
 
@@ -86671,6 +86810,7 @@ void Tool_dissonant::changeDurationOfNote(HTp note, HumNum dur) {
 		text += recip;
 		text += hre.getMatch(3);
 		note->setText(text);
+		note->setDuration(dur);
 	} else {
 		cerr << "STRANGE ERROR: no duration on note" << endl;
 		return;
@@ -86690,7 +86830,19 @@ void Tool_dissonant::mergeWithNextNote(HumdrumFile& infile, int line, int field)
 	if (!cnote) {
 		return;
 	}
+	if (cnote->isNull() || !cnote->isKern() || cnote->isRest()) {
+		return;
+	}
 	HTp nnote = cnote->getNextNNDT();   // next note
+	// NNDT links can point at notes already nullified earlier in suppression.
+	while (nnote && (nnote->isNull() || !nnote->isKern())) {
+		HTp later = nnote->getNextNNDT();
+		if (!later || later == nnote) {
+			nnote = NULL;
+			break;
+		}
+		nnote = later;
+	}
 	if (!nnote) {
 		return;
 	}
@@ -87171,7 +87323,14 @@ RECONSIDER:
 			ternAgent = true;
 		}
 
-		if (((lev >= levn) || ((lev == 2) && (dur == .5))) && (lev >= levp) &&
+		// Do not overwrite fake-suspension labels with weaker dissonance types.
+		bool keepFakeSus =
+			(results[vindex][lineindex] == m_labels[FAKE_SUSPENSION_STEP]) ||
+			(results[vindex][lineindex] == m_labels[FAKE_SUSPENSION_LEAP]);
+
+		if (keepFakeSus) {
+			// already labeled as fake suspension against another voice
+		} else if (((lev >= levn) || ((lev == 2) && (dur == .5))) && (lev >= levp) &&
 			(dur <= durp) && (condition2 || condition2b) && valid_acc_exit) { // weak dissonances
 			if (intp == -1) { // descending dissonances
 				if (intn == -1) { // downward passing tone
@@ -87366,10 +87525,14 @@ void Tool_dissonant::findFakeSuspensions(vector<vector<string>>& results, NoteGr
 
 	for (int i=1; i<(int)attacks.size()-1; i++) {
 		int lineindex = attacks[i]->getLineIndex();
+		// Also upgrade passing tones that precede a suspension: those are
+		// fake suspensions, not true passing tones (e.g. Quinto m.6 in Trm0024a).
 		if ((results[vindex][lineindex].find("Z") == string::npos) &&
 			(results[vindex][lineindex].find("z") == string::npos) &&
 			(results[vindex][lineindex].find("M") == string::npos) &&
-			(results[vindex][lineindex].find("m") == string::npos)) {
+			(results[vindex][lineindex].find("m") == string::npos) &&
+			(results[vindex][lineindex] != m_labels[PASSING_DOWN]) &&
+			(results[vindex][lineindex] != m_labels[PASSING_UP])) {
 			continue;
 		}
 		intp = fabs(*attacks[i] - *attacks[i-1]);

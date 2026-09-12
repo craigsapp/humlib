@@ -1015,7 +1015,7 @@ void Tool_dissonant::simpleNextMerge(HTp cnote, HTp nnote) {
 //   a quarter note or longer, beam start/stop markers (L/J) cannot remain on
 //   that note.  Move an L to the next remaining beamable note, and a J to the
 //   previous remaining beamable note.  If a note ends up with both L and J,
-//   remove both (degenerate one-note beam).
+//   remove both since it has become a one-note beam group.
 //
 
 void Tool_dissonant::adjustBeamsAfterMerge(HTp survivor, HTp removed) {
@@ -1700,7 +1700,14 @@ RECONSIDER:
 			ternAgent = true;
 		}
 
-		if (((lev >= levn) || ((lev == 2) && (dur == .5))) && (lev >= levp) &&
+		// Do not overwrite fake-suspension labels with weaker dissonance types.
+		bool keepFakeSus =
+			(results[vindex][lineindex] == m_labels[FAKE_SUSPENSION_STEP]) ||
+			(results[vindex][lineindex] == m_labels[FAKE_SUSPENSION_LEAP]);
+
+		if (keepFakeSus) {
+			// already labeled as fake suspension against another voice
+		} else if (((lev >= levn) || ((lev == 2) && (dur == .5))) && (lev >= levp) &&
 			(dur <= durp) && (condition2 || condition2b) && valid_acc_exit) { // weak dissonances
 			if (intp == -1) { // descending dissonances
 				if (intn == -1) { // downward passing tone
@@ -1895,10 +1902,14 @@ void Tool_dissonant::findFakeSuspensions(vector<vector<string>>& results, NoteGr
 
 	for (int i=1; i<(int)attacks.size()-1; i++) {
 		int lineindex = attacks[i]->getLineIndex();
+		// Also upgrade passing tones that precede a suspension: those are
+		// fake suspensions, not true passing tones (e.g. Quinto m.6 in Trm0024a).
 		if ((results[vindex][lineindex].find("Z") == string::npos) &&
 			(results[vindex][lineindex].find("z") == string::npos) &&
 			(results[vindex][lineindex].find("M") == string::npos) &&
-			(results[vindex][lineindex].find("m") == string::npos)) {
+			(results[vindex][lineindex].find("m") == string::npos) &&
+			(results[vindex][lineindex] != m_labels[PASSING_DOWN]) &&
+			(results[vindex][lineindex] != m_labels[PASSING_UP])) {
 			continue;
 		}
 		intp = fabs(*attacks[i] - *attacks[i-1]);
