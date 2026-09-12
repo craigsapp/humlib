@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Sep 12 21:02:21 CEST 2026
+// Last Modified: Sat Sep 12 21:33:14 CEST 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -32262,9 +32262,9 @@ bool HumdrumFileStructure::analyzeStrands(void) {
 //
 
 void HumdrumFileStructure::resolveNullTokens(void) {
-	if (m_analyses.m_nulls_analyzed) {
-		return;
-	}
+	// Always recompute.  Tokens may have been changed to null (".") after
+	// the initial analysis (e.g. dissonant -s merges); those need fresh
+	// sustain links or NoteGrid will treat them as rests.
 	m_analyses.m_nulls_analyzed = true;
 	if (!areStrandsAnalyzed()) {
 		analyzeStrands();
@@ -85791,8 +85791,11 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 		suppressDissonances(infile, grid, attacks, results);
 
 		// Merges update token text and cached durations; rebuild lines
-		// before re-analyzing structure for the second dissonance pass.
+		// and null-resolution links before re-analyzing for the second pass.
+		// Without re-resolving nulls, notes turned into "." still point at
+		// themselves and NoteGrid treats mid-note sustains as rests.
 		infile.createLinesFromTokens();
+		infile.resolveNullTokens();
 		infile.analyzeStructure();
 
 		NoteGrid grid2(infile);

@@ -168,8 +168,11 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 		suppressDissonances(infile, grid, attacks, results);
 
 		// Merges update token text and cached durations; rebuild lines
-		// before re-analyzing structure for the second dissonance pass.
+		// and null-resolution links before re-analyzing for the second pass.
+		// Without re-resolving nulls, notes turned into "." still point at
+		// themselves and NoteGrid treats mid-note sustains as rests.
 		infile.createLinesFromTokens();
+		infile.resolveNullTokens();
 		infile.analyzeStructure();
 
 		NoteGrid grid2(infile);

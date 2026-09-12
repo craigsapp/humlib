@@ -1497,9 +1497,9 @@ bool HumdrumFileStructure::analyzeStrands(void) {
 //
 
 void HumdrumFileStructure::resolveNullTokens(void) {
-	if (m_analyses.m_nulls_analyzed) {
-		return;
-	}
+	// Always recompute.  Tokens may have been changed to null (".") after
+	// the initial analysis (e.g. dissonant -s merges); those need fresh
+	// sustain links or NoteGrid will treat them as rests.
 	m_analyses.m_nulls_analyzed = true;
 	if (!areStrandsAnalyzed()) {
 		analyzeStrands();
