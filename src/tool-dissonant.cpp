@@ -1040,6 +1040,23 @@ void Tool_dissonant::adjustBeamsAfterMerge(HTp survivor, HTp removed) {
 		text.erase(std::remove(text.begin(), text.end(), mark), text.end());
 		note->setText(text);
 	};
+
+	bool moveL = hasBeamChar(survivor, 'L') || hasBeamChar(removed, 'L');
+	bool moveJ = hasBeamChar(survivor, 'J') || hasBeamChar(removed, 'J');
+	if (!(moveL || moveJ)) {
+		return;
+	}
+
+	// Fast path: merged pair carried both beam ends (typical two-note
+	// beam → quarter).  Drop L/J; nothing remains to re-attach.
+	if (moveL && moveJ) {
+		removeBeamChar(survivor, 'L');
+		removeBeamChar(survivor, 'J');
+		removeBeamChar(removed, 'L');
+		removeBeamChar(removed, 'J');
+		return;
+	}
+
 	auto addBeamChar = [&hasBeamChar](HTp note, char mark) {
 		if ((!note) || hasBeamChar(note, mark)) {
 			return;
@@ -1167,9 +1184,6 @@ void Tool_dissonant::adjustBeamsAfterMerge(HTp survivor, HTp removed) {
 		}
 		return NULL;
 	};
-
-	bool moveL = hasBeamChar(survivor, 'L') || hasBeamChar(removed, 'L');
-	bool moveJ = hasBeamChar(survivor, 'J') || hasBeamChar(removed, 'J');
 
 	removeBeamChar(survivor, 'L');
 	removeBeamChar(survivor, 'J');

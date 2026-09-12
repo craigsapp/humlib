@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Sep 12 23:39:32 CEST 2026
+// Last Modified: Sun Sep 13 00:57:49 CEST 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -86675,49 +86675,118 @@ void Tool_dissonant::adjustBeamsAfterMerge(HTp survivor, HTp removed) {
 			removeBeamChar(note, 'J');
 		}
 	};
-	auto nextBeamable = [removed](HTp start) -> HTp {
+	// Relocate L/J only within the same beam group.  Do not walk past
+	// unrelated long notes into a neighboring group (e.g. Tenore m.1 8d
+	// must not receive J from merging 8eL+8fJ into a quarter).
+	auto nextBeamable = [removed, survivor, &hasBeamChar](HTp start) -> HTp {
 		HTp tok = start;
 		while (tok) {
 			tok = tok->getNextNNDT();
 			if (!tok) {
 				return NULL;
 			}
-			if (tok == removed) {
+			if ((tok == removed) || tok->isNull()) {
 				continue;
 			}
-			if (tok->isNull()) {
-				continue;
-			}
-			if (!tok->isNote()) {
+			if ((!tok->isNote()) || tok->isRest()) {
 				return NULL;
 			}
 			if (tok->getDuration() >= 1) {
-				continue;
+				if (tok == survivor) {
+					continue;
+				}
+				return NULL;
 			}
-			return tok;
+			if (hasBeamChar(tok, 'J')) {
+				return tok;
+			}
+			HTp fwd = tok;
+			bool foundJ = false;
+			while (fwd) {
+				fwd = fwd->getNextNNDT();
+				if (!fwd) {
+					break;
+				}
+				if ((fwd == removed) || fwd->isNull()) {
+					continue;
+				}
+				if ((!fwd->isNote()) || fwd->isRest()) {
+					break;
+				}
+				if (fwd->getDuration() >= 1) {
+					if (fwd == survivor) {
+						continue;
+					}
+					break;
+				}
+				if (hasBeamChar(fwd, 'L')) {
+					break;
+				}
+				if (hasBeamChar(fwd, 'J')) {
+					foundJ = true;
+					break;
+				}
+			}
+			if (foundJ) {
+				return tok;
+			}
+			return NULL;
 		}
 		return NULL;
 	};
-	auto prevBeamable = [removed](HTp start) -> HTp {
+	auto prevBeamable = [removed, survivor, &hasBeamChar](HTp start) -> HTp {
 		HTp tok = start;
 		while (tok) {
 			tok = tok->getPreviousNNDT();
 			if (!tok) {
 				return NULL;
 			}
-			if (tok == removed) {
+			if ((tok == removed) || tok->isNull()) {
 				continue;
 			}
-			if (tok->isNull()) {
-				continue;
-			}
-			if (!tok->isNote()) {
+			if ((!tok->isNote()) || tok->isRest()) {
 				return NULL;
 			}
 			if (tok->getDuration() >= 1) {
-				continue;
+				if (tok == survivor) {
+					continue;
+				}
+				return NULL;
 			}
-			return tok;
+			if (hasBeamChar(tok, 'L')) {
+				return tok;
+			}
+			HTp back = tok;
+			bool foundL = false;
+			while (back) {
+				back = back->getPreviousNNDT();
+				if (!back) {
+					break;
+				}
+				if ((back == removed) || back->isNull()) {
+					continue;
+				}
+				if ((!back->isNote()) || back->isRest()) {
+					break;
+				}
+				if (back->getDuration() >= 1) {
+					if (back == survivor) {
+						continue;
+					}
+					break;
+				}
+				if (hasBeamChar(back, 'J')) {
+					break;
+				}
+				if (hasBeamChar(back, 'L')) {
+					foundL = true;
+					break;
+				}
+			}
+			if (foundL) {
+				return tok;
+			}
+			return NULL;
 		}
 		return NULL;
 	};
