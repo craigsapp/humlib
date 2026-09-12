@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Sep 12 21:33:14 CEST 2026
+// Last Modified: Sat Sep 12 22:05:30 CEST 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -87078,12 +87078,15 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string>>& results,
 
 		// check if current note is dissonant to another sounding note:
 		dissonant = false;
+		bool lowerOfDissFourth = false; // ref is lower note of a dissonant fourth
 
 		int nextj = 0;
 		int j = 0;
 
 RECONSIDER:
 
+		dissonant = false;
+		lowerOfDissFourth = false;
 		int value = 0;
 		for (j=nextj; j<(int)harmint.size(); j++) {
 			if (j == vindex) {
@@ -87135,6 +87138,11 @@ RECONSIDER:
 				ovoiceindex = j;
 				// oattackindexn = grid.cell(ovoiceindex, sliceindex)->getNextAttackIndex();
 				oattackindexn = getNextPitchAttackIndex(grid, ovoiceindex, sliceindex);
+				// value == 3: other is a fourth above ref, so ref is the lower note.
+				// Lower notes of dissonant fourths only receive agent labels (g/G).
+				if (value == 3) {
+					lowerOfDissFourth = true;
+				}
 				break;
 			}
 		}
@@ -87333,7 +87341,7 @@ RECONSIDER:
 
 		if (keepFakeSus) {
 			// already labeled as fake suspension against another voice
-		} else if (((lev >= levn) || ((lev == 2) && (dur == .5))) && (lev >= levp) &&
+		} else if ((!lowerOfDissFourth) && ((lev >= levn) || ((lev == 2) && (dur == .5))) && (lev >= levp) &&
 			(dur <= durp) && (condition2 || condition2b) && valid_acc_exit) { // weak dissonances
 			if (intp == -1) { // descending dissonances
 				if (intn == -1) { // downward passing tone
@@ -87372,7 +87380,7 @@ RECONSIDER:
 					results[vindex][lineindex] = m_labels[REV_CAMBIATA_UP];
 				}
 			}
-		} else if ((durp >= 2) && (dur == 1) && (lev < levn) && valid_acc_exit &&
+		} else if ((!lowerOfDissFourth) && (durp >= 2) && (dur == 1) && (lev < levn) && valid_acc_exit &&
 					 (condition2 || condition2b) && (lev == 1)) {
 			if (intp == -1) {
 				if (intn == -1) { // dissonant third quarter descending passing tone
@@ -87387,7 +87395,7 @@ RECONSIDER:
 					results[vindex][lineindex] = m_labels[THIRD_Q_UPPER_NEI];
 				}
 			}
-		} else if (((lev > levp) || (durp+durp+durp+durp == dur)) &&
+		} else if ((!lowerOfDissFourth) && ((lev > levp) || (durp+durp+durp+durp == dur)) &&
 				   (lev == levn) && condition2 && (intn == -1) &&
 				   (dur == (durn+durn)) && ((dur+dur) <= odur)) {
 			if (fabs(intp) > 1.0) {
@@ -87461,7 +87469,7 @@ RECONSIDER:
 
 /////////////////////////////
 
-		if (i < ((int)attacks.size() - 2)) { // expand the analysis window
+		if ((!lowerOfDissFourth) && (i < ((int)attacks.size() - 2))) { // expand the analysis window
 
 			double intnn = *attacks[i+2] - *attacks[i+1];
 			HumNum durnn = attacks[i+2]->getDuration();       // dur of note after next
@@ -87478,12 +87486,14 @@ RECONSIDER:
 
 		// Decide whether to give an unexplained dissonance label to the ref.
 		// voice if none of the dissonant conditions above apply.
+		// Lower notes of dissonant fourths do not get unexplained labels.
 		bool refLeaptTo = fabs(intp) > 1 ? true : false;
 		bool othLeaptTo = fabs(ointp) > 1 ? true : false;
 		bool refLeaptFrom = fabs(intn) > 1 ? true : false;
 		bool othLeaptFrom = fabs(ointn) > 1 ? true : false;
 
-		if ((results[vindex][lineindex] == "") && // this voice doesn't already have a dissonance label
+		if ((!lowerOfDissFourth) &&
+				(results[vindex][lineindex] == "") && // this voice doesn't already have a dissonance label
 				((olineindexc < lineindex) || // other voice does not attack at this point
 				((olineindexc == lineindex) && (dur < odur)) || // both voices attack together, but ref voice leaves dissonance first
 				(((olineindexc == lineindex) && (dur == odur)) && // both voices enter and leave dissonance simultaneously
@@ -87501,10 +87511,13 @@ RECONSIDER:
 		// against another note with which it might have a known dissonant function.
 		// Also go back if this voice was identified as an agent, because it may be
 		// the agent of multiple patients.
+		// Also reconsider when ref was only the lower note of a fourth and got no
+		// agent label — it may still be dissonant (2nd/7th) against another voice.
 		if ((results[vindex][lineindex] == m_labels[UNLABELED_Z4]) ||
 				(results[vindex][lineindex] == m_labels[UNLABELED_Z7]) ||
 				(results[vindex][lineindex] == m_labels[AGENT_BIN]) ||
-				(results[vindex][lineindex] == m_labels[AGENT_TERN])) {
+				(results[vindex][lineindex] == m_labels[AGENT_TERN]) ||
+				(lowerOfDissFourth && (results[vindex][lineindex] == ""))) {
 			if (nextj < (int)harmint.size()) {
 				goto RECONSIDER;
 			}
