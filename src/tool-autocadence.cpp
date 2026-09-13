@@ -3169,6 +3169,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/* 106 */ addCadenceDefinition("c", "T",	"cT2",	R"(^7_1:-2, 6_-2:4, 3_)");
 	/* 105 */ addCadenceDefinition("c", "T",	"cT3",	R"(^2_-2:1, 3_1:-2, 2_)");
 	/* 105 */ addCadenceDefinition("c", "T",	"cT4",	R"(^2_1:1, 2_-2:1, 3_1:1, 3_1:-2, 2_)");
+	/* 105 */ addCadenceDefinition("c", "T",	"cT5",	R"(^2_-2:1, 3_1:1, 3_1:-2, 2_1:-2, 1_-2:2, 3_)");
 	/* 105 */ addCadenceDefinition("c", "t",	"ct1",	R"(^2_-2:1, 3_-2:1, 4_(?!2:1))");  // needs negative look-ahead to distinguish from CT5
 	/* 107 */ addCadenceDefinition("p", "C",	"pC1",	R"(^7_1:-2, 6_(?:5|-4):2, 3_)");
 	/* 108 */ addCadenceDefinition("s", "",	"s_1",	R"(^2_1:-2, 8_-2:2, 3_)");
