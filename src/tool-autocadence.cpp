@@ -3165,6 +3165,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/* 100 */ addCadenceDefinition("b", "C",	"bC4",	R"(^4D_1:-2, 3_1:1, 3_2:2, 3_)");
 	/* 101 */ addCadenceDefinition("b", "C",	"bC5",	R"(^4D_1:-2, 3_1:2, 4D_1:2, 5_1:-3, 3_2:2, 3_)");
 	/* 102 */ addCadenceDefinition("b", "C",	"bC6",	R"(^4D_1:-2, 3_2:2, 3_)");
+	/* 102 */ addCadenceDefinition("b", "c",	"bc1",	R"(^4D_1:-2, 3_2:-2, (?:8|1)_)");
 	/* 103 */ addCadenceDefinition("c", "B",	"cB1",	R"(^-4D_-2:1, -3_(?:4|-5):4, -3_)");
 	/* 104 */ addCadenceDefinition("c", "B",	"cB2",	R"(^-4D_-2:1, -3_-2:(?:4|-5), (?:-6|3)_)");
 	/* 105 */ addCadenceDefinition("c", "T",	"cT1",	R"(^2_-2:1, 3_-2:-2, 3_)");
@@ -3174,6 +3175,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/* 105 */ addCadenceDefinition("c", "T",	"cT5",	R"(^2_-2:1, 3_1:1, 3_1:-2, 2_1:-2, 1_-2:2, 3_)");
 	/* 105 */ addCadenceDefinition("c", "T",	"cT6",	R"(^2_-2:1, 3_1:1, 3_-2:-2, 3_)");
 	/* 105 */ addCadenceDefinition("c", "t",	"ct1",	R"(^2_-2:1, 3_-2:1, 4_(?!2:1))");  // needs negative look-ahead to distinguish from CT5
+	/* 105 */ addCadenceDefinition("c", "t",	"ct2",	R"(^2_-2:1, 3_-2:2, 5_)");
 	/* 107 */ addCadenceDefinition("p", "C",	"pC1",	R"(^7_1:-2, 6_(?:5|-4):2, 3_)");
 	/* 108 */ addCadenceDefinition("s", "",	"s_1",	R"(^2_1:-2, 8_-2:2, 3_)");
 	/* 109 */ addCadenceDefinition("t", "C",	"tC1",	R"(^-2_1:-2, -3_1:-2, -4D?_1:2, -3_2:2, -3_)");
@@ -3181,6 +3183,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/* 111 */ addCadenceDefinition("t", "C",	"tC3",	R"(^7_1:-2, 6_1:1, 6_1:-2, 5_1:2, 6_2:2, 6_)");
 	/* 112 */ addCadenceDefinition("t", "C",	"tC4",	R"(^7_1:-2, 6_2:2, 6_)");
 	/* 110 */ addCadenceDefinition("t", "C",	"tC5",	R"(^-2_1:-2, -3_1:1, -3_2:2, -3_)");
+	/* 111 */ addCadenceDefinition("t", "c",	"tc1",	R"(^7_1:-2, 6_-3:1, 8_2:1, 7_)");
 	/* 113 */ addCadenceDefinition("u", "C",	"uC1",	R"(^4D_1:-2, 3_-2:1, 4D_-2:2, 6_)");
 	/* 114 */ addCadenceDefinition("u", "C",	"uC2",	R"(^4D_1:-2, 3_-3:2, 6_)");
 	/* 115 */ addCadenceDefinition("u", "C",	"uC3",	R"(^4D_1:-2, 3_1:-2, 2_-3:3, 6_)");
@@ -3256,6 +3259,8 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("CTb",  "Evaded Authentic");
 	m_cadenceLabels.emplace("CTbx", "Evaded Authentic");
 	m_cadenceLabels.emplace("Cuz",  "Evaded Authentic");
+	m_cadenceLabels.emplace("bc",  "Evaded Authentic");
+	m_cadenceLabels.emplace("bcu",  "Evaded Authentic");
 	m_cadenceLabels.emplace("BCu",  "Authentic");
 	m_cadenceLabels.emplace("BCuz", "Authentic");
 	m_cadenceLabels.emplace("BCx",  "Authentic");
