@@ -3156,6 +3156,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/*  94 */ addCadenceDefinition("T", "a",	"Ta1",	R"(^4D_1:-2, 3_-2:-2, 3_)");
 	/*  95 */ addCadenceDefinition("T", "c",	"Tc1",	R"(^7_1:-2, 6_-2:4, 3_)");
 	/*  95 */ addCadenceDefinition("T", "c",	"Tc2",	R"(^7_1:-2, 6_-2:1, 7_)");
+	/*  95 */ addCadenceDefinition("T", "c",	"Tc3",	R"(^7_1:-2, 6_-2:-2, 6_)");
 	/*  96 */ addCadenceDefinition("T", "y",	"Ty1",	R"(^7_1:-2, 6_-2:R, R_)");
 	/*  97 */ addCadenceDefinition("b", "C",	"bC1",	R"(^4D_1:-2, 3_1:-2, 2_1:2, 3_2:2, 3_)");
 	/*  98 */ addCadenceDefinition("b", "C",	"bC2",	R"(^4D_1:-2, 3_1:-2, 2_2:2, 3_)");
