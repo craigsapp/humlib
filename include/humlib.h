@@ -6257,6 +6257,7 @@ class Tool_autocadence : public HumTool {
 		bool        isUppercaseRootObservation (const std::string& root);
 		int         rootObservationToPitchClass(const std::string& root);
 		bool        isSuspensionLabel          (const std::string& label);
+		bool        isCadentialSuspensionPair  (HTp lower, HTp upper);
 
 	private:
 

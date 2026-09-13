@@ -1379,6 +1379,12 @@ void Tool_autocadence::prepareSinglePairSequences(HumdrumFile& infile, int vinde
 		}
 		HTp lower = get<1>(m_intervals.at(i).at(vindex).at(pindex));
 		HTp upper = get<2>(m_intervals.at(i).at(vindex).at(pindex));
+		// Cadence formulas now start at the suspension itself.  Require a
+		// patient/agent pair (s/S against g/G), or a suspension without
+		// agent (m/M) against any other sounding voice.
+		if (!isCadentialSuspensionPair(lower, upper)) {
+			continue;
+		}
 		string sequence = generateSequenceString(infile, i, vindex, pindex);
 // cerr << "ADDING SEQUENCE: " << sequence << endl;
 		m_sequences.at(vindex).at(pindex).emplace_back(sequence, lower, upper, vector<int>{});
@@ -2155,8 +2161,9 @@ bool Tool_autocadence::hasNoEnsuingSuspension(HumdrumFile& infile, int index) {
 
 //////////////////////////////
 //
-// Tool_autocadence::isSuspensionLabel -- True for binary/ternary suspension
-//     or agent labels from the dissonance analysis.
+// Tool_autocadence::isSuspensionLabel -- True for suspension-family labels
+//     from the dissonance analysis: binary/ternary suspension or agent
+//     (s/S/g/G), fake suspension (f/F), or suspension without agent (m/M).
 //
 
 bool Tool_autocadence::isSuspensionLabel(const string& label) {
@@ -2164,11 +2171,56 @@ bool Tool_autocadence::isSuspensionLabel(const string& label) {
 		return false;
 	}
 	for (char c : label) {
-		if ((c == 's') || (c == 'S') || (c == 'g') || (c == 'G')) {
+		if ((c == 's') || (c == 'S') || (c == 'g') || (c == 'G') ||
+				(c == 'f') || (c == 'F') || (c == 'm') || (c == 'M')) {
 			return true;
 		}
 	}
 	return false;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::isCadentialSuspensionPair -- True when this sounding
+//     voice pair should open a cadence-formula search:
+//       * s/S only against a paired g/G (patient against agent)
+//       * m/M (suspension without agent) against any other sounding voice
+//
+
+bool Tool_autocadence::isCadentialSuspensionPair(HTp lower, HTp upper) {
+	if ((!lower) || (!upper)) {
+		return false;
+	}
+	string dissL = lower->getValue("auto", "dissonance");
+	string dissU = upper->getValue("auto", "dissonance");
+
+	auto hasChars = [](const string& label, const char* chars) -> bool {
+		if (label.empty()) {
+			return false;
+		}
+		for (char c : label) {
+			for (const char* p = chars; *p; p++) {
+				if (c == *p) {
+					return true;
+				}
+			}
+		}
+		return false;
+	};
+
+	// Suspension without agent: pair with any other sounding voice.
+	if (hasChars(dissL, "mM") || hasChars(dissU, "mM")) {
+		return true;
+	}
+
+	// Normal suspension: patient (s/S) only against agent (g/G).
+	bool patientL = hasChars(dissL, "sS");
+	bool patientU = hasChars(dissU, "sS");
+	bool agentL   = hasChars(dissL, "gG");
+	bool agentU   = hasChars(dissU, "gG");
+	return (patientL && agentU) || (patientU && agentL);
 }
 
 
@@ -3001,153 +3053,156 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	m_definitions.reserve(200);
 
 	// /* Index */                 LowerCVF, UpperCVF, Name, Regex
-	/*   0 */ addCadenceDefinition("", "",		"__1",	R"(^(?:-?\d+|R)_1:-?\d+, 7_1:-2, 6_R:-2, R_)");
-	/*   1 */ addCadenceDefinition("", "",		"__2",	R"(^[^R]_1, 2_1:-2, (?:1|8)_-3:2, 4D?_)");
-	/*   2 */ addCadenceDefinition("", "",		"__3",	R"(^[^R]_1:, 4D_1:-2, 3_1:-2, 2_1:2, 3_-3:2, 6_)");
-	/*   3 */ addCadenceDefinition("", "",		"__4",	R"(^[^R]_1:-?\d+, 7_1:-2, 6_-2:2, 8_)");
-	/*   4 */ addCadenceDefinition("A", "T",	"AT1",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_-2:1, -2_2:1, -3_2:-2, -5_)");
-	/*   5 */ addCadenceDefinition("A", "T",	"AT2",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_-2:1, -2_3:-2, -5_)");
-	/*   6 */ addCadenceDefinition("A", "T",	"AT3",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_1:1, -3_-2:1, -2_3:-2, -5_)");
-	/*   7 */ addCadenceDefinition("A", "T",	"AT4",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_2:-2, -5_)");
-	/*   8 */ addCadenceDefinition("B", "C", 	"BC1",  R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:-2, 2_1:2, 3_(?:4|-5):2, (?:1|8)_)");
-	/*   9 */ addCadenceDefinition("B", "C",	"BC2",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]), 4D_1:-2, 3_1:-2, 2_1:2, 3_1:1, 3_-5:2, 8_)");
-	/*  10 */ addCadenceDefinition("B", "C",	"BC3",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_(?:4|-5):2, (?:8|1)_)");
-	/*  11 */ addCadenceDefinition("B", "C",	"BC4",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:-2, 2_-5:3, 8_)");
-	/*  13 */ addCadenceDefinition("B", "C",	"BC6",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:1, 3_(?:4|-5):2, 8_)");
-	/*  14 */ addCadenceDefinition("B", "C",	"BC7",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:1, 3_1:-2, 2_-5:3, 8_)");
-	/*  15 */ addCadenceDefinition("B", "C",	"BC8",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:1, 3_1:-2, 2_1:2, 3_-5:2, 8_)");
-	/*  17 */ addCadenceDefinition("B", "C",	"BC10",	R"(^3_1:2, 4D_1:-2, 3_(?:4|-5):2, (?:1|8)_)");
-	/*  18 */ addCadenceDefinition("B", "C",	"BC11",	R"(^5_1:-2, 4D_1:-2, 3_(?:4|-5):2, (?:1|8)_)");
-	/*  19 */ addCadenceDefinition("B", "c",	"Bc1",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_(?:4|-5):(?:4|-5), 3_)");
-	/* 123 */ addCadenceDefinition("B", "c",	"Bc2",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_(?:4|-5):-2, 6_)");
-	/*  10 */ addCadenceDefinition("B", "y",	"By1",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_(?:4|-5):R, R_)");
-	/*  20 */ addCadenceDefinition("C", "B",	"CB1",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_-2:1, -2_2:1, -3_2:(?:-5|4), -8_)");
-	/*  21 */ addCadenceDefinition("C", "B",	"CB2",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_-2:1, -2_2:1, -3_2:4, (?:1|-8)_)");
-	/*  22 */ addCadenceDefinition("C", "B",	"CB3",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_-2:1, -2_3:-5, -8_)");
-	/*  23 */ addCadenceDefinition("C", "B",	"CB4",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_-2:1, -2_3:4, (?:1|-8)_)");
-	/*  24 */ addCadenceDefinition("C", "B",	"CB5",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_1:1, -3_-2:1, -2_3:-5, -8_)");
-	/*  25 */ addCadenceDefinition("C", "B",	"CB6",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_1:1, -3_-2:1, -2_3:4, (?:1|-8)_)");
-	/*  26 */ addCadenceDefinition("C", "B",	"CB7",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_2:-5, -8_)");
-	/*  27 */ addCadenceDefinition("C", "B",	"CB8",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_2:4, -8_)");
-	/*  28 */ addCadenceDefinition("C", "B",	"CB9",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_2:4, 1_)");
-	/*  29 */ addCadenceDefinition("C", "Q",	"CQ1",	R"(^(?:-?\d+|R)_1:-?\d+, 2_-2:1, 3_2:(?:-5|4), 5_)");
-	/*  29 */ addCadenceDefinition("C", "Q",	"CQ2",	R"(^(?:-?\d+|R)_1:-?\d+, 2_-2:1, 3_-2:1, 4_2:1, 3_2:(?:-5|4), 5_)");
-	/*  30 */ addCadenceDefinition("C", "T",	"CT1",	R"(^(?:-?\d+|R)_1:-?\d+, -7_-2:1, -6_-2:1, -5_2:1, -6_2:-2, -8_)");
-	/*  31 */ addCadenceDefinition("C", "T",	"CT2",	R"(^(?:-?\d+|R)_1:-?\d+, -7_-2:1, -6_-2:1, -5_3:-2, -8_)");
-	/*  32 */ addCadenceDefinition("C", "T",	"CT3",	R"(^(?:-?\d+|R)_1:-?\d+, -7_-2:1, -6_1:1, -6_-2:1, -5_3:-2, -8_)");
-	/*  33 */ addCadenceDefinition("C", "T",	"CT4",	R"(^(?:-?\d+|R)_1:-?\d+, -7_-2:1, -6_2:-2, -8_)");
-	/*  34 */ addCadenceDefinition("C", "T",	"CT5",	R"(^(?:-?\d+|R)_1:-?\d+, 2_-2:1, 3_-2:1, 4D?_2:1, 3_2:-2, (?:1|8)_)");
-	/*  35 */ addCadenceDefinition("C", "T",	"CT6",	R"(^(?:-?\d+|R)_1:-?\d+, 2_-2:1, 3_-2:1, 4D?_3:-2, (?:1|8)_)");
-	/*  36 */ addCadenceDefinition("C", "T",	"CT7",	R"(^(?:-?\d+|R)_1:-?\d+, 2_-2:1, 3_1:1, 3_-2:1, 4D?_2:1, 3_2:-2, (?:1|8)_)");
-	/*  37 */ addCadenceDefinition("C", "T",	"CT8",	R"(^(?:-?\d+|R)_1:-?\d+, 2_-2:1, 3_1:1, 3_-2:1, 4D?_3:-2, (?:1|8)_)");
-	/*  38 */ addCadenceDefinition("C", "T",	"CT9",	R"(^(?:-?\d+|R)_1:-?\d+, 2_-2:1, 3_1:1, 3_2:-2, (?:1|8)_)");
-	/*  39 */ addCadenceDefinition("C", "T",	"CT10",	R"(^(?:-?\d+|R)_1:-?\d+, 2_-2:1, 3_2:-2, (?:1|8)_)");
-	/*  40 */ addCadenceDefinition("C", "T",	"CT11",	R"(^3_2:1, 2_-2:1, 3_2:-2, (?:1|8)_)");
-//	/*  41 */ addCadenceDefinition("C", "T",	"CT11",	R"(^8_-2:1, 2_-2:1, 3_2:-2, (?:1|8)_)");
-	/*  42 */ addCadenceDefinition("C", "t",	"Ct1",	R"(^(?:-?\d+|R)_1:-?\d+, 2_-2:1, 3_-2:1, 4D?_2:1, 3_1:1, 3_2:2, 3_)");
-	/*  43 */ addCadenceDefinition("C", "t",	"Ct2",	R"(^(?:-?\d+|R)_1:-?\d+, 2_-2:1, 3_1:1, 3_-2:1, 4D?_2:1, 3_2:2, 3_)");
-	/*  44 */ addCadenceDefinition("C", "t",	"Ct3",	R"(^(?:-?\d+|R)_1:-?\d+, 2_-2:1, 3_2:2, 3_)");
-	/*  45 */ addCadenceDefinition("C", "t",	"Ct4",	R"(^3_2:1, 2_-2:1, 3_2:2, 3_)");
-	/*  42 */ addCadenceDefinition("C", "t",	"Ct5",	R"(^(?:-?\d+|R)_1:-?\d+, 2_-2:1, 3_-2:1, 4D?_2:1, 3_2:2, 3_)");
-	/*  41 */ addCadenceDefinition("C", "t",	"Ct6",	R"(^(?:-?\d+|R)_1:(?:-?\d+|R), 2_-2:1, 3_1:1, 3_1:1, 3_2:2, 3_)");
-	/*  41 */ addCadenceDefinition("C", "t",	"ct1",	R"(^(?:-?\d+|R)_1:(?:-?\d+|R), 2_-2:1, 3_1:1, 3_1:-2, 2_1:-2, 1_1:2, 2_)");
-	/*  46 */ addCadenceDefinition("C", "u",	"Cu1",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_-2:1, -2_2:1, -3_2:-3, -6_)");
-	/*  47 */ addCadenceDefinition("C", "u",	"Cu2",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_-2:1, -2_3:-3, -6_)");
-	/*  48 */ addCadenceDefinition("C", "u",	"Cu3",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_1:1, -3_-2:1, -2_3:-3, -6_)");
-	/*  49 */ addCadenceDefinition("C", "u",	"Cu4",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_2:-3, -6_)");
-	/*  50 */ addCadenceDefinition("C", "z",	"Cz1",	R"(^(?:-?\d+|R)_1:-?\d+, 2_-2:1, 3_2:R, R_)");
-	/*  51 */ addCadenceDefinition("L", "C",	"LC1",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:-2, 2_1:2, 3_8:2, (?:4|-5)_)");
-	/*  52 */ addCadenceDefinition("L", "C",	"LC2",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:-2, 2_8:3, (?:4|-5)_)");
-	/*  53 */ addCadenceDefinition("L", "C",	"LC3",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:1, 3_1:-2, 2_1:2, 3_8:2, (?:4|-5)_)");
-	/*  54 */ addCadenceDefinition("L", "C",	"LC4",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:1, 3_1:-2, 2_8:3, (?:4|-5)_)");
-	/*  55 */ addCadenceDefinition("L", "C",	"LC5",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:1, 3_8:2, (?:4|-5)_)");
-	/*  56 */ addCadenceDefinition("L", "C",	"LC6",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_8:2, (?:4|-5)_)");
-	/*  57 */ addCadenceDefinition("P", "C",	"PC1",	R"(^(?:R_1|-?\d+_-?[^1]):1, 2_1:-2, 1_-4:2, 5_)");
-	/*  58 */ addCadenceDefinition("P", "C",	"PC2",	R"(^(?:R_1|-?\d+_-?[^1]):1, 2_1:-2, 8_(?:5|-4):2, 5_)");
-	/*  59 */ addCadenceDefinition("P", "C",	"PC3",	R"(^(?:R_1|-?\d+_-?[^1]):1, 2_1:-2, 8_1:1, 8_(?:5|-4):2, 5_)");
-	/*  60 */ addCadenceDefinition("Q", "C",	"QC1",	R"(^(?:R_1|-?\d+_-?[^1]):1, -2_1:-2, -3_-5:2, 4D?_)");
-	/*  61 */ addCadenceDefinition("Q", "C",	"QC2",	R"(^(?:R_1|-?\d+_-?[^1]):1, -2_1:-2, -3_4:2, -5_)");
-	/*  62 */ addCadenceDefinition("Q", "C",	"QC3",	R"(^(?:R_1|-?\d+_-?[^1]):1, 7_1:-2, 6_(?:-5|4):2, 4D?_)");
-	/*  63 */ addCadenceDefinition("Q", "C",	"QC4",	R"(^(?:R_1|-?\d+_-?[^1]):1, 7_1:-2, 6_1:1, 6_(?:-5|4):2, 4D?_)");
-	/*  64 */ addCadenceDefinition("S", "C",	"SC1",	R"(^(?:R_1|-?\d+_-?[^1]):1, 2_1:-2, (?:1|8)_-3:2, 4D?_)");
-	/*  65 */ addCadenceDefinition("S", "C",	"SC2",	R"(^(?:R_1|-?\d+_-?[^1]):1, 2_1:-2, (?:1|8)_1:1, (?:1|8)_-3:2, 4D?_)");
-	/*  66 */ addCadenceDefinition("T", "A",	"TA1",	R"(^(?:R_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_-2:2, 5_)");
-	/*  69 */ addCadenceDefinition("T", "A",	"TA2",	R"(^(?:R_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:-2, 2_-2:3, 5_)");
-	/*  70 */ addCadenceDefinition("T", "A",	"TA3",	R"(^(?:R_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:-2, 2_1:2, 3_-2:2, 5_)");
-	/*  71 */ addCadenceDefinition("T", "A",	"TA4",	R"(^(?:R_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:-2, 2_1:2, 3_1:1, 3_-2:2, 5_)");
-	/*  72 */ addCadenceDefinition("T", "A",	"TA5",	R"(^(?:R_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:1, 3_1:-2, 2_-2:3, 5_)");
-	/*  73 */ addCadenceDefinition("T", "C",	"TC1",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7?_1:-2, 6_-2:2, 8_)");
-	/*  74 */ addCadenceDefinition("T", "C",	"TC2",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7?_1:-2, 6_1:-2, 5_-2:3, 8_)");
-	/*  75 */ addCadenceDefinition("T", "C",	"TC3",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7?_1:-2, 6_1:-2, 5_1:2, 6_-2:2, 8_)");
-	/*  76 */ addCadenceDefinition("T", "C",	"TC4",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7?_1:-2, 6_1:-2, 5_1:2, 6_1:1, 6_-2:2, 8_)");
-	/*  77 */ addCadenceDefinition("T", "C",	"TC5",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7?_1:-2, 6_1:1, 6_-2:2, 8_)");
-	/*  78 */ addCadenceDefinition("T", "C",	"TC6",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7?_1:-2, 6_1:1, 6_1:-2, 5_-2:3, 8_)");
-	/*  79 */ addCadenceDefinition("T", "C",	"TC7",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7?_1:-2, 6_1:1, 6_1:-2, 5_1:2, 6_-2:2, 8_)");
-	/*  80 */ addCadenceDefinition("T", "C",	"TC8",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7?_1:-2, 6_1:2, 7_1:-2, 6_1:-2, 5_-2:3, 8_)");
-	/*  81 */ addCadenceDefinition("T", "C",	"TC9",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7?_1:-2, 6_1:2, 7_1:2, 8_1:-3, 6_-2:2, 8_)");
-	/*  82 */ addCadenceDefinition("T", "C",	"TC10",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7?_1:-2, 6_1:2, 7_1:2, 8_1:-3, 6_1:-2, 5_-2:3, 8_)");
-	/*  83 */ addCadenceDefinition("T", "C",	"TC11",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7?_1:-2, 6_1:3, 8_1:-3, 6_-2:2, 8_)");
-	/*  84 */ addCadenceDefinition("T", "C",	"TC12",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7?_1:-3, 5_1:2, 6_-2:2, 8_)");
-	/*  85 */ addCadenceDefinition("T", "C",	"TC13",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7?_1:2, 8_1:-3, 6_-2:2, 8_)");
-	/*  86 */ addCadenceDefinition("T", "C",	"TC14",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7?_1:2, 8_1:-3, 6_1:-2, 5_-2:3, 8_)");
-	/*  87 */ addCadenceDefinition("T", "C",	"TC15",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7?_1:2, 8_1:-3, 6_1:1, 6_-2:2, 8_)");
-	/*  88 */ addCadenceDefinition("T", "C",	"TC16",	R"(^(?:R_1|-?\d+_-?[^1]):1, -2_1:-2, -3_-2:2, (?:1|-8)_)");
-	/*  89 */ addCadenceDefinition("T", "C",	"TC17",	R"(^(?:R_1|-?\d+_-?[^1]):1, -2_1:-2, -3_1:-2, -4D?_-2:3, (?:1|-8)_)");
-	/*  90 */ addCadenceDefinition("T", "C",	"TC18",	R"(^(?:R_1|-?\d+_-?[^1]):1, -2_1:-2, -3_1:-2, -4D?_1:2, -3_-2:2, (?:1|-8)_)");
-	/*  91 */ addCadenceDefinition("T", "C",	"TC19",	R"(^(?:R_1|-?\d+_-?[^1]):1, -2_1:-2, -3_1:1, -3_1:-2, -4D?_-2:3, (?:1|-8)_)");
-	/*  88 */ addCadenceDefinition("T", "C",	"TC20",	R"(^(?:R_1|-?\d+_-?[^1]):1, -2_1:-2, -3_1:1, -3_-2:2, (?:1|-8)_)");
-	/*  92 */ addCadenceDefinition("T", "C",	"TC21",	R"(^6_1:2, 7_1:-2, 6_-2:2, 8_)");
-	/*  93 */ addCadenceDefinition("T", "C",	"TC22",	R"(^8_1:-2, 7_1:-2, 6_-2:2, 8_)");
-	/*  94 */ addCadenceDefinition("T", "a",	"Ta1",	R"(^(?:-?\d+_-?[^1]):1, 4D_1:-2, 3_-2:-2, 3_)");
-	/*  95 */ addCadenceDefinition("T", "c",	"Tc1",	R"(^(?:R_1|-?\d+_-?[^1]):1, 7_1:-2, 6_-2:4, 3_)");
-	/*  95 */ addCadenceDefinition("T", "c",	"Tc2",	R"(^(?:R_1|-?\d+_-?[^1]):1, 7_1:-2, 6_-2:1, 7_)");
-	/*  96 */ addCadenceDefinition("T", "y",	"Ty1",	R"(^(?:R_1|-?\d+_-?[^1]):1, 7_1:-2, 6_-2:R, R_)");
-	/*  97 */ addCadenceDefinition("b", "C",	"bC1",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:-2, 2_1:2, 3_2:2, 3_)");
-	/*  98 */ addCadenceDefinition("b", "C",	"bC2",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:-2, 2_2:2, 3_)");
-	/*  99 */ addCadenceDefinition("b", "C",	"bC3",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:1, 3_1:-2, 2_2:2, 3_)");
-	/* 100 */ addCadenceDefinition("b", "C",	"bC4",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:1, 3_2:2, 3_)");
-	/* 101 */ addCadenceDefinition("b", "C",	"bC5",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:2, 4D_1:2, 5_1:-3, 3_2:2, 3_)");
-	/* 102 */ addCadenceDefinition("b", "C",	"bC6",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_2:2, 3_)");
-	/* 103 */ addCadenceDefinition("c", "B",	"cB1",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_(?:4|-5):4, -3_)");
-	/* 104 */ addCadenceDefinition("c", "B",	"cB2",	R"(^(?:-?\d+|R)_1:-?\d+, -4D_-2:1, -3_-2:(?:4|-5), (?:-6|3)_)");
-	/* 105 */ addCadenceDefinition("c", "T",	"cT1",	R"(^(?:-?\d+|R)_1:-?\d+, 2_-2:1, 3_-2:-2, 3_)");
-	/* 106 */ addCadenceDefinition("c", "T",	"cT2",	R"(^[^R]_1, 7_1:-2, 6_-2:4, 3_)");
-	/* 105 */ addCadenceDefinition("c", "T",	"cT3",	R"(^(?:-?\d+|R)_1:-?\d+, 2_-2:1, 3_1:-2, 2_)");
-	/* 105 */ addCadenceDefinition("c", "T",	"cT4",	R"(^(?:-?\d+|R)_1:-?\d+, 2_1:1, 2_-2:1, 3_1:1, 3_1:-2, 2_)");
-	/* 105 */ addCadenceDefinition("c", "t",	"ct1",	R"(^(?:-?\d+|R)_1:-?\d+, 2_-2:1, 3_-2:1, 4_(?!2:1))");  // needs negative look-ahead to distinguish from CT5
-	/* 107 */ addCadenceDefinition("p", "C",	"pC1",	R"(^(?:R_1|-?\d+_-?[^1]):1, 7_1:-2, 6_(?:5|-4):2, 3_)");
-	/* 108 */ addCadenceDefinition("s", "",	"s_1",	R"(^(?:R_1|-?\d+_-?[^1]):1, 2_1:-2, 8_-2:2, 3_)");
-	/* 109 */ addCadenceDefinition("t", "C",	"tC1",	R"(^(?:R_1|-?\d+_-?[^1]):1, -2_1:-2, -3_1:-2, -4D?_1:2, -3_2:2, -3_)");
-	/* 110 */ addCadenceDefinition("t", "C",	"tC2",	R"(^(?:R_1|-?\d+_-?[^1]):1, -2_1:-2, -3_2:2, -3_)");
-	/* 111 */ addCadenceDefinition("t", "C",	"tC3",	R"(^(?:R_1|-?\d+_-?[^1]):1, 7_1:-2, 6_1:1, 6_1:-2, 5_1:2, 6_2:2, 6_)");
-	/* 112 */ addCadenceDefinition("t", "C",	"tC4",	R"(^(?:R_1|-?\d+_-?[^1]):1, 7_1:-2, 6_2:2, 6_)");
-	/* 110 */ addCadenceDefinition("t", "C",	"tC5",	R"(^(?:R_1|-?\d+_-?[^1]):1, -2_1:-2, -3_1:1, -3_2:2, -3_)");
-	/* 113 */ addCadenceDefinition("u", "C",	"uC1",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_-2:1, 4D_-2:2, 6_)");
-	/* 114 */ addCadenceDefinition("u", "C",	"uC2",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_-3:2, 6_)");
-	/* 115 */ addCadenceDefinition("u", "C",	"uC3",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:-2, 2_-3:3, 6_)");
-	/* 116 */ addCadenceDefinition("u", "C",	"uC4",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:-2, 2_1:2, 3_-3:2, 6_)");
-	/* 117 */ addCadenceDefinition("u", "C",	"uC5",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:1, 3_-3:2, 6_)");
-	/* 118 */ addCadenceDefinition("u", "C",	"uC6",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:1, 3_1:-2, 2_-3:3, 6_)");
-	/* 119 */ addCadenceDefinition("u", "C",	"uC7",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_1:1, 3_1:-2, 2_1:2, 3_-3:2, 6_)");
-	/* 120 */ addCadenceDefinition("x", "C",	"xC1",	R"(^(?:-?\d+_-?[^1]):1, 4D_1:-2, 3_R:2, R_)");
-	/* 121 */ addCadenceDefinition("x", "C",	"xC2",	R"(^3_1:2, 4D_1:-2, 3_R:2, R_)");
-	/* 122 */ addCadenceDefinition("x", "C",	"xC3",	R"(^5_1:-2, 4D_1:-2, 3_R:2, R_)");
-	/* 120 */ addCadenceDefinition("x", "C",	"xC1",	R"(^(?:-?\d+_-?[^1]):1, 4D_1:-2, 3_1:-2, 2_1:2, 3_R:2, R_)");
-	/* 123 */ addCadenceDefinition("x", "c",	"xc1",	R"(^(?:R_1|4_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_R:-2, R_)");
-	/* 123 */ addCadenceDefinition("x", "y",	"xy1",	R"(^(?:R_1|4D?_1|-?\d+_-?[^1]):1, 4D_1:-2, 3_R:R, R_)");
-	/* 124 */ addCadenceDefinition("y", "z",	"yz1",	R"(^(?:-?\d+|R)_1:-?\d+, 2_-2:1, 3_R:R, R_)");
-	/* 125 */ addCadenceDefinition("z", "C",	"zC1",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7_1:-2, 6_1:-2, 5_1:2, 6_R:2, R_)");
-	/* 125 */ addCadenceDefinition("z", "C",	"zC2",	R"(^(?:R_1|7_1|-?\d+_-?[^1]):1, 7_1:-2, 6_1:1, 6_R:2, R_)");
-	/* 126 */ addCadenceDefinition("z", "C",	"zC3",	R"(^(?:R_1|-?\d+_-?[^1]):1, -2_1:-2, -3_1:1, -3_R:2, R_)");
-	/* 127 */ addCadenceDefinition("z", "C",	"zC4",	R"(^(?:R_1|-?\d+_-?[^1]):1, -2_1:-2, -3_R:2, R_)");
-	/* 128 */ addCadenceDefinition("z", "C",	"zC5",	R"(^(?:R_1|-?\d+_-?[^1]):1, 7_1:-2, 6_R:2, R_)");
-	/* 125 */ addCadenceDefinition("z", "C",	"zC6",	R"(^(?:R_1|-?\d+_-?[^1]):1, -2_1:-2, -3_1:-2, -4_1:2, -3_R:2, R_)");
-	/* 129 */ addCadenceDefinition("z", "c",	"zc1",	R"(^(?:R_1|-?\d+_-?[^1]):1, -2_1:-2, -3_R:-2, R_)");
-	/* 130 */ addCadenceDefinition("z", "c",	"zc2",	R"(^(?:R_1|-?\d+_-?[^1]):1, 7_1:-2, 6_R:-2, R_)");
-	/* 131 */ addCadenceDefinition("z", "y",	"zy1",	R"(^(?:R_1|-?\d+_-?[^1]):1, -2_1:-2, -3_1:1, -3_R:R, R_)");
-	/* 132 */ addCadenceDefinition("z", "y",	"zy2",	R"(^(?:R_1|-?\d+_-?[^1]):1, -2_1:-2, -3_R:R, R_)");
-	/* 133 */ addCadenceDefinition("t", "y",	"ty1",	R"(^(?:R_1|-?\d+_-?[^1]):1, 7_1:-2, 6_(?!-2:)-?\d+:R, R_)");
-	/* 133 */ addCadenceDefinition("t", "y",	"ty2",	R"(^(?:R_1|-?\d+_-?[^1]):1, -2_1:-2, -3_2:R, R_)");
+	// /*   0 */ addCadenceDefinition("", "",		"__1",	R"(^7_1:-2, 6_R:-2, R_)");
+	// /*   1 */ addCadenceDefinition("", "",		"__2",	R"(^2_1:-2, (?:1|8)_-3:2, 4D?_)");
+	// /*   2 */ addCadenceDefinition("", "",		"__3",	R"(^4D_1:-2, 3_1:-2, 2_1:2, 3_-3:2, 6_)");
+	// /*   3 */ addCadenceDefinition("", "",		"__4",	R"(^7_1:-2, 6_-2:2, 8_)");
+
+
+
+	/*   4 */ addCadenceDefinition("A", "T",	"AT1",	R"(^-4D_-2:1, -3_-2:1, -2_2:1, -3_2:-2, -5_)");
+	/*   5 */ addCadenceDefinition("A", "T",	"AT2",	R"(^-4D_-2:1, -3_-2:1, -2_3:-2, -5_)");
+	/*   6 */ addCadenceDefinition("A", "T",	"AT3",	R"(^-4D_-2:1, -3_1:1, -3_-2:1, -2_3:-2, -5_)");
+	/*   7 */ addCadenceDefinition("A", "T",	"AT4",	R"(^-4D_-2:1, -3_2:-2, -5_)");
+	/*   8 */ addCadenceDefinition("B", "C", 	"BC1",  R"(^4D_1:-2, 3_1:-2, 2_1:2, 3_(?:4|-5):2, (?:1|8)_)");
+	/*   9 */ addCadenceDefinition("B", "C",	"BC2",	R"(^4D_1:-2, 3_1:-2, 2_1:2, 3_1:1, 3_-5:2, 8_)");
+	/*  10 */ addCadenceDefinition("B", "C",	"BC3",	R"(^4D_1:-2, 3_(?:4|-5):2, (?:8|1)_)");
+	/*  11 */ addCadenceDefinition("B", "C",	"BC4",	R"(^4D_1:-2, 3_1:-2, 2_-5:3, 8_)");
+	/*  13 */ addCadenceDefinition("B", "C",	"BC6",	R"(^4D_1:-2, 3_1:1, 3_(?:4|-5):2, 8_)");
+	/*  14 */ addCadenceDefinition("B", "C",	"BC7",	R"(^4D_1:-2, 3_1:1, 3_1:-2, 2_-5:3, 8_)");
+	/*  15 */ addCadenceDefinition("B", "C",	"BC8",	R"(^4D_1:-2, 3_1:1, 3_1:-2, 2_1:2, 3_-5:2, 8_)");
+	/*  17 */ addCadenceDefinition("B", "C",	"BC10",	R"(^4D_1:-2, 3_(?:4|-5):2, (?:1|8)_)");
+	/*  18 */ addCadenceDefinition("B", "C",	"BC11",	R"(^4D_1:-2, 3_(?:4|-5):2, (?:1|8)_)");
+	/*  19 */ addCadenceDefinition("B", "c",	"Bc1",	R"(^4D_1:-2, 3_(?:4|-5):(?:4|-5), 3_)");
+	/* 123 */ addCadenceDefinition("B", "c",	"Bc2",	R"(^4D_1:-2, 3_(?:4|-5):-2, 6_)");
+	/*  10 */ addCadenceDefinition("B", "y",	"By1",	R"(^4D_1:-2, 3_(?:4|-5):R, R_)");
+	/*  20 */ addCadenceDefinition("C", "B",	"CB1",	R"(^-4D_-2:1, -3_-2:1, -2_2:1, -3_2:(?:-5|4), -8_)");
+	/*  21 */ addCadenceDefinition("C", "B",	"CB2",	R"(^-4D_-2:1, -3_-2:1, -2_2:1, -3_2:4, (?:1|-8)_)");
+	/*  22 */ addCadenceDefinition("C", "B",	"CB3",	R"(^-4D_-2:1, -3_-2:1, -2_3:-5, -8_)");
+	/*  23 */ addCadenceDefinition("C", "B",	"CB4",	R"(^-4D_-2:1, -3_-2:1, -2_3:4, (?:1|-8)_)");
+	/*  24 */ addCadenceDefinition("C", "B",	"CB5",	R"(^-4D_-2:1, -3_1:1, -3_-2:1, -2_3:-5, -8_)");
+	/*  25 */ addCadenceDefinition("C", "B",	"CB6",	R"(^-4D_-2:1, -3_1:1, -3_-2:1, -2_3:4, (?:1|-8)_)");
+	/*  26 */ addCadenceDefinition("C", "B",	"CB7",	R"(^-4D_-2:1, -3_2:-5, -8_)");
+	/*  27 */ addCadenceDefinition("C", "B",	"CB8",	R"(^-4D_-2:1, -3_2:4, -8_)");
+	/*  28 */ addCadenceDefinition("C", "B",	"CB9",	R"(^-4D_-2:1, -3_2:4, 1_)");
+	/*  29 */ addCadenceDefinition("C", "Q",	"CQ1",	R"(^2_-2:1, 3_2:(?:-5|4), 5_)");
+	/*  29 */ addCadenceDefinition("C", "Q",	"CQ2",	R"(^2_-2:1, 3_-2:1, 4_2:1, 3_2:(?:-5|4), 5_)");
+	/*  30 */ addCadenceDefinition("C", "T",	"CT1",	R"(^-7_-2:1, -6_-2:1, -5_2:1, -6_2:-2, -8_)");
+	/*  31 */ addCadenceDefinition("C", "T",	"CT2",	R"(^-7_-2:1, -6_-2:1, -5_3:-2, -8_)");
+	/*  32 */ addCadenceDefinition("C", "T",	"CT3",	R"(^-7_-2:1, -6_1:1, -6_-2:1, -5_3:-2, -8_)");
+	/*  33 */ addCadenceDefinition("C", "T",	"CT4",	R"(^-7_-2:1, -6_2:-2, -8_)");
+	/*  34 */ addCadenceDefinition("C", "T",	"CT5",	R"(^2_-2:1, 3_-2:1, 4D?_2:1, 3_2:-2, (?:1|8)_)");
+	/*  35 */ addCadenceDefinition("C", "T",	"CT6",	R"(^2_-2:1, 3_-2:1, 4D?_3:-2, (?:1|8)_)");
+	/*  36 */ addCadenceDefinition("C", "T",	"CT7",	R"(^2_-2:1, 3_1:1, 3_-2:1, 4D?_2:1, 3_2:-2, (?:1|8)_)");
+	/*  37 */ addCadenceDefinition("C", "T",	"CT8",	R"(^2_-2:1, 3_1:1, 3_-2:1, 4D?_3:-2, (?:1|8)_)");
+	/*  38 */ addCadenceDefinition("C", "T",	"CT9",	R"(^2_-2:1, 3_1:1, 3_2:-2, (?:1|8)_)");
+	/*  39 */ addCadenceDefinition("C", "T",	"CT10",	R"(^2_-2:1, 3_2:-2, (?:1|8)_)");
+	/*  40 */ addCadenceDefinition("C", "T",	"CT11",	R"(^2_-2:1, 3_2:-2, (?:1|8)_)");
+//	/*  41 */ addCadenceDefinition("C", "T",	"CT11",	R"(^2_-2:1, 3_2:-2, (?:1|8)_)");
+	/*  42 */ addCadenceDefinition("C", "t",	"Ct1",	R"(^2_-2:1, 3_-2:1, 4D?_2:1, 3_1:1, 3_2:2, 3_)");
+	/*  43 */ addCadenceDefinition("C", "t",	"Ct2",	R"(^2_-2:1, 3_1:1, 3_-2:1, 4D?_2:1, 3_2:2, 3_)");
+	/*  44 */ addCadenceDefinition("C", "t",	"Ct3",	R"(^2_-2:1, 3_2:2, 3_)");
+	/*  45 */ addCadenceDefinition("C", "t",	"Ct4",	R"(^2_-2:1, 3_2:2, 3_)");
+	/*  42 */ addCadenceDefinition("C", "t",	"Ct5",	R"(^2_-2:1, 3_-2:1, 4D?_2:1, 3_2:2, 3_)");
+	/*  41 */ addCadenceDefinition("C", "t",	"Ct6",	R"(^2_-2:1, 3_1:1, 3_1:1, 3_2:2, 3_)");
+	/*  41 */ addCadenceDefinition("C", "t",	"ct1",	R"(^2_-2:1, 3_1:1, 3_1:-2, 2_1:-2, 1_1:2, 2_)");
+	/*  46 */ addCadenceDefinition("C", "u",	"Cu1",	R"(^-4D_-2:1, -3_-2:1, -2_2:1, -3_2:-3, -6_)");
+	/*  47 */ addCadenceDefinition("C", "u",	"Cu2",	R"(^-4D_-2:1, -3_-2:1, -2_3:-3, -6_)");
+	/*  48 */ addCadenceDefinition("C", "u",	"Cu3",	R"(^-4D_-2:1, -3_1:1, -3_-2:1, -2_3:-3, -6_)");
+	/*  49 */ addCadenceDefinition("C", "u",	"Cu4",	R"(^-4D_-2:1, -3_2:-3, -6_)");
+	/*  50 */ addCadenceDefinition("C", "z",	"Cz1",	R"(^2_-2:1, 3_2:R, R_)");
+	/*  51 */ addCadenceDefinition("L", "C",	"LC1",	R"(^4D_1:-2, 3_1:-2, 2_1:2, 3_8:2, (?:4|-5)_)");
+	/*  52 */ addCadenceDefinition("L", "C",	"LC2",	R"(^4D_1:-2, 3_1:-2, 2_8:3, (?:4|-5)_)");
+	/*  53 */ addCadenceDefinition("L", "C",	"LC3",	R"(^4D_1:-2, 3_1:1, 3_1:-2, 2_1:2, 3_8:2, (?:4|-5)_)");
+	/*  54 */ addCadenceDefinition("L", "C",	"LC4",	R"(^4D_1:-2, 3_1:1, 3_1:-2, 2_8:3, (?:4|-5)_)");
+	/*  55 */ addCadenceDefinition("L", "C",	"LC5",	R"(^4D_1:-2, 3_1:1, 3_8:2, (?:4|-5)_)");
+	/*  56 */ addCadenceDefinition("L", "C",	"LC6",	R"(^4D_1:-2, 3_8:2, (?:4|-5)_)");
+	/*  57 */ addCadenceDefinition("P", "C",	"PC1",	R"(^2_1:-2, 1_-4:2, 5_)");
+	/*  58 */ addCadenceDefinition("P", "C",	"PC2",	R"(^2_1:-2, 8_(?:5|-4):2, 5_)");
+	/*  59 */ addCadenceDefinition("P", "C",	"PC3",	R"(^2_1:-2, 8_1:1, 8_(?:5|-4):2, 5_)");
+	/*  60 */ addCadenceDefinition("Q", "C",	"QC1",	R"(^-2_1:-2, -3_-5:2, 4D?_)");
+	/*  61 */ addCadenceDefinition("Q", "C",	"QC2",	R"(^-2_1:-2, -3_4:2, -5_)");
+	/*  62 */ addCadenceDefinition("Q", "C",	"QC3",	R"(^7_1:-2, 6_(?:-5|4):2, 4D?_)");
+	/*  63 */ addCadenceDefinition("Q", "C",	"QC4",	R"(^7_1:-2, 6_1:1, 6_(?:-5|4):2, 4D?_)");
+	/*  64 */ addCadenceDefinition("S", "C",	"SC1",	R"(^2_1:-2, (?:1|8)_-3:2, 4D?_)");
+	/*  65 */ addCadenceDefinition("S", "C",	"SC2",	R"(^2_1:-2, (?:1|8)_1:1, (?:1|8)_-3:2, 4D?_)");
+	/*  66 */ addCadenceDefinition("T", "A",	"TA1",	R"(^4D_1:-2, 3_-2:2, 5_)");
+	/*  69 */ addCadenceDefinition("T", "A",	"TA2",	R"(^4D_1:-2, 3_1:-2, 2_-2:3, 5_)");
+	/*  70 */ addCadenceDefinition("T", "A",	"TA3",	R"(^4D_1:-2, 3_1:-2, 2_1:2, 3_-2:2, 5_)");
+	/*  71 */ addCadenceDefinition("T", "A",	"TA4",	R"(^4D_1:-2, 3_1:-2, 2_1:2, 3_1:1, 3_-2:2, 5_)");
+	/*  72 */ addCadenceDefinition("T", "A",	"TA5",	R"(^4D_1:-2, 3_1:1, 3_1:-2, 2_-2:3, 5_)");
+	/*  73 */ addCadenceDefinition("T", "C",	"TC1",	R"(^7_1:-2, 6_-2:2, 8_)");
+	/*  74 */ addCadenceDefinition("T", "C",	"TC2",	R"(^7_1:-2, 6_1:-2, 5_-2:3, 8_)");
+	/*  75 */ addCadenceDefinition("T", "C",	"TC3",	R"(^7_1:-2, 6_1:-2, 5_1:2, 6_-2:2, 8_)");
+	/*  76 */ addCadenceDefinition("T", "C",	"TC4",	R"(^7_1:-2, 6_1:-2, 5_1:2, 6_1:1, 6_-2:2, 8_)");
+	/*  77 */ addCadenceDefinition("T", "C",	"TC5",	R"(^7_1:-2, 6_1:1, 6_-2:2, 8_)");
+	/*  78 */ addCadenceDefinition("T", "C",	"TC6",	R"(^7_1:-2, 6_1:1, 6_1:-2, 5_-2:3, 8_)");
+	/*  79 */ addCadenceDefinition("T", "C",	"TC7",	R"(^7_1:-2, 6_1:1, 6_1:-2, 5_1:2, 6_-2:2, 8_)");
+	/*  80 */ addCadenceDefinition("T", "C",	"TC8",	R"(^7_1:-2, 6_1:2, 7_1:-2, 6_1:-2, 5_-2:3, 8_)");
+	/*  81 */ addCadenceDefinition("T", "C",	"TC9",	R"(^7_1:-2, 6_1:2, 7_1:2, 8_1:-3, 6_-2:2, 8_)");
+	/*  82 */ addCadenceDefinition("T", "C",	"TC10",	R"(^7_1:-2, 6_1:2, 7_1:2, 8_1:-3, 6_1:-2, 5_-2:3, 8_)");
+	/*  83 */ addCadenceDefinition("T", "C",	"TC11",	R"(^7_1:-2, 6_1:3, 8_1:-3, 6_-2:2, 8_)");
+	/*  84 */ addCadenceDefinition("T", "C",	"TC12",	R"(^7_1:-3, 5_1:2, 6_-2:2, 8_)");
+	/*  85 */ addCadenceDefinition("T", "C",	"TC13",	R"(^7_1:2, 8_1:-3, 6_-2:2, 8_)");
+	/*  86 */ addCadenceDefinition("T", "C",	"TC14",	R"(^7_1:2, 8_1:-3, 6_1:-2, 5_-2:3, 8_)");
+	/*  87 */ addCadenceDefinition("T", "C",	"TC15",	R"(^7_1:2, 8_1:-3, 6_1:1, 6_-2:2, 8_)");
+	/*  88 */ addCadenceDefinition("T", "C",	"TC16",	R"(^-2_1:-2, -3_-2:2, (?:1|-8)_)");
+	/*  89 */ addCadenceDefinition("T", "C",	"TC17",	R"(^-2_1:-2, -3_1:-2, -4D?_-2:3, (?:1|-8)_)");
+	/*  90 */ addCadenceDefinition("T", "C",	"TC18",	R"(^-2_1:-2, -3_1:-2, -4D?_1:2, -3_-2:2, (?:1|-8)_)");
+	/*  91 */ addCadenceDefinition("T", "C",	"TC19",	R"(^-2_1:-2, -3_1:1, -3_1:-2, -4D?_-2:3, (?:1|-8)_)");
+	/*  88 */ addCadenceDefinition("T", "C",	"TC20",	R"(^-2_1:-2, -3_1:1, -3_-2:2, (?:1|-8)_)");
+	/*  92 */ addCadenceDefinition("T", "C",	"TC21",	R"(^7_1:-2, 6_-2:2, 8_)");
+	/*  93 */ addCadenceDefinition("T", "C",	"TC22",	R"(^7_1:-2, 6_-2:2, 8_)");
+	/*  94 */ addCadenceDefinition("T", "a",	"Ta1",	R"(^4D_1:-2, 3_-2:-2, 3_)");
+	/*  95 */ addCadenceDefinition("T", "c",	"Tc1",	R"(^7_1:-2, 6_-2:4, 3_)");
+	/*  95 */ addCadenceDefinition("T", "c",	"Tc2",	R"(^7_1:-2, 6_-2:1, 7_)");
+	/*  96 */ addCadenceDefinition("T", "y",	"Ty1",	R"(^7_1:-2, 6_-2:R, R_)");
+	/*  97 */ addCadenceDefinition("b", "C",	"bC1",	R"(^4D_1:-2, 3_1:-2, 2_1:2, 3_2:2, 3_)");
+	/*  98 */ addCadenceDefinition("b", "C",	"bC2",	R"(^4D_1:-2, 3_1:-2, 2_2:2, 3_)");
+	/*  99 */ addCadenceDefinition("b", "C",	"bC3",	R"(^4D_1:-2, 3_1:1, 3_1:-2, 2_2:2, 3_)");
+	/* 100 */ addCadenceDefinition("b", "C",	"bC4",	R"(^4D_1:-2, 3_1:1, 3_2:2, 3_)");
+	/* 101 */ addCadenceDefinition("b", "C",	"bC5",	R"(^4D_1:-2, 3_1:2, 4D_1:2, 5_1:-3, 3_2:2, 3_)");
+	/* 102 */ addCadenceDefinition("b", "C",	"bC6",	R"(^4D_1:-2, 3_2:2, 3_)");
+	/* 103 */ addCadenceDefinition("c", "B",	"cB1",	R"(^-4D_-2:1, -3_(?:4|-5):4, -3_)");
+	/* 104 */ addCadenceDefinition("c", "B",	"cB2",	R"(^-4D_-2:1, -3_-2:(?:4|-5), (?:-6|3)_)");
+	/* 105 */ addCadenceDefinition("c", "T",	"cT1",	R"(^2_-2:1, 3_-2:-2, 3_)");
+	/* 106 */ addCadenceDefinition("c", "T",	"cT2",	R"(^7_1:-2, 6_-2:4, 3_)");
+	/* 105 */ addCadenceDefinition("c", "T",	"cT3",	R"(^2_-2:1, 3_1:-2, 2_)");
+	/* 105 */ addCadenceDefinition("c", "T",	"cT4",	R"(^2_1:1, 2_-2:1, 3_1:1, 3_1:-2, 2_)");
+	/* 105 */ addCadenceDefinition("c", "t",	"ct1",	R"(^2_-2:1, 3_-2:1, 4_(?!2:1))");  // needs negative look-ahead to distinguish from CT5
+	/* 107 */ addCadenceDefinition("p", "C",	"pC1",	R"(^7_1:-2, 6_(?:5|-4):2, 3_)");
+	/* 108 */ addCadenceDefinition("s", "",	"s_1",	R"(^2_1:-2, 8_-2:2, 3_)");
+	/* 109 */ addCadenceDefinition("t", "C",	"tC1",	R"(^-2_1:-2, -3_1:-2, -4D?_1:2, -3_2:2, -3_)");
+	/* 110 */ addCadenceDefinition("t", "C",	"tC2",	R"(^-2_1:-2, -3_2:2, -3_)");
+	/* 111 */ addCadenceDefinition("t", "C",	"tC3",	R"(^7_1:-2, 6_1:1, 6_1:-2, 5_1:2, 6_2:2, 6_)");
+	/* 112 */ addCadenceDefinition("t", "C",	"tC4",	R"(^7_1:-2, 6_2:2, 6_)");
+	/* 110 */ addCadenceDefinition("t", "C",	"tC5",	R"(^-2_1:-2, -3_1:1, -3_2:2, -3_)");
+	/* 113 */ addCadenceDefinition("u", "C",	"uC1",	R"(^4D_1:-2, 3_-2:1, 4D_-2:2, 6_)");
+	/* 114 */ addCadenceDefinition("u", "C",	"uC2",	R"(^4D_1:-2, 3_-3:2, 6_)");
+	/* 115 */ addCadenceDefinition("u", "C",	"uC3",	R"(^4D_1:-2, 3_1:-2, 2_-3:3, 6_)");
+	/* 116 */ addCadenceDefinition("u", "C",	"uC4",	R"(^4D_1:-2, 3_1:-2, 2_1:2, 3_-3:2, 6_)");
+	/* 117 */ addCadenceDefinition("u", "C",	"uC5",	R"(^4D_1:-2, 3_1:1, 3_-3:2, 6_)");
+	/* 118 */ addCadenceDefinition("u", "C",	"uC6",	R"(^4D_1:-2, 3_1:1, 3_1:-2, 2_-3:3, 6_)");
+	/* 119 */ addCadenceDefinition("u", "C",	"uC7",	R"(^4D_1:-2, 3_1:1, 3_1:-2, 2_1:2, 3_-3:2, 6_)");
+	/* 120 */ addCadenceDefinition("x", "C",	"xC1",	R"(^4D_1:-2, 3_R:2, R_)");
+	/* 121 */ addCadenceDefinition("x", "C",	"xC2",	R"(^4D_1:-2, 3_R:2, R_)");
+	/* 122 */ addCadenceDefinition("x", "C",	"xC3",	R"(^4D_1:-2, 3_R:2, R_)");
+	/* 120 */ addCadenceDefinition("x", "C",	"xC1",	R"(^4D_1:-2, 3_1:-2, 2_1:2, 3_R:2, R_)");
+	/* 123 */ addCadenceDefinition("x", "c",	"xc1",	R"(^4D_1:-2, 3_R:-2, R_)");
+	/* 123 */ addCadenceDefinition("x", "y",	"xy1",	R"(^4D_1:-2, 3_R:R, R_)");
+	/* 124 */ addCadenceDefinition("y", "z",	"yz1",	R"(^2_-2:1, 3_R:R, R_)");
+	/* 125 */ addCadenceDefinition("z", "C",	"zC1",	R"(^7_1:-2, 6_1:-2, 5_1:2, 6_R:2, R_)");
+	/* 125 */ addCadenceDefinition("z", "C",	"zC2",	R"(^7_1:-2, 6_1:1, 6_R:2, R_)");
+	/* 126 */ addCadenceDefinition("z", "C",	"zC3",	R"(^-2_1:-2, -3_1:1, -3_R:2, R_)");
+	/* 127 */ addCadenceDefinition("z", "C",	"zC4",	R"(^-2_1:-2, -3_R:2, R_)");
+	/* 128 */ addCadenceDefinition("z", "C",	"zC5",	R"(^7_1:-2, 6_R:2, R_)");
+	/* 125 */ addCadenceDefinition("z", "C",	"zC6",	R"(^-2_1:-2, -3_1:-2, -4_1:2, -3_R:2, R_)");
+	/* 129 */ addCadenceDefinition("z", "c",	"zc1",	R"(^-2_1:-2, -3_R:-2, R_)");
+	/* 130 */ addCadenceDefinition("z", "c",	"zc2",	R"(^7_1:-2, 6_R:-2, R_)");
+	/* 131 */ addCadenceDefinition("z", "y",	"zy1",	R"(^-2_1:-2, -3_1:1, -3_R:R, R_)");
+	/* 132 */ addCadenceDefinition("z", "y",	"zy2",	R"(^-2_1:-2, -3_R:R, R_)");
+	/* 133 */ addCadenceDefinition("t", "y",	"ty1",	R"(^7_1:-2, 6_(?!-2:)-?\d+:R, R_)");
+	/* 133 */ addCadenceDefinition("t", "y",	"ty2",	R"(^-2_1:-2, -3_2:R, R_)");
 }
 
 
@@ -3191,6 +3246,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("BCt",  "Evaded Authentic");
 	m_cadenceLabels.emplace("Bc",   "Evaded Authentic");
 	m_cadenceLabels.emplace("Bcx",  "Evaded Authentic");
+	m_cadenceLabels.emplace("Cbu",  "Evaded Authentic");
 	m_cadenceLabels.emplace("CQu",  "Evaded Authentic");
 	m_cadenceLabels.emplace("CQux", "Evaded Authentic");
 	m_cadenceLabels.emplace("CTb",  "Evaded Authentic");
@@ -3264,42 +3320,10 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 // Tool_autocadence::addCadenceDefinition --
 //
 
-// addCadenceDefinition("z", "y",	"zy2",	R"(^(?:R_1|-?\d+_-?[^1]):1, -2_1:-2, -3_R:R, R_)");
-//		bool        split              (std::vector<std::string>& entries,
-//		                                const std::string& buffer,
-//		                                const std::string& separator);
-//
-
 void Tool_autocadence::addCadenceDefinition(const std::string& funcL, const std::string& funcU,
 		const std::string& name, const std::string& regex) {
-	vector<string> pieces;
-	HumRegex hre;
-	hre.split(pieces, regex, ",");
-	string output;
-	if (pieces.empty()) {
-		output = pieces[0];
-	}
-	if (pieces.size() < 3) {
-		output += " ,";
-		output += pieces[1];
-		output += " ,";
-		output += pieces[2];
-	} else if (pieces.size() > 2) {
-		output += ", ";
-		output += pieces[1];
-	}
-	for (int i=3; i<(int)pieces.size(); i++) {
-		output += pieces[i];
-		if (i < (int)pieces.size() - 1) {
-			output += "Y, [^\\s]+_1:1*, ";
-		}
-	}
 	m_definitions.resize(m_definitions.size() + 1);
-	if (m_repeatQ) {
-		m_definitions.back().setDefinition(funcL, funcU, name, output);
-	} else {
-		m_definitions.back().setDefinition(funcL, funcU, name, regex);
-	}
+	m_definitions.back().setDefinition(funcL, funcU, name, regex);
 }
 
 
