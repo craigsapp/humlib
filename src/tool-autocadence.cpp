@@ -1714,10 +1714,17 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 				labelline << "!LO:TX:a:B:cvf";
 				labelline << ":color=" << m_color;
 				labelline << ":t=" << label;
+				// Full multi-label annotations stay on the note; the cadence
+				// combo only uses each voice's first CVF letter.
+				string firstLabel = label;
+				size_t comma = label.find(',');
+				if (comma != string::npos) {
+					firstLabel = label.substr(0, comma);
+				}
 				if (clabel.empty()) {
-					clabel += label;
+					clabel += firstLabel;
 				} else {
-					clabel += "," + label;
+					clabel += "," + firstLabel;
 				}
 				if (m_popupQ) {
 				 	string fname = getFunctionNames(label);
@@ -1737,29 +1744,27 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 	if (!clabel.empty()) {
 		string slabel = sortUniqueChars(clabel);
 		string cadence = getCadenceLabel(slabel, infile, index);
-		string infolabel = cadence;
-		if (cadence.empty()) {
-			cadence = "UNKNOWN";
-			infolabel = cadence;
-		} else {
+		// Empty string = suppressor entry in m_cadenceLabels: no cadence annotation.
+		if (!cadence.empty()) {
+			string infolabel = cadence;
 			HumRegex hre;
 			hre.replaceDestructive(cadence, "\\n", " ", "g");
 			if (cadence.find("\\n") != std::string::npos) {
 				cadence += "\\n";
 			}
-		}
-		bool isPhrygian = getPhrygian(infile, index);
-		cadenceline << "!!LO:TX:a:B:rj:color=red:cadence:t=";
-		if (isPhrygian) {
-			cadence   = "Phrygian\\n" + cadence;
-			infolabel = "Phrygian " + infolabel;
-		}
-		cadenceline << cadence;
-		if (m_tableQ) {
-			m_cadenceTypeCounts[infolabel]++;
-		}
-		if (m_infoQ) {
-			m_info << "cvf=" << slabel << "\tcadence=" << infolabel << "\\nZZZ" << "\tM=" << m_barnum.at(index) << "\tfile=" << infile.getFilename() << endl;
+			bool isPhrygian = getPhrygian(infile, index);
+			cadenceline << "!!LO:TX:a:B:rj:color=red:cadence:t=";
+			if (isPhrygian) {
+				cadence   = "Phrygian\\n" + cadence;
+				infolabel = "Phrygian " + infolabel;
+			}
+			cadenceline << cadence;
+			if (m_tableQ) {
+				m_cadenceTypeCounts[infolabel]++;
+			}
+			if (m_infoQ) {
+				m_info << "cvf=" << slabel << "\tcadence=" << infolabel << "\\nZZZ" << "\tM=" << m_barnum.at(index) << "\tfile=" << infile.getFilename() << endl;
+			}
 		}
 	} else if (meetsAuthenticBCriteria(infile, index)) {
 		cadenceline << "!!LO:TX:a:B:rj:color=red:cadence:t=AuthenticB";
@@ -1883,14 +1888,20 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 //     then apply AuthenticB if every AuthenticB analysis strand passes.
 //     AuthenticB does not require a CVF match; that case is handled when
 //     printing a line that has no CVF labels.
+//     Returns "UNKNOWN" for CVF combos absent from m_cadenceLabels.
+//     Returns an empty string for suppressor entries (explicit "" values),
+//     which means no cadence annotation should be written.
 //
 
 string Tool_autocadence::getCadenceLabel(const string& cvflabel, HumdrumFile &infile, int index) {
-	string label = m_cadenceLabels[cvflabel];
 	if (meetsAuthenticBCriteria(infile, index)) {
 		return "AuthenticB";
 	}
-	return label;
+	auto it = m_cadenceLabels.find(cvflabel);
+	if (it == m_cadenceLabels.end()) {
+		return "UNKNOWN";
+	}
+	return it->second;
 }
 
 
@@ -3275,14 +3286,14 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("ACTtz","Double Leading Tone");
 	m_cadenceLabels.emplace("ACtz", "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("ACz",  "Abandoned Double Leading Tone");
-	m_cadenceLabels.emplace("AT",   "Altizans");// Phrygian
+	m_cadenceLabels.emplace("AT",   "Altizans Only");// Phrygian
 	m_cadenceLabels.emplace("ATx",  "Altizans Only");
 	m_cadenceLabels.emplace("ATxy", "Altizans Only");
 	m_cadenceLabels.emplace("ATxyz","Altizans Only");
 	m_cadenceLabels.emplace("ATxz", "Altizans Only");
-	m_cadenceLabels.emplace("ATy",  "Altizans");// Phrygian
-	m_cadenceLabels.emplace("ATyz", "Altizans");// Phrygian
-	m_cadenceLabels.emplace("ATz",  "Altizans");// Phrygian
+	m_cadenceLabels.emplace("ATy",  "Altizans Only");// Phrygian
+	m_cadenceLabels.emplace("ATyz", "Altizans Only");// Phrygian
+	m_cadenceLabels.emplace("ATz",  "Altizans Only");// Phrygian
 	m_cadenceLabels.emplace("ABCTz","Authentic");
 	m_cadenceLabels.emplace("BC",   "Authentic");
 	m_cadenceLabels.emplace("BCT",  "Authentic");
@@ -3345,6 +3356,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("CTz",  "Clausula Vera");// Phrygian
 	m_cadenceLabels.emplace("Cu",   "Evaded Authentic");
 	m_cadenceLabels.emplace("cx",   "Abandoned Authentic");
+	m_cadenceLabels.emplace("Ctx",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("Cx",   "Abandoned Authentic");
 	m_cadenceLabels.emplace("cxz",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("By",   "Abandoned Authentic");
@@ -3361,14 +3373,18 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("ct",   "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("cz",   "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("Ta",   "Evaded Altizans Only");
+	m_cadenceLabels.emplace("Tat", "Evaded Altizans Only");
 	m_cadenceLabels.emplace("Taz",  "Evaded Altizans Only");
 	m_cadenceLabels.emplace("Tc",   "Evaded Clausula Vera");
-	m_cadenceLabels.emplace("Tct",   "Evaded Clausula Vera");
+	m_cadenceLabels.emplace("Tct",  "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("Tcx",  "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("Tcxz", "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("Tcz",  "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("xy",   "Abandoned Authentic");
 	m_cadenceLabels.emplace("xyz",  "Abandoned Authentic");
+	// Empty-string labels suppress the cadence annotation entirely (no LO line,
+	// no UNKNOWN).  Use these to filter false-positive CVF combinations.
+	m_cadenceLabels.emplace("BTa",  "");
 }
 
 //////////////////////////////
