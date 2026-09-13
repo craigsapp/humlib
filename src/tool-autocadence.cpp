@@ -3099,6 +3099,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/*  38 */ addCadenceDefinition("C", "T",	"CT9",	R"(^2_-2:1, 3_1:1, 3_2:-2, (?:1|8)_)");
 	/*  39 */ addCadenceDefinition("C", "T",	"CT10",	R"(^2_-2:1, 3_2:-2, (?:1|8)_)");
 	/*  40 */ addCadenceDefinition("C", "T",	"CT11",	R"(^2_-2:1, 3_2:-2, (?:1|8)_)");
+	/*  40 */ addCadenceDefinition("C", "T",	"CT12",	R"(^2_1:1, 2_-2:1, 3_2:-2, (?:1|8)_)");
 //	/*  41 */ addCadenceDefinition("C", "T",	"CT11",	R"(^2_-2:1, 3_2:-2, (?:1|8)_)");
 	/*  42 */ addCadenceDefinition("C", "t",	"Ct1",	R"(^2_-2:1, 3_-2:1, 4D?_2:1, 3_1:1, 3_2:2, 3_)");
 	/*  43 */ addCadenceDefinition("C", "t",	"Ct2",	R"(^2_-2:1, 3_1:1, 3_-2:1, 4D?_2:1, 3_2:2, 3_)");
@@ -3206,7 +3207,9 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/* 120 */ addCadenceDefinition("x", "C",	"xC1",	R"(^4D_1:-2, 3_1:-2, 2_1:2, 3_R:2, R_)");
 	/* 123 */ addCadenceDefinition("x", "c",	"xc1",	R"(^4D_1:-2, 3_R:-2, R_)");
 	/* 123 */ addCadenceDefinition("x", "y",	"xy1",	R"(^4D_1:-2, 3_R:R, R_)");
+	/* 124 */ addCadenceDefinition("y", "T",	"yT1",	R"(^2_-2:1, 3_R:-2, R_)");
 	/* 124 */ addCadenceDefinition("y", "z",	"yz1",	R"(^2_-2:1, 3_R:R, R_)");
+	/* 124 */ addCadenceDefinition("y", "Q",	"yQ1",	R"(^2_-2:1, 3_R:-5, R_)");
 	/* 125 */ addCadenceDefinition("z", "C",	"zC1",	R"(^7_1:-2, 6_1:-2, 5_1:2, 6_R:2, R_)");
 	/* 125 */ addCadenceDefinition("z", "C",	"zC2",	R"(^7_1:-2, 6_1:1, 6_R:2, R_)");
 	/* 126 */ addCadenceDefinition("z", "C",	"zC3",	R"(^-2_1:-2, -3_1:1, -3_R:2, R_)");
@@ -3281,6 +3284,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("CQT",  "Inverted Authentic");
 	m_cadenceLabels.emplace("CQTt", "Inverted Authentic");
 	m_cadenceLabels.emplace("CQt",  "Inverted Authentic");
+	m_cadenceLabels.emplace("Qy",   "Abandoned Inverted Authentic");
 	m_cadenceLabels.emplace("BCz",  "Authentic");
 	m_cadenceLabels.emplace("BCz",  "Authentic");
 	m_cadenceLabels.emplace("BCz",  "Authentic");
@@ -3311,12 +3315,12 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("cx",   "Abandoned Authentic");
 	m_cadenceLabels.emplace("Cx",   "Abandoned Authentic");
 	m_cadenceLabels.emplace("cxz",  "Abandoned Authentic");
-	m_cadenceLabels.emplace("By",  "Abandoned Authentic");
+	m_cadenceLabels.emplace("By",   "Abandoned Authentic");
 	m_cadenceLabels.emplace("Byz",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("BTy",  "Abandoned Authentic");
-	m_cadenceLabels.emplace("BTyz",  "Abandoned Authentic");
+	m_cadenceLabels.emplace("BTyz", "Abandoned Authentic");
 	m_cadenceLabels.emplace("Bty",  "Abandoned Authentic");
-	m_cadenceLabels.emplace("Btyz",  "Abandoned Authentic");
+	m_cadenceLabels.emplace("Btyz", "Abandoned Authentic");
 	m_cadenceLabels.emplace("Cxz",  "Abandoned Clausula Vera");
 	m_cadenceLabels.emplace("Cz",   "Abandoned Clausula Vera");
 	m_cadenceLabels.emplace("Ty",   "Abandoned Clausula Vera");
