@@ -1147,6 +1147,7 @@ void Tool_autocadence::searchIntervalSequences(void) {
 						// cerr << "FOUND MATCH: " << m << endl;
 						matches.push_back(m);
 						m_matches.emplace_back(vector<int>{i, j, k});
+						break;
 					}
 				}
 			}
