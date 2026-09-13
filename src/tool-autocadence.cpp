@@ -2092,7 +2092,8 @@ void Tool_autocadence::prepareExtremisBassizans(HumdrumFile& infile) {
 //
 // Tool_autocadence::hasIncorrectBassizans -- True when the extremis lowest
 //     line attacks at this slice, approached by a falling fifth (-5) or a
-//     rising fourth (4), including when that motion is a voice transfer.
+//     rising fourth (4), including compound equivalents (e.g. rising 11th,
+//     falling 12th) and voice transfers.
 //
 
 bool Tool_autocadence::hasIncorrectBassizans(int index) {
@@ -2100,7 +2101,28 @@ bool Tool_autocadence::hasIncorrectBassizans(int index) {
 		return false;
 	}
 	int lastmel = m_extremisLastmel[index];
-	return (lastmel == -5) || (lastmel == 4);
+	// Reduce compound diatonic intervals by octave (7) into a simple form.
+	// 11→4, 18→4, -12→-5, etc.
+	int n = lastmel;
+	while (n > 8) {
+		n -= 7;
+	}
+	while (n < -8) {
+		n += 7;
+	}
+	if ((n == 4) || (n == -5)) {
+		return true;
+	}
+	// getIntervalName leaves some compound base-40 diffs unmapped (P11=57,
+	// P12=63, …).  Treat those as rising-fourth / falling-fifth classes.
+	int rem = std::abs(lastmel) % 40;
+	if ((lastmel > 0) && (rem == 17)) {
+		return true;  // rising perfect fourth (+ octaves)
+	}
+	if ((lastmel < 0) && (rem == 23)) {
+		return true;  // falling perfect fifth (+ octaves)
+	}
+	return false;
 }
 
 
@@ -3255,11 +3277,13 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("ATy",  "Altizans");// Phrygian
 	m_cadenceLabels.emplace("ATyz", "Altizans");// Phrygian
 	m_cadenceLabels.emplace("ATz",  "Altizans");// Phrygian
+	m_cadenceLabels.emplace("ABCTz","Authentic");
 	m_cadenceLabels.emplace("BC",   "Authentic");
 	m_cadenceLabels.emplace("BCT",  "Authentic");
 	m_cadenceLabels.emplace("BCTt", "Authentic");
 	m_cadenceLabels.emplace("BCTtu","Authentic");
 	m_cadenceLabels.emplace("BCTu", "Authentic");
+	m_cadenceLabels.emplace("BCTz", "Authentic");
 	m_cadenceLabels.emplace("BCt",  "Authentic");
 	m_cadenceLabels.emplace("BCtz", "Authentic");
 	m_cadenceLabels.emplace("BCt",  "Evaded Authentic");
@@ -3284,6 +3308,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("CQT",  "Inverted Authentic");
 	m_cadenceLabels.emplace("CQTt", "Inverted Authentic");
 	m_cadenceLabels.emplace("CQt",  "Inverted Authentic");
+	m_cadenceLabels.emplace("CQtx",  "Inverted Authentic");
 	m_cadenceLabels.emplace("Qy",   "Abandoned Inverted Authentic");
 	m_cadenceLabels.emplace("BCz",  "Authentic");
 	m_cadenceLabels.emplace("BCz",  "Authentic");
@@ -3301,6 +3326,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("CT",   "Clausula Vera");// Phrygian
 	m_cadenceLabels.emplace("CTa",  "Clausula Vera");
 	m_cadenceLabels.emplace("CTaz", "Clausula Vera");
+	m_cadenceLabels.emplace("CTtz", "Clausula Vera");
 	m_cadenceLabels.emplace("CTp",  "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("CTpt", "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("CTu",  "Clausula Vera");
@@ -3331,6 +3357,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("Ta",   "Evaded Altizans Only");
 	m_cadenceLabels.emplace("Taz",  "Evaded Altizans Only");
 	m_cadenceLabels.emplace("Tc",   "Evaded Clausula Vera");
+	m_cadenceLabels.emplace("Tct",   "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("Tcx",  "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("Tcxz", "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("Tcz",  "Evaded Clausula Vera");
@@ -3585,6 +3612,16 @@ string Tool_autocadence::getIntervalName(const string& b40) {
 
 	if (b40 == "40") return "8";
 	if (b40 == "-40") return "-8";
+
+	// Compound equivalents (simple interval + octave(s) in base-40):
+	if (b40 == "57")  return "11";   // P11 = P4 + P8
+	if (b40 == "-57") return "-11";
+	if (b40 == "63")  return "12";   // P12 = P5 + P8
+	if (b40 == "-63") return "-12";
+	if (b40 == "97")  return "18";   // P18 = P4 + 2×P8
+	if (b40 == "-97") return "-18";
+	if (b40 == "103") return "19";   // P19 = P5 + 2×P8
+	if (b40 == "-103") return "-19";
 
 	return b40;
 }

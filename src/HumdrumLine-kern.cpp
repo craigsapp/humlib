@@ -336,6 +336,13 @@ string HumdrumLine::getTriadicQuality(HumdrumFile& infile, int index,
 
 	// More than triad.
 	if (pcs_new.size() > 3) {
+		// Still allow a bass-root reading when P4 and P5 sound above the bass
+		// (e.g. E–A–B plus extra tones).
+		if ((basspc >= 0) && pcs[(basspc + 5) % 12] && pcs[(basspc + 7) % 12]) {
+			quality = "S";
+			root = pcnames[basspc];
+			return "";
+		}
 		quality = "+";
 		return "";
 	}
@@ -464,6 +471,14 @@ string HumdrumLine::getTriadicQuality(HumdrumFile& infile, int index,
 			}
 			return "";
 		}
+	}
+
+	// Suspended sonority: perfect fourth and perfect fifth above the bass
+	// (e.g. E–A–B).  Treat the bass pitch as the root.
+	if ((basspc >= 0) && pcs[(basspc + 5) % 12] && pcs[(basspc + 7) % 12]) {
+		quality = "S";
+		root = pcnames[basspc];
+		return "";
 	}
 
 	// Unknown trichord.
