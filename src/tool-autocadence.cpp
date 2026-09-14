@@ -3244,6 +3244,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/* 111 */ addCadenceDefinition("t", "y",	"tc5",	R"(^7_1:-2, 6_2:1, 5_2:R, R_)");
 	/* 111 */ addCadenceDefinition("t", "c",	"tc6",	R"(^7_2:-2, 5_-3:1, 7_)");
 	/* 111 */ addCadenceDefinition("t", "c",	"tc7",	R"(^7_1:-2, 6_2:1, 5_)");
+	/* 111 */ addCadenceDefinition("t", "c",	"tc7",	R"(^7_1:1, 7_1:-2, 6_2:-2, 4_)");
 	/* 113 */ addCadenceDefinition("u", "C",	"uC1",	R"(^4D_1:-2, 3_-2:1, 4D_-2:2, 6_)");
 	/* 114 */ addCadenceDefinition("u", "C",	"uC2",	R"(^4D_1:-2, 3_-3:2, 6_)");
 	/* 115 */ addCadenceDefinition("u", "C",	"uC3",	R"(^4D_1:-2, 3_1:-2, 2_-3:3, 6_)");
@@ -3350,6 +3351,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("CQtx", "Inverted Authentic");
 	m_cadenceLabels.emplace("Qc",   "Evaded Inverted Authentic");
 	m_cadenceLabels.emplace("Qy",   "Abandoned Inverted Authentic");
+	m_cadenceLabels.emplace("Qty",   "Abandoned Inverted Authentic");
 	m_cadenceLabels.emplace("BCz",  "Authentic");
 	m_cadenceLabels.emplace("BCz",  "Authentic");
 	m_cadenceLabels.emplace("BCz",  "Authentic");
@@ -3391,6 +3393,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("Cxz",  "Abandoned Clausula Vera");
 	m_cadenceLabels.emplace("Cz",   "Abandoned Clausula Vera");
 	m_cadenceLabels.emplace("Ty",   "Abandoned Clausula Vera");
+	m_cadenceLabels.emplace("Tty",  "Abandoned Clausula Vera");
 	m_cadenceLabels.emplace("ty",   "Abandoned Clausula Vera");
 	m_cadenceLabels.emplace("yz",   "Abandoned Clausula Vera");
 	m_cadenceLabels.emplace("ct",   "Evaded Clausula Vera");

@@ -1881,7 +1881,7 @@ RECONSIDER:
 		//// Code to apply binary or ternary suspension and agent labels and
 		//// also suspension ornament and chanson idiom labels
 
-		else if ((!pairedDescendingEighthAgent) && valid_sus_acc &&
+		else if ((!pairedDescendingEighthAgent) && (dur > .25) && valid_sus_acc &&
 				((ointn == -1) || ((ointn == -2) && (ointnn == 1)))) {
 			if ((durpp == 1) && (durp == 1) && (intpp == -1) && (intp == 1) &&
 					((results[vindex][lineindexpp] == m_labels[THIRD_Q_PASS_DOWN]) ||
@@ -1905,7 +1905,7 @@ RECONSIDER:
 				results[vindex][lineindex] = m_labels[AGENT_BIN];
 				results[ovoiceindex][lineindex] = m_labels[SUS_BIN];
 			}
-		} else if ((!pairedDescendingEighthAgent) && valid_ornam_sus_acc &&
+		} else if ((!pairedDescendingEighthAgent) && (dur > .25) && valid_ornam_sus_acc &&
 				((ointn == 0) && (ointnn == -1))) {
 			if ((durpp == 1) && (durp == 1) && (intpp == -1) && (intp == 1) &&
 					((results[vindex][lineindexpp] == m_labels[THIRD_Q_PASS_DOWN]) ||
@@ -1922,7 +1922,7 @@ RECONSIDER:
 				results[ovoiceindex][lineindex] = m_labels[SUS_BIN];
 			} // repeated-note of suspension
 			results[ovoiceindex][olineindexn] = m_labels[SUSPENSION_REP];
-		} else if ((!pairedDescendingEighthAgent) && valid_ornam_sus_acc &&
+		} else if ((!pairedDescendingEighthAgent) && (dur > .25) && valid_ornam_sus_acc &&
 				((ointn == 1) && (ointnn == -2))) {
 			if ((durpp == 1) && (durp == 1) && (intpp == -1) && (intp == 1) &&
 					((results[vindex][lineindexpp] == m_labels[THIRD_Q_PASS_DOWN]) ||
