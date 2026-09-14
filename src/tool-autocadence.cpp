@@ -3350,8 +3350,9 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("CQT",  "Inverted Authentic");
 	m_cadenceLabels.emplace("CQTu", "Inverted Authentic");
 	m_cadenceLabels.emplace("CQTt", "Inverted Authentic");
-	m_cadenceLabels.emplace("CQt",  "Inverted Authentic");
-	m_cadenceLabels.emplace("CQtx", "Inverted Authentic");
+	m_cadenceLabels.emplace("CQt",  "Evaded Inverted Authentic");
+	m_cadenceLabels.emplace("CQtx", "Evaded Inverted Authentic");
+	m_cadenceLabels.emplace("CQx",  "Evaded Inverted Authentic");
 	m_cadenceLabels.emplace("Qc",   "Evaded Inverted Authentic");
 	m_cadenceLabels.emplace("Qy",   "Abandoned Inverted Authentic");
 	m_cadenceLabels.emplace("Qty",  "Abandoned Inverted Authentic");
