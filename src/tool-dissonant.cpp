@@ -1896,10 +1896,9 @@ RECONSIDER:
 			} else if (((odur == .5) || (odur == 1)) && // purely ornamental suspension
 						((odurn == .5) || (odurn == 1)) &&
 						(ointn == -1) && (ointnn == -1) &&
-						// rearticulated same-pitch quarters count as a minim, so not ornamental
-						!((ointp == 0) && (oattackindexp >= 0) &&
-						  (grid.cell(ovoiceindex, oattackindexp)->getDuration() == 1) &&
-						  (odur == 1))) {
+						// same-pitch reattack is prepared (e.g. minim then rearticulated
+						// quarter, or two quarters), so not purely ornamental
+						!(ointp == 0)) {
 				results[vindex][lineindex] = m_labels[AGENT_BIN];
 				results[ovoiceindex][lineindex] = m_labels[ORNAMENTAL_SUS];
 			} else { // binary agent and suspension
