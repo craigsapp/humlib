@@ -3368,6 +3368,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("CLTz", "Leaping Contratenor");
 	m_cadenceLabels.emplace("Cp",   "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("Cpt",  "Evaded Clausula Vera");
+	m_cadenceLabels.emplace("CP",   "Incomplete Plagal Phrygian");
 	m_cadenceLabels.emplace("CPT",  "Plagal Phrygian");// Phrygian
 	m_cadenceLabels.emplace("CPTz", "Plagal Phrygian");// Phrygian
 	m_cadenceLabels.emplace("CPt",  "Evaded Plagal Phrygian");
