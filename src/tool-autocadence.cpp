@@ -2865,8 +2865,10 @@ void Tool_autocadence::generateCounterpointStrings(vector<HTp>& kspines, int vin
 		return;
 	}
 
-	// Keep slices with a note attack in either voice, or where both voices
-	// move to a closing rest.  Double-sustains (no new attack) are skipped.
+	// Keep slices with a note attack in either voice, a rest onset in either
+	// voice (so a rest against a sustained/tied note is not skipped), or where
+	// both voices move to a closing rest.  Double-sustains (no new attack and
+	// no rest onset) are skipped.
 	vector<vector<HTp>> newpairings(2);
 	newpairings[0].reserve(10000);
 	newpairings[1].reserve(10000);
@@ -2876,13 +2878,14 @@ void Tool_autocadence::generateCounterpointStrings(vector<HTp>& kspines, int vin
 		}
 		bool attackQ = pairings[0][i]->isNoteAttack() ||
 				pairings[1][i]->isNoteAttack();
+		bool restOnsetQ = (!pairings[0][i]->isNullToken() && pairings[0][i]->isRest()) ||
+				(!pairings[1][i]->isNullToken() && pairings[1][i]->isRest());
 		bool closingRestQ = pairings[0][i]->isRest() &&
 				pairings[1][i]->isRest() &&
 				pairings[0][i]->getValueBool("auto", "closingRest") &&
 				pairings[1][i]->getValueBool("auto", "closingRest");
-		if (!attackQ && !closingRestQ) {
-			// Skip slices where both voices sustain without a new attack.
-			// A pair of closing rests (both voices stop sounding) is kept.
+		if (!attackQ && !restOnsetQ && !closingRestQ) {
+			// Skip slices where both voices sustain without a new attack or rest.
 			continue;
 		}
 		//if (pairings[0][i]->isRest() || pairings[1][i]->isRest()) {
@@ -3215,6 +3218,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/* 105 */ addCadenceDefinition("c", "T",	"cT4",	R"(^2_1:1, 2_-2:1, 3_1:1, 3_1:-2, 2_)");
 	/* 105 */ addCadenceDefinition("c", "T",	"cT5",	R"(^2_-2:1, 3_1:1, 3_1:-2, 2_1:-2, 1_-2:2, 3_)");
 	/* 105 */ addCadenceDefinition("c", "T",	"cT6",	R"(^2_-2:1, 3_1:1, 3_-2:-2, 3_)");
+	/* 105 */ addCadenceDefinition("c", "T",	"cT6",	R"(^2_-2:1, 3_4:-2, -3_)");
 	/* 105 */ addCadenceDefinition("c", "t",	"ct1",	R"(^2_-2:1, 3_-2:1, 4_(?!2:1))");  // needs negative look-ahead to distinguish from CT5
 	/* 105 */ addCadenceDefinition("c", "t",	"ct2",	R"(^2_-2:1, 3_-2:2, 5_)");
 	/* 105 */ addCadenceDefinition("c", "t",	"ct3",	R"(^2_-2:1, 3_1:2, 4_-2:2, 6_)");
@@ -3232,6 +3236,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/* 111 */ addCadenceDefinition("t", "c",	"tc2",	R"(^7_1:-2, 6_3:1, 4D_)");
 	/* 111 */ addCadenceDefinition("t", "c",	"tc3",	R"(^7_1:-2, 6_1:1, 6_2:1, 5_2:-2, 3_)");
 	/* 111 */ addCadenceDefinition("t", "c",	"tc4",	R"(^7_1:-2, 6_2:1, 5_)");
+	/* 111 */ addCadenceDefinition("t", "c",	"tc5",	R"(^7_2:-2, 5_-3:1, 7_)");
 	/* 113 */ addCadenceDefinition("u", "C",	"uC1",	R"(^4D_1:-2, 3_-2:1, 4D_-2:2, 6_)");
 	/* 114 */ addCadenceDefinition("u", "C",	"uC2",	R"(^4D_1:-2, 3_-3:2, 6_)");
 	/* 115 */ addCadenceDefinition("u", "C",	"uC3",	R"(^4D_1:-2, 3_1:-2, 2_-3:3, 6_)");
