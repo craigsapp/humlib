@@ -3387,6 +3387,8 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("Tcx",  "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("Tcxz", "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("Tcz",  "Evaded Clausula Vera");
+	m_cadenceLabels.emplace("Txy",  "Abandoned Authentic");
+	m_cadenceLabels.emplace("txy",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("xy",   "Abandoned Authentic");
 	m_cadenceLabels.emplace("xyz",  "Abandoned Authentic");
 	// Empty-string labels suppress the cadence annotation entirely (no LO line,
