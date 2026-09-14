@@ -3297,11 +3297,12 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("ABxz", "Reinterpreted");
 	m_cadenceLabels.emplace("Abz",  "Altizans Only");
 	m_cadenceLabels.emplace("ABz",  "Reinterpreted");
-	m_cadenceLabels.emplace("ACt",  "Evaded Clausula Vera");
-	m_cadenceLabels.emplace("ACT",  "Clausula Vera");// Phrygian
+	m_cadenceLabels.emplace("ACt",  "Evaded Double Leading Tone");
+	m_cadenceLabels.emplace("ACT",  "Double Leading Tone");// Phrygian
+	m_cadenceLabels.emplace("ACQT", "Double Leading Tone");
 	m_cadenceLabels.emplace("ACTt", "Double Leading Tone");
 	m_cadenceLabels.emplace("ACTtz","Double Leading Tone");
-	m_cadenceLabels.emplace("ACtz", "Evaded Clausula Vera");
+	m_cadenceLabels.emplace("ACtz", "Evaded Double Leading Tone");
 	m_cadenceLabels.emplace("ACz",  "Abandoned Double Leading Tone");
 	m_cadenceLabels.emplace("APT",  "Altizans Only");
 	m_cadenceLabels.emplace("AT",   "Altizans Only");// Phrygian
