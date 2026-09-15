@@ -3270,6 +3270,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/* 117 */ addCadenceDefinition("u", "C",	"uC5",	R"(^4D_1:-2, 3_1:1, 3_-3:2, 6_)");
 	/* 118 */ addCadenceDefinition("u", "C",	"uC6",	R"(^4D_1:-2, 3_1:1, 3_1:-2, 2_-3:3, 6_)");
 	/* 119 */ addCadenceDefinition("u", "C",	"uC7",	R"(^4D_1:-2, 3_1:1, 3_1:-2, 2_1:2, 3_-3:2, 6_)");
+	/* 117 */ addCadenceDefinition("u", "y",	"uy1",	R"(^4D_1:-2, 3_-2:1, 4_-2:R, R_)");
 	/* 120 */ addCadenceDefinition("x", "C",	"xC1",	R"(^4D_1:-2, 3_R:2, R_)");
 	/* 121 */ addCadenceDefinition("x", "C",	"xC2",	R"(^4D_1:-2, 3_R:2, R_)");
 	/* 122 */ addCadenceDefinition("x", "C",	"xC3",	R"(^4D_1:-2, 3_R:2, R_)");
@@ -3320,6 +3321,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("ACTtz","Double Leading Tone");
 	m_cadenceLabels.emplace("ACt",  "Evaded Double Leading Tone");
 	m_cadenceLabels.emplace("ACtz", "Evaded Double Leading Tone");
+	m_cadenceLabels.emplace("Tac",  "Evaded Double Leading Tone");
 	m_cadenceLabels.emplace("ACz",  "Abandoned Double Leading Tone");
 	m_cadenceLabels.emplace("APT",  "Altizans Only");
 	m_cadenceLabels.emplace("AT",   "Altizans Only");// Phrygian
@@ -3431,6 +3433,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("Bty",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("Btyz", "Abandoned Authentic");
 	m_cadenceLabels.emplace("Tcux", "Abandoned Authentic");
+	m_cadenceLabels.emplace("uy",   "Abandoned Authentic");
 	m_cadenceLabels.emplace("Cxz",  "Abandoned Clausula Vera");
 	m_cadenceLabels.emplace("Cz",   "Abandoned Clausula Vera");
 	m_cadenceLabels.emplace("Ty",   "Abandoned Clausula Vera");
