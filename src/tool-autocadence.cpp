@@ -3430,6 +3430,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("ty",   "Abandoned Clausula Vera");
 	m_cadenceLabels.emplace("yz",   "Abandoned Clausula Vera");
 	m_cadenceLabels.emplace("ct",   "Evaded Clausula Vera");
+	m_cadenceLabels.emplace("BTat",  "Evaded Altizans Only");
 	m_cadenceLabels.emplace("Ta",   "Evaded Altizans Only");
 	m_cadenceLabels.emplace("Tat",  "Evaded Altizans Only");
 	m_cadenceLabels.emplace("Tax",  "Evaded Altizans Only");
