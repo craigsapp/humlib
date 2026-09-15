@@ -3107,6 +3107,8 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/*   9 */ addCadenceDefinition("B", "C",	"BC2",	R"(^4D_1:-2, 3_1:-2, 2_1:2, 3_1:1, 3_-5:2, 8_)");
 	/*  10 */ addCadenceDefinition("B", "C",	"BC3",	R"(^4D_1:-2, 3_(?:4|-5):2, (?:8|1)_)");
 	/*  11 */ addCadenceDefinition("B", "C",	"BC4",	R"(^4D_1:-2, 3_1:-2, 2_-5:3, 8_)");
+	/*  13 */ addCadenceDefinition("B", "C",	"BC5",	R"(^4D_1:-2, 3_R:1, R_R:-2, 2_1:2, 3_(?:4|-5):2, 8_)");
+	// /*  13 */ addCadenceDefinition("B", "C",	"BC5",	R"(^4D_1:-2, 3_R:1, R_R:-2, 2_1:2, 3_4:2, 8_)");
 	/*  13 */ addCadenceDefinition("B", "C",	"BC6",	R"(^4D_1:-2, 3_1:1, 3_(?:4|-5):2, 8_)");
 	/*  14 */ addCadenceDefinition("B", "C",	"BC7",	R"(^4D_1:-2, 3_1:1, 3_1:-2, 2_-5:3, 8_)");
 	/*  15 */ addCadenceDefinition("B", "C",	"BC8",	R"(^4D_1:-2, 3_1:1, 3_1:-2, 2_1:2, 3_-5:2, 8_)");
@@ -3367,6 +3369,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("BTcu", "Evaded Authentic");
 	m_cadenceLabels.emplace("Bbc",  "Evaded Authentic");
 	m_cadenceLabels.emplace("Bc",   "Evaded Authentic");
+	m_cadenceLabels.emplace("Bct",  "Evaded Authentic");
 	m_cadenceLabels.emplace("Bcx",  "Evaded Authentic");
 	m_cadenceLabels.emplace("Cbu",  "Evaded Authentic");
 	m_cadenceLabels.emplace("Cbux", "Evaded Authentic");
