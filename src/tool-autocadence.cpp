@@ -3325,6 +3325,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("ATy",  "Altizans Only");// Phrygian
 	m_cadenceLabels.emplace("ATyz", "Altizans Only");// Phrygian
 	m_cadenceLabels.emplace("ATz",  "Altizans Only");// Phrygian
+	m_cadenceLabels.emplace("ATbz", "Altizans Only");
 	m_cadenceLabels.emplace("ABCTz","Authentic");
 	m_cadenceLabels.emplace("BC",   "Authentic");
 	m_cadenceLabels.emplace("BCT",  "Authentic");
