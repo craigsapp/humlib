@@ -92,6 +92,9 @@ class Tool_dissonant : public HumTool {
 		bool    isSuspension         (HTp token);
 		void    addSuspensionMarkToNote(HTp start, const string& marks);
 		void    adjustSuspensionColors(HTp speinstart);
+		void    clearPatientsOfLostAgent(vector<vector<string>>& results,
+		                            int vindex, int lineindex,
+		                            vector<int>& agentPatients);
 
 	private:
 		vector<HTp> m_kernspines;

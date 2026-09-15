@@ -1502,13 +1502,31 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string>>& results,
 	HumNum othMeterDen; // the denominator of the other voice's notated time signature
 	bool ternAgent = false;  // true if the ref voice would be a valid agent of a ternary susp. But if true, the diss is not necessarily a susp.
 
-	for (int i=1; i<(int)attacks.size() - 1; i++) {
+		for (int i=1; i<(int)attacks.size() - 1; i++) {
 		sliceindex = attacks[i]->getSliceIndex();
 		lineindex = attacks[i]->getLineIndex();
 		// lineindexn = attacks[i+1]->getLineIndex();
 		attackindexn = attacks[i]->getNextAttackIndex();
 
 		marking = '\0';
+		// Patients labeled while this note was an agent; cleared if g/G is replaced.
+		vector<int> agentPatients;
+
+		auto setRefLabel = [&](const string& label) {
+			string& cur = results[vindex][lineindex];
+			bool wasAgent = (cur == m_labels[AGENT_BIN]) || (cur == m_labels[AGENT_TERN]);
+			bool nowAgent = (label == m_labels[AGENT_BIN]) || (label == m_labels[AGENT_TERN]);
+			if (wasAgent && !nowAgent) {
+				clearPatientsOfLostAgent(results, vindex, lineindex, agentPatients);
+			}
+			cur = label;
+		};
+
+		auto setAgentAndPatient = [&](const string& agentLabel, const string& patientLabel) {
+			results[vindex][lineindex] = agentLabel;
+			results[ovoiceindex][lineindex] = patientLabel;
+			agentPatients.push_back(ovoiceindex);
+		};
 
 		// calculate harmonic intervals:
 		int lowestnote = 1000;
@@ -1812,67 +1830,71 @@ RECONSIDER:
 
 		if (keepFakeSus) {
 			// already labeled as fake suspension against another voice
-		} else if ((!lowerOfDissFourth) && ((lev >= levn) || ((lev == 2) && (dur == .5))) && (lev >= levp) &&
+		} else if (((!lowerOfDissFourth) || pairedDescendingEighthAgent) &&
+			((lev >= levn) || ((lev == 2) && (dur == .5))) && (lev >= levp) &&
 			(dur <= durp) && (condition2 || condition2b) && valid_acc_exit) { // weak dissonances
+			// pairedDescendingEighthAgent: lower-of-fourth eighths refused as g/s
+			// because they are passing motion — allow p/n/… instead of falling
+			// through to unexplained z (e.g. Trm1022a m.89 Bass 8C vs Tenore).
 			if (intp == -1) { // descending dissonances
 				if (intn == -1) { // downward passing tone
-					results[vindex][lineindex] = m_labels[PASSING_DOWN];
+					setRefLabel(m_labels[PASSING_DOWN]);
 				} else if (intn == 1) { // lower neighbor
-					results[vindex][lineindex] = m_labels[NEIGHBOR_DOWN];
+					setRefLabel(m_labels[NEIGHBOR_DOWN]);
 				} else if ((intn == 0) && (dur <= 2)) { // descending anticipation
-					results[vindex][lineindex] = m_labels[ANT_DOWN];
+					setRefLabel(m_labels[ANT_DOWN]);
 				} else if (intn > 1) { // lower échappée
-					results[vindex][lineindex] = m_labels[ECHAPPEE_DOWN];
+					setRefLabel(m_labels[ECHAPPEE_DOWN]);
 				} else if (intn < -1) { // descending short nota cambiata
-					results[vindex][lineindex] = m_labels[CAMBIATA_DOWN_S];
+					setRefLabel(m_labels[CAMBIATA_DOWN_S]);
 				}
 			} else if (intp == 1) { // ascending dissonances
 				if (intn == 1) { // rising passing tone
-					results[vindex][lineindex] = m_labels[PASSING_UP];
+					setRefLabel(m_labels[PASSING_UP]);
 				} else if (intn == -1) { // upper neighbor
-					results[vindex][lineindex] = m_labels[NEIGHBOR_UP];
+					setRefLabel(m_labels[NEIGHBOR_UP]);
 				} else if (intn < -1) { // upper échappée
-					results[vindex][lineindex] = m_labels[ECHAPPEE_UP];
+					setRefLabel(m_labels[ECHAPPEE_UP]);
 				} else if ((intn == 0) && (dur <= 2)) { // rising anticipation
-					results[vindex][lineindex] = m_labels[ANT_UP];
+					setRefLabel(m_labels[ANT_UP]);
 				} else if (intn > 1) { // ascending short nota cambiata
-					results[vindex][lineindex] = m_labels[CAMBIATA_UP_S];
+					setRefLabel(m_labels[CAMBIATA_UP_S]);
 				}
 			} else if (intp < -1) {
 				if (intn == 1) { // reverse lower échappée
-					results[vindex][lineindex] = m_labels[REV_ECHAPPEE_DOWN];
+					setRefLabel(m_labels[REV_ECHAPPEE_DOWN]);
 				} else if (intn == -1) { // reverse descending nota cambiata
-					results[vindex][lineindex] = m_labels[REV_CAMBIATA_DOWN];
+					setRefLabel(m_labels[REV_CAMBIATA_DOWN]);
 				}
 			} else if (intp > 1) {
 				if (intn == -1) { // reverse upper échappée
-					results[vindex][lineindex] = m_labels[REV_ECHAPPEE_UP];
+					setRefLabel(m_labels[REV_ECHAPPEE_UP]);
 				} else if (intn == 1) { // reverse ascending nota cambiata
-					results[vindex][lineindex] = m_labels[REV_CAMBIATA_UP];
+					setRefLabel(m_labels[REV_CAMBIATA_UP]);
 				}
 			}
 		} else if ((!lowerOfDissFourth) && (durp >= 2) && (dur == 1) && (lev < levn) && valid_acc_exit &&
 					 (condition2 || condition2b) && (lev == 1)) {
 			if (intp == -1) {
 				if (intn == -1) { // dissonant third quarter descending passing tone
-					results[vindex][lineindex] = m_labels[THIRD_Q_PASS_DOWN];
+					setRefLabel(m_labels[THIRD_Q_PASS_DOWN]);
 				} else if (intn == 1) { // dissonant third quarter lower neighbor
-					results[vindex][lineindex] = m_labels[THIRD_Q_LOWER_NEI];
+					setRefLabel(m_labels[THIRD_Q_LOWER_NEI]);
 				}
 			} else if (intp == 1) {
 				if (intn == 1) { // dissonant third quarter ascending passing tone
-					results[vindex][lineindex] = m_labels[THIRD_Q_PASS_UP];
+					setRefLabel(m_labels[THIRD_Q_PASS_UP]);
 				} else if (intn == -1) { // dissonant third quarter upper neighbor
-					results[vindex][lineindex] = m_labels[THIRD_Q_UPPER_NEI];
+					setRefLabel(m_labels[THIRD_Q_UPPER_NEI]);
 				}
 			}
 		} else if ((!lowerOfDissFourth) && ((lev > levp) || (durp+durp+durp+durp == dur)) &&
 				   (lev == levn) && condition2 && (intn == -1) &&
 				   (dur == (durn+durn)) && ((dur+dur) <= odur)) {
 			if (fabs(intp) > 1.0) {
-				results[vindex][lineindex] = m_labels[SUS_NO_AGENT_LEAP];
+				setRefLabel(m_labels[SUS_NO_AGENT_LEAP]);
 			} else if ((fabs(intp) == 1.0) || ((intp == 0) && (fabs(intpp) == 1.0))) {
-				results[vindex][lineindex] = m_labels[SUS_NO_AGENT_STEP];
+				setRefLabel(m_labels[SUS_NO_AGENT_STEP]);
 			}
 		}
 
@@ -1891,19 +1913,16 @@ RECONSIDER:
 				results[vindex][lineindexpp] = m_labels[CHANSON_IDIOM];
 			}
 			if (ternAgent) { // ternary agent and suspension
-				results[vindex][lineindex] = m_labels[AGENT_TERN];
-				results[ovoiceindex][lineindex] = m_labels[SUS_TERN];
+				setAgentAndPatient(m_labels[AGENT_TERN], m_labels[SUS_TERN]);
 			} else if (((odur == .5) || (odur == 1)) && // purely ornamental suspension
 						((odurn == .5) || (odurn == 1)) &&
 						(ointn == -1) && (ointnn == -1) &&
 						// same-pitch reattack is prepared (e.g. minim then rearticulated
 						// quarter, or two quarters), so not purely ornamental
 						!(ointp == 0)) {
-				results[vindex][lineindex] = m_labels[AGENT_BIN];
-				results[ovoiceindex][lineindex] = m_labels[ORNAMENTAL_SUS];
+				setAgentAndPatient(m_labels[AGENT_BIN], m_labels[ORNAMENTAL_SUS]);
 			} else { // binary agent and suspension
-				results[vindex][lineindex] = m_labels[AGENT_BIN];
-				results[ovoiceindex][lineindex] = m_labels[SUS_BIN];
+				setAgentAndPatient(m_labels[AGENT_BIN], m_labels[SUS_BIN]);
 			}
 		} else if ((!pairedDescendingEighthAgent) && (dur > .25) && valid_ornam_sus_acc &&
 				((ointn == 0) && (ointnn == -1))) {
@@ -1915,11 +1934,9 @@ RECONSIDER:
 				results[vindex][lineindexpp] = m_labels[CHANSON_IDIOM];
 			}
 			if (ternAgent) { // ternary agent and suspension
-				results[vindex][lineindex] = m_labels[AGENT_TERN];
-				results[ovoiceindex][lineindex] = m_labels[SUS_TERN];
+				setAgentAndPatient(m_labels[AGENT_TERN], m_labels[SUS_TERN]);
 			} else { // binary agent and suspension
-				results[vindex][lineindex] = m_labels[AGENT_BIN];
-				results[ovoiceindex][lineindex] = m_labels[SUS_BIN];
+				setAgentAndPatient(m_labels[AGENT_BIN], m_labels[SUS_BIN]);
 			} // repeated-note of suspension
 			results[ovoiceindex][olineindexn] = m_labels[SUSPENSION_REP];
 		} else if ((!pairedDescendingEighthAgent) && (dur > .25) && valid_ornam_sus_acc &&
@@ -1932,11 +1949,9 @@ RECONSIDER:
 				results[vindex][lineindexpp] = m_labels[CHANSON_IDIOM];
 			}
 			if (ternAgent) { // ternary agent and suspension
-				results[vindex][lineindex] = m_labels[AGENT_TERN];
-				results[ovoiceindex][lineindex] = m_labels[SUS_TERN];
+				setAgentAndPatient(m_labels[AGENT_TERN], m_labels[SUS_TERN]);
 			} else { // binary agent and suspension
-				results[vindex][lineindex] = m_labels[AGENT_BIN];
-				results[ovoiceindex][lineindex] = m_labels[SUS_BIN];
+				setAgentAndPatient(m_labels[AGENT_BIN], m_labels[SUS_BIN]);
 			} // This ornament is consonant against the agent so no ornament label.
 		}
 
@@ -1950,10 +1965,10 @@ RECONSIDER:
 
 			if ((dur <= durp) && (lev >= levp) && (lev >= levn) &&
 					(intp == -1) && (intn == -2) && (intnn == 1)) { // long-form descending cambiata
-				results[vindex][lineindex] = m_labels[CAMBIATA_DOWN_L];
+				setRefLabel(m_labels[CAMBIATA_DOWN_L]);
 			} else if ((dur <= durp) && (lev >= levp) && (lev >= levn) &&
 					(intp == 1) && (intn == 2) && (intnn == -1)) { // long-form ascending nota cambiata
-				results[vindex][lineindex] = m_labels[CAMBIATA_UP_L];
+				setRefLabel(m_labels[CAMBIATA_UP_L]);
 			}
 		}
 
@@ -1978,7 +1993,7 @@ RECONSIDER:
 				((fabs(intp) == 1) && (fabs(intn) == 1) && !othLeaptTo && !othLeaptFrom) || // ref voice enters and leaves by step, other voice by step or rep
 				((fabs(intp) == 1) && (intn == 0) && !othLeaptTo && (ointn == 0)) || // ref enters by step and leaves by rep, other v enters by step or rep and leaves by rep
 				(!refLeaptTo && refLeaptFrom && othLeaptFrom))))) { // ref voice enters diss by step or rep and both voices leave by leap
-			results[vindex][lineindex] = unexp_label;
+			setRefLabel(unexp_label);
 		}
 
 
@@ -1999,6 +2014,50 @@ RECONSIDER:
 		}
 	}
 
+}
+
+
+
+//////////////////////////////
+//
+// Tool_dissonant::clearPatientsOfLostAgent -- When an agent label (g/G) is
+//     replaced during RECONSIDER (e.g. by a passing tone), clear patient
+//     labels (s/S/o) that this agent assigned at the same line — unless
+//     another voice still has an agent label there (patient may belong to
+//     that other pair as well).
+//
+
+void Tool_dissonant::clearPatientsOfLostAgent(vector<vector<string>>& results,
+		int vindex, int lineindex, vector<int>& agentPatients) {
+	if (agentPatients.empty()) {
+		return;
+	}
+	bool otherAgent = false;
+	for (int j=0; j<(int)results.size(); j++) {
+		if (j == vindex) {
+			continue;
+		}
+		if ((results[j][lineindex] == m_labels[AGENT_BIN]) ||
+				(results[j][lineindex] == m_labels[AGENT_TERN])) {
+			otherAgent = true;
+			break;
+		}
+	}
+	if (otherAgent) {
+		agentPatients.clear();
+		return;
+	}
+	for (int pv : agentPatients) {
+		if ((pv < 0) || (pv >= (int)results.size())) {
+			continue;
+		}
+		if ((results[pv][lineindex] == m_labels[SUS_BIN]) ||
+				(results[pv][lineindex] == m_labels[SUS_TERN]) ||
+				(results[pv][lineindex] == m_labels[ORNAMENTAL_SUS])) {
+			results[pv][lineindex] = "";
+		}
+	}
+	agentPatients.clear();
 }
 
 
