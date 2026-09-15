@@ -3268,6 +3268,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/* 120 */ addCadenceDefinition("x", "C",	"xC4",	R"(^4D_1:-2, 3_1:-2, 2_1:2, 3_R:2, R_)");
 	/* 120 */ addCadenceDefinition("x", "C",	"xC5",	R"(^4D_1:-2, 3_1:1, 3_R:2, R_)");
 	/* 123 */ addCadenceDefinition("x", "c",	"xc1",	R"(^4D_1:-2, 3_R:-2, R_)");
+	/* 123 */ addCadenceDefinition("x", "c",	"xc2",	R"(^4D_1:-2, 3_R:4, R_)");
 	/* 123 */ addCadenceDefinition("x", "y",	"xy1",	R"(^4D_1:-2, 3_R:R, R_)");
 	/* 124 */ addCadenceDefinition("y", "T",	"yT1",	R"(^2_-2:1, 3_R:-2, R_)");
 	/* 124 */ addCadenceDefinition("y", "z",	"yz1",	R"(^2_-2:1, 3_R:R, R_)");
@@ -3403,6 +3404,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("Cu",   "Evaded Authentic");
 	m_cadenceLabels.emplace("cx",   "Abandoned Authentic");
 	m_cadenceLabels.emplace("Ctx",  "Abandoned Authentic");
+	m_cadenceLabels.emplace("ctx",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("Cx",   "Abandoned Authentic");
 	m_cadenceLabels.emplace("cxz",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("BTcx", "Abandoned Authentic");
