@@ -3113,6 +3113,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/*  19 */ addCadenceDefinition("B", "c",	"Bc1",	R"(^4D_1:-2, 3_(?:4|-5):(?:4|-5), 3_)");
 	/* 123 */ addCadenceDefinition("B", "c",	"Bc2",	R"(^4D_1:-2, 3_(?:4|-5):-2, 6_)");
 	/* 123 */ addCadenceDefinition("B", "c",	"Bc3",	R"(^4D_1:-2, 3_(?:4|-5):1, 7_)");
+	/* 123 */ addCadenceDefinition("B", "c",	"Bc4",	R"(^4D_1:-2, 3_(?:4|-5):-3, 5_)");
 	/*  10 */ addCadenceDefinition("B", "y",	"By1",	R"(^4D_1:-2, 3_(?:4|-5):R, R_)");
 	/*  20 */ addCadenceDefinition("C", "B",	"CB1",	R"(^-4D_-2:1, -3_-2:1, -2_2:1, -3_2:(?:-5|4), -8_)");
 	/*  21 */ addCadenceDefinition("C", "B",	"CB2",	R"(^-4D_-2:1, -3_-2:1, -2_2:1, -3_2:4, (?:1|-8)_)");
@@ -3209,7 +3210,8 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/*  95 */ addCadenceDefinition("T", "c",	"Tc4",	R"(^-2_1:-2, -3_1:1, -3_-2:1, -2_)");
 	/*  95 */ addCadenceDefinition("T", "c",	"Tc5",	R"(^-2_1:1, -2_1:-2, -3_-2:-2, -3_)");
 	/*  95 */ addCadenceDefinition("T", "c",	"Tc6",	R"(^7_1:-2, 6_1:-2, 5_1:-2, 4_1:-2, 3_-2:2, 5_)");
-	/*  95 */ addCadenceDefinition("T", "c",	"Tc7",	R"(^7_1:-2, 6_1:1, 6_-2:1, 7_)");
+	/*  95 */ addCadenceDefinition("T", "c",	"Tc7",	R"(^7_1:-2, 6_1:1, 6_-2:1, 7_-2:1, 8_2:1, 7_)");
+	/*  95 */ addCadenceDefinition("T", "c",	"Tc8",	R"(^7_1:-2, 6_1:1, 6_-2:1, 7_)");
 	/*  96 */ addCadenceDefinition("T", "y",	"Ty1",	R"(^7_1:-2, 6_-2:R, R_)");
 	/*  97 */ addCadenceDefinition("b", "C",	"bC1",	R"(^4D_1:-2, 3_1:-2, 2_1:2, 3_2:2, 3_)");
 	/*  98 */ addCadenceDefinition("b", "C",	"bC2",	R"(^4D_1:-2, 3_1:-2, 2_2:2, 3_)");
@@ -3308,6 +3310,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("ABxz", "Reinterpreted");
 	m_cadenceLabels.emplace("Abz",  "Altizans Only");
 	m_cadenceLabels.emplace("ABz",  "Reinterpreted");
+	m_cadenceLabels.emplace("ABCT", "Double Leading Tone");
 	m_cadenceLabels.emplace("ACT",  "Double Leading Tone");// Phrygian
 	m_cadenceLabels.emplace("ACQT", "Double Leading Tone");
 	m_cadenceLabels.emplace("ACTt", "Double Leading Tone");
