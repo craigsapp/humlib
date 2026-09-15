@@ -3097,6 +3097,8 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 
 
 
+	/*   4 */ addCadenceDefinition("", "",		"__1",	R"(^2_-2:1, 3_-2:1, 4_-3:-3, 4_)");
+	/* 124 */ addCadenceDefinition("y", "T",	"yT2",	R"(^2_-2:1, 3_1:-5, -3_R:4, R_)");  // keep high to disambiguate
 	/*   4 */ addCadenceDefinition("A", "T",	"AT1",	R"(^-4D_-2:1, -3_-2:1, -2_2:1, -3_2:-2, -5_)");
 	/*   5 */ addCadenceDefinition("A", "T",	"AT2",	R"(^-4D_-2:1, -3_-2:1, -2_3:-2, -5_)");
 	/*   6 */ addCadenceDefinition("A", "T",	"AT3",	R"(^-4D_-2:1, -3_1:1, -3_-2:1, -2_3:-2, -5_)");
@@ -3131,7 +3133,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/*  31 */ addCadenceDefinition("C", "T",	"CT2",	R"(^-7_-2:1, -6_-2:1, -5_3:-2, -8_)");
 	/*  32 */ addCadenceDefinition("C", "T",	"CT3",	R"(^-7_-2:1, -6_1:1, -6_-2:1, -5_3:-2, -8_)");
 	/*  33 */ addCadenceDefinition("C", "T",	"CT4",	R"(^-7_-2:1, -6_2:-2, -8_)");
-	/*  41 */ addCadenceDefinition("C", "T",	"ct5",	R"(^-7_-2:1, -6_1:1, -6_1:1, -6_2:-2, -8_)");
+	/*  41 */ addCadenceDefinition("C", "T",	"CT5",	R"(^-7_-2:1, -6_1:1, -6_1:1, -6_2:-2, -8_)");
 	/*  34 */ addCadenceDefinition("C", "T",	"CT6",	R"(^2_-2:1, 3_-2:1, 4D?_2:1, 3_2:-2, (?:1|8)_)");
 	/*  35 */ addCadenceDefinition("C", "T",	"CT7",	R"(^2_-2:1, 3_-2:1, 4D?_3:-2, (?:1|8)_)");
 	/*  36 */ addCadenceDefinition("C", "T",	"CT8",	R"(^2_-2:1, 3_1:1, 3_-2:1, 4D?_2:1, 3_2:-2, (?:1|8)_)");
@@ -3140,7 +3142,8 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/*  39 */ addCadenceDefinition("C", "T",	"CT11",	R"(^2_-2:1, 3_2:-2, (?:1|8)_)");
 	/*  40 */ addCadenceDefinition("C", "T",	"CT12",	R"(^2_-2:1, 3_2:-2, (?:1|8)_)");
 	/*  40 */ addCadenceDefinition("C", "T",	"CT13",	R"(^2_1:1, 2_-2:1, 3_2:-2, (?:1|8)_)");
-//	/*  41 */ addCadenceDefinition("C", "T",	"CT11",	R"(^2_-2:1, 3_2:-2, (?:1|8)_)");
+	/*  41 */ addCadenceDefinition("C", "T",	"CT14",	R"(^-7_-2:1, -6_-2:1, -5_2:1, -6_1:1, -6_2:-2, -8_)");
+	//	/*  41 */ addCadenceDefinition("C", "T",	"CT11",	R"(^2_-2:1, 3_2:-2, (?:1|8)_)");
 	/*  42 */ addCadenceDefinition("C", "t",	"Ct1",	R"(^2_-2:1, 3_-2:1, 4D?_2:1, 3_1:1, 3_2:2, 3_)");
 	/*  43 */ addCadenceDefinition("C", "t",	"Ct2",	R"(^2_-2:1, 3_1:1, 3_-2:1, 4D?_2:1, 3_2:2, 3_)");
 	/*  44 */ addCadenceDefinition("C", "t",	"Ct3",	R"(^2_-2:1, 3_2:2, 3_)");
@@ -3243,6 +3246,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/* 105 */ addCadenceDefinition("c", "t",	"ct4",	R"(^2_-2:1, 3_3:3, 3_1:-2, 2_)");
 	/* 105 */ addCadenceDefinition("c", "t",	"ct5",	R"(^2_-2:1, 3_1:2, 4D_)");
 	/*  41 */ addCadenceDefinition("c", "t",	"ct6",	R"(^2_-2:1, 3_1:1, 3_1:-2, 2_1:-2, 1_1:2, 2_)");
+	/* 105 */ addCadenceDefinition("c", "t",	"ct7",	R"(^2_-2:1, 3_4:1, -2_)");
 	/*  41 */ addCadenceDefinition("c", "u",	"cu1",	R"(^-4_-2:1, -3_1:-3, -5_)");
 	/*  41 */ addCadenceDefinition("c", "z",	"cz1",	R"(^2_-2:1, 3_4:R, R_)");
 	/* 107 */ addCadenceDefinition("p", "C",	"pC1",	R"(^7_1:-2, 6_(?:5|-4):2, 3_)");
@@ -3290,6 +3294,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/* 127 */ addCadenceDefinition("z", "C",	"zC4",	R"(^-2_1:-2, -3_R:2, R_)");
 	/* 128 */ addCadenceDefinition("z", "C",	"zC5",	R"(^7_1:-2, 6_R:2, R_)");
 	/* 125 */ addCadenceDefinition("z", "C",	"zC6",	R"(^-2_1:-2, -3_1:-2, -4_1:2, -3_R:2, R_)");
+	/* 125 */ addCadenceDefinition("z", "C",	"zC7",	R"(^-2_1:-2, -3_1:-2, -4_R:3, R_)");
 	/* 129 */ addCadenceDefinition("z", "c",	"zc1",	R"(^-2_1:-2, -3_R:-2, R_)");
 	/* 130 */ addCadenceDefinition("z", "c",	"zc2",	R"(^7_1:-2, 6_R:-2, R_)");
 	/* 131 */ addCadenceDefinition("z", "y",	"zy1",	R"(^-2_1:-2, -3_1:1, -3_R:R, R_)");
@@ -3422,6 +3427,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("cx",   "Abandoned Authentic");
 	m_cadenceLabels.emplace("Ctx",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("ctx",  "Abandoned Authentic");
+	m_cadenceLabels.emplace("Cuxz", "Abandoned Authentic");
 	m_cadenceLabels.emplace("Cx",   "Abandoned Authentic");
 	m_cadenceLabels.emplace("cxz",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("BTcx", "Abandoned Authentic");
@@ -3457,6 +3463,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("Tcz",  "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("Txy",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("txy",  "Abandoned Authentic");
+	m_cadenceLabels.emplace("txyz", "Abandoned Authentic");
 	m_cadenceLabels.emplace("xy",   "Abandoned Authentic");
 	m_cadenceLabels.emplace("xyz",  "Abandoned Authentic");
 	// Empty-string labels suppress the cadence annotation entirely (no LO line,
