@@ -3219,6 +3219,8 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/* 102 */ addCadenceDefinition("b", "c",	"bc4",	R"(^4D_1:-2, 3_-4:3, 8_2:1, 7_)");
 	/* 103 */ addCadenceDefinition("c", "B",	"cB1",	R"(^-4D_-2:1, -3_(?:4|-5):4, -3_)");
 	/* 104 */ addCadenceDefinition("c", "B",	"cB2",	R"(^-4D_-2:1, -3_-2:(?:4|-5), (?:-6|3)_)");
+	/* 104 */ addCadenceDefinition("c", "Q",	"cQ1",	R"(^2_-2:1, 3_1:-5, -3_-2:4, 3_)");
+	/* 104 */ addCadenceDefinition("c", "Q",	"cQ2",	R"(^2_-2:1, 3_1:-5, -3_)");
 	/* 105 */ addCadenceDefinition("c", "T",	"cT1",	R"(^2_-2:1, 3_-2:-2, 3_)");
 	/* 106 */ addCadenceDefinition("c", "T",	"cT2",	R"(^7_1:-2, 6_-2:4, 3_)");
 	/* 105 */ addCadenceDefinition("c", "T",	"cT3",	R"(^2_-2:1, 3_1:-2, 2_1:-2, 1_1:2, 2_)");
@@ -3233,6 +3235,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/* 105 */ addCadenceDefinition("c", "t",	"ct4",	R"(^2_-2:1, 3_3:3, 3_1:-2, 2_)");
 	/* 105 */ addCadenceDefinition("c", "t",	"ct5",	R"(^2_-2:1, 3_1:2, 4D_)");
 	/*  41 */ addCadenceDefinition("c", "t",	"ct6",	R"(^2_-2:1, 3_1:1, 3_1:-2, 2_1:-2, 1_1:2, 2_)");
+	/*  41 */ addCadenceDefinition("c", "u",	"ct6",	R"(^-4_-2:1, -3_1:-3, -5_)");
 	/* 107 */ addCadenceDefinition("p", "C",	"pC1",	R"(^7_1:-2, 6_(?:5|-4):2, 3_)");
 	// /* 108 */ addCadenceDefinition("s", "",		"s_1",	R"(^2_1:-2, 8_-2:2, 3_)");
 	/* 109 */ addCadenceDefinition("t", "C",	"tC1",	R"(^-2_1:-2, -3_1:-2, -4D?_1:2, -3_2:2, -3_)");
@@ -3353,6 +3356,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("Bcz",  "Evaded Authentic");
 	m_cadenceLabels.emplace("Cb",   "Evaded Authentic");
 	m_cadenceLabels.emplace("Tbc",  "Evaded Authentic");
+	m_cadenceLabels.emplace("BQTat", "Inverted Authentic");
 	m_cadenceLabels.emplace("CQ",   "Inverted Authentic");
 	m_cadenceLabels.emplace("CQT",  "Inverted Authentic");
 	m_cadenceLabels.emplace("CQTa", "Inverted Authentic");
@@ -3362,6 +3366,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("CQtx", "Evaded Inverted Authentic");
 	m_cadenceLabels.emplace("CQx",  "Evaded Inverted Authentic");
 	m_cadenceLabels.emplace("Qc",   "Evaded Inverted Authentic");
+	m_cadenceLabels.emplace("Qcu",  "Evaded Inverted Authentic");
 	m_cadenceLabels.emplace("CQz",  "Abandoned Inverted Authentic");
 	m_cadenceLabels.emplace("Qy",   "Abandoned Inverted Authentic");
 	m_cadenceLabels.emplace("Qty",  "Abandoned Inverted Authentic");
