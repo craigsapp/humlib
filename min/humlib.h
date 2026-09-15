@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Sep 14 16:31:19 CEST 2026
+// Last Modified: Tue Sep 15 19:27:59 CEST 2026
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -6349,7 +6349,7 @@ class Tool_autocadence : public HumTool {
 		bool m_intervalsOnlyQ           = false; // -I: show counterpoint interval infomation but
 		                                         //     do not do cadence analysis
 		bool m_printRawDiatonicPitchesQ = false; // -p: display m_pitches after filling
-		int  m_sequenceLength           = 7;     // maximum regex interval sequence length
+		int  m_sequenceLength           = 9;     // maximum regex interval sequence length
 		bool m_matchesQ                 = false; // -m: display sequences that match to cadence formula(s)
 		bool m_printSequenceInfoQ       = false; // -s: print list of interval sequences
 		bool m_countQ                   = false; // --count: print number of cadences found
@@ -7994,6 +7994,9 @@ class Tool_dissonant : public HumTool {
 		bool    isSuspension         (HTp token);
 		void    addSuspensionMarkToNote(HTp start, const string& marks);
 		void    adjustSuspensionColors(HTp speinstart);
+		void    clearPatientsOfLostAgent(vector<vector<string>>& results,
+		                            int vindex, int lineindex,
+		                            vector<int>& agentPatients);
 
 	private:
 		vector<HTp> m_kernspines;

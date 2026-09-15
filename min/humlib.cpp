@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Sep 14 16:31:19 CEST 2026
+// Last Modified: Tue Sep 15 19:27:59 CEST 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -64352,6 +64352,9 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/*  18 */ addCadenceDefinition("B", "C",	"BC11",	R"(^4D_1:-2, 3_(?:4|-5):2, (?:1|8)_)");
 	/*  19 */ addCadenceDefinition("B", "c",	"Bc1",	R"(^4D_1:-2, 3_(?:4|-5):(?:4|-5), 3_)");
 	/* 123 */ addCadenceDefinition("B", "c",	"Bc2",	R"(^4D_1:-2, 3_(?:4|-5):-2, 6_)");
+	/* 123 */ addCadenceDefinition("B", "c",	"Bc3",	R"(^4D_1:-2, 3_(?:4|-5):1, 7_)");
+	/* 123 */ addCadenceDefinition("B", "c",	"Bc4",	R"(^4D_1:-2, 3_(?:4|-5):-3, 5_)");
+	/* 123 */ addCadenceDefinition("B", "c",	"Bc5",	R"(^4D_1:-2, 3_1:-2, 2_1:2, 3_1:-3, (?:1|8)_1:4, 4_1:-2, 3_1:1, 3_(?:4|-5):-3, 5_)");
 	/*  10 */ addCadenceDefinition("B", "y",	"By1",	R"(^4D_1:-2, 3_(?:4|-5):R, R_)");
 	/*  20 */ addCadenceDefinition("C", "B",	"CB1",	R"(^-4D_-2:1, -3_-2:1, -2_2:1, -3_2:(?:-5|4), -8_)");
 	/*  21 */ addCadenceDefinition("C", "B",	"CB2",	R"(^-4D_-2:1, -3_-2:1, -2_2:1, -3_2:4, (?:1|-8)_)");
@@ -64385,10 +64388,12 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/*  42 */ addCadenceDefinition("C", "t",	"Ct5",	R"(^2_-2:1, 3_-2:1, 4D?_2:1, 3_2:2, 3_)");
 	/*  41 */ addCadenceDefinition("C", "t",	"Ct6",	R"(^2_-2:1, 3_1:1, 3_1:1, 3_2:2, 3_)");
 	/*  41 */ addCadenceDefinition("C", "t",	"Ct7",	R"(^2_-2:1, 3_1:1, 3_2:2, 3_)");
+	/*  41 */ addCadenceDefinition("C", "t",	"Ct8",	R"(^2_-2:1, 3_2:-4, -3_)");
 	/*  46 */ addCadenceDefinition("C", "u",	"Cu1",	R"(^-4D_-2:1, -3_-2:1, -2_2:1, -3_2:-3, -6_)");
 	/*  47 */ addCadenceDefinition("C", "u",	"Cu2",	R"(^-4D_-2:1, -3_-2:1, -2_3:-3, -6_)");
 	/*  48 */ addCadenceDefinition("C", "u",	"Cu3",	R"(^-4D_-2:1, -3_1:1, -3_-2:1, -2_3:-3, -6_)");
 	/*  49 */ addCadenceDefinition("C", "u",	"Cu4",	R"(^-4D_-2:1, -3_2:-3, -6_)");
+	/*  41 */ addCadenceDefinition("C", "x",	"Cx1",	R"(^2_-2:1, 3_-2:1, 4_2:-5, -3_2:R, R_)");
 	/*  50 */ addCadenceDefinition("C", "z",	"Cz1",	R"(^2_-2:1, 3_2:R, R_)");
 	/*  50 */ addCadenceDefinition("C", "z",	"Cz2",	R"(^2_-2:1, 3_1:1, 3_2:R, R_)");
 	/*  51 */ addCadenceDefinition("L", "C",	"LC1",	R"(^4D_1:-2, 3_1:-2, 2_1:2, 3_8:2, (?:4|-5)_)");
@@ -64436,13 +64441,18 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/*  93 */ addCadenceDefinition("T", "C",	"TC22",	R"(^7_1:-2, 6_-2:2, 8_)");
 	/*  94 */ addCadenceDefinition("T", "a",	"Ta1",	R"(^4D_1:-2, 3_-2:-2, 3_)");
 	/*  94 */ addCadenceDefinition("T", "a",	"Ta2",	R"(^4D_1:-2, 3_-2:1, 4D_)");
+	/*  94 */ addCadenceDefinition("", "",		"_Ta3",	R"(^4D_1:-2, 3_1:1, 3_-2:-2, 3_-2:-2, 3_-2:2, 5_)");
 	/*  94 */ addCadenceDefinition("T", "a",	"Ta3",	R"(^4D_1:-2, 3_1:1, 3_-2:-2, 3_)");
+	/* 111 */ addCadenceDefinition("T", "a",	"Ta4",	R"(^4D_1:-2, 3_1:-2, 2_1:2, 3_-2:-2, 3_)");
+	/* 102 */ addCadenceDefinition("T", "a",	"Ta5",	R"(^4D_1:-2, 3_1:1, 3_-2:1, 4D_)");
 	/*  95 */ addCadenceDefinition("T", "c",	"Tc1",	R"(^7_1:-2, 6_-2:4, 3_)");
 	/*  95 */ addCadenceDefinition("T", "c",	"Tc2",	R"(^7_1:-2, 6_-2:1, 7_)");
 	/*  95 */ addCadenceDefinition("T", "c",	"Tc3",	R"(^7_1:-2, 6_-2:-2, 6_)");
 	/*  95 */ addCadenceDefinition("T", "c",	"Tc4",	R"(^-2_1:-2, -3_1:1, -3_-2:1, -2_)");
 	/*  95 */ addCadenceDefinition("T", "c",	"Tc5",	R"(^-2_1:1, -2_1:-2, -3_-2:-2, -3_)");
 	/*  95 */ addCadenceDefinition("T", "c",	"Tc6",	R"(^7_1:-2, 6_1:-2, 5_1:-2, 4_1:-2, 3_-2:2, 5_)");
+	/*  95 */ addCadenceDefinition("T", "c",	"Tc7",	R"(^7_1:-2, 6_1:1, 6_-2:1, 7_-2:1, 8_2:1, 7_)");
+	/*  95 */ addCadenceDefinition("T", "c",	"Tc8",	R"(^7_1:-2, 6_1:1, 6_-2:1, 7_)");
 	/*  96 */ addCadenceDefinition("T", "y",	"Ty1",	R"(^7_1:-2, 6_-2:R, R_)");
 	/*  97 */ addCadenceDefinition("b", "C",	"bC1",	R"(^4D_1:-2, 3_1:-2, 2_1:2, 3_2:2, 3_)");
 	/*  98 */ addCadenceDefinition("b", "C",	"bC2",	R"(^4D_1:-2, 3_1:-2, 2_2:2, 3_)");
@@ -64451,11 +64461,12 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/* 101 */ addCadenceDefinition("b", "C",	"bC5",	R"(^4D_1:-2, 3_1:2, 4D_1:2, 5_1:-3, 3_2:2, 3_)");
 	/* 102 */ addCadenceDefinition("b", "C",	"bC6",	R"(^4D_1:-2, 3_2:2, 3_)");
 	/* 102 */ addCadenceDefinition("b", "c",	"bc1",	R"(^4D_1:-2, 3_2:-2, (?:8|1)_)");
-	/* 102 */ addCadenceDefinition("b", "c",	"bc2",	R"(^4D_1:-2, 3_1:1, 3_-2:1, 4D_)");
 	/* 102 */ addCadenceDefinition("b", "c",	"bc3",	R"(^4D_1:-2, 3_-3:1, 5_2:1, 4D_)");
 	/* 102 */ addCadenceDefinition("b", "c",	"bc4",	R"(^4D_1:-2, 3_-4:3, 8_2:1, 7_)");
 	/* 103 */ addCadenceDefinition("c", "B",	"cB1",	R"(^-4D_-2:1, -3_(?:4|-5):4, -3_)");
 	/* 104 */ addCadenceDefinition("c", "B",	"cB2",	R"(^-4D_-2:1, -3_-2:(?:4|-5), (?:-6|3)_)");
+	/* 104 */ addCadenceDefinition("c", "Q",	"cQ1",	R"(^2_-2:1, 3_1:-5, -3_-2:4, 3_)");
+	/* 104 */ addCadenceDefinition("c", "Q",	"cQ2",	R"(^2_-2:1, 3_1:-5, -3_)");
 	/* 105 */ addCadenceDefinition("c", "T",	"cT1",	R"(^2_-2:1, 3_-2:-2, 3_)");
 	/* 106 */ addCadenceDefinition("c", "T",	"cT2",	R"(^7_1:-2, 6_-2:4, 3_)");
 	/* 105 */ addCadenceDefinition("c", "T",	"cT3",	R"(^2_-2:1, 3_1:-2, 2_1:-2, 1_1:2, 2_)");
@@ -64464,27 +64475,32 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/* 105 */ addCadenceDefinition("c", "T",	"cT6",	R"(^2_-2:1, 3_1:1, 3_-2:-2, 3_)");
 	/* 105 */ addCadenceDefinition("c", "T",	"cT6",	R"(^2_-2:1, 3_4:-2, -3_)");
 	/* 105 */ addCadenceDefinition("c", "T",	"cT6",	R"(^2_-2:1, 3_1:-2, 2_)");
-	/* 105 */ addCadenceDefinition("c", "t",	"ct1",	R"(^2_-2:1, 3_-2:1, 4_(?!2:1))");  // needs negative look-ahead to distinguish from CT5
+	/* 105 */ addCadenceDefinition("c", "t",	"ct1",	R"(^2_-2:1, 3_-2:1, 4_(?!2:1))");  // needs negative look-ahead for disambiguation
 	/* 105 */ addCadenceDefinition("c", "t",	"ct2",	R"(^2_-2:1, 3_-2:2, 5_)");
 	/* 105 */ addCadenceDefinition("c", "t",	"ct3",	R"(^2_-2:1, 3_1:2, 4_-2:2, 6_)");
 	/* 105 */ addCadenceDefinition("c", "t",	"ct4",	R"(^2_-2:1, 3_3:3, 3_1:-2, 2_)");
 	/* 105 */ addCadenceDefinition("c", "t",	"ct5",	R"(^2_-2:1, 3_1:2, 4D_)");
 	/*  41 */ addCadenceDefinition("c", "t",	"ct6",	R"(^2_-2:1, 3_1:1, 3_1:-2, 2_1:-2, 1_1:2, 2_)");
+	/*  41 */ addCadenceDefinition("c", "u",	"cu1",	R"(^-4_-2:1, -3_1:-3, -5_)");
+	/*  41 */ addCadenceDefinition("c", "z",	"cz1",	R"(^2_-2:1, 3_4:R, R_)");
 	/* 107 */ addCadenceDefinition("p", "C",	"pC1",	R"(^7_1:-2, 6_(?:5|-4):2, 3_)");
-	/* 108 */ addCadenceDefinition("s", "",	"s_1",	R"(^2_1:-2, 8_-2:2, 3_)");
+	// /* 108 */ addCadenceDefinition("s", "",		"s_1",	R"(^2_1:-2, 8_-2:2, 3_)");
 	/* 109 */ addCadenceDefinition("t", "C",	"tC1",	R"(^-2_1:-2, -3_1:-2, -4D?_1:2, -3_2:2, -3_)");
 	/* 110 */ addCadenceDefinition("t", "C",	"tC2",	R"(^-2_1:-2, -3_2:2, -3_)");
 	/* 111 */ addCadenceDefinition("t", "C",	"tC3",	R"(^7_1:-2, 6_1:1, 6_1:-2, 5_1:2, 6_2:2, 6_)");
 	/* 112 */ addCadenceDefinition("t", "C",	"tC4",	R"(^7_1:-2, 6_2:2, 6_)");
 	/* 110 */ addCadenceDefinition("t", "C",	"tC5",	R"(^-2_1:-2, -3_1:1, -3_2:2, -3_)");
+	/* 112 */ addCadenceDefinition("t", "C",	"tC6",	R"(^7_1:-2, 6_1:-2, 5_1:2, 6_2:2, 6_)");
 	/* 111 */ addCadenceDefinition("t", "c",	"tc1",	R"(^7_1:-2, 6_-3:1, 8_2:1, 7_)");
 	/* 111 */ addCadenceDefinition("t", "c",	"tc2",	R"(^7_1:-2, 6_3:1, 4D_)");
 	/* 111 */ addCadenceDefinition("t", "c",	"tc3",	R"(^7_1:-2, 6_1:1, 6_2:1, 5_2:-2, 3_)");
 	/* 111 */ addCadenceDefinition("t", "c",	"tc4",	R"(^7_1:-2, 6_2:1, 5_2:1, 4D_)");
-	/* 111 */ addCadenceDefinition("t", "y",	"tc5",	R"(^7_1:-2, 6_2:1, 5_2:R, R_)");
+	/* 111 */ addCadenceDefinition("t", "y",	"ty5",	R"(^7_1:-2, 6_2:1, 5_2:R, R_)");
 	/* 111 */ addCadenceDefinition("t", "c",	"tc6",	R"(^7_2:-2, 5_-3:1, 7_)");
-	/* 111 */ addCadenceDefinition("t", "c",	"tc7",	R"(^7_1:-2, 6_2:1, 5_)");
-	/* 111 */ addCadenceDefinition("t", "c",	"tc7",	R"(^7_1:1, 7_1:-2, 6_2:-2, 4_)");
+	/* 111 */ addCadenceDefinition("t", "c",	"tc7",	R"(^7_1:-2, 6_2:1, 5_2:-2, 3_)");
+	/* 111 */ addCadenceDefinition("t", "c",	"tc8",	R"(^7_1:-2, 6_2:1, 5_)");
+	/* 111 */ addCadenceDefinition("t", "c",	"tc9",	R"(^7_1:-2, 6_1:1, 6_2:1, 5_2:-2, 3_)");
+	/* 111 */ addCadenceDefinition("t", "c",	"tc9",	R"(^7_1:-2, 6_1:1, 6_2:1, 5_2:1, 4D_)");
 	/* 113 */ addCadenceDefinition("u", "C",	"uC1",	R"(^4D_1:-2, 3_-2:1, 4D_-2:2, 6_)");
 	/* 114 */ addCadenceDefinition("u", "C",	"uC2",	R"(^4D_1:-2, 3_-3:2, 6_)");
 	/* 115 */ addCadenceDefinition("u", "C",	"uC3",	R"(^4D_1:-2, 3_1:-2, 2_-3:3, 6_)");
@@ -64498,6 +64514,8 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/* 120 */ addCadenceDefinition("x", "C",	"xC4",	R"(^4D_1:-2, 3_1:-2, 2_1:2, 3_R:2, R_)");
 	/* 120 */ addCadenceDefinition("x", "C",	"xC5",	R"(^4D_1:-2, 3_1:1, 3_R:2, R_)");
 	/* 123 */ addCadenceDefinition("x", "c",	"xc1",	R"(^4D_1:-2, 3_R:-2, R_)");
+	/* 123 */ addCadenceDefinition("x", "c",	"xc2",	R"(^4D_1:-2, 3_R:4, R_)");
+	/* 123 */ addCadenceDefinition("x", "c",	"xc3",	R"(^4D_1:-2, 3_R:1, R_)");
 	/* 123 */ addCadenceDefinition("x", "y",	"xy1",	R"(^4D_1:-2, 3_R:R, R_)");
 	/* 124 */ addCadenceDefinition("y", "T",	"yT1",	R"(^2_-2:1, 3_R:-2, R_)");
 	/* 124 */ addCadenceDefinition("y", "z",	"yz1",	R"(^2_-2:1, 3_R:R, R_)");
@@ -64533,12 +64551,15 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("ABxz", "Reinterpreted");
 	m_cadenceLabels.emplace("Abz",  "Altizans Only");
 	m_cadenceLabels.emplace("ABz",  "Reinterpreted");
-	m_cadenceLabels.emplace("ACt",  "Evaded Clausula Vera");
-	m_cadenceLabels.emplace("ACT",  "Clausula Vera");// Phrygian
+	m_cadenceLabels.emplace("ABCT", "Double Leading Tone");
+	m_cadenceLabels.emplace("ACT",  "Double Leading Tone");// Phrygian
+	m_cadenceLabels.emplace("ACQT", "Double Leading Tone");
 	m_cadenceLabels.emplace("ACTt", "Double Leading Tone");
 	m_cadenceLabels.emplace("ACTtz","Double Leading Tone");
-	m_cadenceLabels.emplace("ACtz", "Evaded Clausula Vera");
+	m_cadenceLabels.emplace("ACt",  "Evaded Double Leading Tone");
+	m_cadenceLabels.emplace("ACtz", "Evaded Double Leading Tone");
 	m_cadenceLabels.emplace("ACz",  "Abandoned Double Leading Tone");
+	m_cadenceLabels.emplace("APT",  "Altizans Only");
 	m_cadenceLabels.emplace("AT",   "Altizans Only");// Phrygian
 	m_cadenceLabels.emplace("ATb",  "Altizans Only");
 	m_cadenceLabels.emplace("ATx",  "Altizans Only");
@@ -64548,10 +64569,12 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("ATy",  "Altizans Only");// Phrygian
 	m_cadenceLabels.emplace("ATyz", "Altizans Only");// Phrygian
 	m_cadenceLabels.emplace("ATz",  "Altizans Only");// Phrygian
+	m_cadenceLabels.emplace("ATbz", "Altizans Only");
 	m_cadenceLabels.emplace("ABCTz","Authentic");
 	m_cadenceLabels.emplace("BC",   "Authentic");
 	m_cadenceLabels.emplace("BCT",  "Authentic");
 	m_cadenceLabels.emplace("BCTt", "Authentic");
+	m_cadenceLabels.emplace("BCTx", "Authentic");
 	m_cadenceLabels.emplace("BCTtu","Authentic");
 	m_cadenceLabels.emplace("BCTu", "Authentic");
 	m_cadenceLabels.emplace("BCTz", "Authentic");
@@ -64564,12 +64587,19 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("BCxz", "Authentic");
 	m_cadenceLabels.emplace("BCz",  "Authentic");
 	m_cadenceLabels.emplace("BCQ",  "Authentic");
+	m_cadenceLabels.emplace("BCQu",  "Authentic");
+	m_cadenceLabels.emplace("BCz",  "Authentic");
+	m_cadenceLabels.emplace("BCz",  "Authentic");
+	m_cadenceLabels.emplace("BCz",  "Authentic");
 	m_cadenceLabels.emplace("BCb",  "Evaded Authentic");
 	m_cadenceLabels.emplace("BTc",  "Evaded Authentic");
+	m_cadenceLabels.emplace("BTcu", "Evaded Authentic");
+	m_cadenceLabels.emplace("Bbc",  "Evaded Authentic");
 	m_cadenceLabels.emplace("Bc",   "Evaded Authentic");
 	m_cadenceLabels.emplace("Bcx",  "Evaded Authentic");
 	m_cadenceLabels.emplace("Cbu",  "Evaded Authentic");
 	m_cadenceLabels.emplace("Cbux", "Evaded Authentic");
+	m_cadenceLabels.emplace("Cbx",  "Evaded Authentic");
 	m_cadenceLabels.emplace("Cbz",  "Evaded Authentic");
 	m_cadenceLabels.emplace("CQu",  "Evaded Authentic");
 	m_cadenceLabels.emplace("CQux", "Evaded Authentic");
@@ -64583,25 +64613,30 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("Bcz",  "Evaded Authentic");
 	m_cadenceLabels.emplace("Cb",   "Evaded Authentic");
 	m_cadenceLabels.emplace("Tbc",  "Evaded Authentic");
+	m_cadenceLabels.emplace("BQTat", "Inverted Authentic");
 	m_cadenceLabels.emplace("CQ",   "Inverted Authentic");
 	m_cadenceLabels.emplace("CQT",  "Inverted Authentic");
+	m_cadenceLabels.emplace("CQTa", "Inverted Authentic");
 	m_cadenceLabels.emplace("CQTu", "Inverted Authentic");
 	m_cadenceLabels.emplace("CQTt", "Inverted Authentic");
-	m_cadenceLabels.emplace("CQt",  "Inverted Authentic");
-	m_cadenceLabels.emplace("CQtx", "Inverted Authentic");
+	m_cadenceLabels.emplace("CQt",  "Evaded Inverted Authentic");
+	m_cadenceLabels.emplace("CQtx", "Evaded Inverted Authentic");
+	m_cadenceLabels.emplace("CQx",  "Evaded Inverted Authentic");
 	m_cadenceLabels.emplace("Qc",   "Evaded Inverted Authentic");
+	m_cadenceLabels.emplace("Qcu",  "Evaded Inverted Authentic");
+	m_cadenceLabels.emplace("CQz",  "Abandoned Inverted Authentic");
 	m_cadenceLabels.emplace("Qy",   "Abandoned Inverted Authentic");
-	m_cadenceLabels.emplace("Qty",   "Abandoned Inverted Authentic");
-	m_cadenceLabels.emplace("BCz",  "Authentic");
-	m_cadenceLabels.emplace("BCz",  "Authentic");
-	m_cadenceLabels.emplace("BCz",  "Authentic");
+	m_cadenceLabels.emplace("Qty",  "Abandoned Inverted Authentic");
 	m_cadenceLabels.emplace("C",    "Quince");
+	m_cadenceLabels.emplace("CL",   "Leaping Contratenor");
 	m_cadenceLabels.emplace("CLT",  "Leaping Contratenor");
 	m_cadenceLabels.emplace("CLTz", "Leaping Contratenor");
 	m_cadenceLabels.emplace("Cp",   "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("Cpt",  "Evaded Clausula Vera");
-	m_cadenceLabels.emplace("CPT",  "Phrygian");// Phrygian
-	m_cadenceLabels.emplace("CPTz", "Phrygian");// Phrygian
+	m_cadenceLabels.emplace("CP",   "Incomplete Plagal Phrygian");
+	m_cadenceLabels.emplace("CPT",  "Plagal Phrygian");// Phrygian
+	m_cadenceLabels.emplace("CPTz", "Plagal Phrygian");// Phrygian
+	m_cadenceLabels.emplace("CPt",  "Evaded Plagal Phrygian");
 	m_cadenceLabels.emplace("Ct",   "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("CT",   "Clausula Vera");// Phrygian
 	m_cadenceLabels.emplace("CTa",  "Clausula Vera");
@@ -64620,24 +64655,29 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("Cu",   "Evaded Authentic");
 	m_cadenceLabels.emplace("cx",   "Abandoned Authentic");
 	m_cadenceLabels.emplace("Ctx",  "Abandoned Authentic");
+	m_cadenceLabels.emplace("ctx",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("Cx",   "Abandoned Authentic");
 	m_cadenceLabels.emplace("cxz",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("BTcx", "Abandoned Authentic");
 	m_cadenceLabels.emplace("By",   "Abandoned Authentic");
+	m_cadenceLabels.emplace("Bxy",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("Bxyz", "Abandoned Authentic");
 	m_cadenceLabels.emplace("Byz",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("BTy",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("BTyz", "Abandoned Authentic");
 	m_cadenceLabels.emplace("Bty",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("Btyz", "Abandoned Authentic");
+	m_cadenceLabels.emplace("Tcux", "Abandoned Authentic");
 	m_cadenceLabels.emplace("Cxz",  "Abandoned Clausula Vera");
 	m_cadenceLabels.emplace("Cz",   "Abandoned Clausula Vera");
 	m_cadenceLabels.emplace("Ty",   "Abandoned Clausula Vera");
 	m_cadenceLabels.emplace("Tty",  "Abandoned Clausula Vera");
+	m_cadenceLabels.emplace("cz",   "Abandoned Clausula Vera");
 	m_cadenceLabels.emplace("ty",   "Abandoned Clausula Vera");
 	m_cadenceLabels.emplace("yz",   "Abandoned Clausula Vera");
 	m_cadenceLabels.emplace("ct",   "Evaded Clausula Vera");
-	m_cadenceLabels.emplace("cz",   "Evaded Clausula Vera");
+	m_cadenceLabels.emplace("BTat", "Evaded Altizans Only");
+	m_cadenceLabels.emplace("BTaz", "Evaded Altizans Only");
 	m_cadenceLabels.emplace("Ta",   "Evaded Altizans Only");
 	m_cadenceLabels.emplace("Tat",  "Evaded Altizans Only");
 	m_cadenceLabels.emplace("Tax",  "Evaded Altizans Only");
@@ -87295,13 +87335,31 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string>>& results,
 	HumNum othMeterDen; // the denominator of the other voice's notated time signature
 	bool ternAgent = false;  // true if the ref voice would be a valid agent of a ternary susp. But if true, the diss is not necessarily a susp.
 
-	for (int i=1; i<(int)attacks.size() - 1; i++) {
+		for (int i=1; i<(int)attacks.size() - 1; i++) {
 		sliceindex = attacks[i]->getSliceIndex();
 		lineindex = attacks[i]->getLineIndex();
 		// lineindexn = attacks[i+1]->getLineIndex();
 		attackindexn = attacks[i]->getNextAttackIndex();
 
 		marking = '\0';
+		// Patients labeled while this note was an agent; cleared if g/G is replaced.
+		vector<int> agentPatients;
+
+		auto setRefLabel = [&](const string& label) {
+			string& cur = results[vindex][lineindex];
+			bool wasAgent = (cur == m_labels[AGENT_BIN]) || (cur == m_labels[AGENT_TERN]);
+			bool nowAgent = (label == m_labels[AGENT_BIN]) || (label == m_labels[AGENT_TERN]);
+			if (wasAgent && !nowAgent) {
+				clearPatientsOfLostAgent(results, vindex, lineindex, agentPatients);
+			}
+			cur = label;
+		};
+
+		auto setAgentAndPatient = [&](const string& agentLabel, const string& patientLabel) {
+			results[vindex][lineindex] = agentLabel;
+			results[ovoiceindex][lineindex] = patientLabel;
+			agentPatients.push_back(ovoiceindex);
+		};
 
 		// calculate harmonic intervals:
 		int lowestnote = 1000;
@@ -87605,67 +87663,71 @@ RECONSIDER:
 
 		if (keepFakeSus) {
 			// already labeled as fake suspension against another voice
-		} else if ((!lowerOfDissFourth) && ((lev >= levn) || ((lev == 2) && (dur == .5))) && (lev >= levp) &&
+		} else if (((!lowerOfDissFourth) || pairedDescendingEighthAgent) &&
+			((lev >= levn) || ((lev == 2) && (dur == .5))) && (lev >= levp) &&
 			(dur <= durp) && (condition2 || condition2b) && valid_acc_exit) { // weak dissonances
+			// pairedDescendingEighthAgent: lower-of-fourth eighths refused as g/s
+			// because they are passing motion — allow p/n/… instead of falling
+			// through to unexplained z (e.g. Trm1022a m.89 Bass 8C vs Tenore).
 			if (intp == -1) { // descending dissonances
 				if (intn == -1) { // downward passing tone
-					results[vindex][lineindex] = m_labels[PASSING_DOWN];
+					setRefLabel(m_labels[PASSING_DOWN]);
 				} else if (intn == 1) { // lower neighbor
-					results[vindex][lineindex] = m_labels[NEIGHBOR_DOWN];
+					setRefLabel(m_labels[NEIGHBOR_DOWN]);
 				} else if ((intn == 0) && (dur <= 2)) { // descending anticipation
-					results[vindex][lineindex] = m_labels[ANT_DOWN];
+					setRefLabel(m_labels[ANT_DOWN]);
 				} else if (intn > 1) { // lower échappée
-					results[vindex][lineindex] = m_labels[ECHAPPEE_DOWN];
+					setRefLabel(m_labels[ECHAPPEE_DOWN]);
 				} else if (intn < -1) { // descending short nota cambiata
-					results[vindex][lineindex] = m_labels[CAMBIATA_DOWN_S];
+					setRefLabel(m_labels[CAMBIATA_DOWN_S]);
 				}
 			} else if (intp == 1) { // ascending dissonances
 				if (intn == 1) { // rising passing tone
-					results[vindex][lineindex] = m_labels[PASSING_UP];
+					setRefLabel(m_labels[PASSING_UP]);
 				} else if (intn == -1) { // upper neighbor
-					results[vindex][lineindex] = m_labels[NEIGHBOR_UP];
+					setRefLabel(m_labels[NEIGHBOR_UP]);
 				} else if (intn < -1) { // upper échappée
-					results[vindex][lineindex] = m_labels[ECHAPPEE_UP];
+					setRefLabel(m_labels[ECHAPPEE_UP]);
 				} else if ((intn == 0) && (dur <= 2)) { // rising anticipation
-					results[vindex][lineindex] = m_labels[ANT_UP];
+					setRefLabel(m_labels[ANT_UP]);
 				} else if (intn > 1) { // ascending short nota cambiata
-					results[vindex][lineindex] = m_labels[CAMBIATA_UP_S];
+					setRefLabel(m_labels[CAMBIATA_UP_S]);
 				}
 			} else if (intp < -1) {
 				if (intn == 1) { // reverse lower échappée
-					results[vindex][lineindex] = m_labels[REV_ECHAPPEE_DOWN];
+					setRefLabel(m_labels[REV_ECHAPPEE_DOWN]);
 				} else if (intn == -1) { // reverse descending nota cambiata
-					results[vindex][lineindex] = m_labels[REV_CAMBIATA_DOWN];
+					setRefLabel(m_labels[REV_CAMBIATA_DOWN]);
 				}
 			} else if (intp > 1) {
 				if (intn == -1) { // reverse upper échappée
-					results[vindex][lineindex] = m_labels[REV_ECHAPPEE_UP];
+					setRefLabel(m_labels[REV_ECHAPPEE_UP]);
 				} else if (intn == 1) { // reverse ascending nota cambiata
-					results[vindex][lineindex] = m_labels[REV_CAMBIATA_UP];
+					setRefLabel(m_labels[REV_CAMBIATA_UP]);
 				}
 			}
 		} else if ((!lowerOfDissFourth) && (durp >= 2) && (dur == 1) && (lev < levn) && valid_acc_exit &&
 					 (condition2 || condition2b) && (lev == 1)) {
 			if (intp == -1) {
 				if (intn == -1) { // dissonant third quarter descending passing tone
-					results[vindex][lineindex] = m_labels[THIRD_Q_PASS_DOWN];
+					setRefLabel(m_labels[THIRD_Q_PASS_DOWN]);
 				} else if (intn == 1) { // dissonant third quarter lower neighbor
-					results[vindex][lineindex] = m_labels[THIRD_Q_LOWER_NEI];
+					setRefLabel(m_labels[THIRD_Q_LOWER_NEI]);
 				}
 			} else if (intp == 1) {
 				if (intn == 1) { // dissonant third quarter ascending passing tone
-					results[vindex][lineindex] = m_labels[THIRD_Q_PASS_UP];
+					setRefLabel(m_labels[THIRD_Q_PASS_UP]);
 				} else if (intn == -1) { // dissonant third quarter upper neighbor
-					results[vindex][lineindex] = m_labels[THIRD_Q_UPPER_NEI];
+					setRefLabel(m_labels[THIRD_Q_UPPER_NEI]);
 				}
 			}
 		} else if ((!lowerOfDissFourth) && ((lev > levp) || (durp+durp+durp+durp == dur)) &&
 				   (lev == levn) && condition2 && (intn == -1) &&
 				   (dur == (durn+durn)) && ((dur+dur) <= odur)) {
 			if (fabs(intp) > 1.0) {
-				results[vindex][lineindex] = m_labels[SUS_NO_AGENT_LEAP];
+				setRefLabel(m_labels[SUS_NO_AGENT_LEAP]);
 			} else if ((fabs(intp) == 1.0) || ((intp == 0) && (fabs(intpp) == 1.0))) {
-				results[vindex][lineindex] = m_labels[SUS_NO_AGENT_STEP];
+				setRefLabel(m_labels[SUS_NO_AGENT_STEP]);
 			}
 		}
 
@@ -87684,19 +87746,16 @@ RECONSIDER:
 				results[vindex][lineindexpp] = m_labels[CHANSON_IDIOM];
 			}
 			if (ternAgent) { // ternary agent and suspension
-				results[vindex][lineindex] = m_labels[AGENT_TERN];
-				results[ovoiceindex][lineindex] = m_labels[SUS_TERN];
+				setAgentAndPatient(m_labels[AGENT_TERN], m_labels[SUS_TERN]);
 			} else if (((odur == .5) || (odur == 1)) && // purely ornamental suspension
 						((odurn == .5) || (odurn == 1)) &&
 						(ointn == -1) && (ointnn == -1) &&
 						// same-pitch reattack is prepared (e.g. minim then rearticulated
 						// quarter, or two quarters), so not purely ornamental
 						!(ointp == 0)) {
-				results[vindex][lineindex] = m_labels[AGENT_BIN];
-				results[ovoiceindex][lineindex] = m_labels[ORNAMENTAL_SUS];
+				setAgentAndPatient(m_labels[AGENT_BIN], m_labels[ORNAMENTAL_SUS]);
 			} else { // binary agent and suspension
-				results[vindex][lineindex] = m_labels[AGENT_BIN];
-				results[ovoiceindex][lineindex] = m_labels[SUS_BIN];
+				setAgentAndPatient(m_labels[AGENT_BIN], m_labels[SUS_BIN]);
 			}
 		} else if ((!pairedDescendingEighthAgent) && (dur > .25) && valid_ornam_sus_acc &&
 				((ointn == 0) && (ointnn == -1))) {
@@ -87708,11 +87767,9 @@ RECONSIDER:
 				results[vindex][lineindexpp] = m_labels[CHANSON_IDIOM];
 			}
 			if (ternAgent) { // ternary agent and suspension
-				results[vindex][lineindex] = m_labels[AGENT_TERN];
-				results[ovoiceindex][lineindex] = m_labels[SUS_TERN];
+				setAgentAndPatient(m_labels[AGENT_TERN], m_labels[SUS_TERN]);
 			} else { // binary agent and suspension
-				results[vindex][lineindex] = m_labels[AGENT_BIN];
-				results[ovoiceindex][lineindex] = m_labels[SUS_BIN];
+				setAgentAndPatient(m_labels[AGENT_BIN], m_labels[SUS_BIN]);
 			} // repeated-note of suspension
 			results[ovoiceindex][olineindexn] = m_labels[SUSPENSION_REP];
 		} else if ((!pairedDescendingEighthAgent) && (dur > .25) && valid_ornam_sus_acc &&
@@ -87725,11 +87782,9 @@ RECONSIDER:
 				results[vindex][lineindexpp] = m_labels[CHANSON_IDIOM];
 			}
 			if (ternAgent) { // ternary agent and suspension
-				results[vindex][lineindex] = m_labels[AGENT_TERN];
-				results[ovoiceindex][lineindex] = m_labels[SUS_TERN];
+				setAgentAndPatient(m_labels[AGENT_TERN], m_labels[SUS_TERN]);
 			} else { // binary agent and suspension
-				results[vindex][lineindex] = m_labels[AGENT_BIN];
-				results[ovoiceindex][lineindex] = m_labels[SUS_BIN];
+				setAgentAndPatient(m_labels[AGENT_BIN], m_labels[SUS_BIN]);
 			} // This ornament is consonant against the agent so no ornament label.
 		}
 
@@ -87743,10 +87798,10 @@ RECONSIDER:
 
 			if ((dur <= durp) && (lev >= levp) && (lev >= levn) &&
 					(intp == -1) && (intn == -2) && (intnn == 1)) { // long-form descending cambiata
-				results[vindex][lineindex] = m_labels[CAMBIATA_DOWN_L];
+				setRefLabel(m_labels[CAMBIATA_DOWN_L]);
 			} else if ((dur <= durp) && (lev >= levp) && (lev >= levn) &&
 					(intp == 1) && (intn == 2) && (intnn == -1)) { // long-form ascending nota cambiata
-				results[vindex][lineindex] = m_labels[CAMBIATA_UP_L];
+				setRefLabel(m_labels[CAMBIATA_UP_L]);
 			}
 		}
 
@@ -87771,7 +87826,7 @@ RECONSIDER:
 				((fabs(intp) == 1) && (fabs(intn) == 1) && !othLeaptTo && !othLeaptFrom) || // ref voice enters and leaves by step, other voice by step or rep
 				((fabs(intp) == 1) && (intn == 0) && !othLeaptTo && (ointn == 0)) || // ref enters by step and leaves by rep, other v enters by step or rep and leaves by rep
 				(!refLeaptTo && refLeaptFrom && othLeaptFrom))))) { // ref voice enters diss by step or rep and both voices leave by leap
-			results[vindex][lineindex] = unexp_label;
+			setRefLabel(unexp_label);
 		}
 
 
@@ -87792,6 +87847,50 @@ RECONSIDER:
 		}
 	}
 
+}
+
+
+
+//////////////////////////////
+//
+// Tool_dissonant::clearPatientsOfLostAgent -- When an agent label (g/G) is
+//     replaced during RECONSIDER (e.g. by a passing tone), clear patient
+//     labels (s/S/o) that this agent assigned at the same line — unless
+//     another voice still has an agent label there (patient may belong to
+//     that other pair as well).
+//
+
+void Tool_dissonant::clearPatientsOfLostAgent(vector<vector<string>>& results,
+		int vindex, int lineindex, vector<int>& agentPatients) {
+	if (agentPatients.empty()) {
+		return;
+	}
+	bool otherAgent = false;
+	for (int j=0; j<(int)results.size(); j++) {
+		if (j == vindex) {
+			continue;
+		}
+		if ((results[j][lineindex] == m_labels[AGENT_BIN]) ||
+				(results[j][lineindex] == m_labels[AGENT_TERN])) {
+			otherAgent = true;
+			break;
+		}
+	}
+	if (otherAgent) {
+		agentPatients.clear();
+		return;
+	}
+	for (int pv : agentPatients) {
+		if ((pv < 0) || (pv >= (int)results.size())) {
+			continue;
+		}
+		if ((results[pv][lineindex] == m_labels[SUS_BIN]) ||
+				(results[pv][lineindex] == m_labels[SUS_TERN]) ||
+				(results[pv][lineindex] == m_labels[ORNAMENTAL_SUS])) {
+			results[pv][lineindex] = "";
+		}
+	}
+	agentPatients.clear();
 }
 
 

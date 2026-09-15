@@ -227,7 +227,7 @@ class Tool_autocadence : public HumTool {
 		bool m_intervalsOnlyQ           = false; // -I: show counterpoint interval infomation but
 		                                         //     do not do cadence analysis
 		bool m_printRawDiatonicPitchesQ = false; // -p: display m_pitches after filling
-		int  m_sequenceLength           = 7;     // maximum regex interval sequence length
+		int  m_sequenceLength           = 9;     // maximum regex interval sequence length
 		bool m_matchesQ                 = false; // -m: display sequences that match to cadence formula(s)
 		bool m_printSequenceInfoQ       = false; // -s: print list of interval sequences
 		bool m_countQ                   = false; // --count: print number of cadences found

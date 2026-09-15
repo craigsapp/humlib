@@ -3114,6 +3114,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/* 123 */ addCadenceDefinition("B", "c",	"Bc2",	R"(^4D_1:-2, 3_(?:4|-5):-2, 6_)");
 	/* 123 */ addCadenceDefinition("B", "c",	"Bc3",	R"(^4D_1:-2, 3_(?:4|-5):1, 7_)");
 	/* 123 */ addCadenceDefinition("B", "c",	"Bc4",	R"(^4D_1:-2, 3_(?:4|-5):-3, 5_)");
+	/* 123 */ addCadenceDefinition("B", "c",	"Bc5",	R"(^4D_1:-2, 3_1:-2, 2_1:2, 3_1:-3, (?:1|8)_1:4, 4_1:-2, 3_1:1, 3_(?:4|-5):-3, 5_)");
 	/*  10 */ addCadenceDefinition("B", "y",	"By1",	R"(^4D_1:-2, 3_(?:4|-5):R, R_)");
 	/*  20 */ addCadenceDefinition("C", "B",	"CB1",	R"(^-4D_-2:1, -3_-2:1, -2_2:1, -3_2:(?:-5|4), -8_)");
 	/*  21 */ addCadenceDefinition("C", "B",	"CB2",	R"(^-4D_-2:1, -3_-2:1, -2_2:1, -3_2:4, (?:1|-8)_)");
@@ -3435,7 +3436,8 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("ty",   "Abandoned Clausula Vera");
 	m_cadenceLabels.emplace("yz",   "Abandoned Clausula Vera");
 	m_cadenceLabels.emplace("ct",   "Evaded Clausula Vera");
-	m_cadenceLabels.emplace("BTat",  "Evaded Altizans Only");
+	m_cadenceLabels.emplace("BTat", "Evaded Altizans Only");
+	m_cadenceLabels.emplace("BTaz", "Evaded Altizans Only");
 	m_cadenceLabels.emplace("Ta",   "Evaded Altizans Only");
 	m_cadenceLabels.emplace("Tat",  "Evaded Altizans Only");
 	m_cadenceLabels.emplace("Tax",  "Evaded Altizans Only");
