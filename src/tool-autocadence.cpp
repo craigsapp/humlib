@@ -3419,26 +3419,27 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("CL",   "Leaping Contratenor");
 	m_cadenceLabels.emplace("CLT",  "Leaping Contratenor");
 	m_cadenceLabels.emplace("CLTz", "Leaping Contratenor");
-	m_cadenceLabels.emplace("Cp",   "Evaded Clausula Vera");
-	m_cadenceLabels.emplace("Cpt",  "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("CP",   "Incomplete Plagal Phrygian");
 	m_cadenceLabels.emplace("CPT",  "Plagal Phrygian");// Phrygian
 	m_cadenceLabels.emplace("CPTz", "Plagal Phrygian");// Phrygian
 	m_cadenceLabels.emplace("CPt",  "Evaded Plagal Phrygian");
-	m_cadenceLabels.emplace("Ct",   "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("CT",   "Clausula Vera");// Phrygian
 	m_cadenceLabels.emplace("CTa",  "Clausula Vera");
 	m_cadenceLabels.emplace("CTaz", "Clausula Vera");
+	m_cadenceLabels.emplace("CTc",  "Clausula Vera");
 	m_cadenceLabels.emplace("CTtz", "Clausula Vera");
-	m_cadenceLabels.emplace("CTp",  "Evaded Clausula Vera");
-	m_cadenceLabels.emplace("CTpt", "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("CTu",  "Clausula Vera");
 	m_cadenceLabels.emplace("CTt",  "Clausula Vera");
-	m_cadenceLabels.emplace("Ctu",  "Evaded Authentic");
-	m_cadenceLabels.emplace("CTux", "Evaded Authentic");
 	m_cadenceLabels.emplace("CTx",  "Clausula Vera");
 	m_cadenceLabels.emplace("Ctxz", "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("Ctz",  "Evaded Clausula Vera");
+	m_cadenceLabels.emplace("Cp",   "Evaded Clausula Vera");
+	m_cadenceLabels.emplace("Cpt",  "Evaded Clausula Vera");
+	m_cadenceLabels.emplace("Ct",   "Evaded Clausula Vera");
+	m_cadenceLabels.emplace("CTp",  "Evaded Clausula Vera");
+	m_cadenceLabels.emplace("CTpt", "Evaded Clausula Vera");
+	m_cadenceLabels.emplace("Ctu",  "Evaded Authentic");
+	m_cadenceLabels.emplace("CTux", "Evaded Authentic");
 	m_cadenceLabels.emplace("CTz",  "Clausula Vera");// Phrygian
 	m_cadenceLabels.emplace("Cu",   "Evaded Authentic");
 	m_cadenceLabels.emplace("cx",   "Abandoned Authentic");
