@@ -3099,6 +3099,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	
 	/*   4 */ addCadenceDefinition("", "",		"__1",	R"(^2_-2:1, 3_-2:1, 4_-3:-3, 4_)");
 	/* 105 */ addCadenceDefinition("", "",		"__2",	R"(^2_-2:1, 3_-2:1, 4_5:1, 7_)");
+	/* 105 */ addCadenceDefinition("", "",		"__3",	R"(^2_-2:1, 3_-2:1, 4_-2:1, 5_2:1, 4_)");
 	/* 124 */ addCadenceDefinition("y", "T",	"yT2",	R"(^2_-2:1, 3_1:-5, -3_R:4, R_)");  // keep high to disambiguate
 	/*   4 */ addCadenceDefinition("A", "T",	"AT1",	R"(^-4D_-2:1, -3_-2:1, -2_2:1, -3_2:-2, -5_)");
 	/*   5 */ addCadenceDefinition("A", "T",	"AT2",	R"(^-4D_-2:1, -3_-2:1, -2_3:-2, -5_)");
@@ -3383,6 +3384,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("CQu",  "Evaded Authentic");
 	m_cadenceLabels.emplace("CQux", "Evaded Authentic");
 	m_cadenceLabels.emplace("CTb",  "Evaded Authentic");
+	m_cadenceLabels.emplace("CTbu", "Evaded Authentic");
 	m_cadenceLabels.emplace("CTbx", "Evaded Authentic");
 	m_cadenceLabels.emplace("Cuz",  "Evaded Authentic");
 	m_cadenceLabels.emplace("bc",   "Evaded Authentic");
