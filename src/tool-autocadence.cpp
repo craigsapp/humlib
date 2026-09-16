@@ -3399,6 +3399,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("CQTa", "Inverted Authentic");
 	m_cadenceLabels.emplace("CQTu", "Inverted Authentic");
 	m_cadenceLabels.emplace("CQTt", "Inverted Authentic");
+	m_cadenceLabels.emplace("BTa",  "Evaded Inverted Authentic");
 	m_cadenceLabels.emplace("CQt",  "Evaded Inverted Authentic");
 	m_cadenceLabels.emplace("CQtx", "Evaded Inverted Authentic");
 	m_cadenceLabels.emplace("CQx",  "Evaded Inverted Authentic");
@@ -3479,7 +3480,6 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("xyz",  "Abandoned Authentic");
 	// Empty-string labels suppress the cadence annotation entirely (no LO line,
 	// no UNKNOWN).  Use these to filter false-positive CVF combinations.
-	m_cadenceLabels.emplace("BTa",  "");
 }
 
 //////////////////////////////
