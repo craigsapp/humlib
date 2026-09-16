@@ -3350,6 +3350,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("BCTt", "Authentic");
 	m_cadenceLabels.emplace("BCTx", "Authentic");
 	m_cadenceLabels.emplace("BCTtu","Authentic");
+	m_cadenceLabels.emplace("BCTtx","Authentic");
 	m_cadenceLabels.emplace("BCTu", "Authentic");
 	m_cadenceLabels.emplace("BCTz", "Authentic");
 	m_cadenceLabels.emplace("BCt",  "Authentic");
