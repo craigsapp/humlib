@@ -2672,7 +2672,8 @@ void Tool_autocadence::preparePitchInfo(HumdrumFile& infile) {
 void Tool_autocadence::prepareLowestPitches(HumdrumFile& infile) {
 	m_lowestPitch.clear();
 	m_lowestPitch.resize(m_pitches.size());
-	std::fill(m_lowestPitch.begin(), m_lowestPitch.end(), 0);
+	// -1 = unset; first sounding pitch on the line replaces it.
+	std::fill(m_lowestPitch.begin(), m_lowestPitch.end(), -1);
 
 	m_lowestPitchIndex.clear();
 	m_lowestPitchIndex.resize(m_pitches.size());
@@ -2697,6 +2698,10 @@ void Tool_autocadence::prepareLowestPitches(HumdrumFile& infile) {
 				}
 			}
 
+		}
+		if (m_lowestPitch.at(line) == -1) {
+			m_lowestPitch.at(line) = 0;
+			continue;
 		}
 		HTp ltoken = infile.token(line, m_lowestPitchIndex.at(line));
 		ltoken->setValue("auto", "lowest", "xxx");
@@ -2944,8 +2949,11 @@ string Tool_autocadence::generateCounterpointString(vector<vector<HTp>>& pairing
 	}
 
 	// Determine if there is a fourth above the lowest sounding note
-	// for the current pair of voices:
+	// for the current pair of voices (either member of the pair may be
+	// the fourth above the bass; when voices are crossed the lower staff
+	// can hold that fourth while the upper staff holds the bass).
 	int lowU = 0;
+	int lowL = 0;
 	int lowest = m_lowestPitch.at(lineIndex);
 	if (lowest == 0) {
 		// do nothing
@@ -2953,9 +2961,12 @@ string Tool_autocadence::generateCounterpointString(vector<vector<HTp>>& pairing
 		if (b7U != 0) {
 			lowU = getDiatonicInterval(lowest, b7U);
 		}
+		if (b7L != 0) {
+			lowL = getDiatonicInterval(lowest, b7L);
+		}
 	}
 	string dissonant4;
-	if (lowU == 4) {
+	if ((lowU == 4) || (lowL == 4)) {
 		dissonant4 = "D";
 	}
 
@@ -2997,8 +3008,8 @@ string Tool_autocadence::generateCounterpointString(vector<vector<HTp>>& pairing
 	}
 
 	string output = hint;
-	if (hint == "4") {
-		// only marking dissonances for 4
+	// Mark dissonant fourths for both uncrossed (4) and crossed (-4) pairs.
+	if ((hint == "4") || (hint == "-4")) {
 		output += dissonant4;
 	}
 	output += "_";
@@ -3406,19 +3417,23 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("cu",   "Evaded Authentic");
 	m_cadenceLabels.emplace("ctu",  "Evaded Authentic");
 	m_cadenceLabels.emplace("cux",  "Evaded Authentic");
+	m_cadenceLabels.emplace("Ctu",  "Evaded Authentic");
+	m_cadenceLabels.emplace("CTux", "Evaded Authentic");
+	m_cadenceLabels.emplace("Cu",   "Evaded Authentic");
 	m_cadenceLabels.emplace("BQTat", "Inverted Authentic");
 	m_cadenceLabels.emplace("CQ",   "Inverted Authentic");
 	m_cadenceLabels.emplace("CQT",  "Inverted Authentic");
 	m_cadenceLabels.emplace("CQTa", "Inverted Authentic");
 	m_cadenceLabels.emplace("CQTu", "Inverted Authentic");
 	m_cadenceLabels.emplace("CQTt", "Inverted Authentic");
+	m_cadenceLabels.emplace("CQt",  "Inverted Authentic");
+	m_cadenceLabels.emplace("CQtx", "Inverted Authentic");
+	m_cadenceLabels.emplace("CQx",  "Inverted Authentic");
+	m_cadenceLabels.emplace("CQxz", "Inverted Authentic");
+	m_cadenceLabels.emplace("CQz",  "Inverted Authentic");
 	m_cadenceLabels.emplace("BTa",  "Evaded Inverted Authentic");
-	m_cadenceLabels.emplace("CQt",  "Evaded Inverted Authentic");
-	m_cadenceLabels.emplace("CQtx", "Evaded Inverted Authentic");
-	m_cadenceLabels.emplace("CQx",  "Evaded Inverted Authentic");
 	m_cadenceLabels.emplace("Qc",   "Evaded Inverted Authentic");
 	m_cadenceLabels.emplace("Qcu",  "Evaded Inverted Authentic");
-	m_cadenceLabels.emplace("CQz",  "Abandoned Inverted Authentic");
 	m_cadenceLabels.emplace("QTy",  "Abandoned Inverted Authentic");
 	m_cadenceLabels.emplace("Qy",   "Abandoned Inverted Authentic");
 	m_cadenceLabels.emplace("Qyz",  "Abandoned Inverted Authentic");
@@ -3439,23 +3454,21 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("CTu",  "Clausula Vera");
 	m_cadenceLabels.emplace("CTt",  "Clausula Vera");
 	m_cadenceLabels.emplace("CTx",  "Clausula Vera");
+	m_cadenceLabels.emplace("CTz",  "Clausula Vera");// Phrygian
 	m_cadenceLabels.emplace("Ctxz", "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("Ctz",  "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("Cp",   "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("Cpt",  "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("Ct",   "Evaded Clausula Vera");
-	m_cadenceLabels.emplace("CTp",  "Evaded Clausula Vera");
-	m_cadenceLabels.emplace("CTpt", "Evaded Clausula Vera");
-	m_cadenceLabels.emplace("Ctu",  "Evaded Authentic");
-	m_cadenceLabels.emplace("CTux", "Evaded Authentic");
-	m_cadenceLabels.emplace("CTz",  "Clausula Vera");// Phrygian
-	m_cadenceLabels.emplace("Cu",   "Evaded Authentic");
+	m_cadenceLabels.emplace("CTp",  "Evaded Clausula Vera");  // TODO: check this, perhaps it shouldn't be evaded
+	m_cadenceLabels.emplace("CTpt", "Evaded Clausula Vera");  // TODO: check this, perhaps it shouldn't be evaded
 	m_cadenceLabels.emplace("cx",   "Abandoned Authentic");
 	m_cadenceLabels.emplace("CTxz", "Abandoned Authentic");
 	m_cadenceLabels.emplace("Ctx",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("ctx",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("Cuxz", "Abandoned Authentic");
 	m_cadenceLabels.emplace("Cx",   "Abandoned Authentic");
+	m_cadenceLabels.emplace("Cxz",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("cxz",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("BTcx", "Abandoned Authentic");
 	m_cadenceLabels.emplace("By",   "Abandoned Authentic");
@@ -3470,7 +3483,6 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("Tcux", "Abandoned Authentic");
 	m_cadenceLabels.emplace("uxy",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("uy",   "Abandoned Authentic");
-	m_cadenceLabels.emplace("Cxz",  "Abandoned Clausula Vera");
 	m_cadenceLabels.emplace("Cz",   "Abandoned Clausula Vera");
 	m_cadenceLabels.emplace("Ty",   "Abandoned Clausula Vera");
 	m_cadenceLabels.emplace("Tty",  "Abandoned Clausula Vera");
