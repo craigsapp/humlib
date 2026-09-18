@@ -119,6 +119,7 @@ class Tool_autocadence : public HumTool {
 		std::string sortUniqueChars            (const std::string& input);
 		void        fillInMajorMinor           (HumdrumFile& infile);
 		bool        getPhrygian                (HumdrumFile& infile, int index);
+		int         getSignedSemitoneHarmonic  (HTp lower, HTp upper);
 		std::string getIntervalName            (const std::string& b40);
 		std::string getTriadData               (HumdrumFile& infile, int line);
 		std::string getCadenceLabel            (const std::string& cvflabel, HumdrumFile& infile, int index);

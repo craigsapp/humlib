@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Sep 16 17:21:18 CEST 2026
+// Last Modified: Fri Sep 18 12:34:45 CEST 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -62054,6 +62054,33 @@ void Tool_autocadence::addMatchToScore(HumdrumFile& infile, int matchIndex) {
 	}
 	endU->setValue("auto", "cvf", valueU);
 
+	bool altizansL   = (funcL == "A") || (funcL == "a");
+	bool altizansU   = (funcU == "A") || (funcU == "a");
+	bool tenorizansL = (funcL == "T") || (funcL == "t") || (funcL == "z");
+	bool tenorizansU = (funcU == "T") || (funcU == "t") || (funcU == "z");
+	if (altizansL || altizansU) {
+		// Altizans present: Phrygian only via initial +6/-6; skip tenorizans test.
+		int semis = getSignedSemitoneHarmonic(startL, startU);
+		if ((semis == 6) || (semis == -6)) {
+			if (altizansL) {
+				endL->setValue("auto", "phrygian", "true");
+			}
+			if (altizansU) {
+				endU->setValue("auto", "phrygian", "true");
+			}
+		}
+	} else if (tenorizansL || tenorizansU) {
+		int semis = getSignedSemitoneHarmonic(startL, startU);
+		if ((semis == 11) || (semis == 1) || (semis == -1) || (semis == -11)) {
+			if (tenorizansL) {
+				endL->setValue("auto", "phrygian", "true");
+			}
+			if (tenorizansU) {
+				endU->setValue("auto", "phrygian", "true");
+			}
+		}
+	}
+
 	if (m_colorQ) {
 		colorNotes(startL, endL);
 		colorNotes(startU, endU);
@@ -63713,20 +63740,50 @@ int Tool_autocadence::rootObservationToPitchClass(const string& root) {
 
 //////////////////////////////
 //
-// Tool_autocadence::getPhrygian -- true if approached by a m2.
+// Tool_autocadence::getPhrygian -- true when addMatchToScore marked a
+//     formula as Phrygian: A/a with first harmonic ±6 (aug. 4th), or else
+//     T/t/z with first harmonic ±1 or ±11.  A/a short-circuits the
+//     tenorizans test for that match.
 //
 
 bool Tool_autocadence::getPhrygian(HumdrumFile& infile, int index) {
-	for (int i=0; i<(int)m_lastmel.at(index).size(); i++) {
+	for (int i=0; i<infile[index].getFieldCount(); i++) {
 		HTp token = infile[index].token(i);
-		string cvf = token->getValue("auto", "cvf");
-		if ((cvf == "T") || (cvf == "t") || (cvf == "z")) {
-			if (m_lastmel.at(index).at(i) == "-5") {
-				return true;
-			}
+		if (!token->getValue("auto", "phrygian").empty()) {
+			return true;
 		}
 	}
 	return false;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::getSignedSemitoneHarmonic -- Signed MIDI-semitone
+//     harmonic interval between lower-staff and upper-staff notes of a
+//     cadence-formula slice, reduced modulo 12 into [-11, 11].  Unison
+//     and octave map to 0.  Returns 0 if either pitch is missing.
+//
+
+int Tool_autocadence::getSignedSemitoneHarmonic(HTp lower, HTp upper) {
+	auto firstMidi = [](HTp token) -> int {
+		vector<int> midis = token->getMidiPitches();
+		for (int midi : midis) {
+			int absMidi = midi < 0 ? -midi : midi;
+			if (absMidi > 0) {
+				return absMidi;
+			}
+		}
+		return 0;
+	};
+
+	int midiL = firstMidi(lower);
+	int midiU = firstMidi(upper);
+	if ((midiL == 0) || (midiU == 0)) {
+		return 0;
+	}
+	return (midiU - midiL) % 12;
 }
 
 
@@ -63912,7 +63969,8 @@ void Tool_autocadence::preparePitchInfo(HumdrumFile& infile) {
 void Tool_autocadence::prepareLowestPitches(HumdrumFile& infile) {
 	m_lowestPitch.clear();
 	m_lowestPitch.resize(m_pitches.size());
-	std::fill(m_lowestPitch.begin(), m_lowestPitch.end(), 0);
+	// -1 = unset; first sounding pitch on the line replaces it.
+	std::fill(m_lowestPitch.begin(), m_lowestPitch.end(), -1);
 
 	m_lowestPitchIndex.clear();
 	m_lowestPitchIndex.resize(m_pitches.size());
@@ -63937,6 +63995,10 @@ void Tool_autocadence::prepareLowestPitches(HumdrumFile& infile) {
 				}
 			}
 
+		}
+		if (m_lowestPitch.at(line) == -1) {
+			m_lowestPitch.at(line) = 0;
+			continue;
 		}
 		HTp ltoken = infile.token(line, m_lowestPitchIndex.at(line));
 		ltoken->setValue("auto", "lowest", "xxx");
@@ -64184,8 +64246,11 @@ string Tool_autocadence::generateCounterpointString(vector<vector<HTp>>& pairing
 	}
 
 	// Determine if there is a fourth above the lowest sounding note
-	// for the current pair of voices:
+	// for the current pair of voices (either member of the pair may be
+	// the fourth above the bass; when voices are crossed the lower staff
+	// can hold that fourth while the upper staff holds the bass).
 	int lowU = 0;
+	int lowL = 0;
 	int lowest = m_lowestPitch.at(lineIndex);
 	if (lowest == 0) {
 		// do nothing
@@ -64193,9 +64258,12 @@ string Tool_autocadence::generateCounterpointString(vector<vector<HTp>>& pairing
 		if (b7U != 0) {
 			lowU = getDiatonicInterval(lowest, b7U);
 		}
+		if (b7L != 0) {
+			lowL = getDiatonicInterval(lowest, b7L);
+		}
 	}
 	string dissonant4;
-	if (lowU == 4) {
+	if ((lowU == 4) || (lowL == 4)) {
 		dissonant4 = "D";
 	}
 
@@ -64237,8 +64305,8 @@ string Tool_autocadence::generateCounterpointString(vector<vector<HTp>>& pairing
 	}
 
 	string output = hint;
-	if (hint == "4") {
-		// only marking dissonances for 4
+	// Mark dissonant fourths for both uncrossed (4) and crossed (-4) pairs.
+	if ((hint == "4") || (hint == "-4")) {
 		output += dissonant4;
 	}
 	output += "_";
@@ -64646,19 +64714,23 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("cu",   "Evaded Authentic");
 	m_cadenceLabels.emplace("ctu",  "Evaded Authentic");
 	m_cadenceLabels.emplace("cux",  "Evaded Authentic");
+	m_cadenceLabels.emplace("Ctu",  "Evaded Authentic");
+	m_cadenceLabels.emplace("CTux", "Evaded Authentic");
+	m_cadenceLabels.emplace("Cu",   "Evaded Authentic");
 	m_cadenceLabels.emplace("BQTat", "Inverted Authentic");
 	m_cadenceLabels.emplace("CQ",   "Inverted Authentic");
 	m_cadenceLabels.emplace("CQT",  "Inverted Authentic");
 	m_cadenceLabels.emplace("CQTa", "Inverted Authentic");
 	m_cadenceLabels.emplace("CQTu", "Inverted Authentic");
 	m_cadenceLabels.emplace("CQTt", "Inverted Authentic");
+	m_cadenceLabels.emplace("CQt",  "Inverted Authentic");
+	m_cadenceLabels.emplace("CQtx", "Inverted Authentic");
+	m_cadenceLabels.emplace("CQx",  "Inverted Authentic");
+	m_cadenceLabels.emplace("CQxz", "Inverted Authentic");
+	m_cadenceLabels.emplace("CQz",  "Inverted Authentic");
 	m_cadenceLabels.emplace("BTa",  "Evaded Inverted Authentic");
-	m_cadenceLabels.emplace("CQt",  "Evaded Inverted Authentic");
-	m_cadenceLabels.emplace("CQtx", "Evaded Inverted Authentic");
-	m_cadenceLabels.emplace("CQx",  "Evaded Inverted Authentic");
 	m_cadenceLabels.emplace("Qc",   "Evaded Inverted Authentic");
 	m_cadenceLabels.emplace("Qcu",  "Evaded Inverted Authentic");
-	m_cadenceLabels.emplace("CQz",  "Abandoned Inverted Authentic");
 	m_cadenceLabels.emplace("QTy",  "Abandoned Inverted Authentic");
 	m_cadenceLabels.emplace("Qy",   "Abandoned Inverted Authentic");
 	m_cadenceLabels.emplace("Qyz",  "Abandoned Inverted Authentic");
@@ -64679,23 +64751,21 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("CTu",  "Clausula Vera");
 	m_cadenceLabels.emplace("CTt",  "Clausula Vera");
 	m_cadenceLabels.emplace("CTx",  "Clausula Vera");
+	m_cadenceLabels.emplace("CTz",  "Clausula Vera");// Phrygian
 	m_cadenceLabels.emplace("Ctxz", "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("Ctz",  "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("Cp",   "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("Cpt",  "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("Ct",   "Evaded Clausula Vera");
-	m_cadenceLabels.emplace("CTp",  "Evaded Clausula Vera");
-	m_cadenceLabels.emplace("CTpt", "Evaded Clausula Vera");
-	m_cadenceLabels.emplace("Ctu",  "Evaded Authentic");
-	m_cadenceLabels.emplace("CTux", "Evaded Authentic");
-	m_cadenceLabels.emplace("CTz",  "Clausula Vera");// Phrygian
-	m_cadenceLabels.emplace("Cu",   "Evaded Authentic");
+	m_cadenceLabels.emplace("CTp",  "Evaded Clausula Vera");  // TODO: check this, perhaps it shouldn't be evaded
+	m_cadenceLabels.emplace("CTpt", "Evaded Clausula Vera");  // TODO: check this, perhaps it shouldn't be evaded
 	m_cadenceLabels.emplace("cx",   "Abandoned Authentic");
 	m_cadenceLabels.emplace("CTxz", "Abandoned Authentic");
 	m_cadenceLabels.emplace("Ctx",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("ctx",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("Cuxz", "Abandoned Authentic");
 	m_cadenceLabels.emplace("Cx",   "Abandoned Authentic");
+	m_cadenceLabels.emplace("Cxz",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("cxz",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("BTcx", "Abandoned Authentic");
 	m_cadenceLabels.emplace("By",   "Abandoned Authentic");
@@ -64710,7 +64780,6 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("Tcux", "Abandoned Authentic");
 	m_cadenceLabels.emplace("uxy",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("uy",   "Abandoned Authentic");
-	m_cadenceLabels.emplace("Cxz",  "Abandoned Clausula Vera");
 	m_cadenceLabels.emplace("Cz",   "Abandoned Clausula Vera");
 	m_cadenceLabels.emplace("Ty",   "Abandoned Clausula Vera");
 	m_cadenceLabels.emplace("Tty",  "Abandoned Clausula Vera");
