@@ -3518,12 +3518,13 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("CL",   "Leaping Contratenor");
 	m_cadenceLabels.emplace("CLT",  "Leaping Contratenor");
 	m_cadenceLabels.emplace("CLTz", "Leaping Contratenor");
-	m_cadenceLabels.emplace("CP",   "Incomplete Plagal");  // TODO: consider "9-8-5" as neutral alternative to "Plagal"
+	m_cadenceLabels.emplace("CP",   "Incomplete 9-8-5");
 	m_cadenceLabels.emplace("Pc",   "");
-	m_cadenceLabels.emplace("CPT",  "Plagal");
-	m_cadenceLabels.emplace("CPTz", "Plagal");
-	m_cadenceLabels.emplace("CPt",  "Evaded Plagal");
-	m_cadenceLabels.emplace("PTc",  "Evaded Plagal");
+	m_cadenceLabels.emplace("CPT",  "9-8-5");
+	m_cadenceLabels.emplace("CPTz", "9-8-5");
+	m_cadenceLabels.emplace("CPt",  "Evaded 9-8-5");
+	m_cadenceLabels.emplace("PTc",  "Evaded 9-8-5");
+	m_cadenceLabels.emplace("Pct",  "Evaded 9-8-5");
 	m_cadenceLabels.emplace("CT",   "Clausula Vera");
 	m_cadenceLabels.emplace("CTa",  "Clausula Vera");
 	m_cadenceLabels.emplace("CTaz", "Clausula Vera");
