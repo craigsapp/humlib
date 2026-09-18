@@ -1774,17 +1774,23 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 		// Empty string = suppressor entry in m_cadenceLabels: no cadence annotation.
 		if (!cadence.empty()) {
 			string infolabel = cadence;
+			bool isPhrygian = getPhrygian(infile, index);
+			if (isPhrygian) {
+				if (infolabel.compare(0, 7, "Evaded ") == 0) {
+					infolabel.insert(7, "Phrygian ");
+				} else if (infolabel.compare(0, 10, "Abandoned ") == 0) {
+					infolabel.insert(10, "Phrygian ");
+				} else {
+					infolabel = "Phrygian " + infolabel;
+				}
+			}
+			cadence = infolabel;
 			HumRegex hre;
 			hre.replaceDestructive(cadence, "\\n", " ", "g");
 			if (cadence.find("\\n") != std::string::npos) {
 				cadence += "\\n";
 			}
-			bool isPhrygian = getPhrygian(infile, index);
 			cadenceline << "!!LO:TX:a:B:rj:color=red:cadence:t=";
-			if (isPhrygian) {
-				cadence   = "Phrygian\\n" + cadence;
-				infolabel = "Phrygian " + infolabel;
-			}
 			cadenceline << cadence;
 			if (m_tableQ) {
 				m_cadenceTypeCounts[infolabel]++;
@@ -3278,6 +3284,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/*  88 */ addCadenceDefinition("T", "C",	"TC20",	R"(^-2_1:-2, -3_1:1, -3_-2:2, (?:1|-8)_)");
 	/*  92 */ addCadenceDefinition("T", "C",	"TC21",	R"(^7_1:-2, 6_-2:2, 8_)");
 	/*  93 */ addCadenceDefinition("T", "C",	"TC22",	R"(^7_1:-2, 6_-2:2, 8_)");
+	/*  95 */ addCadenceDefinition("T", "C",	"TC23",	R"(^7_1:-2, 6_-2:-2, 6_2:2, 6_-2:2, 8_)");
 	/*  94 */ addCadenceDefinition("T", "a",	"Ta1",	R"(^4D_1:-2, 3_-2:-2, 3_)");
 	/*  94 */ addCadenceDefinition("T", "a",	"Ta2",	R"(^4D_1:-2, 3_-2:1, 4D_)");
 	/*  94 */ addCadenceDefinition("", "",		"_Ta3",	R"(^4D_1:-2, 3_1:1, 3_-2:-2, 3_-2:-2, 3_-2:2, 5_)");

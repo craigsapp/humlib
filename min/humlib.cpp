@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Sep 18 12:34:45 CEST 2026
+// Last Modified: Fri Sep 18 14:44:18 CEST 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -63014,17 +63014,23 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 		// Empty string = suppressor entry in m_cadenceLabels: no cadence annotation.
 		if (!cadence.empty()) {
 			string infolabel = cadence;
+			bool isPhrygian = getPhrygian(infile, index);
+			if (isPhrygian) {
+				if (infolabel.compare(0, 7, "Evaded ") == 0) {
+					infolabel.insert(7, "Phrygian ");
+				} else if (infolabel.compare(0, 10, "Abandoned ") == 0) {
+					infolabel.insert(10, "Phrygian ");
+				} else {
+					infolabel = "Phrygian " + infolabel;
+				}
+			}
+			cadence = infolabel;
 			HumRegex hre;
 			hre.replaceDestructive(cadence, "\\n", " ", "g");
 			if (cadence.find("\\n") != std::string::npos) {
 				cadence += "\\n";
 			}
-			bool isPhrygian = getPhrygian(infile, index);
 			cadenceline << "!!LO:TX:a:B:rj:color=red:cadence:t=";
-			if (isPhrygian) {
-				cadence   = "Phrygian\\n" + cadence;
-				infolabel = "Phrygian " + infolabel;
-			}
 			cadenceline << cadence;
 			if (m_tableQ) {
 				m_cadenceTypeCounts[infolabel]++;
@@ -64429,6 +64435,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/* 123 */ addCadenceDefinition("B", "c",	"Bc3",	R"(^4D_1:-2, 3_(?:4|-5):1, 7_)");
 	/* 123 */ addCadenceDefinition("B", "c",	"Bc4",	R"(^4D_1:-2, 3_(?:4|-5):-3, 5_)");
 	/* 123 */ addCadenceDefinition("B", "c",	"Bc5",	R"(^4D_1:-2, 3_1:-2, 2_1:2, 3_1:-3, (?:1|8)_1:4, 4_1:-2, 3_1:1, 3_(?:4|-5):-3, 5_)");
+	/* 123 */ addCadenceDefinition("B", "c",	"Bc6",	R"(^4D_1:-2, 3_1:-2, 2_1:2, 3_(?:4|-5):-3, 5_)");
 	/*  10 */ addCadenceDefinition("B", "y",	"By1",	R"(^4D_1:-2, 3_(?:4|-5):R, R_)");
 	/*  20 */ addCadenceDefinition("C", "B",	"CB1",	R"(^-4D_-2:1, -3_-2:1, -2_2:1, -3_2:(?:-5|4), -8_)");
 	/*  21 */ addCadenceDefinition("C", "B",	"CB2",	R"(^-4D_-2:1, -3_-2:1, -2_2:1, -3_2:4, (?:1|-8)_)");
@@ -64480,6 +64487,8 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/*  57 */ addCadenceDefinition("P", "C",	"PC1",	R"(^2_1:-2, 1_-4:2, 5_)");
 	/*  58 */ addCadenceDefinition("P", "C",	"PC2",	R"(^2_1:-2, 8_(?:5|-4):2, 5_)");
 	/*  59 */ addCadenceDefinition("P", "C",	"PC3",	R"(^2_1:-2, 8_1:1, 8_(?:5|-4):2, 5_)");
+	/*  59 */ addCadenceDefinition("P", "c",	"Pc1",	R"(^2_1:-2, 8_(?:5|-4):1, 4D_)");
+	/*  59 */ addCadenceDefinition("P", "c",	"Pc2",	R"(^2_1:-2, 8_1:1, 8_(?:5|-4):1, 4D_)");
 	/*  60 */ addCadenceDefinition("Q", "C",	"QC1",	R"(^-2_1:-2, -3_-5:2, 4D?_)");
 	/*  61 */ addCadenceDefinition("Q", "C",	"QC2",	R"(^-2_1:-2, -3_4:2, -5_)");
 	/*  62 */ addCadenceDefinition("Q", "C",	"QC3",	R"(^7_1:-2, 6_(?:-5|4):2, 4D?_)");
@@ -64543,6 +64552,8 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/* 102 */ addCadenceDefinition("b", "c",	"bc1",	R"(^4D_1:-2, 3_2:-2, (?:8|1)_)");
 	/* 102 */ addCadenceDefinition("b", "c",	"bc3",	R"(^4D_1:-2, 3_-3:1, 5_2:1, 4D_)");
 	/* 102 */ addCadenceDefinition("b", "c",	"bc4",	R"(^4D_1:-2, 3_-4:3, 8_2:1, 7_)");
+	/* 102 */ addCadenceDefinition("b", "y",	"by1",	R"(^4D_1:-2, 3_2:R, R_)");
+	/* 102 */ addCadenceDefinition("b", "y",	"by2",	R"(^4D_1:-2, 3_1:1, 3_2:R, R_)");
 	/* 103 */ addCadenceDefinition("c", "B",	"cB1",	R"(^-4D_-2:1, -3_(?:4|-5):4, -3_)");
 	/* 104 */ addCadenceDefinition("c", "B",	"cB2",	R"(^-4D_-2:1, -3_-2:(?:4|-5), (?:-6|3)_)");
 	/* 104 */ addCadenceDefinition("c", "Q",	"cQ1",	R"(^2_-2:1, 3_1:-5, -3_-2:4, 3_)");
@@ -64556,6 +64567,8 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/* 105 */ addCadenceDefinition("c", "T",	"cT7",	R"(^2_-2:1, 3_4:-2, -3_)");
 	/* 105 */ addCadenceDefinition("c", "T",	"cT8",	R"(^2_-2:1, 3_1:-2, 2_)");
 	/* 105 */ addCadenceDefinition("c", "T",	"cT9",	R"(^2_-2:1, 3_1:1, 3_1:-2, 2_)");
+	/* 123 */ addCadenceDefinition("c", "T",	"cT10",	R"(^2_-2:1, 3_-2:1, 4_2:1, 3_-3:-2, 4_)");
+	/* 105 */ addCadenceDefinition("c", "T",	"cT11",	R"(^2_-2:1, 3_-2:1, 4_-2:1, 5_2:-2, 3_)");
 	/* 105 */ addCadenceDefinition("c", "t",	"ct1",	R"(^2_-2:1, 3_-2:1, 4_(?!2:1))");  // needs negative look-ahead for disambiguation
 	/* 105 */ addCadenceDefinition("c", "t",	"ct2",	R"(^2_-2:1, 3_-2:2, 5_)");
 	/* 105 */ addCadenceDefinition("c", "t",	"ct3",	R"(^2_-2:1, 3_1:2, 4_-2:2, 6_)");
@@ -64565,7 +64578,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/* 105 */ addCadenceDefinition("c", "t",	"ct7",	R"(^2_-2:1, 3_4:1, -2_)");
 	/*  41 */ addCadenceDefinition("c", "u",	"cu1",	R"(^-4_-2:1, -3_1:-3, -5_)");
 	/*  41 */ addCadenceDefinition("c", "z",	"cz1",	R"(^2_-2:1, 3_4:R, R_)");
-	/* 107 */ addCadenceDefinition("p", "C",	"pC1",	R"(^7_1:-2, 6_(?:5|-4):2, 3_)");
+	/* 107 */ addCadenceDefinition("p", "C",	"pC1",	R"(^7_1:-2, 6_(?:5|-4):2, 3_)");  // TODO: should "p" exist?
 	// /* 108 */ addCadenceDefinition("s", "",		"s_1",	R"(^2_1:-2, 8_-2:2, 3_)");
 	/* 109 */ addCadenceDefinition("t", "C",	"tC1",	R"(^-2_1:-2, -3_1:-2, -4D?_1:2, -3_2:2, -3_)");
 	/* 110 */ addCadenceDefinition("t", "C",	"tC2",	R"(^-2_1:-2, -3_2:2, -3_)");
@@ -64579,7 +64592,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/* 111 */ addCadenceDefinition("t", "c",	"tc4",	R"(^7_1:-2, 6_2:1, 5_2:1, 4D_)");
 	/* 111 */ addCadenceDefinition("t", "y",	"ty5",	R"(^7_1:-2, 6_2:1, 5_2:R, R_)");
 	/* 111 */ addCadenceDefinition("t", "c",	"tc6",	R"(^7_2:-2, 5_-3:1, 7_)");
-	/* 111 */ addCadenceDefinition("t", "c",	"tc7",	R"(^7_1:-2, 6_2:1, 5_2:-2, 3_)");
+	/* 111 */ addCadenceDefinition("t", "c",	"tc7",	R"(^7_1:-2, 6_2:1, 5_2:-2, 3_)");  // TODO: reconsider disambiguation -> Trm0059c m. 40
 	/* 111 */ addCadenceDefinition("t", "c",	"tc8",	R"(^7_1:-2, 6_2:1, 5_)");
 	/* 111 */ addCadenceDefinition("t", "c",	"tc9",	R"(^7_1:-2, 6_1:1, 6_2:1, 5_2:-2, 3_)");
 	/* 111 */ addCadenceDefinition("t", "c",	"tc9",	R"(^7_1:-2, 6_1:1, 6_2:1, 5_2:1, 4D_)");
@@ -64593,6 +64606,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/* 119 */ addCadenceDefinition("u", "c",	"uc1",	R"(^4D_1:-2, 3_1:-2, 2_1:2, 3_-2:1, 4_-2:1, 5_)");
 	/* 119 */ addCadenceDefinition("u", "c",	"uc2",	R"(^4D_1:-2, 3_-3:1, 5_)");
 	/* 117 */ addCadenceDefinition("u", "y",	"uy1",	R"(^4D_1:-2, 3_-2:1, 4_-2:R, R_)");
+	/* 117 */ addCadenceDefinition("u", "y",	"uy2",	R"(^4D_1:-2, 3_-3:R, R_)");
 	/* 120 */ addCadenceDefinition("x", "C",	"xC1",	R"(^4D_1:-2, 3_R:2, R_)");
 	/* 121 */ addCadenceDefinition("x", "C",	"xC2",	R"(^4D_1:-2, 3_R:2, R_)");
 	/* 122 */ addCadenceDefinition("x", "C",	"xC3",	R"(^4D_1:-2, 3_R:2, R_)");
@@ -64601,6 +64615,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/* 123 */ addCadenceDefinition("x", "c",	"xc1",	R"(^4D_1:-2, 3_R:-2, R_)");
 	/* 123 */ addCadenceDefinition("x", "c",	"xc2",	R"(^4D_1:-2, 3_R:4, R_)");
 	/* 123 */ addCadenceDefinition("x", "c",	"xc3",	R"(^4D_1:-2, 3_R:1, R_)");
+	/* 123 */ addCadenceDefinition("x", "c",	"xc4",	R"(^4D_1:-2, 3_1:-2, 2_1:2, 3_R:-3, R_)");
 	/* 123 */ addCadenceDefinition("x", "y",	"xy1",	R"(^4D_1:-2, 3_R:R, R_)");
 	/* 123 */ addCadenceDefinition("x", "y",	"xy2",	R"(^4D_R:-2, R_)");
 	/* 124 */ addCadenceDefinition("y", "T",	"yT1",	R"(^2_-2:1, 3_R:-2, R_)");
@@ -64639,8 +64654,8 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("ABxz", "Reinterpreted");
 	m_cadenceLabels.emplace("Abz",  "Altizans Only");
 	m_cadenceLabels.emplace("ABz",  "Reinterpreted");
-	m_cadenceLabels.emplace("ABCT", "Double Leading Tone");
-	m_cadenceLabels.emplace("ACT",  "Double Leading Tone");// Phrygian
+	m_cadenceLabels.emplace("ABCT", "Double Leading Tone");  // TODO: consider "Dual/Double/Twin Patient"
+	m_cadenceLabels.emplace("ACT",  "Double Leading Tone");
 	m_cadenceLabels.emplace("ACQT", "Double Leading Tone");
 	m_cadenceLabels.emplace("ACTt", "Double Leading Tone");
 	m_cadenceLabels.emplace("ACTtz","Double Leading Tone");
@@ -64650,15 +64665,15 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("ACz",  "Abandoned Double Leading Tone");
 	m_cadenceLabels.emplace("ABT",  "Altizans Only");
 	m_cadenceLabels.emplace("APT",  "Altizans Only");
-	m_cadenceLabels.emplace("AT",   "Altizans Only");// Phrygian
+	m_cadenceLabels.emplace("AT",   "Altizans Only");
 	m_cadenceLabels.emplace("ATb",  "Altizans Only");
 	m_cadenceLabels.emplace("ATx",  "Altizans Only");
 	m_cadenceLabels.emplace("ATxy", "Altizans Only");
 	m_cadenceLabels.emplace("ATxyz","Altizans Only");
 	m_cadenceLabels.emplace("ATxz", "Altizans Only");
-	m_cadenceLabels.emplace("ATy",  "Altizans Only");// Phrygian
-	m_cadenceLabels.emplace("ATyz", "Altizans Only");// Phrygian
-	m_cadenceLabels.emplace("ATz",  "Altizans Only");// Phrygian
+	m_cadenceLabels.emplace("ATy",  "Altizans Only");
+	m_cadenceLabels.emplace("ATyz", "Altizans Only");
+	m_cadenceLabels.emplace("ATz",  "Altizans Only");
 	m_cadenceLabels.emplace("ATbz", "Altizans Only");
 	m_cadenceLabels.emplace("ABCTz","Authentic");
 	m_cadenceLabels.emplace("BC",   "Authentic");
@@ -64739,11 +64754,12 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("CL",   "Leaping Contratenor");
 	m_cadenceLabels.emplace("CLT",  "Leaping Contratenor");
 	m_cadenceLabels.emplace("CLTz", "Leaping Contratenor");
-	m_cadenceLabels.emplace("CP",   "Incomplete Plagal Phrygian");
-	m_cadenceLabels.emplace("CPT",  "Plagal Phrygian");// Phrygian
-	m_cadenceLabels.emplace("CPTz", "Plagal Phrygian");// Phrygian
-	m_cadenceLabels.emplace("CPt",  "Evaded Plagal Phrygian");
-	m_cadenceLabels.emplace("CT",   "Clausula Vera");// Phrygian
+	m_cadenceLabels.emplace("CP",   "Incomplete Plagal");  // TODO: consider "9-8-5" as neutral alternative to "Plagal"
+	m_cadenceLabels.emplace("CPT",  "Plagal");
+	m_cadenceLabels.emplace("CPTz", "Plagal");
+	m_cadenceLabels.emplace("CPt",  "Evaded Plagal");
+	m_cadenceLabels.emplace("PTc",  "Evaded Plagal");
+	m_cadenceLabels.emplace("CT",   "Clausula Vera");
 	m_cadenceLabels.emplace("CTa",  "Clausula Vera");
 	m_cadenceLabels.emplace("CTaz", "Clausula Vera");
 	m_cadenceLabels.emplace("CTc",  "Clausula Vera");
@@ -64751,7 +64767,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("CTu",  "Clausula Vera");
 	m_cadenceLabels.emplace("CTt",  "Clausula Vera");
 	m_cadenceLabels.emplace("CTx",  "Clausula Vera");
-	m_cadenceLabels.emplace("CTz",  "Clausula Vera");// Phrygian
+	m_cadenceLabels.emplace("CTz",  "Clausula Vera");
 	m_cadenceLabels.emplace("Ctxz", "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("Ctz",  "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("Cp",   "Evaded Clausula Vera");
@@ -64759,6 +64775,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("Ct",   "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("CTp",  "Evaded Clausula Vera");  // TODO: check this, perhaps it shouldn't be evaded
 	m_cadenceLabels.emplace("CTpt", "Evaded Clausula Vera");  // TODO: check this, perhaps it shouldn't be evaded
+	m_cadenceLabels.emplace("bxy",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("cx",   "Abandoned Authentic");
 	m_cadenceLabels.emplace("CTxz", "Abandoned Authentic");
 	m_cadenceLabels.emplace("Ctx",  "Abandoned Authentic");
@@ -64778,6 +64795,8 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("Bty",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("Btyz", "Abandoned Authentic");
 	m_cadenceLabels.emplace("Tcux", "Abandoned Authentic");
+	m_cadenceLabels.emplace("Tby",  "Abandoned Authentic");
+	m_cadenceLabels.emplace("Tbuy", "Abandoned Authentic");
 	m_cadenceLabels.emplace("uxy",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("uy",   "Abandoned Authentic");
 	m_cadenceLabels.emplace("Cz",   "Abandoned Clausula Vera");
