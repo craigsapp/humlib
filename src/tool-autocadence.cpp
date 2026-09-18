@@ -3565,6 +3565,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("Tcux", "Abandoned Authentic");
 	m_cadenceLabels.emplace("Tby",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("Tbuy", "Abandoned Authentic");
+	m_cadenceLabels.emplace("Tuy",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("uxy",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("uy",   "Abandoned Authentic");
 	m_cadenceLabels.emplace("Cz",   "Abandoned Clausula Vera");
