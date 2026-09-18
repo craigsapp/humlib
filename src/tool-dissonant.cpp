@@ -1503,10 +1503,38 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string>>& results,
 	bool ternAgent = false;  // true if the ref voice would be a valid agent of a ternary susp. But if true, the diss is not necessarily a susp.
 
 		for (int i=1; i<(int)attacks.size() - 1; i++) {
+		// Same-pitch reattacks are treated as one longer note (as if written
+		// as a single duration).  Only analyze at the first attack of a run.
+		double curMidi = attacks[i]->getAbsMidiPitch();
+		if (!Convert::isNaN(curMidi)) {
+			double prevMidi = attacks[i-1]->getAbsMidiPitch();
+			if (!Convert::isNaN(prevMidi) && (curMidi == prevMidi)) {
+				continue;
+			}
+		}
+
 		sliceindex = attacks[i]->getSliceIndex();
 		lineindex = attacks[i]->getLineIndex();
 		// lineindexn = attacks[i+1]->getLineIndex();
-		attackindexn = attacks[i]->getNextAttackIndex();
+
+		// Next attack that changes pitch (or a rest); sum durations of
+		// intervening same-pitch reattacks into the current note.
+		int nextPitchAttacki = i + 1;
+		HumNum mergedDur = attacks[i]->getDuration();
+		while (nextPitchAttacki < (int)attacks.size()) {
+			double nextMidi = attacks[nextPitchAttacki]->getAbsMidiPitch();
+			if (Convert::isNaN(curMidi) || Convert::isNaN(nextMidi) ||
+					(nextMidi != curMidi)) {
+				break;
+			}
+			mergedDur += attacks[nextPitchAttacki]->getDuration();
+			nextPitchAttacki++;
+		}
+		if (nextPitchAttacki < (int)attacks.size()) {
+			attackindexn = attacks[nextPitchAttacki]->getSliceIndex();
+		} else {
+			attackindexn = -1;
+		}
 
 		marking = '\0';
 		// Patients labeled while this note was an agent; cleared if g/G is replaced.
@@ -1678,13 +1706,19 @@ RECONSIDER:
 
 		// variables for dissonant voice
 		durp = attacks[i-1]->getDuration();
-		dur  = attacks[i]->getDuration();
-		durn = attacks[i+1]->getDuration();
+		dur  = mergedDur;
+		if (nextPitchAttacki < (int)attacks.size()) {
+			durn = attacks[nextPitchAttacki]->getDuration();
+			intn = *attacks[nextPitchAttacki] - *attacks[i];
+			levn = attacks[nextPitchAttacki]->getMetricLevel();
+		} else {
+			durn = 0;
+			intn = NAN;
+			levn = attacks[i]->getMetricLevel();
+		}
 		intp = *attacks[i] - *attacks[i-1];
-		intn = *attacks[i+1] - *attacks[i];
 		levp = attacks[i-1]->getMetricLevel();
 		lev  = attacks[i]->getMetricLevel();
-		levn = attacks[i+1]->getMetricLevel();
 		if (i >= 2) {
 			intpp = *attacks[i-1] - *attacks[i-2];
 			durpp = attacks[i-2]->getDuration();

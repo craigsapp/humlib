@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Sep 18 23:38:58 CEST 2026
+// Last Modified: Sat Sep 19 01:18:54 CEST 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -64471,6 +64471,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/*  41 */ addCadenceDefinition("C", "t",	"Ct6",	R"(^2_-2:1, 3_1:1, 3_1:1, 3_2:2, 3_)");
 	/*  41 */ addCadenceDefinition("C", "t",	"Ct7",	R"(^2_-2:1, 3_1:1, 3_2:2, 3_)");
 	/*  41 */ addCadenceDefinition("C", "t",	"Ct8",	R"(^2_-2:1, 3_2:-4, -3_)");
+	/* 105 */ addCadenceDefinition("C", "t",	"Ct9",	R"(^2_-2:1, 3_-2:2, 5_1:2, 6_2:2, 6_2:-3, 3_)");
 	/*  46 */ addCadenceDefinition("C", "u",	"Cu1",	R"(^-4D_-2:1, -3_-2:1, -2_2:1, -3_2:-3, -6_)");
 	/*  47 */ addCadenceDefinition("C", "u",	"Cu2",	R"(^-4D_-2:1, -3_-2:1, -2_3:-3, -6_)");
 	/*  48 */ addCadenceDefinition("C", "u",	"Cu3",	R"(^-4D_-2:1, -3_1:1, -3_-2:1, -2_3:-3, -6_)");
@@ -64533,7 +64534,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/* 102 */ addCadenceDefinition("T", "a",	"Ta5",	R"(^4D_1:-2, 3_1:1, 3_-2:1, 4D_)");
 	/* 102 */ addCadenceDefinition("T", "a",	"Ta6",	R"(^4D_1:1, 4_1:-2, 3_-2:-2, 3_)");
 	/*  95 */ addCadenceDefinition("T", "c",	"Tc1",	R"(^7_1:-2, 6_-2:4, 3_)");
-	/*  95 */ addCadenceDefinition("T", "c",	"Tc2",	R"(^7_1:-2, 6_-2:1, 7_)");
+	/*  95 */ addCadenceDefinition("T", "c",	"Tc2",	R"(^7_1:-2, 6_-2:1, 7_-2:1, 8_2:1, 7_)");
 	/*  95 */ addCadenceDefinition("T", "c",	"Tc3",	R"(^7_1:-2, 6_-2:-2, 6_-2:-2, 6_2:2, 6_)");
 	/*  95 */ addCadenceDefinition("T", "c",	"Tc4",	R"(^7_1:-2, 6_-2:-2, 6_)");
 	/*  95 */ addCadenceDefinition("T", "c",	"Tc5",	R"(^-2_1:-2, -3_1:1, -3_-2:1, -2_)");
@@ -64541,9 +64542,11 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/*  95 */ addCadenceDefinition("T", "c",	"Tc7",	R"(^7_1:-2, 6_1:-2, 5_1:-2, 4_1:-2, 3_-2:2, 5_)");
 	/*  95 */ addCadenceDefinition("T", "c",	"Tc8",	R"(^7_1:-2, 6_1:1, 6_-2:1, 7_-2:1, 8_2:1, 7_)");
 	/*  95 */ addCadenceDefinition("T", "c",	"Tc9",	R"(^7_1:-2, 6_1:1, 6_-2:1, 7_)");
-	/*  95 */ addCadenceDefinition("T", "c",	"Tc10",	R"(^-2_1:-2, -3_-2:1, -2_)");
+	/*  95 */ addCadenceDefinition("T", "c",	"Tc10",	R"(^-2_1:-2, -3_-2:1, -2_-2:1, 1_2:1, -2_)");
 	/*  95 */ addCadenceDefinition("T", "c",	"Tc11",	R"(^7_1:-2, 6_1:1, 6_-2:-2, 6_)");
 	/* 111 */ addCadenceDefinition("T", "c",	"Tc12",	R"(^7_1:-2, 6_2:1, 5_-3:1, 7_)");
+	/*  95 */ addCadenceDefinition("T", "c",	"Tc13",	R"(^-2_1:-2, -3_-2:1, -2_)");
+	/*  95 */ addCadenceDefinition("T", "c",	"Tc14",	R"(^7_1:-2, 6_-2:1, 7_)");
 	/*  96 */ addCadenceDefinition("T", "y",	"Ty1",	R"(^7_1:-2, 6_-2:R, R_)");
 	/*  97 */ addCadenceDefinition("b", "C",	"bC1",	R"(^4D_1:-2, 3_1:-2, 2_1:2, 3_2:2, 3_)");
 	/*  98 */ addCadenceDefinition("b", "C",	"bC2",	R"(^4D_1:-2, 3_1:-2, 2_2:2, 3_)");
@@ -64758,12 +64761,13 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("CL",   "Leaping Contratenor");
 	m_cadenceLabels.emplace("CLT",  "Leaping Contratenor");
 	m_cadenceLabels.emplace("CLTz", "Leaping Contratenor");
-	m_cadenceLabels.emplace("CP",   "Incomplete Plagal");  // TODO: consider "9-8-5" as neutral alternative to "Plagal"
+	m_cadenceLabels.emplace("CP",   "Incomplete 9-8-5");
 	m_cadenceLabels.emplace("Pc",   "");
-	m_cadenceLabels.emplace("CPT",  "Plagal");
-	m_cadenceLabels.emplace("CPTz", "Plagal");
-	m_cadenceLabels.emplace("CPt",  "Evaded Plagal");
-	m_cadenceLabels.emplace("PTc",  "Evaded Plagal");
+	m_cadenceLabels.emplace("CPT",  "9-8-5");
+	m_cadenceLabels.emplace("CPTz", "9-8-5");
+	m_cadenceLabels.emplace("CPt",  "Evaded 9-8-5");
+	m_cadenceLabels.emplace("PTc",  "Evaded 9-8-5");
+	m_cadenceLabels.emplace("Pct",  "Evaded 9-8-5");
 	m_cadenceLabels.emplace("CT",   "Clausula Vera");
 	m_cadenceLabels.emplace("CTa",  "Clausula Vera");
 	m_cadenceLabels.emplace("CTaz", "Clausula Vera");
@@ -64804,7 +64808,9 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("Tcux", "Abandoned Authentic");
 	m_cadenceLabels.emplace("Tby",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("Tbuy", "Abandoned Authentic");
+	m_cadenceLabels.emplace("Tuy",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("uxy",  "Abandoned Authentic");
+	m_cadenceLabels.emplace("uyz",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("uy",   "Abandoned Authentic");
 	m_cadenceLabels.emplace("Cz",   "Abandoned Clausula Vera");
 	m_cadenceLabels.emplace("Ty",   "Abandoned Clausula Vera");
@@ -87473,10 +87479,38 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string>>& results,
 	bool ternAgent = false;  // true if the ref voice would be a valid agent of a ternary susp. But if true, the diss is not necessarily a susp.
 
 		for (int i=1; i<(int)attacks.size() - 1; i++) {
+		// Same-pitch reattacks are treated as one longer note (as if written
+		// as a single duration).  Only analyze at the first attack of a run.
+		double curMidi = attacks[i]->getAbsMidiPitch();
+		if (!Convert::isNaN(curMidi)) {
+			double prevMidi = attacks[i-1]->getAbsMidiPitch();
+			if (!Convert::isNaN(prevMidi) && (curMidi == prevMidi)) {
+				continue;
+			}
+		}
+
 		sliceindex = attacks[i]->getSliceIndex();
 		lineindex = attacks[i]->getLineIndex();
 		// lineindexn = attacks[i+1]->getLineIndex();
-		attackindexn = attacks[i]->getNextAttackIndex();
+
+		// Next attack that changes pitch (or a rest); sum durations of
+		// intervening same-pitch reattacks into the current note.
+		int nextPitchAttacki = i + 1;
+		HumNum mergedDur = attacks[i]->getDuration();
+		while (nextPitchAttacki < (int)attacks.size()) {
+			double nextMidi = attacks[nextPitchAttacki]->getAbsMidiPitch();
+			if (Convert::isNaN(curMidi) || Convert::isNaN(nextMidi) ||
+					(nextMidi != curMidi)) {
+				break;
+			}
+			mergedDur += attacks[nextPitchAttacki]->getDuration();
+			nextPitchAttacki++;
+		}
+		if (nextPitchAttacki < (int)attacks.size()) {
+			attackindexn = attacks[nextPitchAttacki]->getSliceIndex();
+		} else {
+			attackindexn = -1;
+		}
 
 		marking = '\0';
 		// Patients labeled while this note was an agent; cleared if g/G is replaced.
@@ -87648,13 +87682,19 @@ RECONSIDER:
 
 		// variables for dissonant voice
 		durp = attacks[i-1]->getDuration();
-		dur  = attacks[i]->getDuration();
-		durn = attacks[i+1]->getDuration();
+		dur  = mergedDur;
+		if (nextPitchAttacki < (int)attacks.size()) {
+			durn = attacks[nextPitchAttacki]->getDuration();
+			intn = *attacks[nextPitchAttacki] - *attacks[i];
+			levn = attacks[nextPitchAttacki]->getMetricLevel();
+		} else {
+			durn = 0;
+			intn = NAN;
+			levn = attacks[i]->getMetricLevel();
+		}
 		intp = *attacks[i] - *attacks[i-1];
-		intn = *attacks[i+1] - *attacks[i];
 		levp = attacks[i-1]->getMetricLevel();
 		lev  = attacks[i]->getMetricLevel();
-		levn = attacks[i+1]->getMetricLevel();
 		if (i >= 2) {
 			intpp = *attacks[i-1] - *attacks[i-2];
 			durpp = attacks[i-2]->getDuration();

@@ -3544,8 +3544,9 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("Ct",   "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("CTp",  "Evaded Clausula Vera");  // TODO: check this, perhaps it shouldn't be evaded
 	m_cadenceLabels.emplace("CTpt", "Evaded Clausula Vera");  // TODO: check this, perhaps it shouldn't be evaded
-	m_cadenceLabels.emplace("by",   "Abandoned Authentic");
 	m_cadenceLabels.emplace("bxy",  "Abandoned Authentic");
+	m_cadenceLabels.emplace("by",   "Abandoned Authentic");
+	m_cadenceLabels.emplace("byz",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("cx",   "Abandoned Authentic");
 	m_cadenceLabels.emplace("CTxz", "Abandoned Authentic");
 	m_cadenceLabels.emplace("Ctx",  "Abandoned Authentic");
