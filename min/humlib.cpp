@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Sep 18 14:44:18 CEST 2026
+// Last Modified: Fri Sep 18 23:38:58 CEST 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -63774,7 +63774,7 @@ bool Tool_autocadence::getPhrygian(HumdrumFile& infile, int index) {
 
 int Tool_autocadence::getSignedSemitoneHarmonic(HTp lower, HTp upper) {
 	auto firstMidi = [](HTp token) -> int {
-		vector<int> midis = token->getMidiPitches();
+		vector<int> midis = token->getMidiPitchesResolveNull();
 		for (int midi : midis) {
 			int absMidi = midi < 0 ? -midi : midi;
 			if (absMidi > 0) {
@@ -64524,6 +64524,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/*  88 */ addCadenceDefinition("T", "C",	"TC20",	R"(^-2_1:-2, -3_1:1, -3_-2:2, (?:1|-8)_)");
 	/*  92 */ addCadenceDefinition("T", "C",	"TC21",	R"(^7_1:-2, 6_-2:2, 8_)");
 	/*  93 */ addCadenceDefinition("T", "C",	"TC22",	R"(^7_1:-2, 6_-2:2, 8_)");
+	/*  95 */ addCadenceDefinition("T", "C",	"TC23",	R"(^7_1:-2, 6_-2:-2, 6_2:2, 6_-2:2, 8_)");
 	/*  94 */ addCadenceDefinition("T", "a",	"Ta1",	R"(^4D_1:-2, 3_-2:-2, 3_)");
 	/*  94 */ addCadenceDefinition("T", "a",	"Ta2",	R"(^4D_1:-2, 3_-2:1, 4D_)");
 	/*  94 */ addCadenceDefinition("", "",		"_Ta3",	R"(^4D_1:-2, 3_1:1, 3_-2:-2, 3_-2:-2, 3_-2:2, 5_)");
@@ -64542,6 +64543,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/*  95 */ addCadenceDefinition("T", "c",	"Tc9",	R"(^7_1:-2, 6_1:1, 6_-2:1, 7_)");
 	/*  95 */ addCadenceDefinition("T", "c",	"Tc10",	R"(^-2_1:-2, -3_-2:1, -2_)");
 	/*  95 */ addCadenceDefinition("T", "c",	"Tc11",	R"(^7_1:-2, 6_1:1, 6_-2:-2, 6_)");
+	/* 111 */ addCadenceDefinition("T", "c",	"Tc12",	R"(^7_1:-2, 6_2:1, 5_-3:1, 7_)");
 	/*  96 */ addCadenceDefinition("T", "y",	"Ty1",	R"(^7_1:-2, 6_-2:R, R_)");
 	/*  97 */ addCadenceDefinition("b", "C",	"bC1",	R"(^4D_1:-2, 3_1:-2, 2_1:2, 3_2:2, 3_)");
 	/*  98 */ addCadenceDefinition("b", "C",	"bC2",	R"(^4D_1:-2, 3_1:-2, 2_2:2, 3_)");
@@ -64716,6 +64718,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("CQux", "Evaded Authentic");
 	m_cadenceLabels.emplace("CTb",  "Evaded Authentic");
 	m_cadenceLabels.emplace("CTbu", "Evaded Authentic");
+	m_cadenceLabels.emplace("CTbux", "Evaded Authentic");
 	m_cadenceLabels.emplace("CTbx", "Evaded Authentic");
 	m_cadenceLabels.emplace("Cux",  "Evaded Authentic");
 	m_cadenceLabels.emplace("Cuz",  "Evaded Authentic");
@@ -64732,6 +64735,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("Ctu",  "Evaded Authentic");
 	m_cadenceLabels.emplace("CTux", "Evaded Authentic");
 	m_cadenceLabels.emplace("Cu",   "Evaded Authentic");
+	m_cadenceLabels.emplace("PTbc", "Evaded Authentic");
 	m_cadenceLabels.emplace("BQTat", "Inverted Authentic");
 	m_cadenceLabels.emplace("CQ",   "Inverted Authentic");
 	m_cadenceLabels.emplace("CQT",  "Inverted Authentic");
@@ -64755,6 +64759,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("CLT",  "Leaping Contratenor");
 	m_cadenceLabels.emplace("CLTz", "Leaping Contratenor");
 	m_cadenceLabels.emplace("CP",   "Incomplete Plagal");  // TODO: consider "9-8-5" as neutral alternative to "Plagal"
+	m_cadenceLabels.emplace("Pc",   "");
 	m_cadenceLabels.emplace("CPT",  "Plagal");
 	m_cadenceLabels.emplace("CPTz", "Plagal");
 	m_cadenceLabels.emplace("CPt",  "Evaded Plagal");
@@ -64775,6 +64780,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("Ct",   "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("CTp",  "Evaded Clausula Vera");  // TODO: check this, perhaps it shouldn't be evaded
 	m_cadenceLabels.emplace("CTpt", "Evaded Clausula Vera");  // TODO: check this, perhaps it shouldn't be evaded
+	m_cadenceLabels.emplace("by",   "Abandoned Authentic");
 	m_cadenceLabels.emplace("bxy",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("cx",   "Abandoned Authentic");
 	m_cadenceLabels.emplace("CTxz", "Abandoned Authentic");
@@ -64785,6 +64791,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("Cxz",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("cxz",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("BTcx", "Abandoned Authentic");
+	m_cadenceLabels.emplace("Bbtyz","Abandoned Authentic");
 	m_cadenceLabels.emplace("By",   "Abandoned Authentic");
 	m_cadenceLabels.emplace("Bxy",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("Bxyz", "Abandoned Authentic");

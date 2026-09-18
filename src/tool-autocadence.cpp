@@ -2534,7 +2534,7 @@ bool Tool_autocadence::getPhrygian(HumdrumFile& infile, int index) {
 
 int Tool_autocadence::getSignedSemitoneHarmonic(HTp lower, HTp upper) {
 	auto firstMidi = [](HTp token) -> int {
-		vector<int> midis = token->getMidiPitches();
+		vector<int> midis = token->getMidiPitchesResolveNull();
 		for (int midi : midis) {
 			int absMidi = midi < 0 ? -midi : midi;
 			if (absMidi > 0) {
@@ -3551,6 +3551,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("Cxz",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("cxz",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("BTcx", "Abandoned Authentic");
+	m_cadenceLabels.emplace("Bbtyz","Abandoned Authentic");
 	m_cadenceLabels.emplace("By",   "Abandoned Authentic");
 	m_cadenceLabels.emplace("Bxy",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("Bxyz", "Abandoned Authentic");
