@@ -3232,6 +3232,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/*  41 */ addCadenceDefinition("C", "t",	"Ct7",	R"(^2_-2:1, 3_1:1, 3_2:2, 3_)");
 	/*  41 */ addCadenceDefinition("C", "t",	"Ct8",	R"(^2_-2:1, 3_2:-4, -3_)");
 	/* 105 */ addCadenceDefinition("C", "t",	"Ct9",	R"(^2_-2:1, 3_-2:2, 5_1:2, 6_2:2, 6_2:-3, 3_)");
+	/*  44 */ addCadenceDefinition("C", "t",	"Ct10",	R"(^2_-2:1, 3_1:-2, 2_1:2, 3_2:2, 3_)");
 	/*  46 */ addCadenceDefinition("C", "u",	"Cu1",	R"(^-4D_-2:1, -3_-2:1, -2_2:1, -3_2:-3, -6_)");
 	/*  47 */ addCadenceDefinition("C", "u",	"Cu2",	R"(^-4D_-2:1, -3_-2:1, -2_3:-3, -6_)");
 	/*  48 */ addCadenceDefinition("C", "u",	"Cu3",	R"(^-4D_-2:1, -3_1:1, -3_-2:1, -2_3:-3, -6_)");
@@ -3527,6 +3528,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("CPTz", "9-8-5");
 	m_cadenceLabels.emplace("CPt",  "Evaded 9-8-5");
 	m_cadenceLabels.emplace("PTc",  "Evaded 9-8-5");
+	m_cadenceLabels.emplace("PTcx", "Evaded 9-8-5");
 	m_cadenceLabels.emplace("Pct",  "Evaded 9-8-5");
 	m_cadenceLabels.emplace("CT",   "Clausula Vera");
 	m_cadenceLabels.emplace("CTa",  "Clausula Vera");
@@ -3558,6 +3560,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("cxz",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("BTcx", "Abandoned Authentic");
 	m_cadenceLabels.emplace("Bbtyz","Abandoned Authentic");
+	m_cadenceLabels.emplace("Bbyz", "Abandoned Authentic");
 	m_cadenceLabels.emplace("By",   "Abandoned Authentic");
 	m_cadenceLabels.emplace("Bxy",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("Bxyz", "Abandoned Authentic");
