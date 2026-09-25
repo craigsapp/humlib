@@ -115,7 +115,6 @@ class Tool_autocadence : public HumTool {
 		bool        getCadenceEndSliceNotes    (HTp& endL, HTp& endU, int count, HumdrumFile& infile,
 		                                        int lindex, int vindex, int pindex);
 		void        prepareDissonances         (HumdrumFile& infile);
-		void        prepareDissonancesForLine  (HumdrumLine& iline, HumdrumLine& dline);
 		void        identifySuspensionsAndAgents(HumdrumFile& infile);
 		std::string sortUniqueChars            (const std::string& input);
 		void        fillInMajorMinor           (HumdrumFile& infile);

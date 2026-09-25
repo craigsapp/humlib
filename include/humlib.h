@@ -6239,7 +6239,6 @@ class Tool_autocadence : public HumTool {
 		bool        getCadenceEndSliceNotes    (HTp& endL, HTp& endU, int count, HumdrumFile& infile,
 		                                        int lindex, int vindex, int pindex);
 		void        prepareDissonances         (HumdrumFile& infile);
-		void        prepareDissonancesForLine  (HumdrumLine& iline, HumdrumLine& dline);
 		void        identifySuspensionsAndAgents(HumdrumFile& infile);
 		std::string sortUniqueChars            (const std::string& input);
 		void        fillInMajorMinor           (HumdrumFile& infile);
@@ -7937,6 +7936,9 @@ class Tool_dissonant : public HumTool {
 		bool     run               (HumdrumFile& infile);
 		bool     run               (const string& indata, ostream& out);
 		bool     run               (HumdrumFile& infile, ostream& out);
+
+		void     getDissonanceLabels(HumdrumFile& infile,
+		                            vector<vector<string>>& results);
 
 	protected:
 		void    doAnalysis         (vector<vector<string> >& results,

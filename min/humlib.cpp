@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Sep 25 13:28:38 CEST 2026
+// Last Modified: Fri Sep 25 14:12:07 CEST 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -64906,61 +64906,44 @@ void Tool_autocadence::prepareCvfNames(void) {
 
 //////////////////////////////
 //
-// Tool_autocadence::prepareDissonances --
+// Tool_autocadence::prepareDissonances -- Run the dissonance analysis
+//     from Tool_dissonant and store each label on its note as the
+//     "auto" "dissonance" parameter.
 //
 
 void Tool_autocadence::prepareDissonances(HumdrumFile& infile) {
-	HumdrumFile dfile;
-	stringstream ss;
-	ss << infile;
-	dfile.readString(ss.str());
-   hum::Tool_dissonant dissonant;
-	dissonant.run(dfile);
-	// cout << dfile;
-	int dsize = dfile.getLineCount();
-	int isize = infile.getLineCount();
-	if (dsize != isize) {
-		// number of lines in input/output are expected to be the same.
-		cerr << "LINE COUNTS OF FILES FOR DISSONANCE ANALYSIS DO NOT MATCH." << endl;
+	Tool_dissonant dissonant;
+	vector<vector<string>> labels;
+	dissonant.getDissonanceLabels(infile, labels);
+
+	vector<HTp> kernspines;
+	infile.getKernSpineStartList(kernspines);
+	if (labels.size() != kernspines.size()) {
+		cerr << "VOICE COUNTS FOR DISSONANCE ANALYSIS DO NOT MATCH." << endl;
 		return;
 	}
-	for (int i=0; i<infile.getLineCount(); i++) {
-		if (infile[i].isData()) {
-			prepareDissonancesForLine(infile[i], dfile[i]);
-		}
-	}
-}
 
-
-
-//////////////////////////////
-//
-// Tool_autocadence::prepareDissonancesForLine -- Transfer dissonance analysis to
-//     input file for a single data line.
-//
-
-void Tool_autocadence::prepareDissonancesForLine(HumdrumLine& iline, HumdrumLine& dline) {
-	vector<HTp> ikern;
-	for (int i=0; i<iline.getFieldCount(); i++) {
-		HTp token = iline.token(i);
-		if (token->isKern()) {
-			ikern.push_back(token);
-		}
-	}
-
-	int kindex = -1;
-	for (int i=0; i<dline.getFieldCount(); i++) {
-		HTp token = dline.token(i);
-		if (token->isKern()) {
-			kindex++;
-			continue;
-		}
-		if (token->isDataType("**cdata-rdiss")) {
-			if (kindex >= 0) {
-				string text = token->getText();
-				if (text != ".") {
-					ikern.at(kindex)->setValue("auto", "dissonance", text);
+	for (int v=0; v<(int)labels.size(); v++) {
+		int track = kernspines[v]->getTrack();
+		for (int i=0; i<infile.getLineCount(); i++) {
+			if (!infile[i].isData()) {
+				continue;
+			}
+			const string& label = labels[v][i];
+			if (label.empty() || (label == ".")) {
+				continue;
+			}
+			// Store the label on the last **kern token of the voice's track
+			// on this line (the last subspine if the track is split).
+			HTp target = NULL;
+			for (int j=0; j<infile[i].getFieldCount(); j++) {
+				HTp token = infile.token(i, j);
+				if (token->isKern() && (token->getTrack() == track)) {
+					target = token;
 				}
+			}
+			if (target) {
+				target->setValue("auto", "dissonance", label);
 			}
 		}
 	}
@@ -86211,6 +86194,53 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 			return true;
 		}
 	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_dissonant::getDissonanceLabels -- Run the dissonance analysis and
+//     return the labels without modifying infile or generating any output.
+//     For use by other tools that need the analysis as data.  results[v][i]
+//     is the label for voice v (in **kern spine order) on line i of infile,
+//     or an empty string if there is none.  The -s (suppress) and -V
+//     (voice-function) variants of the analysis are not applied.
+//
+
+void Tool_dissonant::getDissonanceLabels(HumdrumFile& infile,
+		vector<vector<string>>& results) {
+	if (getBoolean("voice-number")) {
+		m_voicenumQ = true;
+	}
+	if (getBoolean("self-number")) {
+		m_selfnumQ = true;
+	}
+
+	if (getBoolean("undirected")) {
+		fillLabels2();
+	} else {
+		fillLabels();
+	}
+
+	NoteGrid grid(infile);
+
+	diss2Q = false;
+	diss7Q = false;
+	diss4Q = false;
+
+	dissL0Q = false;
+	dissL1Q = false;
+	dissL2Q = false;
+
+	vector<vector<NoteCell*>> attacks;
+	attacks.resize(grid.getVoiceCount());
+	results.clear();
+	results.resize(grid.getVoiceCount());
+	for (int i=0; i<(int)results.size(); i++) {
+		results[i].resize(infile.getLineCount());
+	}
+	doAnalysis(results, grid, attacks, getBoolean("debug"));
 }
 
 

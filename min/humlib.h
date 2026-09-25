@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Sep 25 13:28:38 CEST 2026
+// Last Modified: Fri Sep 25 14:12:07 CEST 2026
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -6239,7 +6239,6 @@ class Tool_autocadence : public HumTool {
 		bool        getCadenceEndSliceNotes    (HTp& endL, HTp& endU, int count, HumdrumFile& infile,
 		                                        int lindex, int vindex, int pindex);
 		void        prepareDissonances         (HumdrumFile& infile);
-		void        prepareDissonancesForLine  (HumdrumLine& iline, HumdrumLine& dline);
 		void        identifySuspensionsAndAgents(HumdrumFile& infile);
 		std::string sortUniqueChars            (const std::string& input);
 		void        fillInMajorMinor           (HumdrumFile& infile);
@@ -7937,6 +7936,9 @@ class Tool_dissonant : public HumTool {
 		bool     run               (HumdrumFile& infile);
 		bool     run               (const string& indata, ostream& out);
 		bool     run               (HumdrumFile& infile, ostream& out);
+
+		void     getDissonanceLabels(HumdrumFile& infile,
+		                            vector<vector<string>>& results);
 
 	protected:
 		void    doAnalysis         (vector<vector<string> >& results,

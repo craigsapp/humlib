@@ -262,6 +262,53 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 
 
 
+//////////////////////////////
+//
+// Tool_dissonant::getDissonanceLabels -- Run the dissonance analysis and
+//     return the labels without modifying infile or generating any output.
+//     For use by other tools that need the analysis as data.  results[v][i]
+//     is the label for voice v (in **kern spine order) on line i of infile,
+//     or an empty string if there is none.  The -s (suppress) and -V
+//     (voice-function) variants of the analysis are not applied.
+//
+
+void Tool_dissonant::getDissonanceLabels(HumdrumFile& infile,
+		vector<vector<string>>& results) {
+	if (getBoolean("voice-number")) {
+		m_voicenumQ = true;
+	}
+	if (getBoolean("self-number")) {
+		m_selfnumQ = true;
+	}
+
+	if (getBoolean("undirected")) {
+		fillLabels2();
+	} else {
+		fillLabels();
+	}
+
+	NoteGrid grid(infile);
+
+	diss2Q = false;
+	diss7Q = false;
+	diss4Q = false;
+
+	dissL0Q = false;
+	dissL1Q = false;
+	dissL2Q = false;
+
+	vector<vector<NoteCell*>> attacks;
+	attacks.resize(grid.getVoiceCount());
+	results.clear();
+	results.resize(grid.getVoiceCount());
+	for (int i=0; i<(int)results.size(); i++) {
+		results[i].resize(infile.getLineCount());
+	}
+	doAnalysis(results, grid, attacks, getBoolean("debug"));
+}
+
+
+
 /////////////////////////////
 //
 // Tool_dissonant::adjustColorization -- The dissonance analysis will color the

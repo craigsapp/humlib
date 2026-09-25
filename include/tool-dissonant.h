@@ -31,6 +31,9 @@ class Tool_dissonant : public HumTool {
 		bool     run               (const string& indata, ostream& out);
 		bool     run               (HumdrumFile& infile, ostream& out);
 
+		void     getDissonanceLabels(HumdrumFile& infile,
+		                            vector<vector<string>>& results);
+
 	protected:
 		void    doAnalysis         (vector<vector<string> >& results,
 		                            NoteGrid& grid,
