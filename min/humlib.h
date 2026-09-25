@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Sep 25 12:27:54 CEST 2026
+// Last Modified: Fri Sep 25 12:49:49 CEST 2026
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -6250,7 +6250,7 @@ class Tool_autocadence : public HumTool {
 		std::string getCadenceLabel            (const std::string& cvflabel, HumdrumFile& infile, int index);
 		void        prepareAuthenticBAnalyses  (HumdrumFile& infile);
 		void        prepareClosingCounts       (HumdrumFile& infile);
-		void        prepareExtremisBassizans   (HumdrumFile& infile);
+		void        prepareExtremisBass        (HumdrumFile& infile);
 		bool        meetsAuthenticBCriteria    (HumdrumFile& infile, int index);
 		bool        hasIncorrectBassizans      (int index);
 		bool        hasClosingVoicesAtArrival  (int index);

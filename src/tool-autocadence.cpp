@@ -1980,7 +1980,7 @@ string Tool_autocadence::getCadenceLabel(const string& cvflabel, HumdrumFile &in
 
 void Tool_autocadence::prepareAuthenticBAnalyses(HumdrumFile& infile) {
 	prepareClosingCounts(infile);
-	prepareExtremisBassizans(infile);
+	prepareExtremisBass(infile);
 }
 
 
@@ -2067,23 +2067,20 @@ bool Tool_autocadence::meetsAuthenticBCriteria(HumdrumFile& infile, int index) {
 
 //////////////////////////////
 //
-// Tool_autocadence::prepareExtremisBassizans -- Run Tool_extremis for the
+// Tool_autocadence::prepareExtremisBass -- Run Tool_extremis for the
 //     synthetic lowest line, then store that line's last melodic interval
 //     only on extremis note attacks.  Continuation slices (null tokens and
 //     tie sustainations) keep 0 so AuthenticB labels only the bass arrival.
 //
 
-void Tool_autocadence::prepareExtremisBassizans(HumdrumFile& infile) {
+void Tool_autocadence::prepareExtremisBass(HumdrumFile& infile) {
 	m_extremisLastmel.clear();
 	m_extremisLastmel.resize(infile.getLineCount(), 0);
 
-	HumdrumFile efile;
-	stringstream ess;
-	ess << infile;
-	efile.readString(ess.str());
-
+	// Tool_extremis only reads its input (output goes to its Humdrum text),
+	// so it can run directly on infile without a copy.
 	Tool_extremis extremis;
-	extremis.run(efile);
+	extremis.run(infile);
 	if (!extremis.hasHumdrumText()) {
 		return;
 	}

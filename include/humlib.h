@@ -6250,7 +6250,7 @@ class Tool_autocadence : public HumTool {
 		std::string getCadenceLabel            (const std::string& cvflabel, HumdrumFile& infile, int index);
 		void        prepareAuthenticBAnalyses  (HumdrumFile& infile);
 		void        prepareClosingCounts       (HumdrumFile& infile);
-		void        prepareExtremisBassizans   (HumdrumFile& infile);
+		void        prepareExtremisBass        (HumdrumFile& infile);
 		bool        meetsAuthenticBCriteria    (HumdrumFile& infile, int index);
 		bool        hasIncorrectBassizans      (int index);
 		bool        hasClosingVoicesAtArrival  (int index);
