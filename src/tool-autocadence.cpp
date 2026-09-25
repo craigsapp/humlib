@@ -1197,7 +1197,12 @@ void Tool_autocadence::searchIntervalSequences(void) {
 			for (int k=0; k<(int)m_sequences[i][j].size(); k++) {
 				string& feature = get<0>(m_sequences.at(i).at(j).at(k));
 				for (int m=0; m<(int)m_definitions.size(); m++) {
-					if (regex_search(feature, m_definitions.at(m).m_compiled)) {
+					CadenceDefinition& def = m_definitions.at(m);
+					regex_constants::match_flag_type flags = regex_constants::match_default;
+					if (!def.m_regex.empty() && (def.m_regex[0] == '^')) {
+						flags = regex_constants::match_continuous;
+					}
+					if (regex_search(feature, def.m_compiled, flags)) {
 						vector<int>& matches = get<3>(m_sequences.at(i).at(j).at(k));
 						// cerr << "FOUND MATCH: " << m << endl;
 						matches.push_back(m);
