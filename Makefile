@@ -27,16 +27,16 @@
 OS := $(shell uname -s)
 
 # Set the environmental variable $MACOSX_DEPLOYMENT_TARGET to
-# "10.9" in Apple OS X to compile for OS X 10.9 and later (for example,
-# you can compile for OS X 10.9 computers even if you are using the 10.10
+# "10.15" in Apple OS X to compile for macOS 10.15 and later (for example,
+# you can compile for macOS 10.15 computers even if you are using a newer
 # version of the operating system).
 
 ENV =
 ARCH =
 ifeq ($(OS),Darwin)
 	OS = OSX
-	# Minimum OS X Version for C++11 is OS X 10.9:
-   	ENV = MACOSX_DEPLOYMENT_TARGET=10.9
+	# Minimum macOS version for C++17 std::filesystem is 10.15:
+   	ENV = MACOSX_DEPLOYMENT_TARGET=10.15
    	# use the following to compile for 32-bit architecture on 64-bit comps:
    	#ARCH = -m32 -arch i386
 else

@@ -1148,9 +1148,9 @@ void Tool_autocadence::printMatchCount(void) {
 //////////////////////////////
 //
 // Tool_autocadence::printCadenceTable -- Print cadence-label counts
-//      (summed over all input files when reading a file set/stream),
-//      sorted by count descending.  Only labels that occur at least once
-//      are listed.
+//      (summed over all input files when reading a file set/stream) as a
+//      Humdrum table (**count, **cadence), sorted by count descending.
+//      Only labels that occur at least once are listed.
 //
 
 void Tool_autocadence::printCadenceTable(void) {
@@ -1165,10 +1165,11 @@ void Tool_autocadence::printCadenceTable(void) {
 			});
 
 	m_humdrum_text.str("");
-	m_humdrum_text << "Count\tCadence Type" << endl;
+	m_humdrum_text << "**count\t**cadence" << endl;
 	for (int i=0; i<(int)rows.size(); i++) {
 		m_humdrum_text << rows[i].second << "\t" << rows[i].first << endl;
 	}
+	m_humdrum_text << "*-\t*-" << endl;
 }
 
 

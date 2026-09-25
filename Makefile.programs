@@ -22,10 +22,11 @@
 ##
 
 # Set the environmental variable $MACOSX_DEPLOYMENT_TARGET to
-# "10.9" in Apple OS X to compile for OS X 10.9 and later.
+# "10.15" in Apple OS X to compile for macOS 10.15 and later
+# (minimum for C++17 std::filesystem).
 ENV =
 ifeq ($(shell uname),Darwin)
-   ENV = MACOSX_DEPLOYMENT_TARGET=10.9
+   ENV = MACOSX_DEPLOYMENT_TARGET=10.15
    #ARCH = -m32 -arch i386
 else
    # ARCH = -m32

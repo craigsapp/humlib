@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Sep 25 11:42:14 CEST 2026
+// Last Modified: Fri Sep 25 12:14:54 CEST 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -62388,9 +62388,9 @@ void Tool_autocadence::printMatchCount(void) {
 //////////////////////////////
 //
 // Tool_autocadence::printCadenceTable -- Print cadence-label counts
-//      (summed over all input files when reading a file set/stream),
-//      sorted by count descending.  Only labels that occur at least once
-//      are listed.
+//      (summed over all input files when reading a file set/stream) as a
+//      Humdrum table (**count, **cadence), sorted by count descending.
+//      Only labels that occur at least once are listed.
 //
 
 void Tool_autocadence::printCadenceTable(void) {
@@ -62405,10 +62405,11 @@ void Tool_autocadence::printCadenceTable(void) {
 			});
 
 	m_humdrum_text.str("");
-	m_humdrum_text << "Count\tCadence Type" << endl;
+	m_humdrum_text << "**count\t**cadence" << endl;
 	for (int i=0; i<(int)rows.size(); i++) {
 		m_humdrum_text << rows[i].second << "\t" << rows[i].first << endl;
 	}
+	m_humdrum_text << "*-\t*-" << endl;
 }
 
 
