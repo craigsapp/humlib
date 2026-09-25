@@ -293,6 +293,9 @@ Tool_autocadence::Tool_autocadence(void) {
 //
 
 bool Tool_autocadence::run(HumdrumFileSet& infiles) {
+	// Input may continue in later file sets (command-line stream), so
+	// accumulate -t counts and print the table once in finally().
+	m_deferTableQ = true;
 	bool status = true;
 	for (int i=0; i<infiles.getCount(); i++) {
 		status &= run(infiles[i]);
@@ -382,12 +385,28 @@ void Tool_autocadence::initialize(void) {
 
 //////////////////////////////
 //
+// Tool_autocadence::finally -- Print the cadence-type table (-t) after
+//     all input files from a file set/stream have been processed.
+//
+
+void Tool_autocadence::finally(void) {
+	if (m_tableQ && m_deferTableQ) {
+		printCadenceTable();
+	}
+}
+
+
+
+//////////////////////////////
+//
 // Tool_autocadence::processFile --
 //
 
 void Tool_autocadence::processFile(HumdrumFile& infile) {
 	m_info.str("");
-	m_cadenceTypeCounts.clear();
+	if (!m_deferTableQ) {
+		m_cadenceTypeCounts.clear();
+	}
 	m_barnum = infile.getMeasureNumbers();
 	m_root.resize(infile.getLineCount());
 
@@ -441,7 +460,14 @@ void Tool_autocadence::processFile(HumdrumFile& infile) {
 	printScore(infile);
 	if (m_tableQ) {
 		// Cadence-type counts are collected while printing the score.
-		printCadenceTable();
+		if (m_deferTableQ) {
+			// Counts accumulate across all input files; the table is
+			// printed once in finally().
+			m_humdrum_text.str("");
+		} else {
+			// Single-file use (such as !!!filter: autocadence -t).
+			printCadenceTable();
+		}
 		return;
 	}
 
@@ -1122,6 +1148,7 @@ void Tool_autocadence::printMatchCount(void) {
 //////////////////////////////
 //
 // Tool_autocadence::printCadenceTable -- Print cadence-label counts
+//      (summed over all input files when reading a file set/stream),
 //      sorted by count descending.  Only labels that occur at least once
 //      are listed.
 //

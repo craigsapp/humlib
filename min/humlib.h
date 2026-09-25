@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Sep 19 01:18:54 CEST 2026
+// Last Modified: Fri Sep 25 11:42:14 CEST 2026
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -6181,6 +6181,7 @@ class Tool_autocadence : public HumTool {
 		bool        run                 (const std::string& indata, std::ostream& out);
 		bool        run                 (HumdrumFile& infile, std::ostream& out);
 		void        initialize          (void);
+		void        finally             (void);
 
 	protected:
 		void        processFile         (HumdrumFile& infile);
@@ -6378,6 +6379,7 @@ class Tool_autocadence : public HumTool {
 
 		int         m_cadenceCount = 0;
 		std::map<std::string, int> m_cadenceTypeCounts;
+		bool        m_deferTableQ = false; // -t: print table once in finally()
 		std::string m_marker = "@";
 		std::string m_suspensionMarker = "N";
 		std::string m_suspensionColor  = "crimson";

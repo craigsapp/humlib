@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Sep 19 01:18:54 CEST 2026
+// Last Modified: Fri Sep 25 11:42:14 CEST 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -61533,6 +61533,9 @@ Tool_autocadence::Tool_autocadence(void) {
 //
 
 bool Tool_autocadence::run(HumdrumFileSet& infiles) {
+	// Input may continue in later file sets (command-line stream), so
+	// accumulate -t counts and print the table once in finally().
+	m_deferTableQ = true;
 	bool status = true;
 	for (int i=0; i<infiles.getCount(); i++) {
 		status &= run(infiles[i]);
@@ -61622,12 +61625,28 @@ void Tool_autocadence::initialize(void) {
 
 //////////////////////////////
 //
+// Tool_autocadence::finally -- Print the cadence-type table (-t) after
+//     all input files from a file set/stream have been processed.
+//
+
+void Tool_autocadence::finally(void) {
+	if (m_tableQ && m_deferTableQ) {
+		printCadenceTable();
+	}
+}
+
+
+
+//////////////////////////////
+//
 // Tool_autocadence::processFile --
 //
 
 void Tool_autocadence::processFile(HumdrumFile& infile) {
 	m_info.str("");
-	m_cadenceTypeCounts.clear();
+	if (!m_deferTableQ) {
+		m_cadenceTypeCounts.clear();
+	}
 	m_barnum = infile.getMeasureNumbers();
 	m_root.resize(infile.getLineCount());
 
@@ -61681,7 +61700,14 @@ void Tool_autocadence::processFile(HumdrumFile& infile) {
 	printScore(infile);
 	if (m_tableQ) {
 		// Cadence-type counts are collected while printing the score.
-		printCadenceTable();
+		if (m_deferTableQ) {
+			// Counts accumulate across all input files; the table is
+			// printed once in finally().
+			m_humdrum_text.str("");
+		} else {
+			// Single-file use (such as !!!filter: autocadence -t).
+			printCadenceTable();
+		}
 		return;
 	}
 
@@ -62362,6 +62388,7 @@ void Tool_autocadence::printMatchCount(void) {
 //////////////////////////////
 //
 // Tool_autocadence::printCadenceTable -- Print cadence-label counts
+//      (summed over all input files when reading a file set/stream),
 //      sorted by count descending.  Only labels that occur at least once
 //      are listed.
 //
@@ -64472,6 +64499,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/*  41 */ addCadenceDefinition("C", "t",	"Ct7",	R"(^2_-2:1, 3_1:1, 3_2:2, 3_)");
 	/*  41 */ addCadenceDefinition("C", "t",	"Ct8",	R"(^2_-2:1, 3_2:-4, -3_)");
 	/* 105 */ addCadenceDefinition("C", "t",	"Ct9",	R"(^2_-2:1, 3_-2:2, 5_1:2, 6_2:2, 6_2:-3, 3_)");
+	/*  44 */ addCadenceDefinition("C", "t",	"Ct10",	R"(^2_-2:1, 3_1:-2, 2_1:2, 3_2:2, 3_)");
 	/*  46 */ addCadenceDefinition("C", "u",	"Cu1",	R"(^-4D_-2:1, -3_-2:1, -2_2:1, -3_2:-3, -6_)");
 	/*  47 */ addCadenceDefinition("C", "u",	"Cu2",	R"(^-4D_-2:1, -3_-2:1, -2_3:-3, -6_)");
 	/*  48 */ addCadenceDefinition("C", "u",	"Cu3",	R"(^-4D_-2:1, -3_1:1, -3_-2:1, -2_3:-3, -6_)");
@@ -64767,6 +64795,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("CPTz", "9-8-5");
 	m_cadenceLabels.emplace("CPt",  "Evaded 9-8-5");
 	m_cadenceLabels.emplace("PTc",  "Evaded 9-8-5");
+	m_cadenceLabels.emplace("PTcx", "Evaded 9-8-5");
 	m_cadenceLabels.emplace("Pct",  "Evaded 9-8-5");
 	m_cadenceLabels.emplace("CT",   "Clausula Vera");
 	m_cadenceLabels.emplace("CTa",  "Clausula Vera");
@@ -64784,8 +64813,10 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("Ct",   "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("CTp",  "Evaded Clausula Vera");  // TODO: check this, perhaps it shouldn't be evaded
 	m_cadenceLabels.emplace("CTpt", "Evaded Clausula Vera");  // TODO: check this, perhaps it shouldn't be evaded
-	m_cadenceLabels.emplace("by",   "Abandoned Authentic");
+	m_cadenceLabels.emplace("ctz",  "Evaded Clausula Vera");
 	m_cadenceLabels.emplace("bxy",  "Abandoned Authentic");
+	m_cadenceLabels.emplace("by",   "Abandoned Authentic");
+	m_cadenceLabels.emplace("byz",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("cx",   "Abandoned Authentic");
 	m_cadenceLabels.emplace("CTxz", "Abandoned Authentic");
 	m_cadenceLabels.emplace("Ctx",  "Abandoned Authentic");
@@ -64796,6 +64827,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	m_cadenceLabels.emplace("cxz",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("BTcx", "Abandoned Authentic");
 	m_cadenceLabels.emplace("Bbtyz","Abandoned Authentic");
+	m_cadenceLabels.emplace("Bbyz", "Abandoned Authentic");
 	m_cadenceLabels.emplace("By",   "Abandoned Authentic");
 	m_cadenceLabels.emplace("Bxy",  "Abandoned Authentic");
 	m_cadenceLabels.emplace("Bxyz", "Abandoned Authentic");

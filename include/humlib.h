@@ -6181,6 +6181,7 @@ class Tool_autocadence : public HumTool {
 		bool        run                 (const std::string& indata, std::ostream& out);
 		bool        run                 (HumdrumFile& infile, std::ostream& out);
 		void        initialize          (void);
+		void        finally             (void);
 
 	protected:
 		void        processFile         (HumdrumFile& infile);
@@ -6378,6 +6379,7 @@ class Tool_autocadence : public HumTool {
 
 		int         m_cadenceCount = 0;
 		std::map<std::string, int> m_cadenceTypeCounts;
+		bool        m_deferTableQ = false; // -t: print table once in finally()
 		std::string m_marker = "@";
 		std::string m_suspensionMarker = "N";
 		std::string m_suspensionColor  = "crimson";
