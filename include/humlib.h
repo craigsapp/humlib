@@ -8534,8 +8534,6 @@ class Tool_extremis : public HumTool {
 		bool        run              (const std::string& indata, std::ostream& out);
 		bool        run              (HumdrumFile& infile, std::ostream& out);
 
-	protected:
-
 		// SynthEvent describes a single note (or rest) of the synthetic
 		// extreme-pitch spine.  Each event spans a range of input data
 		// lines that share the same extreme pitch, and which together
@@ -8549,6 +8547,12 @@ class Tool_extremis : public HumTool {
 			int    b40       = 0; // base-40 pitch (0 means rest)
 			bool   isRest    = true;
 		};
+
+		void        getEvents        (HumdrumFile& infile,
+		                              std::vector<SynthEvent>& events,
+		                              bool wantHigh = false);
+
+	protected:
 
 		void        initialize          (void);
 		void        processFile         (HumdrumFile& infile);

@@ -300,6 +300,22 @@ void Tool_extremis::processFile(HumdrumFile& infile) {
 
 //////////////////////////////
 //
+// Tool_extremis::getEvents -- Return the synthetic lowest-pitch events
+//    (or highest-pitch events if wantHigh is true) without rendering any
+//    Humdrum output.  For use by other tools that need the extreme-pitch
+//    line as data.  Event startLine/endLine values are line indexes in
+//    infile.
+//
+
+void Tool_extremis::getEvents(HumdrumFile& infile, vector<SynthEvent>& events,
+		bool wantHigh) {
+	buildEvents(infile, events, wantHigh);
+}
+
+
+
+//////////////////////////////
+//
 // Tool_extremis::buildEvents -- Walk through the data lines of the file and
 //    group consecutive moments into synthetic events.  A new event starts
 //    when the extreme pitch changes or when the source voice rearticulates

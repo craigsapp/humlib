@@ -2067,45 +2067,29 @@ bool Tool_autocadence::meetsAuthenticBCriteria(HumdrumFile& infile, int index) {
 
 //////////////////////////////
 //
-// Tool_autocadence::prepareExtremisBass -- Run Tool_extremis for the
-//     synthetic lowest line, then store that line's last melodic interval
-//     only on extremis note attacks.  Continuation slices (null tokens and
-//     tie sustainations) keep 0 so AuthenticB labels only the bass arrival.
+// Tool_autocadence::prepareExtremisBass -- Get the synthetic lowest-line
+//     events from Tool_extremis, then store the melodic interval from the
+//     previous event on the input line where each note event starts.
+//     Continuation lines of an event (null tokens and tie sustainations)
+//     keep 0 so AuthenticB labels only the bass arrival.
 //
 
 void Tool_autocadence::prepareExtremisBass(HumdrumFile& infile) {
 	m_extremisLastmel.clear();
 	m_extremisLastmel.resize(infile.getLineCount(), 0);
 
-	// Tool_extremis only reads its input (output goes to its Humdrum text),
-	// so it can run directly on infile without a copy.
 	Tool_extremis extremis;
-	extremis.run(infile);
-	if (!extremis.hasHumdrumText()) {
-		return;
-	}
+	vector<Tool_extremis::SynthEvent> events;
+	extremis.getEvents(infile, events);
 
-	HumdrumFile lowfile;
-	lowfile.readString(extremis.getHumdrumText());
-
-	vector<HTp> sstarts;
-	lowfile.getKernSpineStartList(sstarts);
-	if (sstarts.empty()) {
-		return;
-	}
-
-	vector<HTp> notes;
-	getTokenList(sstarts[0], notes);
-	vector<int> diatonic;
-	vector<string> interval;
-	calculateVoiceIntervals(notes, diatonic, interval);
-
-	map<HTp, int> lastmelByToken;
-	for (int j=0; j<(int)notes.size(); j++) {
-		if (interval.at(j).empty()) {
+	for (int i=1; i<(int)events.size(); i++) {
+		const Tool_extremis::SynthEvent& event = events[i];
+		const Tool_extremis::SynthEvent& previous = events[i-1];
+		if (event.isRest || previous.isRest) {
+			// Intervals into or out of a rest are "R" (stored as 0).
 			continue;
 		}
-		string iname = getIntervalName(interval.at(j));
+		string iname = getIntervalName(to_string(event.b40 - previous.b40));
 		int value = 0;
 		if (iname != "R") {
 			try {
@@ -2114,49 +2098,7 @@ void Tool_autocadence::prepareExtremisBass(HumdrumFile& infile) {
 				value = 0;
 			}
 		}
-		lastmelByToken[notes.at(j)] = value;
-	}
-
-	vector<int> lowLastmel(lowfile.getLineCount(), 0);
-	for (int i=0; i<lowfile.getLineCount(); i++) {
-		if (!lowfile[i].isData()) {
-			continue;
-		}
-		HTp token = NULL;
-		for (int j=0; j<lowfile[i].getFieldCount(); j++) {
-			if (lowfile.token(i, j)->isKern()) {
-				token = lowfile.token(i, j);
-				break;
-			}
-		}
-		if (!token || token->isNull() || token->isRest() ||
-				token->isSecondaryTiedNote()) {
-			continue;
-		}
-		auto found = lastmelByToken.find(token);
-		if (found != lastmelByToken.end()) {
-			lowLastmel[i] = found->second;
-		}
-	}
-
-	vector<int> origData;
-	vector<int> lowData;
-	for (int i=0; i<infile.getLineCount(); i++) {
-		if (infile[i].isData()) {
-			origData.push_back(i);
-		}
-	}
-	for (int i=0; i<lowfile.getLineCount(); i++) {
-		if (lowfile[i].isData()) {
-			lowData.push_back(i);
-		}
-	}
-	if (origData.size() != lowData.size()) {
-		cerr << "DATA LINE COUNTS OF FILES FOR EXTREMIS ANALYSIS DO NOT MATCH." << endl;
-		return;
-	}
-	for (int k=0; k<(int)origData.size(); k++) {
-		m_extremisLastmel[origData[k]] = lowLastmel[lowData[k]];
+		m_extremisLastmel.at(event.startLine) = value;
 	}
 }
 
