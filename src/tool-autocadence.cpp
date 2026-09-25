@@ -375,10 +375,14 @@ void Tool_autocadence::initialize(void) {
 		m_triadQ   = true;
 	}
 
-	prepareCadenceDefinitions();
-	prepareCadenceLabels();
-	prepareCvfNames();
-	prepareDissonanceNames();
+	// The cadence tables (including the compiled regexes) do not depend on
+	// the options, so build them only once rather than for every input file.
+	if (m_definitions.empty()) {
+		prepareCadenceDefinitions();
+		prepareCadenceLabels();
+		prepareCvfNames();
+		prepareDissonanceNames();
+	}
 }
 
 

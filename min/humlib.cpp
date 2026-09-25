@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Sep 25 14:12:07 CEST 2026
+// Last Modified: Fri Sep 25 15:58:35 CEST 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -61615,10 +61615,14 @@ void Tool_autocadence::initialize(void) {
 		m_triadQ   = true;
 	}
 
-	prepareCadenceDefinitions();
-	prepareCadenceLabels();
-	prepareCvfNames();
-	prepareDissonanceNames();
+	// The cadence tables (including the compiled regexes) do not depend on
+	// the options, so build them only once rather than for every input file.
+	if (m_definitions.empty()) {
+		prepareCadenceDefinitions();
+		prepareCadenceLabels();
+		prepareCvfNames();
+		prepareDissonanceNames();
+	}
 }
 
 
