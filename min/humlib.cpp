@@ -26123,34 +26123,10 @@ void HumdrumFileContent::analyzeBarlines(void) {
 				continue;
 			}
 			if (!baseQ) {
-				baseline = "";
-				for (int k=0; k<(int)token->size(); k++) {
-					if (isdigit(token->at(k))) {
-						// ignore barnumbers
-						// maybe ignore fermatas
-						continue;
-					}
-					if (token->at(k) == ';') {
-						// ignore fermatas in comparison
-						continue;
-					}
-					baseline += token->at(k);
-				}
+				baseline = getBarlineStyle(token);
 				baseQ = true;
 			} else {
-				comparison = "";
-				for (int k=0; k<(int)token->size(); k++) {
-					if (isdigit(token->at(k))) {
-						// ignore barnumbers;
-						// maybe ignore fermatas
-						continue;
-					}
-					if (token->at(k) == ';') {
-						// ignore fermatas in comparison
-						continue;
-					}
-					comparison += token->at(k);
-				}
+				comparison = getBarlineStyle(token);
 				if (comparison != baseline) {
 					allSame = false;
 					break;
@@ -26171,6 +26147,40 @@ void HumdrumFileContent::analyzeBarlines(void) {
 			infile[i].setValue("auto", "barlinesDifferent", 0);
 		}
 	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileContent::getBarlineStyle -- Return the barline token
+//    without barnumbers and fermatas, for comparing barline styles
+//    across staves.  Fermata qualifiers (y for hidden, < or > for
+//    placement) are removed along with the fermata.
+//
+
+string HumdrumFileContent::getBarlineStyle(HTp token) {
+	string output;
+	bool fermataQ = false;
+	for (int k=0; k<(int)token->size(); k++) {
+		char ch = token->at(k);
+		if (isdigit(ch)) {
+			// ignore barnumbers
+			continue;
+		}
+		if (ch == ';') {
+			// ignore fermatas in comparison
+			fermataQ = true;
+			continue;
+		}
+		if (fermataQ && ((ch == 'y') || (ch == '<') || (ch == '>'))) {
+			// ignore fermata qualifiers in comparison
+			continue;
+		}
+		fermataQ = false;
+		output += ch;
+	}
+	return output;
 }
 
 
