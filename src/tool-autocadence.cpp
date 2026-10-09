@@ -3318,6 +3318,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/* 105 */ addCadenceDefinition("c", "t",	"ct5",	R"(^2_-2:1, 3_1:2, 4D_)");
 	/*  41 */ addCadenceDefinition("c", "t",	"ct6",	R"(^2_-2:1, 3_1:1, 3_1:-2, 2_1:-2, 1_1:2, 2_)");
 	/* 105 */ addCadenceDefinition("c", "t",	"ct7",	R"(^2_-2:1, 3_4:1, -2_)");
+	/* 169 */ addCadenceDefinition("c", "t",	"ct8",	R"(^2_-2:1, 3_-2:3, 6_)");
 	/*  41 */ addCadenceDefinition("c", "u",	"cu1",	R"(^-4_-2:1, -3_1:-3, -5_)");
 	/*  41 */ addCadenceDefinition("c", "z",	"cz1",	R"(^2_-2:1, 3_4:R, R_)");
 	/* 107 */ addCadenceDefinition("p", "C",	"pC1",	R"(^7_1:-2, 6_(?:5|-4):2, 3_)");  // TODO: should "p" exist?
