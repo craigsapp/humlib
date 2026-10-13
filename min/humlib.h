@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Oct  9 18:39:51 CEST 2026
+// Last Modified: Fri Oct  9 19:30:56 CEST 2026
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -6250,7 +6250,15 @@ class Tool_autocadence : public HumTool {
 		void        prepareAuthenticBAnalyses  (HumdrumFile& infile);
 		void        prepareClosingCounts       (HumdrumFile& infile);
 		void        prepareExtremisBass        (HumdrumFile& infile);
+		void        prepareAverageNoteDuration (HumdrumFile& infile);
 		bool        meetsAuthenticBCriteria    (HumdrumFile& infile, int index);
+		double      getAuthenticBStrength      (HumdrumFile& infile, int index,
+		                                        const std::string& cvflabel);
+		std::string getAuthenticBStrengthText  (HumdrumFile& infile, int index,
+		                                        const std::string& cvflabel);
+		bool        hasFifthAsHighestNote      (HumdrumFile& infile, int index);
+		bool        hasLongArrivalNotes        (HumdrumFile& infile, int index);
+		bool        hasRealVoiceBassizans      (HumdrumFile& infile, int index);
 		bool        hasIncorrectBassizans      (int index);
 		bool        hasClosingVoicesAtArrival  (int index);
 		bool        hasNoEnsuingSuspension     (HumdrumFile& infile, int index);
@@ -6344,6 +6352,19 @@ class Tool_autocadence : public HumTool {
 		// line at each original-file line (diatonic interval name as int,
 		// e.g. 4 or -5).  0 means no interval / rest.
 		std::vector<int> m_extremisLastmel;
+
+		// m_extremisPrevB40: base-40 pitch of the previous extremis lowest-line
+		// event, stored on the line where the following event starts.
+		// 0 means no previous note (start of piece or after a rest).
+		std::vector<int> m_extremisPrevB40;
+
+		// m_extremisB40: base-40 pitch of the extremis lowest-line event that
+		// starts on each line (0 when no event starts there, or a rest).
+		std::vector<int> m_extremisB40;
+
+		// m_averageNoteDuration: mean tied duration (in quarter notes) of all
+		// note attacks in the piece, used by the AuthenticB soft criteria.
+		double m_averageNoteDuration = 0.0;
 
 		bool m_hasSuspensionMarkersQ = false;
 

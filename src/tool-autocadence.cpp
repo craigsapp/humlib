@@ -98,6 +98,7 @@ and then the two-voice pattern from those two voices goes on to be
 #include <algorithm>
 #include <cctype>
 #include <cmath>
+#include <cstdio>
 #include <iterator>
 
 using namespace std;
@@ -1663,6 +1664,7 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 		string cadence = getCadenceLabel(slabel, infile, index);
 		// Empty string = suppressor entry in m_cadenceLabels: no cadence annotation.
 		if (!cadence.empty()) {
+			bool authenticBQ = (cadence == "AuthenticB");
 			string infolabel = cadence;
 			bool isPhrygian = getPhrygian(infile, index);
 			if (isPhrygian) {
@@ -1682,6 +1684,9 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 			}
 			cadenceline << "!!LO:TX:a:B:rj:color=red:cadence:t=";
 			cadenceline << cadence;
+			if (authenticBQ) {
+				cadenceline << "\\n" << getAuthenticBStrengthText(infile, index, slabel);
+			}
 			if (m_tableQ) {
 				m_cadenceTypeCounts[infolabel]++;
 			}
@@ -1691,6 +1696,7 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 		}
 	} else if (meetsAuthenticBCriteria(infile, index)) {
 		cadenceline << "!!LO:TX:a:B:rj:color=red:cadence:t=AuthenticB";
+		cadenceline << "\\n" << getAuthenticBStrengthText(infile, index, "");
 		if (m_tableQ) {
 			m_cadenceTypeCounts["AuthenticB"]++;
 		}
@@ -1808,7 +1814,7 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 //////////////////////////////
 //
 // Tool_autocadence::getCadenceLabel -- Look up the CVF combination label,
-//     then apply AuthenticB if every AuthenticB analysis strand passes.
+//     then apply AuthenticB if every AuthenticB hard criterion passes.
 //     AuthenticB does not require a CVF match; that case is handled when
 //     printing a line that has no CVF labels.
 //     Returns "UNKNOWN" for CVF combos absent from m_cadenceLabels.
@@ -1838,6 +1844,42 @@ string Tool_autocadence::getCadenceLabel(const string& cvflabel, HumdrumFile &in
 void Tool_autocadence::prepareAuthenticBAnalyses(HumdrumFile& infile) {
 	prepareClosingCounts(infile);
 	prepareExtremisBass(infile);
+	prepareAverageNoteDuration(infile);
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::prepareAverageNoteDuration -- Mean tied duration of
+//     every note attack in the piece (rests, grace notes, null tokens and
+//     tie continuations are ignored).
+//
+
+void Tool_autocadence::prepareAverageNoteDuration(HumdrumFile& infile) {
+	m_averageNoteDuration = 0.0;
+	double sum = 0.0;
+	int count = 0;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isData()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (!token->isKern()) {
+				continue;
+			}
+			if (token->isNull() || token->isRest() || token->isGrace() ||
+					token->isSecondaryTiedNote()) {
+				continue;
+			}
+			sum += token->getTiedDuration().getFloat();
+			count++;
+		}
+	}
+	if (count > 0) {
+		m_averageNoteDuration = sum / count;
+	}
 }
 
 
@@ -1883,41 +1925,218 @@ void Tool_autocadence::prepareClosingCounts(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_autocadence::meetsAuthenticBCriteria -- Combine independent analysis
-//     strands that must all pass before a cadence is labeled AuthenticB.
-//     Add further strands as additional checks below.
+// Tool_autocadence::meetsAuthenticBCriteria -- Hard criteria: every check
+//     here must pass before a moment is labeled AuthenticB.  How strong the
+//     cadence is gets decided afterwards by getAuthenticBStrength().
 //
 
 bool Tool_autocadence::meetsAuthenticBCriteria(HumdrumFile& infile, int index) {
-	// Strand 1: extremis lowest line approaches by an "incorrect" bassizans
+	// Hard 1: extremis lowest line approaches by an "incorrect" bassizans
 	// (falling fifth or rising fourth), including voice transfers.
 	if (!hasIncorrectBassizans(index)) {
 		return false;
 	}
 
-	// Strand 2: at least one voice closes at the cadential arrival.
-	if (!hasClosingVoicesAtArrival(index)) {
-		return false;
-	}
-
-	// Strand 3: no suspension (s/g/S/G) from the arrival through two minims later.
-	if (!hasNoEnsuingSuspension(infile, index)) {
-		return false;
-	}
-
-	// Strand 4: last --root observation before the arrival is an uppercase
+	// Hard 2: last --root observation before the arrival is an uppercase
 	// letter (major triad or major third).  CVF matches are not required.
 	if (!hasPreviousMajorSonority(index)) {
 		return false;
 	}
 
-	// Strand 5: a voice moves from the leading tone up by semitone onto
+	// Hard 3: a voice moves from the leading tone up by semitone onto
 	// the root of the arrival chord, in that same voice, at the arrival.
 	if (!hasLeadingToneToRoot(infile, index)) {
 		return false;
 	}
 
 	return true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::getAuthenticBStrength -- Soft criteria for a moment that
+//     already passed meetsAuthenticBCriteria().  Each satisfied criterion
+//     scores 1, the total is normalized by the number of criteria to the
+//     range 0..1, and rounded to 3 decimal places.  cvflabel is the sorted
+//     CVF combination at the arrival (empty when there are no CVF labels).
+//     Add further soft criteria as additional checks below.
+//
+
+double Tool_autocadence::getAuthenticBStrength(HumdrumFile& infile, int index,
+		const string& cvflabel) {
+	int score = 0;
+	int total = 0;
+	auto criterion = [&](bool passed) {
+		total++;
+		if (passed) {
+			score++;
+		}
+	};
+
+	// Soft 1: a "C" (cantizans) CVF is present at the cadential arrival.
+	criterion(cvflabel.find('C') != string::npos);
+
+	// Soft 2: at least one voice closes at the cadential arrival.
+	criterion(hasClosingVoicesAtArrival(index));
+
+	// Soft 3: no suspension (s/g/S/G) from the arrival through two minims later.
+	criterion(hasNoEnsuingSuspension(infile, index));
+
+	// Soft 4: the highest note of the arrival sonority is not the chord fifth.
+	criterion(!hasFifthAsHighestNote(infile, index));
+
+	// Soft 5: the arrival notes are longer than the piece's average note.
+	criterion(hasLongArrivalNotes(infile, index));
+
+	// Soft 6: the bassizans leap into the arrival happens in one real voice
+	// rather than only in the synthetic lowest line.
+	criterion(hasRealVoiceBassizans(infile, index));
+
+	if (total == 0) {
+		return 0.0;
+	}
+	return std::round(1000.0 * score / total) / 1000.0;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::getAuthenticBStrengthText -- AuthenticB strength printed
+//     with 3 decimal places, such as "0.667".
+//
+
+string Tool_autocadence::getAuthenticBStrengthText(HumdrumFile& infile, int index,
+		const string& cvflabel) {
+	double strength = getAuthenticBStrength(infile, index, cvflabel);
+	char buffer[32];
+	snprintf(buffer, sizeof(buffer), "%.3f", strength);
+	return buffer;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::hasFifthAsHighestNote -- True when the highest sounding
+//     pitch at the arrival (including notes sustained into it) is a perfect
+//     fifth above the arrival root.
+//
+
+bool Tool_autocadence::hasFifthAsHighestNote(HumdrumFile& infile, int index) {
+	int rootPc = arrivalRootPitchClass(infile, index);
+	if (rootPc < 0) {
+		return false;
+	}
+	int highest = 0;
+	vector<int> midis = infile[index].getMidiPitchesResolveNull();
+	for (int midi : midis) {
+		int m = midi < 0 ? -midi : midi;
+		if (m > highest) {
+			highest = m;
+		}
+	}
+	if (highest <= 0) {
+		return false;
+	}
+	return (highest - rootPc + 120) % 12 == 7;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::hasLongArrivalNotes -- True when the mean tied duration
+//     of the notes attacked at the arrival is greater than the average note
+//     duration of the whole piece.
+//
+
+bool Tool_autocadence::hasLongArrivalNotes(HumdrumFile& infile, int index) {
+	if ((index < 0) || (index >= infile.getLineCount())) {
+		return false;
+	}
+	if (!infile[index].isData()) {
+		return false;
+	}
+	double sum = 0.0;
+	int count = 0;
+	for (int j=0; j<infile[index].getFieldCount(); j++) {
+		HTp token = infile.token(index, j);
+		if (!token->isKern()) {
+			continue;
+		}
+		if (token->isNull() || token->isRest() || token->isGrace() ||
+				token->isSecondaryTiedNote()) {
+			continue;
+		}
+		sum += token->getTiedDuration().getFloat();
+		count++;
+	}
+	if (count == 0) {
+		return false;
+	}
+	return (sum / count) > m_averageNoteDuration;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::hasRealVoiceBassizans -- True when a single voice
+//     carries the extremis bassizans leap: it attacks the arrival bass
+//     pitch, and its own previous note is the previous extremis bass pitch.
+//     A leap that only exists in the synthetic line (a voice transfer)
+//     returns false.
+//
+
+bool Tool_autocadence::hasRealVoiceBassizans(HumdrumFile& infile, int index) {
+	if ((index < 0) || (index >= (int)m_extremisB40.size())) {
+		return false;
+	}
+	int arrivalB40 = m_extremisB40[index];
+	int previousB40 = m_extremisPrevB40[index];
+	if ((arrivalB40 <= 0) || (previousB40 <= 0)) {
+		return false;
+	}
+
+	auto hasPitch = [](HTp token, int b40) -> bool {
+		vector<string> subtokens = token->getSubtokens();
+		for (const string& subtoken : subtokens) {
+			if (Convert::kernToBase40(subtoken) == b40) {
+				return true;
+			}
+		}
+		return false;
+	};
+
+	for (int j=0; j<infile[index].getFieldCount(); j++) {
+		HTp token = infile.token(index, j);
+		if (!token->isKern()) {
+			continue;
+		}
+		if (token->isNull() || token->isRest() || token->isSecondaryTiedNote()) {
+			continue;
+		}
+		if (!hasPitch(token, arrivalB40)) {
+			continue;
+		}
+		HTp prev = token->getPreviousToken();
+		while (prev) {
+			if (prev->isData() && !prev->isNull()) {
+				break;
+			}
+			prev = prev->getPreviousToken();
+		}
+		if (!prev || prev->isRest()) {
+			continue;
+		}
+		if (hasPitch(prev, previousB40)) {
+			return true;
+		}
+	}
+	return false;
 }
 
 
@@ -1934,6 +2153,10 @@ bool Tool_autocadence::meetsAuthenticBCriteria(HumdrumFile& infile, int index) {
 void Tool_autocadence::prepareExtremisBass(HumdrumFile& infile) {
 	m_extremisLastmel.clear();
 	m_extremisLastmel.resize(infile.getLineCount(), 0);
+	m_extremisPrevB40.clear();
+	m_extremisPrevB40.resize(infile.getLineCount(), 0);
+	m_extremisB40.clear();
+	m_extremisB40.resize(infile.getLineCount(), 0);
 
 	Tool_extremis extremis;
 	vector<Tool_extremis::SynthEvent> events;
@@ -1946,6 +2169,8 @@ void Tool_autocadence::prepareExtremisBass(HumdrumFile& infile) {
 			// Intervals into or out of a rest are "R" (stored as 0).
 			continue;
 		}
+		m_extremisB40.at(event.startLine) = event.b40;
+		m_extremisPrevB40.at(event.startLine) = previous.b40;
 		string iname = getIntervalName(to_string(event.b40 - previous.b40));
 		int value = 0;
 		if (iname != "R") {
