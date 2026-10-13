@@ -3,12 +3,12 @@
 // serves to verovio.humdrum.org), renders the example to MIDI exactly as VHV
 // does, and checks that both notes sound as B-flat.
 //
-// Usage: node test_vhv_accidentals.js [path/to/verovio-toolkit-wasm.js]
+// Usage: node test-vhv-accidentals.js [path/to/verovio-toolkit-wasm.js]
 
 const path = require("path");
 
 const toolkitPath = path.resolve(process.argv[2] ||
-	path.join(__dirname, "../verovio-script/scripts/verovio-toolkit-wasm.js"));
+	path.join(__dirname, "../../../verovio-script/scripts/verovio-toolkit-wasm.js"));
 
 const HUMDRUM = "**kern\n4b-\n4b-\n=\n*-\n";
 const EXPECTED = [70, 70]; // B-flat4, B-flat4 (a B-natural would be 71)
