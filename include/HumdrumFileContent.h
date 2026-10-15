@@ -119,6 +119,7 @@ class HumdrumFileContent : public HumdrumFileStructure {
 
 	protected:
 
+		std::string getBarlineStyle       (HTp token);
 		bool   analyzeKernPhrasings       (HTp spinestart,
 		                                   std::vector<HTp>& linkstarts,
 		                                   std::vector<HTp>& linkends,
