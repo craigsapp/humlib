@@ -1311,7 +1311,7 @@ tool-filter.o: tool-filter.cpp tool-filter.h \
   MxmlEvent.h HumGrid.h GridMeasure.h \
   GridSlice.h GridPart.h GridStaff.h \
   GridSide.h GridVoice.h tool-melisma.h \
-  tool-mens2kern.h tool-meter.h tool-metlev.h \
+  tool-mens2kern.h tool-meter.h tool-metlev.h tool-metpos.h \
   tool-mint.h tool-modori.h tool-msearch.h \
   Convert.h tool-myank.h tool-nproof.h \
   tool-ordergps.h tool-pbar.h tool-phrase.h \
@@ -1556,6 +1556,14 @@ tool-metlev.o: tool-metlev.cpp tool-metlev.h \
   HumdrumToken.h HumNum.h HumAddress.h \
   HumHash.h HumParamSet.h HumdrumFileStream.h \
   Convert.h
+
+tool-metpos.o: tool-metpos.cpp tool-metpos.h \
+  HumTool.h Options.h HumdrumFileSet.h \
+  HumdrumFile.h HumdrumFileContent.h \
+  HumdrumFileStructure.h HumdrumFileBase.h \
+  HumSignifiers.h HumSignifier.h HumdrumLine.h \
+  HumdrumToken.h HumNum.h HumAddress.h \
+  HumHash.h HumParamSet.h HumdrumFileStream.h
 
 tool-mint.o: tool-mint.cpp tool-mint.h HumTool.h \
   Options.h HumdrumFileSet.h HumdrumFile.h \
