@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Oct 16 19:32:49 CEST 2026
+// Last Modified: Fri Oct 16 19:43:04 CEST 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -63233,6 +63233,24 @@ void Tool_autocadence::prepareAuthenticBAnalyses(HumdrumFile& infile) {
 	prepareAverageNoteDuration(infile);
 	prepareMensurationChanges(infile);
 	preparePlineAttacks(infile);
+	prepareMetricPositions(infile);
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::prepareMetricPositions -- Metric position of every line
+//     from Tool_metpos (1 for the start of a measure, larger numbers for
+//     weaker positions, 0 for none).
+//
+
+void Tool_autocadence::prepareMetricPositions(HumdrumFile& infile) {
+	Tool_metpos metpos;
+	vector<string> argv;
+	argv.push_back("metpos");
+	metpos.process(argv);
+	metpos.getMetricPositions(infile, m_metricPositions);
 }
 
 
@@ -63481,6 +63499,11 @@ double Tool_autocadence::getAuthenticBStrength(HumdrumFile& infile, int index,
 			score++;
 		}
 	};
+	// A criterion worth up to maximum points.
+	auto weightedCriterion = [&](int points, int maximum) {
+		total += maximum;
+		score += points;
+	};
 
 	// Soft 1: a "C" (cantizans) CVF is present at the cadential arrival.
 	criterion(cvflabel.find('C') != string::npos);
@@ -63510,6 +63533,11 @@ double Tool_autocadence::getAuthenticBStrength(HumdrumFile& infile, int index,
 	// arrival, or the arrival's measure ends in a double bar.
 	criterion(hasPlineAfterArrival(infile, index) ||
 			hasDoubleBarEnding(infile, index));
+
+	// Soft 9: the metric position of the arrival: 2 points at the start of
+	// a measure (metpos 1), 1 point at the next strongest position
+	// (metpos 2), and 0 otherwise.
+	weightedCriterion(getMetricPositionPoints(index), 2);
 
 	return std::round(1000.0 * score / total) / 1000.0;
 }
@@ -63728,6 +63756,25 @@ bool Tool_autocadence::hasDoubleBarEnding(HumdrumFile& infile, int index) {
 		return false;
 	}
 	return false;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::getMetricPositionPoints -- Points for the metric
+//     position of the arrival: 2 for metpos 1, 1 for metpos 2, else 0.
+//
+
+int Tool_autocadence::getMetricPositionPoints(int index) {
+	if ((index < 0) || (index >= (int)m_metricPositions.size())) {
+		return 0;
+	}
+	switch (m_metricPositions[index]) {
+		case 1:  return 2;
+		case 2:  return 1;
+		default: return 0;
+	}
 }
 
 
@@ -114810,6 +114857,24 @@ bool Tool_metpos::run(HumdrumFile& infile) {
 
 //////////////////////////////
 //
+// Tool_metpos::getMetricPositions -- Metric position of every line of a
+//     file, as it would be printed in the **metpos spine, without printing
+//     anything: positions is indexed by line, with 0 for non-data lines and
+//     data lines that have no metric position (including the lines after
+//     an error, which stays available from the error text).
+//
+
+void Tool_metpos::getMetricPositions(HumdrumFile& infile, vector<int>& positions) {
+	initialize();
+	processFile(infile);
+	positions = m_lineValues;
+	m_humdrum_text.str("");
+}
+
+
+
+//////////////////////////////
+//
 // Tool_metpos::initialize --
 //
 
@@ -114843,6 +114908,7 @@ void Tool_metpos::initialize(void) {
 
 void Tool_metpos::processFile(HumdrumFile& infile) {
 	m_infile = &infile;
+	m_lineValues.assign(infile.getLineCount(), 0);
 	if (getBoolean("meter")) {
 		if (!regex_match(m_meterOption, regex("^[1-9]+/[1-9]+[.]*$"))) {
 			m_error_text << "metpos: ERROR: Invalid meter specified: "
@@ -115080,8 +115146,7 @@ bool Tool_metpos::processData(HumdrumFile& infile, int index) {
 		             << "in input line: " << (index + 1) << endl;
 		return false;
 	}
-	m_humdrum_text << infile[index] << "\t"
-	               << getPositionText(position, getShortestDuration(infile, index)) << "\n";
+	m_humdrum_text << infile[index] << "\t" << getPositionText(index, position) << "\n";
 	return true;
 }
 
@@ -115138,8 +115203,7 @@ void Tool_metpos::printAnacrusis(HumNum endTime) {
 		} else {
 			position = m_measureDuration - (endTime - start);
 		}
-		HumNum duration = getShortestDuration(*m_infile, record.second);
-		m_humdrum_text << record.first << "\t" << getPositionText(position, duration) << "\n";
+		m_humdrum_text << record.first << "\t" << getPositionText(record.second, position) << "\n";
 	}
 	m_anacrusis.clear();
 }
@@ -115473,13 +115537,15 @@ HumNum Tool_metpos::getShortestDuration(HumdrumFile& infile, int index) {
 
 //////////////////////////////
 //
-// Tool_metpos::getPositionText -- Metric position as printed in the
-//     **metpos spine, or "." when there is none.  duration is the shortest
-//     note value starting at the position.
+// Tool_metpos::getPositionText -- Metric position of the data line at index
+//     (position quarter notes from the start of its measure) as printed in
+//     the **metpos spine, or "." when there is none.  The value is also
+//     stored for getMetricPositions().
 //
 
-string Tool_metpos::getPositionText(HumNum position, HumNum duration) {
-	int value = getMetricPosition(position, duration);
+string Tool_metpos::getPositionText(int index, HumNum position) {
+	int value = getMetricPosition(position, getShortestDuration(*m_infile, index));
+	m_lineValues.at(index) = max(value, 0);
 	if (value <= 0) {
 		return ".";
 	}

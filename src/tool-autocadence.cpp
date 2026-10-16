@@ -92,6 +92,7 @@ and then the two-voice pattern from those two voices goes on to be
 #include "tool-autocadence.h"
 #include "tool-dissonant.h"
 #include "tool-extremis.h"
+#include "tool-metpos.h"
 #include "tool-pliner.h"
 #include "Convert.h"
 #include "HumRegex.h"
@@ -1848,6 +1849,24 @@ void Tool_autocadence::prepareAuthenticBAnalyses(HumdrumFile& infile) {
 	prepareAverageNoteDuration(infile);
 	prepareMensurationChanges(infile);
 	preparePlineAttacks(infile);
+	prepareMetricPositions(infile);
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::prepareMetricPositions -- Metric position of every line
+//     from Tool_metpos (1 for the start of a measure, larger numbers for
+//     weaker positions, 0 for none).
+//
+
+void Tool_autocadence::prepareMetricPositions(HumdrumFile& infile) {
+	Tool_metpos metpos;
+	vector<string> argv;
+	argv.push_back("metpos");
+	metpos.process(argv);
+	metpos.getMetricPositions(infile, m_metricPositions);
 }
 
 
@@ -2096,6 +2115,11 @@ double Tool_autocadence::getAuthenticBStrength(HumdrumFile& infile, int index,
 			score++;
 		}
 	};
+	// A criterion worth up to maximum points.
+	auto weightedCriterion = [&](int points, int maximum) {
+		total += maximum;
+		score += points;
+	};
 
 	// Soft 1: a "C" (cantizans) CVF is present at the cadential arrival.
 	criterion(cvflabel.find('C') != string::npos);
@@ -2125,6 +2149,11 @@ double Tool_autocadence::getAuthenticBStrength(HumdrumFile& infile, int index,
 	// arrival, or the arrival's measure ends in a double bar.
 	criterion(hasPlineAfterArrival(infile, index) ||
 			hasDoubleBarEnding(infile, index));
+
+	// Soft 9: the metric position of the arrival: 2 points at the start of
+	// a measure (metpos 1), 1 point at the next strongest position
+	// (metpos 2), and 0 otherwise.
+	weightedCriterion(getMetricPositionPoints(index), 2);
 
 	return std::round(1000.0 * score / total) / 1000.0;
 }
@@ -2343,6 +2372,25 @@ bool Tool_autocadence::hasDoubleBarEnding(HumdrumFile& infile, int index) {
 		return false;
 	}
 	return false;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::getMetricPositionPoints -- Points for the metric
+//     position of the arrival: 2 for metpos 1, 1 for metpos 2, else 0.
+//
+
+int Tool_autocadence::getMetricPositionPoints(int index) {
+	if ((index < 0) || (index >= (int)m_metricPositions.size())) {
+		return 0;
+	}
+	switch (m_metricPositions[index]) {
+		case 1:  return 2;
+		case 2:  return 1;
+		default: return 0;
+	}
 }
 
 

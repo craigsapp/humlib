@@ -129,6 +129,7 @@ class Tool_autocadence : public HumTool {
 		void        prepareAverageNoteDuration (HumdrumFile& infile);
 		void        prepareMensurationChanges  (HumdrumFile& infile);
 		void        preparePlineAttacks        (HumdrumFile& infile);
+		void        prepareMetricPositions     (HumdrumFile& infile);
 		bool        meetsAuthenticBCriteria    (HumdrumFile& infile, int index);
 		double      getAuthenticBStrength      (HumdrumFile& infile, int index,
 		                                        const std::string& cvflabel);
@@ -140,6 +141,7 @@ class Tool_autocadence : public HumTool {
 		bool        hasMensurationChange       (HumdrumFile& infile, int index);
 		bool        hasPlineAfterArrival       (HumdrumFile& infile, int index);
 		bool        hasDoubleBarEnding         (HumdrumFile& infile, int index);
+		int         getMetricPositionPoints    (int index);
 		bool        hasIncorrectBassizans      (int index);
 		bool        hasClosingVoicesAtArrival  (int index);
 		bool        hasNoEnsuingSuspension     (HumdrumFile& infile, int index);
@@ -255,6 +257,10 @@ class Tool_autocadence : public HumTool {
 		// when that voice starts a poetic line (*pline) on that line.
 		// Empty for non-data lines.
 		std::vector<std::vector<bool>> m_plineAttacks;
+
+		// m_metricPositions: metpos value of each line (1 for the start of
+		// a measure, larger for weaker positions, 0 for none).
+		std::vector<int> m_metricPositions;
 
 		bool m_hasSuspensionMarkersQ = false;
 

@@ -87,6 +87,24 @@ bool Tool_metpos::run(HumdrumFile& infile) {
 
 //////////////////////////////
 //
+// Tool_metpos::getMetricPositions -- Metric position of every line of a
+//     file, as it would be printed in the **metpos spine, without printing
+//     anything: positions is indexed by line, with 0 for non-data lines and
+//     data lines that have no metric position (including the lines after
+//     an error, which stays available from the error text).
+//
+
+void Tool_metpos::getMetricPositions(HumdrumFile& infile, vector<int>& positions) {
+	initialize();
+	processFile(infile);
+	positions = m_lineValues;
+	m_humdrum_text.str("");
+}
+
+
+
+//////////////////////////////
+//
 // Tool_metpos::initialize --
 //
 
@@ -120,6 +138,7 @@ void Tool_metpos::initialize(void) {
 
 void Tool_metpos::processFile(HumdrumFile& infile) {
 	m_infile = &infile;
+	m_lineValues.assign(infile.getLineCount(), 0);
 	if (getBoolean("meter")) {
 		if (!regex_match(m_meterOption, regex("^[1-9]+/[1-9]+[.]*$"))) {
 			m_error_text << "metpos: ERROR: Invalid meter specified: "
@@ -357,8 +376,7 @@ bool Tool_metpos::processData(HumdrumFile& infile, int index) {
 		             << "in input line: " << (index + 1) << endl;
 		return false;
 	}
-	m_humdrum_text << infile[index] << "\t"
-	               << getPositionText(position, getShortestDuration(infile, index)) << "\n";
+	m_humdrum_text << infile[index] << "\t" << getPositionText(index, position) << "\n";
 	return true;
 }
 
@@ -415,8 +433,7 @@ void Tool_metpos::printAnacrusis(HumNum endTime) {
 		} else {
 			position = m_measureDuration - (endTime - start);
 		}
-		HumNum duration = getShortestDuration(*m_infile, record.second);
-		m_humdrum_text << record.first << "\t" << getPositionText(position, duration) << "\n";
+		m_humdrum_text << record.first << "\t" << getPositionText(record.second, position) << "\n";
 	}
 	m_anacrusis.clear();
 }
@@ -750,13 +767,15 @@ HumNum Tool_metpos::getShortestDuration(HumdrumFile& infile, int index) {
 
 //////////////////////////////
 //
-// Tool_metpos::getPositionText -- Metric position as printed in the
-//     **metpos spine, or "." when there is none.  duration is the shortest
-//     note value starting at the position.
+// Tool_metpos::getPositionText -- Metric position of the data line at index
+//     (position quarter notes from the start of its measure) as printed in
+//     the **metpos spine, or "." when there is none.  The value is also
+//     stored for getMetricPositions().
 //
 
-string Tool_metpos::getPositionText(HumNum position, HumNum duration) {
-	int value = getMetricPosition(position, duration);
+string Tool_metpos::getPositionText(int index, HumNum position) {
+	int value = getMetricPosition(position, getShortestDuration(*m_infile, index));
+	m_lineValues.at(index) = max(value, 0);
 	if (value <= 0) {
 		return ".";
 	}

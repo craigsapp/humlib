@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Oct 16 19:32:49 CEST 2026
+// Last Modified: Fri Oct 16 19:43:04 CEST 2026
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -6253,6 +6253,7 @@ class Tool_autocadence : public HumTool {
 		void        prepareAverageNoteDuration (HumdrumFile& infile);
 		void        prepareMensurationChanges  (HumdrumFile& infile);
 		void        preparePlineAttacks        (HumdrumFile& infile);
+		void        prepareMetricPositions     (HumdrumFile& infile);
 		bool        meetsAuthenticBCriteria    (HumdrumFile& infile, int index);
 		double      getAuthenticBStrength      (HumdrumFile& infile, int index,
 		                                        const std::string& cvflabel);
@@ -6264,6 +6265,7 @@ class Tool_autocadence : public HumTool {
 		bool        hasMensurationChange       (HumdrumFile& infile, int index);
 		bool        hasPlineAfterArrival       (HumdrumFile& infile, int index);
 		bool        hasDoubleBarEnding         (HumdrumFile& infile, int index);
+		int         getMetricPositionPoints    (int index);
 		bool        hasIncorrectBassizans      (int index);
 		bool        hasClosingVoicesAtArrival  (int index);
 		bool        hasNoEnsuingSuspension     (HumdrumFile& infile, int index);
@@ -6379,6 +6381,10 @@ class Tool_autocadence : public HumTool {
 		// when that voice starts a poetic line (*pline) on that line.
 		// Empty for non-data lines.
 		std::vector<std::vector<bool>> m_plineAttacks;
+
+		// m_metricPositions: metpos value of each line (1 for the start of
+		// a measure, larger for weaker positions, 0 for none).
+		std::vector<int> m_metricPositions;
 
 		bool m_hasSuspensionMarkersQ = false;
 
@@ -9955,6 +9961,7 @@ class Tool_metpos : public HumTool {
 		bool     run                 (const std::string& indata, std::ostream& out);
 		bool     run                 (HumdrumFile& infile, std::ostream& out);
 
+		void     getMetricPositions  (HumdrumFile& infile, std::vector<int>& positions);
 		int      getMetricPosition   (HumNum position, HumNum duration = 0);
 		bool     setMeter            (const std::string& meter, int lineNumber = 0);
 
@@ -9971,7 +9978,7 @@ class Tool_metpos : public HumTool {
 		bool     processData         (HumdrumFile& infile, int index);
 		void     emit                (const std::string& text);
 		void     printAnacrusis      (HumNum endTime);
-		std::string getPositionText  (HumNum position, HumNum duration);
+		std::string getPositionText  (int index, HumNum position);
 		int      getGridPosition     (HumNum position);
 		HumNum   getShortestDuration (HumdrumFile& infile, int index);
 		void     useHierarchy        (int beats, HumNum duration);
@@ -10020,6 +10027,9 @@ class Tool_metpos : public HumTool {
 		// or -1 for other records.
 		std::vector<std::pair<std::string, int>> m_anacrusis;
 		HumdrumFile* m_infile = NULL;
+
+		// Metric position printed for each line (0 for none).
+		std::vector<int> m_lineValues;
 };
 
 

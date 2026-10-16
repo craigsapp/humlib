@@ -42,6 +42,7 @@ class Tool_metpos : public HumTool {
 		bool     run                 (const std::string& indata, std::ostream& out);
 		bool     run                 (HumdrumFile& infile, std::ostream& out);
 
+		void     getMetricPositions  (HumdrumFile& infile, std::vector<int>& positions);
 		int      getMetricPosition   (HumNum position, HumNum duration = 0);
 		bool     setMeter            (const std::string& meter, int lineNumber = 0);
 
@@ -58,7 +59,7 @@ class Tool_metpos : public HumTool {
 		bool     processData         (HumdrumFile& infile, int index);
 		void     emit                (const std::string& text);
 		void     printAnacrusis      (HumNum endTime);
-		std::string getPositionText  (HumNum position, HumNum duration);
+		std::string getPositionText  (int index, HumNum position);
 		int      getGridPosition     (HumNum position);
 		HumNum   getShortestDuration (HumdrumFile& infile, int index);
 		void     useHierarchy        (int beats, HumNum duration);
@@ -107,6 +108,9 @@ class Tool_metpos : public HumTool {
 		// or -1 for other records.
 		std::vector<std::pair<std::string, int>> m_anacrusis;
 		HumdrumFile* m_infile = NULL;
+
+		// Metric position printed for each line (0 for none).
+		std::vector<int> m_lineValues;
 };
 
 // END_MERGE
