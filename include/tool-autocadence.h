@@ -127,6 +127,7 @@ class Tool_autocadence : public HumTool {
 		void        prepareClosingCounts       (HumdrumFile& infile);
 		void        prepareExtremisBass        (HumdrumFile& infile);
 		void        prepareAverageNoteDuration (HumdrumFile& infile);
+		void        prepareMensurationChanges  (HumdrumFile& infile);
 		bool        meetsAuthenticBCriteria    (HumdrumFile& infile, int index);
 		double      getAuthenticBStrength      (HumdrumFile& infile, int index,
 		                                        const std::string& cvflabel);
@@ -135,6 +136,7 @@ class Tool_autocadence : public HumTool {
 		bool        hasFifthAsHighestNote      (HumdrumFile& infile, int index);
 		bool        hasLongArrivalNotes        (HumdrumFile& infile, int index);
 		bool        hasRealVoiceBassizans      (HumdrumFile& infile, int index);
+		bool        hasMensurationChange       (HumdrumFile& infile, int index);
 		bool        hasIncorrectBassizans      (int index);
 		bool        hasClosingVoicesAtArrival  (int index);
 		bool        hasNoEnsuingSuspension     (HumdrumFile& infile, int index);
@@ -241,6 +243,10 @@ class Tool_autocadence : public HumTool {
 		// m_averageNoteDuration: mean tied duration (in quarter notes) of all
 		// note attacks in the piece, used by the AuthenticB soft criteria.
 		double m_averageNoteDuration = 0.0;
+
+		// m_mensurationChanges: true on interpretation lines where a **kern
+		// spine changes its *M, *met or *omet value.
+		std::vector<bool> m_mensurationChanges;
 
 		bool m_hasSuspensionMarkersQ = false;
 

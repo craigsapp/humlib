@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Oct  9 19:30:56 CEST 2026
+// Last Modified: Fri Oct 16 16:01:02 CEST 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -63231,6 +63231,54 @@ void Tool_autocadence::prepareAuthenticBAnalyses(HumdrumFile& infile) {
 	prepareClosingCounts(infile);
 	prepareExtremisBass(infile);
 	prepareAverageNoteDuration(infile);
+	prepareMensurationChanges(infile);
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::prepareMensurationChanges -- Mark the interpretation
+//     lines where any **kern spine changes its time signature (*M), its
+//     mensuration sign (*met), or its original mensuration sign (*omet).
+//     The first value in each spine is not a change, nor is a restatement
+//     of the value that is already active.
+//
+
+void Tool_autocadence::prepareMensurationChanges(HumdrumFile& infile) {
+	m_mensurationChanges.clear();
+	m_mensurationChanges.resize(infile.getLineCount(), false);
+
+	// Active *M, *met and *omet values for each track.
+	vector<vector<string>> active(infile.getTrackCount() + 1, vector<string>(3));
+
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isInterpretation()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (!token->isKern()) {
+				continue;
+			}
+			int kind = -1;
+			if (token->isTimeSignature()) {
+				kind = 0;
+			} else if (token->isMensurationSymbol()) {
+				kind = 1;
+			} else if (token->isOriginalMensurationSymbol()) {
+				kind = 2;
+			}
+			if (kind < 0) {
+				continue;
+			}
+			string& previous = active.at(token->getTrack()).at(kind);
+			if ((!previous.empty()) && (previous != *token)) {
+				m_mensurationChanges[i] = true;
+			}
+			previous = *token;
+		}
+	}
 }
 
 
@@ -63380,9 +63428,10 @@ double Tool_autocadence::getAuthenticBStrength(HumdrumFile& infile, int index,
 	// rather than only in the synthetic lowest line.
 	criterion(hasRealVoiceBassizans(infile, index));
 
-	if (total == 0) {
-		return 0.0;
-	}
+	// Soft 7: a mensuration change happens in the arrival's measure or in
+	// the measure after it.
+	criterion(hasMensurationChange(infile, index));
+
 	return std::round(1000.0 * score / total) / 1000.0;
 }
 
@@ -63464,6 +63513,46 @@ bool Tool_autocadence::hasLongArrivalNotes(HumdrumFile& infile, int index) {
 		return false;
 	}
 	return (sum / count) > m_averageNoteDuration;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::hasMensurationChange -- True when a mensuration change
+//     (see prepareMensurationChanges) happens anywhere in the measure that
+//     contains the arrival or in the measure after it.
+//
+
+bool Tool_autocadence::hasMensurationChange(HumdrumFile& infile, int index) {
+	if ((index < 0) || (index >= (int)m_mensurationChanges.size())) {
+		return false;
+	}
+
+	// Before the arrival: back to the barline that starts its measure.
+	for (int i=index-1; i>=0; i--) {
+		if (infile[i].isBarline()) {
+			break;
+		}
+		if (m_mensurationChanges[i]) {
+			return true;
+		}
+	}
+
+	// After the arrival: stop at the barline that ends the following measure.
+	int barlines = 0;
+	for (int i=index+1; i<infile.getLineCount(); i++) {
+		if (infile[i].isBarline()) {
+			barlines++;
+			if (barlines >= 2) {
+				break;
+			}
+		}
+		if (m_mensurationChanges[i]) {
+			return true;
+		}
+	}
+	return false;
 }
 
 
