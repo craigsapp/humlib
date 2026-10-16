@@ -128,6 +128,7 @@ class Tool_autocadence : public HumTool {
 		void        prepareExtremisBass        (HumdrumFile& infile);
 		void        prepareAverageNoteDuration (HumdrumFile& infile);
 		void        prepareMensurationChanges  (HumdrumFile& infile);
+		void        preparePlineAttacks        (HumdrumFile& infile);
 		bool        meetsAuthenticBCriteria    (HumdrumFile& infile, int index);
 		double      getAuthenticBStrength      (HumdrumFile& infile, int index,
 		                                        const std::string& cvflabel);
@@ -137,6 +138,8 @@ class Tool_autocadence : public HumTool {
 		bool        hasLongArrivalNotes        (HumdrumFile& infile, int index);
 		bool        hasRealVoiceBassizans      (HumdrumFile& infile, int index);
 		bool        hasMensurationChange       (HumdrumFile& infile, int index);
+		bool        hasPlineAfterArrival       (HumdrumFile& infile, int index);
+		bool        hasDoubleBarEnding         (HumdrumFile& infile, int index);
 		bool        hasIncorrectBassizans      (int index);
 		bool        hasClosingVoicesAtArrival  (int index);
 		bool        hasNoEnsuingSuspension     (HumdrumFile& infile, int index);
@@ -247,6 +250,11 @@ class Tool_autocadence : public HumTool {
 		// m_mensurationChanges: true on interpretation lines where a **kern
 		// spine changes its *M, *met or *omet value.
 		std::vector<bool> m_mensurationChanges;
+
+		// m_plineAttacks: for each data line, true by track (index 0 unused)
+		// when that voice starts a poetic line (*pline) on that line.
+		// Empty for non-data lines.
+		std::vector<std::vector<bool>> m_plineAttacks;
 
 		bool m_hasSuspensionMarkersQ = false;
 

@@ -34,6 +34,8 @@ class Tool_pliner : public HumTool {
 		bool     run               (HumdrumFile& infile);
 		bool     run               (const std::string& indata, std::ostream& out);
 		bool     run               (HumdrumFile& infile, std::ostream& out);
+		void     getPlines         (HumdrumFile& infile,
+		                            std::map<int, std::map<int, std::string>>& plines);
 
 	protected:
 		void     initialize        (void);

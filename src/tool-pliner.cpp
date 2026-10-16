@@ -103,12 +103,35 @@ void Tool_pliner::initialize(void) {
 //
 
 void Tool_pliner::processFile(HumdrumFile& infile) {
+	map<int, map<int, string>> insertions;
+	getPlines(infile, insertions);
+	if (m_poem.empty()) {
+		m_humdrum_text << infile;
+		return;
+	}
+	emitOutput(infile, insertions);
+}
+
+
+
+//////////////////////////////
+//
+// Tool_pliner::getPlines -- Compute the *pline annotations without printing
+//    them, so that other tools can use the analysis directly.  plines is
+//    indexed by the data line where each poetic line starts in a voice,
+//    then by track (both the **kern and its **text track), with the
+//    *pline token text as the value.  plines is empty when no poem can
+//    be extracted from the score.
+//
+
+void Tool_pliner::getPlines(HumdrumFile& infile, map<int, map<int, string>>& plines) {
+	plines.clear();
 	m_poem.clear();
 	m_voices.clear();
 
 	bool havePoem = extractPoem(infile, m_poem);
 	if (!havePoem) {
-		m_humdrum_text << infile;
+		m_poem.clear();
 		return;
 	}
 
@@ -123,8 +146,6 @@ void Tool_pliner::processFile(HumdrumFile& infile) {
 			cerr << endl;
 		}
 	}
-
-	map<int, map<int, string>> insertions;
 
 	for (Voice& voice : m_voices) {
 		vector<SungWord> words;
@@ -154,12 +175,10 @@ void Tool_pliner::processFile(HumdrumFile& infile) {
 			string modifier = getModifier(m_poem, span);
 			string text = "*pline:" + to_string(span.line + 1) + modifier;
 			int li = span.startToken->getLineIndex();
-			insertions[li][kernTrack] = text;
-			insertions[li][textTrack] = text;
+			plines[li][kernTrack] = text;
+			plines[li][textTrack] = text;
 		}
 	}
-
-	emitOutput(infile, insertions);
 }
 
 

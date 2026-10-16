@@ -92,6 +92,7 @@ and then the two-voice pattern from those two voices goes on to be
 #include "tool-autocadence.h"
 #include "tool-dissonant.h"
 #include "tool-extremis.h"
+#include "tool-pliner.h"
 #include "Convert.h"
 #include "HumRegex.h"
 
@@ -1846,6 +1847,79 @@ void Tool_autocadence::prepareAuthenticBAnalyses(HumdrumFile& infile) {
 	prepareExtremisBass(infile);
 	prepareAverageNoteDuration(infile);
 	prepareMensurationChanges(infile);
+	preparePlineAttacks(infile);
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::preparePlineAttacks -- Mark the data lines where a voice
+//     starts a poetic line (a *pline observation).  *pline tokens already in
+//     the **kern spines of the input are used when present; otherwise the
+//     poetic lines are computed with Tool_pliner.
+//
+
+void Tool_autocadence::preparePlineAttacks(HumdrumFile& infile) {
+	m_plineAttacks.clear();
+	m_plineAttacks.resize(infile.getLineCount());
+	int trackCount = infile.getTrackCount();
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (infile[i].isData()) {
+			m_plineAttacks[i].resize(trackCount + 1, false);
+		}
+	}
+
+	// Existing *pline tokens apply to the next data token in their spine.
+	bool found = false;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isInterpretation()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (!token->isKern()) {
+				continue;
+			}
+			if (token->compare(0, 7, "*pline:") != 0) {
+				continue;
+			}
+			HTp next = token->getNextToken();
+			while (next && !next->isData()) {
+				next = next->getNextToken();
+			}
+			if (!next) {
+				continue;
+			}
+			m_plineAttacks.at(next->getLineIndex()).at(token->getTrack()) = true;
+			found = true;
+		}
+	}
+	if (found) {
+		return;
+	}
+
+	Tool_pliner pliner;
+	vector<string> argv;
+	argv.push_back("pliner");
+	pliner.process(argv);
+	map<int, map<int, string>> plines;
+	pliner.getPlines(infile, plines);
+	for (auto& lineEntry : plines) {
+		int line = lineEntry.first;
+		if ((line < 0) || (line >= (int)m_plineAttacks.size())) {
+			continue;
+		}
+		if (m_plineAttacks[line].empty()) {
+			continue;
+		}
+		for (auto& trackEntry : lineEntry.second) {
+			int track = trackEntry.first;
+			if ((track > 0) && (track <= trackCount)) {
+				m_plineAttacks[line][track] = true;
+			}
+		}
+	}
 }
 
 
@@ -2046,6 +2120,12 @@ double Tool_autocadence::getAuthenticBStrength(HumdrumFile& infile, int index,
 	// the measure after it.
 	criterion(hasMensurationChange(infile, index));
 
+	// Soft 8: either no voice starts a poetic line at the arrival but at
+	// least one voice starts a poetic line on its next attack after the
+	// arrival, or the arrival's measure ends in a double bar.
+	criterion(hasPlineAfterArrival(infile, index) ||
+			hasDoubleBarEnding(infile, index));
+
 	return std::round(1000.0 * score / total) / 1000.0;
 }
 
@@ -2165,6 +2245,102 @@ bool Tool_autocadence::hasMensurationChange(HumdrumFile& infile, int index) {
 		if (m_mensurationChanges[i]) {
 			return true;
 		}
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::hasPlineAfterArrival -- True when no voice has a *pline
+//     observation at the arrival, and at least one voice has a *pline
+//     observation on its next note attack after the arrival.  That attack
+//     must be in the arrival's measure or in one of the two measures after
+//     it.
+//
+
+bool Tool_autocadence::hasPlineAfterArrival(HumdrumFile& infile, int index) {
+	if ((index < 0) || (index >= (int)m_plineAttacks.size())) {
+		return false;
+	}
+	if (m_plineAttacks[index].empty()) {
+		return false;
+	}
+	for (bool plineQ : m_plineAttacks[index]) {
+		if (plineQ) {
+			return false;
+		}
+	}
+
+	// Voices whose next attack after the arrival has already been checked.
+	vector<bool> done(infile.getTrackCount() + 1, false);
+
+	// Stop at the barline that ends the second measure after the arrival.
+	int barlines = 0;
+	for (int i=index+1; i<infile.getLineCount(); i++) {
+		if (infile[i].isBarline()) {
+			barlines++;
+			if (barlines >= 3) {
+				break;
+			}
+			continue;
+		}
+		if (!infile[i].isData()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (!token->isKern()) {
+				continue;
+			}
+			int track = token->getTrack();
+			if (done[track]) {
+				continue;
+			}
+			if (token->isNull() || token->isRest() || token->isSecondaryTiedNote()) {
+				continue;
+			}
+			done[track] = true;
+			if (m_plineAttacks[i][track]) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::hasDoubleBarEnding -- True when the barline that ends
+//     the arrival's measure is a double bar in any **kern spine: a final
+//     barline (==), a double bar (=||), or a repeat sign (such as =:|! or
+//     =!|:).
+//
+
+bool Tool_autocadence::hasDoubleBarEnding(HumdrumFile& infile, int index) {
+	if ((index < 0) || (index >= infile.getLineCount())) {
+		return false;
+	}
+	for (int i=index+1; i<infile.getLineCount(); i++) {
+		if (!infile[i].isBarline()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (!token->isKern()) {
+				continue;
+			}
+			if ((token->find("==") != string::npos) ||
+					(token->find("||") != string::npos) ||
+					(token->find("|!") != string::npos) ||
+					(token->find("!|") != string::npos)) {
+				return true;
+			}
+		}
+		return false;
 	}
 	return false;
 }
