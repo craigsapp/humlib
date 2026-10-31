@@ -1465,16 +1465,17 @@ string MxmlEvent::getKernPitch(void) {
 					explicitQ = true;
 				}
 				string paren = child.attribute("parentheses").value();
+				if (paren.empty() && (string(child.attribute("cautionary").value()) == "yes")) {
+					paren = "yes";
+				}
 				if (paren == "yes") {
 					editorialQ = 1;
 					reportEditorialAccidentalToOwner();
 				}
-				// Sibelius method of adding parenthese to notes:
-    			//    <accidental cautionary="yes">natural</accidental>
+				// Respect explicit parentheses="no" on cautionary accidentals.
 				string caution = child.attribute("cautionary").value();
-				if (caution == "yes") {
-					editorialQ = 0; // do not make caution editorial
-					// reportEditorialAccidentalToOwner();
+				if ((caution == "yes") && (paren != "yes")) {
+					editorialQ = 0;
 				}
 			}
 			child = child.next_sibling();
