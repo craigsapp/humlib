@@ -636,8 +636,8 @@ void Tool_autocadence::addMatchToScore(HumdrumFile& infile, int matchIndex) {
 	int nindex = coord.at(2);
 	auto& info = m_sequences.at(vindex).at(pindex).at(nindex);
 	// get<0> is the sequence string.
-	HTp startL = get<1>(info);  // starting token of cadence formula, lower voice
-	HTp startU = get<2>(info);  // starting token of cadence formula, upper voice
+	HTp startL = std::get<1>(info);  // starting token of cadence formula, lower voice
+	HTp startU = std::get<2>(info);  // starting token of cadence formula, upper voice
 
 	if (startL == NULL) {
 		cerr << "WARNING: startL is NULL" << endl;
@@ -649,7 +649,7 @@ void Tool_autocadence::addMatchToScore(HumdrumFile& infile, int matchIndex) {
 	}
 
 	int lindex = startL->getLineIndex();
-	vector<int>& dindexes = get<3>(info);
+	vector<int>& dindexes = std::get<3>(info);
 	if (dindexes.empty()) {
 		cerr << "WARNING: dindexes is empty" << endl;
 		return;
@@ -891,7 +891,7 @@ bool Tool_autocadence::getCadenceEndSliceNotes(HTp& endL, HTp& endU, int count,
 			lineIndex++;
 			continue;
 		}
-		string& interval = get<0>(m_intervals.at(lineIndex).at(vindex).at(pindex));
+		string& interval = std::get<0>(m_intervals.at(lineIndex).at(vindex).at(pindex));
 		if (!interval.empty()) {
 			counter++;
 			if (counter == count) {
@@ -992,7 +992,7 @@ void Tool_autocadence::printMatchCount(void) {
 	int subcount = 0;
 	for (int i=0; i<(int)m_matches.size(); i++) {
 		auto& info = m_sequences.at(m_matches[i][0]).at(m_matches[i][1]).at(m_matches[i][2]);
-		vector<int>& matches = get<3>(info);
+		vector<int>& matches = std::get<3>(info);
 		subcount += (int)matches.size() - 1;
 	}
 
@@ -1055,7 +1055,7 @@ void Tool_autocadence::searchIntervalSequences(void) {
 	for (int i=0; i<(int)m_sequences.size(); i++) {
 		for (int j=0; j<(int)m_sequences[i].size(); j++) {
 			for (int k=0; k<(int)m_sequences[i][j].size(); k++) {
-				string& feature = get<0>(m_sequences.at(i).at(j).at(k));
+				string& feature = std::get<0>(m_sequences.at(i).at(j).at(k));
 				for (int m=0; m<(int)m_definitions.size(); m++) {
 					CadenceDefinition& def = m_definitions.at(m);
 					std::regex_constants::match_flag_type flags = std::regex_constants::match_default;
@@ -1063,7 +1063,7 @@ void Tool_autocadence::searchIntervalSequences(void) {
 						flags = std::regex_constants::match_continuous;
 					}
 					if (regex_search(feature, def.m_compiled, flags)) {
-						vector<int>& matches = get<3>(m_sequences.at(i).at(j).at(k));
+						vector<int>& matches = std::get<3>(m_sequences.at(i).at(j).at(k));
 						// cerr << "FOUND MATCH: " << m << endl;
 						matches.push_back(m);
 						m_matches.emplace_back(vector<int>{i, j, k});
@@ -1092,7 +1092,7 @@ void Tool_autocadence::prepareDefinitionList(set<int>& list) {
 		int& pindex = m_matches.at(i).at(1);
 		int& nindex = m_matches.at(i).at(2);
 		auto& info  = m_sequences.at(vindex).at(pindex).at(nindex);
-		vector<int>& matches = get<3>(info);
+		vector<int>& matches = std::get<3>(info);
 		for (int m=0; m<(int)matches.size(); m++) {
 			int dindex = matches.at(m);
 			list.insert(dindex);
@@ -1132,7 +1132,7 @@ void Tool_autocadence::printSequenceMatches(void) {
 		int& pindex = m_matches.at(i).at(1);
 		int& nindex = m_matches.at(i).at(2);
 		auto& info = m_sequences.at(vindex).at(pindex).at(nindex);
-		vector<int>& matches = get<3>(info);
+		vector<int>& matches = std::get<3>(info);
 		if (matches.empty()) {
 			continue;
 		}
@@ -1158,7 +1158,7 @@ void Tool_autocadence::printSequenceMatches(void) {
 		}
 
 		m_humdrum_text << "\t";
-		string& sequence = get<0>(info);
+		string& sequence = std::get<0>(info);
 		m_humdrum_text << sequence << endl;
 	}
 }
@@ -1174,8 +1174,8 @@ void Tool_autocadence::printSequenceMatches2(void) {
 			}
 			m_humdrum_text << "# Matches for voices " << (i+1) << " TO " << (i+1+j+1) << endl;
 			for (int k=0; k<(int)m_sequences.at(i).at(j).size(); k++) {
-				string& sequence = get<0>(m_sequences.at(i).at(j).at(k));
-				vector<int>& matches = get<3>(m_sequences.at(i).at(j).at(k));
+				string& sequence = std::get<0>(m_sequences.at(i).at(j).at(k));
+				vector<int>& matches = std::get<3>(m_sequences.at(i).at(j).at(k));
 				if (matches.empty()) {
 					continue;
 				}
@@ -1224,7 +1224,7 @@ void Tool_autocadence::printSequenceInfo(void) {
 			m_humdrum_text << endl;
 			m_humdrum_text << "# Sequences for voices " << (i+1) << " TO " << (i+1+j+1) << endl;
 			for (int k=0; k<(int)m_sequences[i][j].size(); k++) {
-				string& sequence = get<0>(m_sequences[i][j][k]);
+				string& sequence = std::get<0>(m_sequences[i][j][k]);
 				m_humdrum_text << sequence << endl;
 			}
 		}
@@ -1294,12 +1294,12 @@ void Tool_autocadence::prepareSinglePairSequences(HumdrumFile& infile, int vinde
 		if (!infile[i].isData()) {
 			continue;
 		}
-		string interval = get<0>(m_intervals.at(i).at(vindex).at(pindex));
+		string interval = std::get<0>(m_intervals.at(i).at(vindex).at(pindex));
 		if (interval.empty()) {
 			continue;
 		}
-		HTp lower = get<1>(m_intervals.at(i).at(vindex).at(pindex));
-		HTp upper = get<2>(m_intervals.at(i).at(vindex).at(pindex));
+		HTp lower = std::get<1>(m_intervals.at(i).at(vindex).at(pindex));
+		HTp upper = std::get<2>(m_intervals.at(i).at(vindex).at(pindex));
 		// Cadence formulas now start at the suspension itself.  Require a
 		// patient/agent pair (s/S against g/G), or a suspension without
 		// agent (m/M) against any other sounding voice.
@@ -1333,7 +1333,7 @@ void Tool_autocadence::prepareSinglePairSequences(HumdrumFile& infile, int vinde
 string Tool_autocadence::generateSequenceString(HumdrumFile& infile, int lindex, int vindex, int pindex) {
 	vector<string> pieces;
 	for (int i=lindex; i<infile.getLineCount(); i++) {
-		string interval = get<0>(m_intervals.at(i).at(vindex).at(pindex));
+		string interval = std::get<0>(m_intervals.at(i).at(vindex).at(pindex));
 		if (interval.empty()) {
 			continue;
 		}
@@ -1542,7 +1542,7 @@ void Tool_autocadence::printIntervalDataLine(HumdrumFile& infile, int index, int
 			int vindex = m_trackToVoiceIndex.at(track);
 			int tcount = kcount - vindex - 1;
 			for (int j=0; j<tcount; j++) {
-				string value = get<0>(m_intervals.at(index).at(vindex).at(j));
+				string value = std::get<0>(m_intervals.at(index).at(vindex).at(j));
 				if (value == "") {
 					value = ".";
 				}
@@ -1606,7 +1606,7 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 			int vindex = m_trackToVoiceIndex.at(track);
 			int tcount = kcount - vindex - 1;
 			for (int j=0; j<tcount; j++) {
-				string value = get<0>(m_intervals.at(index).at(vindex).at(j));
+				string value = std::get<0>(m_intervals.at(index).at(vindex).at(j));
 				if (value == "") {
 					value = ".";
 				}
@@ -3188,8 +3188,8 @@ void Tool_autocadence::prepareIntervalInfo(HumdrumFile& infile) {
 			int pcount = vcount - j - 1;
 			m_intervals[i][j].resize(pcount);
 			for (int k=0; k<pcount; k++) {
-				get<1>(m_intervals[i][j][k]) = NULL;
-				get<2>(m_intervals[i][j][k]) = NULL;
+				std::get<1>(m_intervals[i][j][k]) = NULL;
+				std::get<2>(m_intervals[i][j][k]) = NULL;
 			}
 		}
 	}
