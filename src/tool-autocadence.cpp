@@ -3894,7 +3894,7 @@ void Tool_autocadence::prepareCadenceLabels(void) {
 	{"CLT",  "Leaping Contratenor"},
 	{"CLTz", "Leaping Contratenor"},
 	{"CP",   "Incomplete 9-8-5"},
-	{"Pc",   ""},
+	{"Pc",   "Evaded 9-8-5"},
 	{"CPT",  "9-8-5"},
 	{"CPTz", "9-8-5"},
 	{"CPt",  "Evaded 9-8-5"},

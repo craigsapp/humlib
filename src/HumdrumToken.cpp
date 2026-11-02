@@ -1341,6 +1341,11 @@ bool HumdrumToken::isStaff(void) const {
 //
 
 bool HumdrumToken::isRest(void) {
+	if (!isData()) {
+		// Comments and interpretations are never rests, even if they
+		// contain an "r" (such as "!LO:TX:color=red").
+		return false;
+	}
 	if (isKernLike()) {
 		if (isChord()) {
 			// rests are not allowed in chords, so return false if
