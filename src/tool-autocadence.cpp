@@ -1026,6 +1026,9 @@ void Tool_autocadence::printCadenceTable(void) {
 
 	m_humdrum_text.str("");
 	m_humdrum_text << "**count\t**cadence" << endl;
+	// *cdata tells kernify (run by verovio on staffless input) to render
+	// these spines as text (**cdata-*) instead of hiding them (**xcdata-*).
+	m_humdrum_text << "*cdata\t*cdata" << endl;
 	for (int i=0; i<(int)rows.size(); i++) {
 		m_humdrum_text << rows[i].second << "\t" << rows[i].first << endl;
 	}
