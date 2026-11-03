@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Nov  3 17:28:45 CET 2026
+// Last Modified: Tue Nov  3 20:55:17 CET 2026
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -6257,8 +6257,10 @@ class Tool_autocadence : public HumTool {
 		bool        meetsAuthenticBCriteria    (HumdrumFile& infile, int index);
 		double      getAuthenticBStrength      (HumdrumFile& infile, int index,
 		                                        const std::string& cvflabel);
-		std::string getAuthenticBStrengthText  (HumdrumFile& infile, int index,
-		                                        const std::string& cvflabel);
+		std::string getAuthenticBStrengthText  (double strength);
+		std::string getAuthenticBCategory      (double strength);
+		std::string writeAuthenticBLine        (std::ostream& out, const std::string& label,
+		                                        double strength);
 		bool        hasFifthAsHighestNote      (HumdrumFile& infile, int index);
 		bool        hasLongArrivalNotes        (HumdrumFile& infile, int index);
 		bool        hasRealVoiceBassizans      (HumdrumFile& infile, int index);
@@ -6410,6 +6412,7 @@ class Tool_autocadence : public HumTool {
 		bool m_repeatQ                  = false; // -r: allow repeated notes
 		bool m_infoQ                    = false; // -i print info only
 		bool m_tableQ                   = false; // -t: print cadence-type count table
+		int  m_authenticLabels          = 1;     // -a: AuthenticB label mode (1-4, default 1)
 		bool m_fileQ                    = false; // -f print filename info
 		bool m_lastQ                    = false;  // -L
 		bool m_markupQ                  = false; // -M

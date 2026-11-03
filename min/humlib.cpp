@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Nov  3 17:28:45 CET 2026
+// Last Modified: Tue Nov  3 20:55:17 CET 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -61523,6 +61523,7 @@ Tool_autocadence::Tool_autocadence(void) {
 	define("count|match-count=b",        "Return number of cadence formulas that match");
 	define("i|info=b",                   "Show only information not score");
 	define("t|cadence-table=b",          "Show a table of the counts of each cadence label");
+	define("a|authentic-labels=i:1",     "AuthenticB labels (default 1): 1=text, 2=text+attenuated, 3=decimal, 4=decimal+attenuated");
 
 	define("M|analytic-markup|markup=b", "Show melodic interval to last note");
 	define("L|last-melody=b",            "Show melodic interval to last note");
@@ -61604,6 +61605,7 @@ void Tool_autocadence::initialize(void) {
 	m_repeatQ                  =  getBoolean("repeat");
 	m_infoQ                    =  getBoolean("info");
 	m_tableQ                   =  getBoolean("cadence-table");
+	m_authenticLabels          =  getInteger("authentic-labels");
 	m_lowestQ                  =  getBoolean("lowest");
 	m_showSuspensionsQ         = !getBoolean("do-not-show-suspensions");
 	m_markupQ                  =  getBoolean("analytic-markup");
@@ -63070,32 +63072,36 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 					infolabel = "Phrygian " + infolabel;
 				}
 			}
-			cadence = infolabel;
-			HumRegex hre;
-			hre.replaceDestructive(cadence, "\\n", " ", "g");
-			if (cadence.find("\\n") != std::string::npos) {
-				cadence += "\\n";
-			}
-			cadenceline << "!!LO:TX:a:B:rj:color=red:cadence:t=";
-			cadenceline << cadence;
 			if (authenticBQ) {
-				cadenceline << "\\n" << getAuthenticBStrengthText(infile, index, slabel);
+				double strength = getAuthenticBStrength(infile, index, slabel);
+				infolabel = writeAuthenticBLine(cadenceline, infolabel, strength);
+			} else {
+				cadence = infolabel;
+				HumRegex hre;
+				hre.replaceDestructive(cadence, "\\n", " ", "g");
+				if (cadence.find("\\n") != std::string::npos) {
+					cadence += "\\n";
+				}
+				cadenceline << "!!LO:TX:a:B:rj:color=red:cadence:t=";
+				cadenceline << cadence;
 			}
-			if (m_tableQ) {
+			// A hidden (comment-only) AuthenticB returns an empty label and
+			// is left out of -t and -i.
+			if (m_tableQ && !infolabel.empty()) {
 				m_cadenceTypeCounts[infolabel]++;
 			}
-			if (m_infoQ) {
+			if (m_infoQ && !infolabel.empty()) {
 				m_info << "cvf=" << slabel << "\tcadence=" << infolabel << "\\nZZZ" << "\tM=" << m_barnum.at(index) << "\tfile=" << infile.getFilename() << endl;
 			}
 		}
 	} else if (meetsAuthenticBCriteria(infile, index)) {
-		cadenceline << "!!LO:TX:a:B:rj:color=red:cadence:t=AuthenticB";
-		cadenceline << "\\n" << getAuthenticBStrengthText(infile, index, "");
-		if (m_tableQ) {
-			m_cadenceTypeCounts["AuthenticB"]++;
+		double strength = getAuthenticBStrength(infile, index, "");
+		string infolabel = writeAuthenticBLine(cadenceline, "AuthenticB", strength);
+		if (m_tableQ && !infolabel.empty()) {
+			m_cadenceTypeCounts[infolabel]++;
 		}
-		if (m_infoQ) {
-			m_info << "cvf=\tcadence=AuthenticB\\nZZZ" << "\tM=" << m_barnum.at(index) << "\tfile=" << infile.getFilename() << endl;
+		if (m_infoQ && !infolabel.empty()) {
+			m_info << "cvf=\tcadence=" << infolabel << "\\nZZZ" << "\tM=" << m_barnum.at(index) << "\tfile=" << infile.getFilename() << endl;
 		}
 	}
 
@@ -63558,12 +63564,80 @@ double Tool_autocadence::getAuthenticBStrength(HumdrumFile& infile, int index,
 //     with 3 decimal places, such as "0.667".
 //
 
-string Tool_autocadence::getAuthenticBStrengthText(HumdrumFile& infile, int index,
-		const string& cvflabel) {
-	double strength = getAuthenticBStrength(infile, index, cvflabel);
+string Tool_autocadence::getAuthenticBStrengthText(double strength) {
 	char buffer[32];
 	snprintf(buffer, sizeof(buffer), "%.3f", strength);
 	return buffer;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::getAuthenticBCategory -- Strength category for -a 1/2:
+//     "Strong AuthenticB" (>= 0.75), "Weak AuthenticB" (>= 0.45) or
+//     "Attenuated Authentic" (< 0.45).
+//
+
+string Tool_autocadence::getAuthenticBCategory(double strength) {
+	if (strength >= 0.75) {
+		return "Strong AuthenticB";
+	} else if (strength >= 0.45) {
+		return "Weak AuthenticB";
+	}
+	return "Attenuated Authentic";
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::writeAuthenticBLine -- Write the cadence line for an
+//     AuthenticB moment.  label is "AuthenticB", possibly with a prefix
+//     such as "Phrygian ".  Modes for -a (--authentic-labels):
+//        1: text category (Strong/Weak AuthenticB, Attenuated Authentic);
+//           Attenuated written as a comment that verovio does not display
+//        2: same as 1, with Attenuated displayed
+//        3: decimal strength; Attenuated written as a hidden comment
+//        4: decimal strength, all displayed
+//     Default is mode 1.  Returns the label used for -t counts and -i info:
+//     the category in modes 1/2, or "AuthenticB 0.500" style in modes 3/4.
+//     Returns an empty string for a hidden cadence, which -t and -i skip.
+//
+
+string Tool_autocadence::writeAuthenticBLine(ostream& out, const string& label,
+		double strength) {
+	int mode = m_authenticLabels;
+	if ((mode < 1) || (mode > 4)) {
+		mode = 1;
+	}
+	bool textQ = (mode <= 2);
+	bool hiddenQ = ((mode == 1) || (mode == 3)) &&
+			(getAuthenticBCategory(strength) == "Attenuated Authentic");
+
+	string output = label;
+	if (textQ) {
+		size_t pos = output.find("AuthenticB");
+		if (pos != string::npos) {
+			output.replace(pos, 10, getAuthenticBCategory(strength));
+		}
+	}
+	string strengthText = getAuthenticBStrengthText(strength);
+
+	if (hiddenQ) {
+		// Plain global comment: kept in the score but not typeset.
+		out << "!!" << output;
+		if (!textQ) {
+			out << ": " << strengthText;
+		}
+		return "";
+	}
+	out << "!!LO:TX:a:B:rj:color=red:cadence:t=" << output;
+	if (textQ) {
+		return output;
+	}
+	out << "\\n" << strengthText;
+	return output + " " + strengthText;
 }
 
 
