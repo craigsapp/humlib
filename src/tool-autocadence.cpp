@@ -134,7 +134,7 @@ Tool_autocadence::Tool_autocadence(void) {
 	define("count|match-count=b",        "Return number of cadence formulas that match");
 	define("i|info=b",                   "Show only information not score");
 	define("t|cadence-table=b",          "Show a table of the counts of each cadence label");
-	define("a|authentic-labels=i:1",     "AuthenticB labels (default 1): 1=text, 2=text+attenuated, 3=decimal, 4=decimal+attenuated");
+	define("a|authentic-labels=i:1",     "Authentic strength labels (default 1): 0=skip semplici, 1=text, 2=text+attenuated, 3=decimal, 4=decimal+attenuated");
 
 	define("M|analytic-markup|markup=b", "Show melodic interval to last note");
 	define("L|last-melody=b",            "Show melodic interval to last note");
@@ -217,6 +217,9 @@ void Tool_autocadence::initialize(void) {
 	m_infoQ                    =  getBoolean("info");
 	m_tableQ                   =  getBoolean("cadence-table");
 	m_authenticLabels          =  getInteger("authentic-labels");
+	if ((m_authenticLabels < 0) || (m_authenticLabels > 4)) {
+		m_authenticLabels = 1;
+	}
 	m_lowestQ                  =  getBoolean("lowest");
 	m_showSuspensionsQ         = !getBoolean("do-not-show-suspensions");
 	m_markupQ                  =  getBoolean("analytic-markup");
@@ -315,7 +318,10 @@ void Tool_autocadence::processFile(HumdrumFile& infile) {
 		}
 	}
 
-	prepareAuthenticBAnalyses(infile);
+	// -a 0: skip Cadenze Semplici, leaving only the CVF cadence analysis.
+	if (m_authenticLabels != 0) {
+		prepareCadenzeSempliciAnalyses(infile);
+	}
 
 	// markup score with matches and CVF
 	markupScore(infile);
@@ -1666,12 +1672,16 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 			}
 		}
 	}
+	// Cadenze Semplici (every hard criterion passes) are labeled "Authentic"
+	// with a strength, overriding any CVF label and not requiring a CVF
+	// match.  A CVF-table "Authentic" has no strength attached.
+	bool sempliciQ = (m_authenticLabels != 0) &&
+			meetsCadenzeSempliciCriteria(infile, index);
 	if (!clabel.empty()) {
 		string slabel = sortUniqueChars(clabel);
-		string cadence = getCadenceLabel(slabel, infile, index);
+		string cadence = sempliciQ ? "Authentic" : getCadenceLabel(slabel);
 		// Empty string = suppressor entry in m_cadenceLabels: no cadence annotation.
 		if (!cadence.empty()) {
-			bool authenticBQ = (cadence == "AuthenticB");
 			string infolabel = cadence;
 			bool isPhrygian = getPhrygian(infile, index);
 			if (isPhrygian) {
@@ -1683,9 +1693,9 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 					infolabel = "Phrygian " + infolabel;
 				}
 			}
-			if (authenticBQ) {
-				double strength = getAuthenticBStrength(infile, index, slabel);
-				infolabel = writeAuthenticBLine(cadenceline, infolabel, strength);
+			if (sempliciQ) {
+				double strength = getCadenzeSempliciStrength(infile, index, slabel);
+				infolabel = writeCadenzeSempliciLine(cadenceline, infolabel, strength);
 			} else {
 				cadence = infolabel;
 				HumRegex hre;
@@ -1696,7 +1706,7 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 				cadenceline << "!!LO:TX:a:B:rj:color=red:cadence:t=";
 				cadenceline << cadence;
 			}
-			// A hidden (comment-only) AuthenticB returns an empty label and
+			// A hidden (comment-only) Cadenze Semplici returns an empty label and
 			// is left out of -t and -i.
 			if (m_tableQ && !infolabel.empty()) {
 				m_cadenceTypeCounts[infolabel]++;
@@ -1705,9 +1715,9 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 				m_info << "cvf=" << slabel << "\tcadence=" << infolabel << "\\nZZZ" << "\tM=" << m_barnum.at(index) << "\tfile=" << infile.getFilename() << endl;
 			}
 		}
-	} else if (meetsAuthenticBCriteria(infile, index)) {
-		double strength = getAuthenticBStrength(infile, index, "");
-		string infolabel = writeAuthenticBLine(cadenceline, "AuthenticB", strength);
+	} else if (sempliciQ) {
+		double strength = getCadenzeSempliciStrength(infile, index, "");
+		string infolabel = writeCadenzeSempliciLine(cadenceline, "Authentic", strength);
 		if (m_tableQ && !infolabel.empty()) {
 			m_cadenceTypeCounts[infolabel]++;
 		}
@@ -1824,19 +1834,15 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 
 //////////////////////////////
 //
-// Tool_autocadence::getCadenceLabel -- Look up the CVF combination label,
-//     then apply AuthenticB if every AuthenticB hard criterion passes.
-//     AuthenticB does not require a CVF match; that case is handled when
-//     printing a line that has no CVF labels.
+// Tool_autocadence::getCadenceLabel -- Look up the CVF combination label.
+//     Cadenze Semplici are checked separately by the caller, since they
+//     override the CVF label.
 //     Returns "UNKNOWN" for CVF combos absent from m_cadenceLabels.
 //     Returns an empty string for suppressor entries (explicit "" values),
 //     which means no cadence annotation should be written.
 //
 
-string Tool_autocadence::getCadenceLabel(const string& cvflabel, HumdrumFile &infile, int index) {
-	if (meetsAuthenticBCriteria(infile, index)) {
-		return "AuthenticB";
-	}
+string Tool_autocadence::getCadenceLabel(const string& cvflabel) {
 	auto it = m_cadenceLabels.find(cvflabel);
 	if (it == m_cadenceLabels.end()) {
 		return "UNKNOWN";
@@ -1848,11 +1854,11 @@ string Tool_autocadence::getCadenceLabel(const string& cvflabel, HumdrumFile &in
 
 //////////////////////////////
 //
-// Tool_autocadence::prepareAuthenticBAnalyses -- Run supporting analyses used
-//     by AuthenticB.  Add new strand preparations here as they are introduced.
+// Tool_autocadence::prepareCadenzeSempliciAnalyses -- Run supporting analyses used
+//     by Cadenze Semplici.  Add new strand preparations here as they are introduced.
 //
 
-void Tool_autocadence::prepareAuthenticBAnalyses(HumdrumFile& infile) {
+void Tool_autocadence::prepareCadenzeSempliciAnalyses(HumdrumFile& infile) {
 	prepareClosingCounts(infile);
 	prepareExtremisBass(infile);
 	prepareAverageNoteDuration(infile);
@@ -2075,12 +2081,13 @@ void Tool_autocadence::prepareClosingCounts(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_autocadence::meetsAuthenticBCriteria -- Hard criteria: every check
-//     here must pass before a moment is labeled AuthenticB.  How strong the
-//     cadence is gets decided afterwards by getAuthenticBStrength().
+// Tool_autocadence::meetsCadenzeSempliciCriteria -- Hard criteria: every check
+//     here must pass before a moment is labeled as a Cadenze Semplici
+//     ("Authentic" with a strength).  How strong the
+//     cadence is gets decided afterwards by getCadenzeSempliciStrength().
 //
 
-bool Tool_autocadence::meetsAuthenticBCriteria(HumdrumFile& infile, int index) {
+bool Tool_autocadence::meetsCadenzeSempliciCriteria(HumdrumFile& infile, int index) {
 	// Hard 1: extremis lowest line approaches by an "incorrect" bassizans
 	// (falling fifth or rising fourth), including voice transfers.
 	if (!hasIncorrectBassizans(index)) {
@@ -2106,15 +2113,15 @@ bool Tool_autocadence::meetsAuthenticBCriteria(HumdrumFile& infile, int index) {
 
 //////////////////////////////
 //
-// Tool_autocadence::getAuthenticBStrength -- Soft criteria for a moment that
-//     already passed meetsAuthenticBCriteria().  Each satisfied criterion
+// Tool_autocadence::getCadenzeSempliciStrength -- Soft criteria for a moment that
+//     already passed meetsCadenzeSempliciCriteria().  Each satisfied criterion
 //     scores 1, the total is normalized by the number of criteria to the
 //     range 0..1, and rounded to 3 decimal places.  cvflabel is the sorted
 //     CVF combination at the arrival (empty when there are no CVF labels).
 //     Add further soft criteria as additional checks below.
 //
 
-double Tool_autocadence::getAuthenticBStrength(HumdrumFile& infile, int index,
+double Tool_autocadence::getCadenzeSempliciStrength(HumdrumFile& infile, int index,
 		const string& cvflabel) {
 	int score = 0;
 	int total = 0;
@@ -2171,11 +2178,11 @@ double Tool_autocadence::getAuthenticBStrength(HumdrumFile& infile, int index,
 
 //////////////////////////////
 //
-// Tool_autocadence::getAuthenticBStrengthText -- AuthenticB strength printed
+// Tool_autocadence::getCadenzeSempliciStrengthText -- Cadenze Semplici strength printed
 //     with 3 decimal places, such as "0.667".
 //
 
-string Tool_autocadence::getAuthenticBStrengthText(double strength) {
+string Tool_autocadence::getCadenzeSempliciStrengthText(double strength) {
 	char buffer[32];
 	snprintf(buffer, sizeof(buffer), "%.3f", strength);
 	return buffer;
@@ -2185,16 +2192,16 @@ string Tool_autocadence::getAuthenticBStrengthText(double strength) {
 
 //////////////////////////////
 //
-// Tool_autocadence::getAuthenticBCategory -- Strength category for -a 1/2:
-//     "Strong AuthenticB" (>= 0.75), "Weak AuthenticB" (>= 0.45) or
+// Tool_autocadence::getCadenzeSempliciCategory -- Strength category for -a 1/2:
+//     "Strong Authentic" (>= 0.75), "Weak Authentic" (>= 0.45) or
 //     "Attenuated Authentic" (< 0.45).
 //
 
-string Tool_autocadence::getAuthenticBCategory(double strength) {
+string Tool_autocadence::getCadenzeSempliciCategory(double strength) {
 	if (strength >= 0.75) {
-		return "Strong AuthenticB";
+		return "Strong Authentic";
 	} else if (strength >= 0.45) {
-		return "Weak AuthenticB";
+		return "Weak Authentic";
 	}
 	return "Attenuated Authentic";
 }
@@ -2203,37 +2210,35 @@ string Tool_autocadence::getAuthenticBCategory(double strength) {
 
 //////////////////////////////
 //
-// Tool_autocadence::writeAuthenticBLine -- Write the cadence line for an
-//     AuthenticB moment.  label is "AuthenticB", possibly with a prefix
+// Tool_autocadence::writeCadenzeSempliciLine -- Write the cadence line for a
+//     Cadenze Semplici moment.  label is "Authentic", possibly with a prefix
 //     such as "Phrygian ".  Modes for -a (--authentic-labels):
-//        1: text category (Strong/Weak AuthenticB, Attenuated Authentic);
+//        0: Cadenze Semplici analysis skipped (this function is not called)
+//        1: text category (Strong/Weak/Attenuated Authentic);
 //           Attenuated written as a comment that verovio does not display
 //        2: same as 1, with Attenuated displayed
 //        3: decimal strength; Attenuated written as a hidden comment
 //        4: decimal strength, all displayed
 //     Default is mode 1.  Returns the label used for -t counts and -i info:
-//     the category in modes 1/2, or "AuthenticB 0.500" style in modes 3/4.
+//     the category in modes 1/2, or "Authentic 0.500" style in modes 3/4.
 //     Returns an empty string for a hidden cadence, which -t and -i skip.
 //
 
-string Tool_autocadence::writeAuthenticBLine(ostream& out, const string& label,
+string Tool_autocadence::writeCadenzeSempliciLine(ostream& out, const string& label,
 		double strength) {
 	int mode = m_authenticLabels;
-	if ((mode < 1) || (mode > 4)) {
-		mode = 1;
-	}
 	bool textQ = (mode <= 2);
 	bool hiddenQ = ((mode == 1) || (mode == 3)) &&
-			(getAuthenticBCategory(strength) == "Attenuated Authentic");
+			(getCadenzeSempliciCategory(strength) == "Attenuated Authentic");
 
 	string output = label;
 	if (textQ) {
-		size_t pos = output.find("AuthenticB");
+		size_t pos = output.find("Authentic");
 		if (pos != string::npos) {
-			output.replace(pos, 10, getAuthenticBCategory(strength));
+			output.replace(pos, 9, getCadenzeSempliciCategory(strength));
 		}
 	}
-	string strengthText = getAuthenticBStrengthText(strength);
+	string strengthText = getCadenzeSempliciStrengthText(strength);
 
 	if (hiddenQ) {
 		// Plain global comment: kept in the score but not typeset.
@@ -2537,7 +2542,7 @@ bool Tool_autocadence::hasRealVoiceBassizans(HumdrumFile& infile, int index) {
 //     events from Tool_extremis, then store the melodic interval from the
 //     previous event on the input line where each note event starts.
 //     Continuation lines of an event (null tokens and tie sustainations)
-//     keep 0 so AuthenticB labels only the bass arrival.
+//     keep 0 so Cadenze Semplici labels only the bass arrival.
 //
 
 void Tool_autocadence::prepareExtremisBass(HumdrumFile& infile) {
@@ -2619,7 +2624,7 @@ bool Tool_autocadence::hasIncorrectBassizans(int index) {
 //
 // Tool_autocadence::hasClosingVoicesAtArrival -- True when the closing-voice
 //     count at the cadential arrival is greater than 0.  A 0 (or non-data
-//     line) blocks the AuthenticB label.
+//     line) blocks the Cadenze Semplici label.
 //
 
 bool Tool_autocadence::hasClosingVoicesAtArrival(int index) {

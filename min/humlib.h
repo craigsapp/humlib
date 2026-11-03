@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Nov  3 20:55:17 CET 2026
+// Last Modified: Tue Nov  3 21:17:34 CET 2026
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -6246,20 +6246,20 @@ class Tool_autocadence : public HumTool {
 		int         getSignedSemitoneHarmonic  (HTp lower, HTp upper);
 		std::string getIntervalName            (const std::string& b40);
 		std::string getTriadData               (HumdrumFile& infile, int line);
-		std::string getCadenceLabel            (const std::string& cvflabel, HumdrumFile& infile, int index);
-		void        prepareAuthenticBAnalyses  (HumdrumFile& infile);
+		std::string getCadenceLabel            (const std::string& cvflabel);
+		void        prepareCadenzeSempliciAnalyses (HumdrumFile& infile);
 		void        prepareClosingCounts       (HumdrumFile& infile);
 		void        prepareExtremisBass        (HumdrumFile& infile);
 		void        prepareAverageNoteDuration (HumdrumFile& infile);
 		void        prepareMensurationChanges  (HumdrumFile& infile);
 		void        preparePlineAttacks        (HumdrumFile& infile);
 		void        prepareMetricPositions     (HumdrumFile& infile);
-		bool        meetsAuthenticBCriteria    (HumdrumFile& infile, int index);
-		double      getAuthenticBStrength      (HumdrumFile& infile, int index,
+		bool        meetsCadenzeSempliciCriteria (HumdrumFile& infile, int index);
+		double      getCadenzeSempliciStrength (HumdrumFile& infile, int index,
 		                                        const std::string& cvflabel);
-		std::string getAuthenticBStrengthText  (double strength);
-		std::string getAuthenticBCategory      (double strength);
-		std::string writeAuthenticBLine        (std::ostream& out, const std::string& label,
+		std::string getCadenzeSempliciStrengthText (double strength);
+		std::string getCadenzeSempliciCategory (double strength);
+		std::string writeCadenzeSempliciLine (std::ostream& out, const std::string& label,
 		                                        double strength);
 		bool        hasFifthAsHighestNote      (HumdrumFile& infile, int index);
 		bool        hasLongArrivalNotes        (HumdrumFile& infile, int index);
@@ -6372,7 +6372,7 @@ class Tool_autocadence : public HumTool {
 		std::vector<int> m_extremisB40;
 
 		// m_averageNoteDuration: mean tied duration (in quarter notes) of all
-		// note attacks in the piece, used by the AuthenticB soft criteria.
+		// note attacks in the piece, used by the Cadenze Semplici soft criteria.
 		double m_averageNoteDuration = 0.0;
 
 		// m_mensurationChanges: true on interpretation lines where a **kern
@@ -6412,7 +6412,7 @@ class Tool_autocadence : public HumTool {
 		bool m_repeatQ                  = false; // -r: allow repeated notes
 		bool m_infoQ                    = false; // -i print info only
 		bool m_tableQ                   = false; // -t: print cadence-type count table
-		int  m_authenticLabels          = 1;     // -a: AuthenticB label mode (1-4, default 1)
+		int  m_authenticLabels          = 1;     // -a: Cadenze Semplici label mode (0-4, default 1; 0 = skip analysis)
 		bool m_fileQ                    = false; // -f print filename info
 		bool m_lastQ                    = false;  // -L
 		bool m_markupQ                  = false; // -M
