@@ -123,6 +123,7 @@ class Tool_autocadence : public HumTool {
 		std::string getIntervalName            (const std::string& b40);
 		std::string getTriadData               (HumdrumFile& infile, int line);
 		std::string getCadenceLabel            (const std::string& cvflabel);
+		std::string getCadenceDisplayText      (const std::string& label);
 		void        prepareCadenzeSempliciAnalyses (HumdrumFile& infile);
 		void        prepareClosingCounts       (HumdrumFile& infile);
 		void        prepareExtremisBass        (HumdrumFile& infile);

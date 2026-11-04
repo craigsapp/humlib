@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Nov  4 12:16:22 CET 2026
+// Last Modified: Wed Nov  4 12:31:25 CET 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -63085,14 +63085,8 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 				double strength = getCadenzeSempliciStrength(infile, index, slabel);
 				infolabel = writeCadenzeSempliciLine(cadenceline, infolabel, strength);
 			} else {
-				cadence = infolabel;
-				HumRegex hre;
-				hre.replaceDestructive(cadence, "\\n", " ", "g");
-				if (cadence.find("\\n") != std::string::npos) {
-					cadence += "\\n";
-				}
 				cadenceline << "!!LO:TX:a:B:rj:color=red:cadence:t=";
-				cadenceline << cadence;
+				cadenceline << getCadenceDisplayText(infolabel);
 			}
 			// A hidden (comment-only) Cadenze Semplici returns an empty label and
 			// is left out of -t and -i.
@@ -63218,6 +63212,26 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 		m_humdrum_text << dataline.str() << endl;
 	}
 }
+
+
+//////////////////////////////
+//
+// Tool_autocadence::getCadenceDisplayText -- Cadence label as typeset in
+//     the score: one word per line (spaces become "\\n"), with a final
+//     "\\n" when the label has more than one line, such as
+//     "Evaded\\nClausula\\nVera\\n".  -t and -i keep the spaces.
+//
+
+string Tool_autocadence::getCadenceDisplayText(const string& label) {
+	string output = label;
+	HumRegex hre;
+	hre.replaceDestructive(output, "\\n", " ", "g");
+	if (output.find("\\n") != std::string::npos) {
+		output += "\\n";
+	}
+	return output;
+}
+
 
 
 //////////////////////////////
@@ -63642,12 +63656,11 @@ string Tool_autocadence::writeCadenzeSempliciLine(ostream& out, const string& la
 		}
 		return "";
 	}
-	out << "!!LO:TX:a:B:rj:color=red:cadence:t=" << output;
-	if (textQ) {
-		return output;
+	if (!textQ) {
+		output += " " + strengthText;
 	}
-	out << "\\n" << strengthText;
-	return output + " " + strengthText;
+	out << "!!LO:TX:a:B:rj:color=red:cadence:t=" << getCadenceDisplayText(output);
+	return output;
 }
 
 

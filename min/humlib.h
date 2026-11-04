@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Nov  4 12:16:22 CET 2026
+// Last Modified: Wed Nov  4 12:31:25 CET 2026
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -6247,6 +6247,7 @@ class Tool_autocadence : public HumTool {
 		std::string getIntervalName            (const std::string& b40);
 		std::string getTriadData               (HumdrumFile& infile, int line);
 		std::string getCadenceLabel            (const std::string& cvflabel);
+		std::string getCadenceDisplayText      (const std::string& label);
 		void        prepareCadenzeSempliciAnalyses (HumdrumFile& infile);
 		void        prepareClosingCounts       (HumdrumFile& infile);
 		void        prepareExtremisBass        (HumdrumFile& infile);
