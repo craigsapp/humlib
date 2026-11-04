@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Nov  3 21:17:34 CET 2026
+// Last Modified: Wed Nov  4 12:16:22 CET 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -61523,7 +61523,7 @@ Tool_autocadence::Tool_autocadence(void) {
 	define("count|match-count=b",        "Return number of cadence formulas that match");
 	define("i|info=b",                   "Show only information not score");
 	define("t|cadence-table=b",          "Show a table of the counts of each cadence label");
-	define("a|authentic-labels=i:1",     "Authentic strength labels (default 1): 0=skip, 1=text, 2=text+attenuated, 3=decimal, 4=decimal+attenuated");
+	define("a|authentic-labels=i:1",     "Authentic strength labels (default 1): 0=skip semplici, 1=text, 2=text+attenuated, 3=decimal, 4=decimal+attenuated");
 
 	define("M|analytic-markup|markup=b", "Show melodic interval to last note");
 	define("L|last-melody=b",            "Show melodic interval to last note");
@@ -61707,7 +61707,6 @@ void Tool_autocadence::processFile(HumdrumFile& infile) {
 		}
 	}
 
-	// -a 0: skip Cadenze Semplici, leaving only the CVF cadence analysis.
 	if (m_authenticLabels != 0) {
 		prepareCadenzeSempliciAnalyses(infile);
 	}
@@ -63062,7 +63061,7 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 		}
 	}
 	// Cadenze Semplici (every hard criterion passes) are labeled "Authentic"
-	// with a strength, overriding any CVF label and not requiring a CVF
+	// with a strength, overriding any CVF-based label and not requiring a CVF
 	// match.  A CVF-table "Authentic" has no strength attached.
 	bool sempliciQ = (m_authenticLabels != 0) &&
 			meetsCadenzeSempliciCriteria(infile, index);
@@ -63473,7 +63472,7 @@ void Tool_autocadence::prepareClosingCounts(HumdrumFile& infile) {
 // Tool_autocadence::meetsCadenzeSempliciCriteria -- Hard criteria: every check
 //     here must pass before a moment is labeled as a Cadenze Semplici
 //     ("Authentic" with a strength).  How strong the
-//     cadence is gets decided afterwards by getCadenzeSempliciStrength().
+//     cadence is determined by getCadenzeSempliciStrength().
 //
 
 bool Tool_autocadence::meetsCadenzeSempliciCriteria(HumdrumFile& infile, int index) {
@@ -63568,13 +63567,19 @@ double Tool_autocadence::getCadenzeSempliciStrength(HumdrumFile& infile, int ind
 //////////////////////////////
 //
 // Tool_autocadence::getCadenzeSempliciStrengthText -- Cadenze Semplici strength printed
-//     with 3 decimal places, such as "0.667".
+//     with up to 3 decimal places and trailing zeros dropped, such as
+//     "0.667", "0.3", "1.0" or "0.0".
 //
 
 string Tool_autocadence::getCadenzeSempliciStrengthText(double strength) {
 	char buffer[32];
 	snprintf(buffer, sizeof(buffer), "%.3f", strength);
-	return buffer;
+	string output = buffer;
+	output.erase(output.find_last_not_of('0') + 1);
+	if (!output.empty() && (output.back() == '.')) {
+		output += '0';
+	}
+	return output;
 }
 
 
@@ -63609,7 +63614,7 @@ string Tool_autocadence::getCadenzeSempliciCategory(double strength) {
 //        3: decimal strength; Attenuated written as a hidden comment
 //        4: decimal strength, all displayed
 //     Default is mode 1.  Returns the label used for -t counts and -i info:
-//     the category in modes 1/2, or "Authentic 0.500" style in modes 3/4.
+//     the category in modes 1/2, or "Authentic 0.5" style in modes 3/4.
 //     Returns an empty string for a hidden cadence, which -t and -i skip.
 //
 
@@ -63931,7 +63936,7 @@ bool Tool_autocadence::hasRealVoiceBassizans(HumdrumFile& infile, int index) {
 //     events from Tool_extremis, then store the melodic interval from the
 //     previous event on the input line where each note event starts.
 //     Continuation lines of an event (null tokens and tie sustainations)
-//     keep 0 so Cadenze Semplici labels only the bass arrival.
+//     keep 0 so cadence labels only apply to the bass arrival.
 //
 
 void Tool_autocadence::prepareExtremisBass(HumdrumFile& infile) {

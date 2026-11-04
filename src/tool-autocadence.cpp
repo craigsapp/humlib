@@ -2178,13 +2178,19 @@ double Tool_autocadence::getCadenzeSempliciStrength(HumdrumFile& infile, int ind
 //////////////////////////////
 //
 // Tool_autocadence::getCadenzeSempliciStrengthText -- Cadenze Semplici strength printed
-//     with 3 decimal places, such as "0.667".
+//     with up to 3 decimal places and trailing zeros dropped, such as
+//     "0.667", "0.3", "1.0" or "0.0".
 //
 
 string Tool_autocadence::getCadenzeSempliciStrengthText(double strength) {
 	char buffer[32];
 	snprintf(buffer, sizeof(buffer), "%.3f", strength);
-	return buffer;
+	string output = buffer;
+	output.erase(output.find_last_not_of('0') + 1);
+	if (!output.empty() && (output.back() == '.')) {
+		output += '0';
+	}
+	return output;
 }
 
 
@@ -2219,7 +2225,7 @@ string Tool_autocadence::getCadenzeSempliciCategory(double strength) {
 //        3: decimal strength; Attenuated written as a hidden comment
 //        4: decimal strength, all displayed
 //     Default is mode 1.  Returns the label used for -t counts and -i info:
-//     the category in modes 1/2, or "Authentic 0.500" style in modes 3/4.
+//     the category in modes 1/2, or "Authentic 0.5" style in modes 3/4.
 //     Returns an empty string for a hidden cadence, which -t and -i skip.
 //
 

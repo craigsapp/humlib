@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Nov  3 21:17:34 CET 2026
+// Last Modified: Wed Nov  4 12:16:22 CET 2026
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -6412,7 +6412,7 @@ class Tool_autocadence : public HumTool {
 		bool m_repeatQ                  = false; // -r: allow repeated notes
 		bool m_infoQ                    = false; // -i print info only
 		bool m_tableQ                   = false; // -t: print cadence-type count table
-		int  m_authenticLabels          = 1;     // -a: Cadenze Semplici label mode (0-4, default 1; 0 = skip analysis)
+		int  m_authenticLabels          = 1;     // -a: Authentic cadence label mode (0-4, default 1; 0 = skip semplici analysis)
 		bool m_fileQ                    = false; // -f print filename info
 		bool m_lastQ                    = false;  // -L
 		bool m_markupQ                  = false; // -M
