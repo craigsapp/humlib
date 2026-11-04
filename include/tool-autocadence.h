@@ -288,7 +288,7 @@ class Tool_autocadence : public HumTool {
 		bool m_repeatQ                  = false; // -r: allow repeated notes
 		bool m_infoQ                    = false; // -i print info only
 		bool m_tableQ                   = false; // -t: print cadence-type count table
-		int  m_authenticLabels          = 1;     // -a: Cadenze Semplici label mode (0-4, default 1; 0 = skip analysis)
+		int  m_authenticLabels          = 1;     // -a: Authentic cadence label mode (0-4, default 1; 0 = skip semplici analysis)
 		bool m_fileQ                    = false; // -f print filename info
 		bool m_lastQ                    = false;  // -L
 		bool m_markupQ                  = false; // -M

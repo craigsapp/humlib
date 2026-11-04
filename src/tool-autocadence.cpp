@@ -318,7 +318,6 @@ void Tool_autocadence::processFile(HumdrumFile& infile) {
 		}
 	}
 
-	// -a 0: skip Cadenze Semplici, leaving only the CVF cadence analysis.
 	if (m_authenticLabels != 0) {
 		prepareCadenzeSempliciAnalyses(infile);
 	}
@@ -1673,7 +1672,7 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 		}
 	}
 	// Cadenze Semplici (every hard criterion passes) are labeled "Authentic"
-	// with a strength, overriding any CVF label and not requiring a CVF
+	// with a strength, overriding any CVF-based label and not requiring a CVF
 	// match.  A CVF-table "Authentic" has no strength attached.
 	bool sempliciQ = (m_authenticLabels != 0) &&
 			meetsCadenzeSempliciCriteria(infile, index);
@@ -2084,7 +2083,7 @@ void Tool_autocadence::prepareClosingCounts(HumdrumFile& infile) {
 // Tool_autocadence::meetsCadenzeSempliciCriteria -- Hard criteria: every check
 //     here must pass before a moment is labeled as a Cadenze Semplici
 //     ("Authentic" with a strength).  How strong the
-//     cadence is gets decided afterwards by getCadenzeSempliciStrength().
+//     cadence is determined by getCadenzeSempliciStrength().
 //
 
 bool Tool_autocadence::meetsCadenzeSempliciCriteria(HumdrumFile& infile, int index) {
@@ -2542,7 +2541,7 @@ bool Tool_autocadence::hasRealVoiceBassizans(HumdrumFile& infile, int index) {
 //     events from Tool_extremis, then store the melodic interval from the
 //     previous event on the input line where each note event starts.
 //     Continuation lines of an event (null tokens and tie sustainations)
-//     keep 0 so Cadenze Semplici labels only the bass arrival.
+//     keep 0 so cadence labels only apply to the bass arrival.
 //
 
 void Tool_autocadence::prepareExtremisBass(HumdrumFile& infile) {
