@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Nov  4 12:31:25 CET 2026
+// Last Modified: Thu Nov  5 17:56:45 CET 2026
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -6242,6 +6242,7 @@ class Tool_autocadence : public HumTool {
 		void        identifySuspensionsAndAgents(HumdrumFile& infile);
 		std::string sortUniqueChars            (const std::string& input);
 		void        fillInMajorMinor           (HumdrumFile& infile);
+		void        prepareMeasureNumbers      (HumdrumFile& infile);
 		bool        getPhrygian                (HumdrumFile& infile, int index);
 		int         getSignedSemitoneHarmonic  (HTp lower, HTp upper);
 		std::string getIntervalName            (const std::string& b40);
@@ -6255,6 +6256,18 @@ class Tool_autocadence : public HumTool {
 		void        prepareMensurationChanges  (HumdrumFile& infile);
 		void        preparePlineAttacks        (HumdrumFile& infile);
 		void        prepareMetricPositions     (HumdrumFile& infile);
+		void        preparePlagalCadences      (HumdrumFile& infile);
+		bool        isPlagalArrival            (int index);
+		void        prepareTerminalLong        (HumdrumFile& infile);
+		bool        hasTerminalLongBass        (HumdrumFile& infile, int line,
+		                                        unsigned long long voices, int pc);
+		bool        hasBassSectionEnd          (HumdrumFile& infile, int line,
+		                                        unsigned long long voices, int pc);
+		int         getPitchClassMask          (HumdrumFile& infile, int index);
+		bool        hasSectionBreak            (HumdrumFile& infile, int endLine);
+		bool        isDoubleBarline            (HumdrumFile& infile, int index);
+		bool        hasSectionBreakBetween     (HumdrumFile& infile, int startLine,
+		                                        int endLine);
 		bool        meetsCadenzeSempliciCriteria (HumdrumFile& infile, int index);
 		double      getCadenzeSempliciStrength (HumdrumFile& infile, int index,
 		                                        const std::string& cvflabel);
@@ -6413,7 +6426,7 @@ class Tool_autocadence : public HumTool {
 		bool m_repeatQ                  = false; // -r: allow repeated notes
 		bool m_infoQ                    = false; // -i print info only
 		bool m_tableQ                   = false; // -t: print cadence-type count table
-		int  m_authenticLabels          = 1;     // -a: Authentic cadence label mode (0-4, default 1; 0 = skip semplici analysis)
+		int  m_authenticLabels          = 1;     // -a: Authentic cadence label mode (0-4, default 1; 0 = skip semplici and plagal analyses)
 		bool m_fileQ                    = false; // -f print filename info
 		bool m_lastQ                    = false;  // -L
 		bool m_markupQ                  = false; // -M
@@ -6431,6 +6444,23 @@ class Tool_autocadence : public HumTool {
 		std::string m_lastMelColor     = "limegreen";
 		std::vector<std::string> m_quality;
 		std::vector<std::string> m_root;
+
+		// m_bassEvents: notes of the synthetic lowest line from extremis
+		// (rests left out), used for Plagal detection.
+		struct BassEvent {
+			int    line = -1; // line where the note is attacked
+			HumNum start;  // start time in quarter notes from start of piece
+			HumNum end;    // end time in quarter notes from start of piece
+			int    pc = 0; // pitch class (C=0)
+			unsigned long long voices = 0; // tracks of the real voices sounding it (bit = track)
+		};
+		std::vector<BassEvent> m_bassEvents;
+
+		// m_plagalArrival: true on the line where a Plagal cadence arrives.
+		std::vector<bool> m_plagalArrival;
+
+		// m_terminalLong: **kern signifier for terminal longs (from RDF).
+		std::string m_terminalLong;
 		bool m_foundEmpytTriad = false;
 		bool m_hasTriadColor = false;
 		bool m_removeWeakQ = false;

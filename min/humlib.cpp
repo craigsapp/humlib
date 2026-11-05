@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Nov  4 12:31:25 CET 2026
+// Last Modified: Thu Nov  5 17:56:45 CET 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -61523,7 +61523,7 @@ Tool_autocadence::Tool_autocadence(void) {
 	define("count|match-count=b",        "Return number of cadence formulas that match");
 	define("i|info=b",                   "Show only information not score");
 	define("t|cadence-table=b",          "Show a table of the counts of each cadence label");
-	define("a|authentic-labels=i:1",     "Authentic strength labels (default 1): 0=skip semplici, 1=text, 2=text+attenuated, 3=decimal, 4=decimal+attenuated");
+	define("a|authentic-labels=i:1",     "Authentic strength labels (default 1): 0=skip semplici/plagal, 1=text, 2=text+attenuated, 3=decimal, 4=decimal+attenuated");
 
 	define("M|analytic-markup|markup=b", "Show melodic interval to last note");
 	define("L|last-melody=b",            "Show melodic interval to last note");
@@ -61661,7 +61661,7 @@ void Tool_autocadence::processFile(HumdrumFile& infile) {
 	if (!m_deferTableQ) {
 		m_cadenceTypeCounts.clear();
 	}
-	m_barnum = infile.getMeasureNumbers();
+	prepareMeasureNumbers(infile);
 	m_root.resize(infile.getLineCount());
 
 	fillInLastMelodicInterval(infile);
@@ -61707,9 +61707,16 @@ void Tool_autocadence::processFile(HumdrumFile& infile) {
 		}
 	}
 
+	m_plagalArrival.clear();
 	if (m_authenticLabels != 0) {
 		prepareCadenzeSempliciAnalyses(infile);
+		// Uses the extremis bass line prepared above.
+		preparePlagalCadences(infile);
 	}
+
+	// -i: info lines of earlier input files (all output is printed after
+	// the last file, so they must survive this file's score output).
+	string previousInfo = m_infoQ ? m_humdrum_text.str() : "";
 
 	// markup score with matches and CVF
 	markupScore(infile);
@@ -61729,10 +61736,36 @@ void Tool_autocadence::processFile(HumdrumFile& infile) {
 
 	if (m_infoQ) {
 		m_humdrum_text.str("");
-		m_humdrum_text << m_info.str();
+		m_humdrum_text << previousInfo << m_info.str();
 	}
 
 }
+
+
+//////////////////////////////
+//
+// Tool_autocadence::prepareMeasureNumbers -- Measure number of each line
+//     (for -i).  A barline without a number (some scores number only the
+//     first barline) is counted as the previous measure number plus one.
+//     Lines before the first barline are -1.
+//
+
+void Tool_autocadence::prepareMeasureNumbers(HumdrumFile& infile) {
+	m_barnum.assign(infile.getLineCount(), -1);
+	int current = -1;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (infile[i].isBarline()) {
+			int number = infile.getMeasureNumber(i);
+			if (number >= 0) {
+				current = number;
+			} else {
+				current = (current < 0) ? 1 : current + 1;
+			}
+		}
+		m_barnum[i] = current;
+	}
+}
+
 
 
 //////////////////////////////
@@ -62063,6 +62096,13 @@ void Tool_autocadence::addMatchToScore(HumdrumFile& infile, int matchIndex) {
 	int status = getCadenceEndSliceNotes(endL, endU, count, infile, lindex, vindex, pindex);
 	if (!status) {
 		cerr << "Problem extracting slide end for cadence" << endl;
+		return;
+	}
+
+	// No cadence formula across a section boundary.
+	int firstLine = std::min(lindex, startU->getLineIndex());
+	int lastLine  = std::max(endL->getLineIndex(), endU->getLineIndex());
+	if (hasSectionBreakBetween(infile, firstLine, lastLine)) {
 		return;
 	}
 
@@ -63108,6 +63148,20 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 		}
 	}
 
+	// Plagal is written in addition to any other cadence label on the line.
+	if (isPlagalArrival(index)) {
+		if (!cadenceline.str().empty()) {
+			cadenceline << "\n";
+		}
+		cadenceline << "!!LO:TX:a:B:rj:color=red:cadence:t=" << getCadenceDisplayText("Plagal");
+		if (m_tableQ) {
+			m_cadenceTypeCounts["Plagal"]++;
+		}
+		if (m_infoQ) {
+			m_info << "cvf=" << sortUniqueChars(clabel) << "\tcadence=Plagal\\nZZZ" << "\tM=" << m_barnum.at(index) << "\tfile=" << infile.getFilename() << endl;
+		}
+	}
+
 	stringstream dissonanceline;
 	if (m_showSuspensionsQ && foundDissonanceQ) {
 		for (int i=0; i<fcount; i++) {
@@ -63496,6 +63550,17 @@ bool Tool_autocadence::meetsCadenzeSempliciCriteria(HumdrumFile& infile, int ind
 		return false;
 	}
 
+	// No cadence across a section boundary: the bass note approaching the
+	// arrival must be in the same section.
+	for (int j=1; j<(int)m_bassEvents.size(); j++) {
+		if (m_bassEvents[j].line == index) {
+			if (hasSectionBreakBetween(infile, m_bassEvents[j-1].line, index)) {
+				return false;
+			}
+			break;
+		}
+	}
+
 	// Hard 2: last --root observation before the arrival is an uppercase
 	// letter (major triad or major third).  CVF matches are not required.
 	if (!hasPreviousMajorSonority(index)) {
@@ -63621,7 +63686,8 @@ string Tool_autocadence::getCadenzeSempliciCategory(double strength) {
 // Tool_autocadence::writeCadenzeSempliciLine -- Write the cadence line for a
 //     Cadenze Semplici moment.  label is "Authentic", possibly with a prefix
 //     such as "Phrygian ".  Modes for -a (--authentic-labels):
-//        0: Cadenze Semplici analysis skipped (this function is not called)
+//        0: Cadenze Semplici and Plagal analyses skipped (this function
+//           is not called)
 //        1: text category (Strong/Weak/Attenuated Authentic);
 //           Attenuated written as a comment that verovio does not display
 //        2: same as 1, with Attenuated displayed
@@ -63843,22 +63909,37 @@ bool Tool_autocadence::hasDoubleBarEnding(HumdrumFile& infile, int index) {
 		return false;
 	}
 	for (int i=index+1; i<infile.getLineCount(); i++) {
-		if (!infile[i].isBarline()) {
+		if (infile[i].isBarline()) {
+			return isDoubleBarline(infile, i);
+		}
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::isDoubleBarline -- True when a barline line is a double
+//     bar in any **kern spine: a final barline (==), a double bar (=||), or
+//     a repeat sign (such as =:|! or =!|:).
+//
+
+bool Tool_autocadence::isDoubleBarline(HumdrumFile& infile, int index) {
+	if (!infile[index].isBarline()) {
+		return false;
+	}
+	for (int j=0; j<infile[index].getFieldCount(); j++) {
+		HTp token = infile.token(index, j);
+		if (!token->isKern()) {
 			continue;
 		}
-		for (int j=0; j<infile[i].getFieldCount(); j++) {
-			HTp token = infile.token(i, j);
-			if (!token->isKern()) {
-				continue;
-			}
-			if ((token->find("==") != string::npos) ||
-					(token->find("||") != string::npos) ||
-					(token->find("|!") != string::npos) ||
-					(token->find("!|") != string::npos)) {
-				return true;
-			}
+		if ((token->find("==") != string::npos) ||
+				(token->find("||") != string::npos) ||
+				(token->find("|!") != string::npos) ||
+				(token->find("!|") != string::npos)) {
+			return true;
 		}
-		return false;
 	}
 	return false;
 }
@@ -63945,6 +64026,518 @@ bool Tool_autocadence::hasRealVoiceBassizans(HumdrumFile& infile, int index) {
 
 //////////////////////////////
 //
+// Tool_autocadence::preparePlagalCadences -- Mark the arrival lines of
+//     Plagal (I-IV-I) cadences in m_plagalArrival.  No suspension is needed.
+//
+//     The score is cut into triad slices: runs of consecutive sonorities
+//     with the same triad in the triad analysis (getTriadicQuality(), as
+//     used by the triad tool and --root).  Sonorities that are not full
+//     triads (dyads, unisons, other chords) are ignored.  A slice ends when
+//     a different triad starts, when all parts rest, at a double barline or
+//     section label (*>), or at the end of the piece.  Only major and minor
+//     slices can be the I or IV below, so a diminished or augmented slice
+//     between them breaks the progression.
+//
+//     Three slices in a row (with no all-part rest between them) form a
+//     Plagal cadence when, using the extremis lowest line as the bass:
+//       - Last slice (I): its main bass note, the pitch class sounding the
+//         longest in the slice, is the final.  The triad root is the final
+//         (root position), and the final is in the bass at the arrival
+//         point (the start of the slice).
+//       - Middle slice (IV): the triad root is a fourth above the final,
+//         and the bass touches that pitch class (root position at some point).
+//       - First slice (I): the triad root is the final, and the bass
+//         touches the final or the third of that triad.  A VI chord (a
+//         major or minor triad a major or minor sixth above the final) may
+//         come between the first I and the IV, as I - VI - IV - I or
+//         I - IV - VI - IV - I.
+//       - These bass notes (the first slice's final or third, the middle
+//         slice's fourth and the final at the arrival point) all come from
+//         the same real voice: the voice sounding the extremis note.
+//       - In that voice, the arrival note is the last note of a section:
+//         only rests (or nothing) come between it and a double barline,
+//         a section label or the end of the piece.  Another note (even a
+//         repeated final) before that disqualifies it.
+//       - The last slice is at least as long as the middle slice (or the
+//         bass final has a terminal long mark, so it is held longer).
+//       - The last slice ends a section, or is longer than the slice that
+//         follows it.  A section ends at the end of the piece, at an
+//         all-part rest, or at a double barline or section label (*>)
+//         where the slice ends.
+//     The arrival is where the bass arrives on the final: the first line of
+//     the last slice, or earlier when the final triad is delayed (such as
+//     by a suspension) and the bass final is attacked during the middle
+//     slice, then held into the final triad.  The middle slice is then
+//     measured up to the bass arrival.
+//
+
+void Tool_autocadence::preparePlagalCadences(HumdrumFile& infile) {
+	m_plagalArrival.assign(infile.getLineCount(), false);
+	prepareTerminalLong(infile);
+
+	struct TriadSlice {
+		int    startLine = -1;
+		int    endLine   = -1;    // line that ends the slice (line count at end of piece)
+		string root;          // --root token, such as "F" (major) or "g" (minor)
+		int    rootPc    = -1;
+		string quality;           // "M", "m", "d" (diminished) or "A" (augmented)
+		bool   majorQ    = true;
+		bool   sectionEndQ = false; // ended by a double barline or section label
+		HumNum start;
+		HumNum end;
+		vector<HumNum> bassDur = vector<HumNum>(12, 0); // bass time per pitch class
+		// Real voices (track bits) that sound each bass pitch class.
+		vector<unsigned long long> bassVoices = vector<unsigned long long>(12, 0);
+		int    startBassPc = -1;      // bass note sounding where the slice starts
+		unsigned long long startBassVoices = 0;
+		int    startBassLine = -1;    // where that bass note was attacked
+		HumNum startBassTime;
+		int    mainBassPc = -1;
+	};
+
+	vector<TriadSlice> slices;
+	TriadSlice current;
+	bool openQ = false;
+
+	auto closeSlice = [&](HumNum endTime, int endLine) {
+		if (openQ) {
+			current.end = endTime;
+			current.endLine = endLine;
+			slices.push_back(current);
+			openQ = false;
+		}
+	};
+
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isData()) {
+			if (openQ && hasSectionBreak(infile, i + 1) && !hasSectionBreak(infile, i)) {
+				// A double barline or section label ends the slice.
+				current.sectionEndQ = true;
+				closeSlice(infile[i].getDurationFromStart(), i);
+			}
+			continue;
+		}
+		HumNum time = infile[i].getDurationFromStart();
+		int pcMask = getPitchClassMask(infile, i);
+		if (pcMask == 0) {
+			// All parts rest.
+			closeSlice(time, i);
+			continue;
+		}
+		const string& quality = m_quality.at(i);
+		int rootPc = rootObservationToPitchClass(m_root.at(i));
+		bool triadQ = ((quality == "M") || (quality == "m") ||
+				(quality == "d") || (quality == "A")) && (rootPc >= 0);
+		if (!triadQ) {
+			// Not a full triad: ignored.
+			continue;
+		}
+		if (openQ && (current.root == m_root.at(i))) {
+			continue;
+		}
+		closeSlice(time, i);
+		current = TriadSlice();
+		current.startLine = i;
+		current.start     = time;
+		current.root      = m_root.at(i);
+		current.rootPc    = rootPc;
+		current.quality   = quality;
+		current.majorQ    = (quality == "M") || (quality == "A");
+		openQ = true;
+	}
+	closeSlice(infile.getScoreDuration(), infile.getLineCount());
+
+	// Bass time per pitch class in each slice (slices and bass events are
+	// both in time order and do not overlap).
+	int first = 0;
+	for (TriadSlice& slice : slices) {
+		while ((first < (int)m_bassEvents.size()) &&
+				(m_bassEvents[first].end <= slice.start)) {
+			first++;
+		}
+		HumNum longest = 0;
+		for (int j=first; j<(int)m_bassEvents.size(); j++) {
+			const BassEvent& bass = m_bassEvents[j];
+			if (bass.start >= slice.end) {
+				break;
+			}
+			HumNum start = (bass.start > slice.start) ? bass.start : slice.start;
+			HumNum end   = (bass.end   < slice.end)   ? bass.end   : slice.end;
+			if (end <= start) {
+				continue;
+			}
+			slice.bassDur[bass.pc] += end - start;
+			slice.bassVoices[bass.pc] |= bass.voices;
+			if ((bass.start <= slice.start) && (bass.end > slice.start)) {
+				slice.startBassPc = bass.pc;
+				slice.startBassVoices = bass.voices;
+				slice.startBassLine = bass.line;
+				slice.startBassTime = bass.start;
+			}
+			// Ties go to the pitch class heard first.
+			if (slice.bassDur[bass.pc] > longest) {
+				longest = slice.bassDur[bass.pc];
+				slice.mainBassPc = bass.pc;
+			}
+		}
+	}
+
+	for (int k=2; k<(int)slices.size(); k++) {
+		const TriadSlice& plagal  = slices[k-1];
+		const TriadSlice& arrival = slices[k];
+		auto majorMinor = [](const TriadSlice& slice) {
+			return (slice.quality == "M") || (slice.quality == "m");
+		};
+		// The triads before the final IV: I - IV - I, I - VI - IV - I, or
+		// I - IV - VI - IV - I.  VI is a major or minor triad a major or
+		// minor sixth above the final.
+		int final = arrival.mainBassPc;
+		int fourth = (final + 5) % 12;
+		auto hasRoot = [&](int j, int pc) {
+			return (j >= 0) && majorMinor(slices[j]) && (slices[j].rootPc == pc);
+		};
+		auto isSixth = [&](int j) {
+			return (j >= 0) && majorMinor(slices[j]) &&
+					((slices[j].rootPc == (final + 9) % 12) ||
+					 (slices[j].rootPc == (final + 8) % 12));
+		};
+		int tonicIndex = -1;
+		if (final >= 0) {
+			if (hasRoot(k-2, final)) {
+				tonicIndex = k - 2;
+			} else if (isSixth(k-2) && hasRoot(k-3, final)) {
+				tonicIndex = k - 3;
+			} else if (isSixth(k-2) && hasRoot(k-3, fourth) && hasRoot(k-4, final)) {
+				tonicIndex = k - 4;
+			}
+		}
+		if (tonicIndex < 0) {
+			continue;
+		}
+		const TriadSlice& tonic = slices[tonicIndex];
+		// The bass may arrive on the final before the final triad sounds
+		// (such as under a suspension): attacked during the middle slice
+		// and held into the final triad.
+		bool bassFirstQ = (arrival.startBassTime > plagal.start) &&
+				(arrival.startBassTime < arrival.start);
+		// All the slices must be consecutive: no all-part rest between them,
+		// and none ended by a section break.
+		bool consecutiveQ = true;
+		for (int j=tonicIndex; j<k; j++) {
+			if (slices[j].sectionEndQ || (slices[j].end != slices[j+1].start)) {
+				consecutiveQ = false;
+			}
+		}
+		if (!consecutiveQ) {
+			continue;
+		}
+		if (!majorMinor(tonic) || !majorMinor(plagal) || !majorMinor(arrival)) {
+			continue;
+		}
+		if ((final < 0) || (arrival.rootPc != final)) {
+			continue;
+		}
+		// The final must be in the bass at the arrival point itself.
+		if (arrival.startBassPc != final) {
+			continue;
+		}
+		if ((plagal.rootPc != fourth) || (plagal.bassDur[fourth] <= 0)) {
+			continue;
+		}
+		if (tonic.rootPc != final) {
+			continue;
+		}
+		int third = (final + (tonic.majorQ ? 4 : 3)) % 12;
+		if ((tonic.bassDur[final] <= 0) && (tonic.bassDur[third] <= 0)) {
+			continue;
+		}
+		// The bass notes above must all come from the same real voice.
+		unsigned long long voices = (tonic.bassVoices[final] | tonic.bassVoices[third])
+				& plagal.bassVoices[fourth] & arrival.startBassVoices;
+		if (voices == 0) {
+			continue;
+		}
+		// The arrival note ends a section in the bass voice.
+		if (!hasBassSectionEnd(infile, arrival.startLine, voices, final)) {
+			continue;
+		}
+		// The arrival point is where the bass arrives on the final.
+		int    arrivalLine = arrival.startLine;
+		HumNum arrivalTime = arrival.start;
+		if (bassFirstQ) {
+			arrivalLine = arrival.startBassLine;
+			arrivalTime = arrival.startBassTime;
+		}
+		HumNum arrivalDur = arrival.end - arrivalTime;
+		// A bass final with a terminal long mark is held beyond its written
+		// duration, so it is long enough.
+		if ((arrivalDur < (arrivalTime - plagal.start)) &&
+				!hasTerminalLongBass(infile, arrival.startLine, voices, final)) {
+			continue;
+		}
+		bool sectionEndQ = arrival.sectionEndQ || (k == (int)slices.size() - 1) ||
+				(slices[k+1].start != arrival.end) || // all-part rest follows
+				hasSectionBreak(infile, arrival.endLine);
+		if (!sectionEndQ) {
+			const TriadSlice& next = slices[k+1];
+			if (arrivalDur <= (next.end - next.start)) {
+				continue;
+			}
+		}
+		m_plagalArrival.at(arrivalLine) = true;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::prepareTerminalLong -- Store the **kern signifier for
+//     terminal longs from the file's RDF records (such as "l" for
+//     !!!RDF**kern: l = terminal long), as Tool_kern2mens does.
+//
+
+void Tool_autocadence::prepareTerminalLong(HumdrumFile& infile) {
+	m_terminalLong.clear();
+	HumRegex hre;
+	for (int i=infile.getLineCount() - 1; i>=0; i--) {
+		if (infile[i].hasSpines() || !infile[i].isReferenceRecord()) {
+			continue;
+		}
+		if (infile[i].getReferenceKey() != "RDF**kern") {
+			continue;
+		}
+		string value = infile[i].getReferenceValue();
+		if (hre.search(value, "^\\s*([^\\s]+)\\s*=\\s*(.*)\\s*$")) {
+			string signifier  = hre.getMatch(1);
+			string definition = hre.getMatch(2);
+			if (hre.search(definition, "terminal\\s+long") ||
+					hre.search(definition, "long\\s+note")) {
+				m_terminalLong = signifier;
+				return;
+			}
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::hasTerminalLongBass -- True when, in one of the given
+//     voices (track bits) sounding pitch class pc on the given line, that
+//     note (or one of its tied parts) has the terminal long signifier.
+//
+
+bool Tool_autocadence::hasTerminalLongBass(HumdrumFile& infile, int line,
+		unsigned long long voices, int pc) {
+	if (m_terminalLong.empty()) {
+		return false;
+	}
+	for (int j=0; j<infile[line].getFieldCount(); j++) {
+		HTp token = infile.token(line, j);
+		if (!token->isKern() || (token->getTrack() >= 64) ||
+				!((voices >> token->getTrack()) & 1ULL)) {
+			continue;
+		}
+		HTp note = token->isNull() ? token->resolveNull() : token;
+		if (!note || note->isNull() || note->isRest()) {
+			continue;
+		}
+		vector<int> pitches;
+		note->getMidiPitches(pitches);
+		bool foundQ = false;
+		for (int pitch : pitches) {
+			int m = std::abs(pitch);
+			if ((m > 0) && ((m % 12) == pc)) {
+				foundQ = true;
+			}
+		}
+		if (!foundQ) {
+			continue;
+		}
+		// Back up to the attack, then check every tied part.
+		while (note && note->isSecondaryTiedNote()) {
+			note = note->getPreviousNNDT();
+		}
+		while (note) {
+			if (note->find(m_terminalLong) != string::npos) {
+				return true;
+			}
+			HTp next = note->getNextNNDT();
+			if (!next || !next->isSecondaryTiedNote()) {
+				break;
+			}
+			note = next;
+		}
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::hasBassSectionEnd -- True when, in one of the given
+//     voices (track bits) sounding pitch class pc on the given line, that
+//     note is the voice's last note before a double barline or section
+//     label (*>), or the end of the piece.  Tied continuations are part of
+//     the note, and rests may follow it; any new attack (including a
+//     repeated note) before the section ends disqualifies it.
+//
+
+bool Tool_autocadence::hasBassSectionEnd(HumdrumFile& infile, int line,
+		unsigned long long voices, int pc) {
+	for (int j=0; j<infile[line].getFieldCount(); j++) {
+		HTp token = infile.token(line, j);
+		if (!token->isKern() || (token->getTrack() >= 64) ||
+				!((voices >> token->getTrack()) & 1ULL)) {
+			continue;
+		}
+		HTp note = token->isNull() ? token->resolveNull() : token;
+		if (!note || note->isNull() || note->isRest()) {
+			continue;
+		}
+		vector<int> pitches;
+		note->getMidiPitches(pitches);
+		bool foundQ = false;
+		for (int pitch : pitches) {
+			int m = std::abs(pitch);
+			if ((m > 0) && ((m % 12) == pc)) {
+				foundQ = true;
+			}
+		}
+		if (!foundQ) {
+			continue;
+		}
+		HTp next = note->getNextNNDT();
+		while (next && next->isSecondaryTiedNote()) {
+			note = next;
+			next = next->getNextNNDT();
+		}
+		// Rests may follow before the section ends.
+		while (next && next->isRest()) {
+			next = next->getNextNNDT();
+		}
+		if (!next) {
+			return true; // last note of the piece in this voice
+		}
+		// A section break between the arrival note and the next note.
+		if (hasSectionBreakBetween(infile, note->getLineIndex(), next->getLineIndex())) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::isPlagalArrival -- True when a Plagal cadence arrives
+//     on this line (see preparePlagalCadences()).
+//
+
+bool Tool_autocadence::isPlagalArrival(int index) {
+	if ((index < 0) || (index >= (int)m_plagalArrival.size())) {
+		return false;
+	}
+	return m_plagalArrival[index];
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::hasSectionBreakBetween -- True when a double barline
+//     or a section label (*>name) comes after line startLine and before
+//     line endLine.  Cadences are not detected across such a boundary.
+//
+
+bool Tool_autocadence::hasSectionBreakBetween(HumdrumFile& infile,
+		int startLine, int endLine) {
+	if (startLine < 0) {
+		startLine = 0;
+	}
+	if (endLine > infile.getLineCount()) {
+		endLine = infile.getLineCount();
+	}
+	for (int i=startLine+1; i<endLine; i++) {
+		if (isDoubleBarline(infile, i)) {
+			return true;
+		}
+		if (infile[i].isInterpretation()) {
+			for (int k=0; k<infile[i].getFieldCount(); k++) {
+				HTp label = infile.token(i, k);
+				if ((label->compare(0, 2, "*>") == 0) &&
+						(label->find('[') == string::npos)) {
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::hasSectionBreak -- True when a double barline or a
+//     section label (*>name) comes just before the given line, after the
+//     last data line before it.  Used to test whether a triad slice ends
+//     a section; endLine is the line where the slice ends.
+//
+
+bool Tool_autocadence::hasSectionBreak(HumdrumFile& infile, int endLine) {
+	if (endLine > infile.getLineCount()) {
+		endLine = infile.getLineCount();
+	}
+	for (int i=endLine-1; i>=0; i--) {
+		if (infile[i].isData()) {
+			return false;
+		}
+		if (isDoubleBarline(infile, i)) {
+			return true;
+		}
+		if (infile[i].isInterpretation()) {
+			for (int j=0; j<infile[i].getFieldCount(); j++) {
+				HTp token = infile.token(i, j);
+				if ((token->compare(0, 2, "*>") == 0) &&
+						(token->find('[') == string::npos)) {
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autocadence::getPitchClassMask -- Pitch classes sounding on a data
+//     line, including notes sustained into it, as bits (bit 0 = C).
+//     Returns 0 when all parts rest.
+//
+
+int Tool_autocadence::getPitchClassMask(HumdrumFile& infile, int index) {
+	int mask = 0;
+	vector<int> midis = infile[index].getMidiPitchesResolveNull();
+	for (int midi : midis) {
+		int m = (midi < 0) ? -midi : midi;
+		if (m > 0) {
+			mask |= 1 << (m % 12);
+		}
+	}
+	return mask;
+}
+
+
+
+//////////////////////////////
+//
 // Tool_autocadence::prepareExtremisBass -- Get the synthetic lowest-line
 //     events from Tool_extremis, then store the melodic interval from the
 //     previous event on the input line where each note event starts.
@@ -63963,6 +64556,38 @@ void Tool_autocadence::prepareExtremisBass(HumdrumFile& infile) {
 	Tool_extremis extremis;
 	vector<Tool_extremis::SynthEvent> events;
 	extremis.getEvents(infile, events);
+
+	m_bassEvents.clear();
+	for (const Tool_extremis::SynthEvent& event : events) {
+		if (event.isRest || (event.b40 <= 0)) {
+			continue;
+		}
+		BassEvent bass;
+		bass.line  = event.startLine;
+		bass.start = infile[event.startLine].getDurationFromStart();
+		bass.end   = bass.start + event.duration;
+		int midi   = Convert::base40ToMidiNoteNumber(event.b40);
+		bass.pc    = midi % 12;
+		// Real voices sounding this lowest note where the event starts.
+		for (int j=0; j<infile[event.startLine].getFieldCount(); j++) {
+			HTp token = infile.token(event.startLine, j);
+			if (!token->isKern()) {
+				continue;
+			}
+			HTp note = token->isNull() ? token->resolveNull() : token;
+			if (!note || note->isNull() || note->isRest()) {
+				continue;
+			}
+			vector<int> pitches;
+			note->getMidiPitches(pitches);
+			for (int pitch : pitches) {
+				if ((std::abs(pitch) == midi) && (token->getTrack() < 64)) {
+					bass.voices |= 1ULL << token->getTrack();
+				}
+			}
+		}
+		m_bassEvents.push_back(bass);
+	}
 
 	for (int i=1; i<(int)events.size(); i++) {
 		const Tool_extremis::SynthEvent& event = events[i];
