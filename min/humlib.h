@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Nov  4 12:31:25 CET 2026
+// Last Modified: Do.  5 Nov. 2026 17:33:51 CET
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -1558,6 +1558,7 @@ class HumdrumToken : public std::string, public HumHash {
 		bool     isModernKeySignature      (void);
 		bool     isOriginalKeySignature    (void);
 		bool     isKeyDesignation          (void);
+		bool     isUndefinedKey            (void);
 		bool     isTimeSignature           (void);
 		bool     isMetricSymbol            (void);
 		bool     isMeterSymbol             (void) { return isMetricSymbol(); }
@@ -7767,6 +7768,9 @@ class Tool_deg : public HumTool {
 		std::string     createDegInterpretation  (const std::string& degtok, int refLine, bool addPreSpine);
 		std::string     printDegInterpretation   (const std::string& interp, HumdrumFile& infile, int lineIndex);
 		void            getModeAndTonic          (std::string& mode, int& b40tonic, const std::string& token);
+		std::string     normalizeKeyOption       (const std::string& key);
+		bool            isValidKeyOption         (const std::string& key);
+		bool            hasValidKeyOptions       (void);
 
 		bool            isDegAboveLine           (HumdrumFile& infile, int lineIndex);
 		bool            isDegArrowLine           (HumdrumFile& infile, int lineIndex);

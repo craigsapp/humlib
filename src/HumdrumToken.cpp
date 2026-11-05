@@ -1679,6 +1679,17 @@ bool HumdrumToken::isKeyDesignation(void) {
 
 //////////////////////////////
 //
+// HumdrumToken::isUndefinedKey -- True for *?: which resets the key context.
+//
+
+bool HumdrumToken::isUndefinedKey(void) {
+	return *this == "*?:";
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::isTimeSignature -- True if a **kern time signature.
 //
 

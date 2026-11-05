@@ -111,6 +111,7 @@ class HumdrumToken : public std::string, public HumHash {
 		bool     isModernKeySignature      (void);
 		bool     isOriginalKeySignature    (void);
 		bool     isKeyDesignation          (void);
+		bool     isUndefinedKey            (void);
 		bool     isTimeSignature           (void);
 		bool     isMetricSymbol            (void);
 		bool     isMeterSymbol             (void) { return isMetricSymbol(); }
