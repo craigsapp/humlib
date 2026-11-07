@@ -1722,7 +1722,9 @@ void Tool_autocadence::printIntervalDataLineScore(HumdrumFile& infile,
 		// Empty string = suppressor entry in m_cadenceLabels: no cadence annotation.
 		if (!cadence.empty()) {
 			string infolabel = cadence;
-			bool isPhrygian = getPhrygian(infile, index);
+			// A bassizans (B or b) at the arrival rules out a Phrygian label.
+			bool bassizansQ = (slabel.find_first_of("Bb") != string::npos);
+			bool isPhrygian = !bassizansQ && getPhrygian(infile, index);
 			if (isPhrygian) {
 				if (infolabel.compare(0, 7, "Evaded ") == 0) {
 					infolabel.insert(7, "Phrygian ");
