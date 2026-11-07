@@ -2657,6 +2657,9 @@ bool Tool_autocadence::hasRealVoiceBassizans(HumdrumFile& infile, int index) {
 //         point (the start of the slice).
 //       - First slice (IV): the triad root is a fourth above the final,
 //         and the bass touches that pitch class (root position at some point).
+//       - The bass moves directly from the fourth to the final at the
+//         arrival, down a perfect fourth or up a perfect fifth (or a
+//         compound of these), with no rest or other note between them.
 //       - These bass notes (the first slice's fourth and the final at the
 //         arrival point) come from the same real voice: the voice sounding
 //         the extremis note.
@@ -2821,6 +2824,29 @@ void Tool_autocadence::preparePlagalCadences(HumdrumFile& infile) {
 		}
 		// The bass notes above must all come from the same real voice.
 		unsigned long long voices = plagal.bassVoices[fourth] & arrival.startBassVoices;
+		if (voices == 0) {
+			continue;
+		}
+		// The bass moves directly from the fourth to the final, down a
+		// perfect fourth or up a perfect fifth (or compounds), in that voice.
+		int bassLine = arrival.startBassLine;
+		int b40 = (bassLine >= 0) ? m_extremisB40.at(bassLine) : 0;
+		int prevB40 = (bassLine >= 0) ? m_extremisPrevB40.at(bassLine) : 0;
+		if ((b40 <= 0) || (prevB40 <= 0)) {
+			continue; // no previous note, or a rest comes before the final
+		}
+		int leap = b40 - prevB40;
+		if (!(((leap < 0) && (-leap % 40 == 17)) || ((leap > 0) && (leap % 40 == 23)))) {
+			continue;
+		}
+		unsigned long long prevVoices = 0;
+		for (int j=1; j<(int)m_bassEvents.size(); j++) {
+			if (m_bassEvents[j].line == bassLine) {
+				prevVoices = m_bassEvents[j-1].voices;
+				break;
+			}
+		}
+		voices &= prevVoices;
 		if (voices == 0) {
 			continue;
 		}
@@ -4296,6 +4322,7 @@ void Tool_autocadence::prepareCadenceDefinitions(void) {
 	/*  57 */ {"P", "C",	"PC1",	R"(^2_1:-2, 1_-4:2, 5_)"},
 	/*  58 */ {"P", "C",	"PC2",	R"(^2_1:-2, 8_(?:5|-4):2, 5_)"},
 	/*  59 */ {"P", "C",	"PC3",	R"(^2_1:-2, 8_1:1, 8_(?:5|-4):2, 5_)"},
+	/*  59 */ {"P", "C",	"PC4",	R"(^2_1:-2, 8_1:-2, 7_1:2, 8_(?:5|-4):2, 5_)"},
 	/*  59 */ {"P", "c",	"Pc1",	R"(^2_1:-2, 8_(?:5|-4):1, 4D_)"},
 	/*  59 */ {"P", "c",	"Pc2",	R"(^2_1:-2, 8_1:1, 8_(?:5|-4):1, 4D_)"},
 	/*  60 */ {"Q", "C",	"QC1",	R"(^-2_1:-2, -3_-5:2, 4D?_)"},
