@@ -2638,7 +2638,7 @@ bool Tool_autocadence::hasRealVoiceBassizans(HumdrumFile& infile, int index) {
 //////////////////////////////
 //
 // Tool_autocadence::preparePlagalCadences -- Mark the arrival lines of
-//     Plagal (I-IV-I) cadences in m_plagalArrival.  No suspension is needed.
+//     Plagal (IV-I) cadences in m_plagalArrival.  No suspension is needed.
 //
 //     The score is cut into triad slices: runs of consecutive sonorities
 //     with the same triad in the triad analysis (getTriadicQuality(), as
@@ -2649,27 +2649,22 @@ bool Tool_autocadence::hasRealVoiceBassizans(HumdrumFile& infile, int index) {
 //     slices can be the I or IV below, so a diminished or augmented slice
 //     between them breaks the progression.
 //
-//     Three slices in a row (with no all-part rest between them) form a
-//     Plagal cadence when, using the extremis lowest line as the bass:
+//     Two slices in a row (with no all-part rest between them) form a
+//     Plagal (IV - I) cadence when, using the extremis lowest line as the bass:
 //       - Last slice (I): its main bass note, the pitch class sounding the
 //         longest in the slice, is the final.  The triad root is the final
 //         (root position), and the final is in the bass at the arrival
 //         point (the start of the slice).
-//       - Middle slice (IV): the triad root is a fourth above the final,
+//       - First slice (IV): the triad root is a fourth above the final,
 //         and the bass touches that pitch class (root position at some point).
-//       - First slice (I): the triad root is the final, and the bass
-//         touches the final or the third of that triad.  A VI chord (a
-//         major or minor triad a major or minor sixth above the final) may
-//         come between the first I and the IV, as I - VI - IV - I or
-//         I - IV - VI - IV - I.
-//       - These bass notes (the first slice's final or third, the middle
-//         slice's fourth and the final at the arrival point) all come from
-//         the same real voice: the voice sounding the extremis note.
+//       - These bass notes (the first slice's fourth and the final at the
+//         arrival point) come from the same real voice: the voice sounding
+//         the extremis note.
 //       - In that voice, the arrival note is the last note of a section:
 //         only rests (or nothing) come between it and a double barline,
 //         a section label or the end of the piece.  Another note (even a
 //         repeated final) before that disqualifies it.
-//       - The last slice is at least as long as the middle slice (or the
+//       - The last slice is at least as long as the IV slice (or the
 //         bass final has a terminal long mark, so it is held longer).
 //       - The last slice ends a section, or is longer than the slice that
 //         follows it.  A section ends at the end of the piece, at an
@@ -2677,8 +2672,8 @@ bool Tool_autocadence::hasRealVoiceBassizans(HumdrumFile& infile, int index) {
 //         where the slice ends.
 //     The arrival is where the bass arrives on the final: the first line of
 //     the last slice, or earlier when the final triad is delayed (such as
-//     by a suspension) and the bass final is attacked during the middle
-//     slice, then held into the final triad.  The middle slice is then
+//     by a suspension) and the bass final is attacked during the IV
+//     slice, then held into the final triad.  The IV slice is then
 //     measured up to the bass arrival.
 //
 
@@ -2793,56 +2788,25 @@ void Tool_autocadence::preparePlagalCadences(HumdrumFile& infile) {
 		}
 	}
 
-	for (int k=2; k<(int)slices.size(); k++) {
+	for (int k=1; k<(int)slices.size(); k++) {
 		const TriadSlice& plagal  = slices[k-1];
 		const TriadSlice& arrival = slices[k];
 		auto majorMinor = [](const TriadSlice& slice) {
 			return (slice.quality == "M") || (slice.quality == "m");
 		};
-		// The triads before the final IV: I - IV - I, I - VI - IV - I, or
-		// I - IV - VI - IV - I.  VI is a major or minor triad a major or
-		// minor sixth above the final.
 		int final = arrival.mainBassPc;
 		int fourth = (final + 5) % 12;
-		auto hasRoot = [&](int j, int pc) {
-			return (j >= 0) && majorMinor(slices[j]) && (slices[j].rootPc == pc);
-		};
-		auto isSixth = [&](int j) {
-			return (j >= 0) && majorMinor(slices[j]) &&
-					((slices[j].rootPc == (final + 9) % 12) ||
-					 (slices[j].rootPc == (final + 8) % 12));
-		};
-		int tonicIndex = -1;
-		if (final >= 0) {
-			if (hasRoot(k-2, final)) {
-				tonicIndex = k - 2;
-			} else if (isSixth(k-2) && hasRoot(k-3, final)) {
-				tonicIndex = k - 3;
-			} else if (isSixth(k-2) && hasRoot(k-3, fourth) && hasRoot(k-4, final)) {
-				tonicIndex = k - 4;
-			}
-		}
-		if (tonicIndex < 0) {
-			continue;
-		}
-		const TriadSlice& tonic = slices[tonicIndex];
 		// The bass may arrive on the final before the final triad sounds
-		// (such as under a suspension): attacked during the middle slice
+		// (such as under a suspension): attacked during the IV slice
 		// and held into the final triad.
 		bool bassFirstQ = (arrival.startBassTime > plagal.start) &&
 				(arrival.startBassTime < arrival.start);
-		// All the slices must be consecutive: no all-part rest between them,
-		// and none ended by a section break.
-		bool consecutiveQ = true;
-		for (int j=tonicIndex; j<k; j++) {
-			if (slices[j].sectionEndQ || (slices[j].end != slices[j+1].start)) {
-				consecutiveQ = false;
-			}
-		}
-		if (!consecutiveQ) {
+		// The IV and I slices must be consecutive: no all-part rest between
+		// them, and the IV not ended by a section break.
+		if (plagal.sectionEndQ || (plagal.end != arrival.start)) {
 			continue;
 		}
-		if (!majorMinor(tonic) || !majorMinor(plagal) || !majorMinor(arrival)) {
+		if (!majorMinor(plagal) || !majorMinor(arrival)) {
 			continue;
 		}
 		if ((final < 0) || (arrival.rootPc != final)) {
@@ -2855,16 +2819,8 @@ void Tool_autocadence::preparePlagalCadences(HumdrumFile& infile) {
 		if ((plagal.rootPc != fourth) || (plagal.bassDur[fourth] <= 0)) {
 			continue;
 		}
-		if (tonic.rootPc != final) {
-			continue;
-		}
-		int third = (final + (tonic.majorQ ? 4 : 3)) % 12;
-		if ((tonic.bassDur[final] <= 0) && (tonic.bassDur[third] <= 0)) {
-			continue;
-		}
 		// The bass notes above must all come from the same real voice.
-		unsigned long long voices = (tonic.bassVoices[final] | tonic.bassVoices[third])
-				& plagal.bassVoices[fourth] & arrival.startBassVoices;
+		unsigned long long voices = plagal.bassVoices[fourth] & arrival.startBassVoices;
 		if (voices == 0) {
 			continue;
 		}
