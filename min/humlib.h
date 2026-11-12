@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Nov  4 12:31:25 CET 2026
+// Last Modified: Thu Nov 12 20:43:49 UTC 2026
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -10752,41 +10752,8 @@ class MeasureInfo {
 	public:
 		MeasureInfo(void) { clear(); }
 		void clear(void)  { num = seg = start = stop = -1;
-			sclef.resize(0); skeysig.resize(0); skey.resize(0);
-			stimesig.resize(0); smet.resize(0); stempo.resize(0);
-			eclef.resize(0); ekeysig.resize(0); ekey.resize(0);
-			etimesig.resize(0); emet.resize(0); etempo.resize(0);
+			sstates.clear(); estates.clear();
 			file = NULL;
-		}
-		void setTrackCount(int tcount) {
-			sclef.resize(tcount+1);
-			skeysig.resize(tcount+1);
-			skey.resize(tcount+1);
-			stimesig.resize(tcount+1);
-			smet.resize(tcount+1);
-			stempo.resize(tcount+1);
-			eclef.resize(tcount+1);
-			ekeysig.resize(tcount+1);
-			ekey.resize(tcount+1);
-			etimesig.resize(tcount+1);
-			emet.resize(tcount+1);
-			etempo.resize(tcount+1);
-			int i;
-			for (i=0; i<tcount+1; i++) {
-				sclef[i].clear();
-				skeysig[i].clear();
-				skey[i].clear();
-				stimesig[i].clear();
-				smet[i].clear();
-				stempo[i].clear();
-				eclef[i].clear();
-				ekeysig[i].clear();
-				ekey[i].clear();
-				etimesig[i].clear();
-				emet[i].clear();
-				etempo[i].clear();
-			}
-			tracks = tcount;
 		}
 		int num;          // measure number
 		std::string stopStyle;  // styling for end of last measure
@@ -10794,24 +10761,11 @@ class MeasureInfo {
 		int seg;          // measure segment
 		int start;        // starting line of segment
 		int stop;         // ending line of segment
-		int tracks;       // number of primary tracks in file.
 		HumdrumFile* file;
 
-		// musical settings at start of measure
-		std::vector<MyCoord> sclef;     // starting clef of segment
-		std::vector<MyCoord> skeysig;   // starting keysig of segment
-		std::vector<MyCoord> skey;      // starting key of segment
-		std::vector<MyCoord> stimesig;  // starting timesig of segment
-		std::vector<MyCoord> smet;      // starting met of segment
-		std::vector<MyCoord> stempo;    // starting tempo of segment
-
-		// musical settings at start of measure
-		std::vector<MyCoord> eclef;     // ending clef    of segment
-		std::vector<MyCoord> ekeysig;   // ending keysig  of segment
-		std::vector<MyCoord> ekey;      // ending key     of segment
-		std::vector<MyCoord> etimesig;  // ending timesig of segment
-		std::vector<MyCoord> emet;      // ending met     of segment
-		std::vector<MyCoord> etempo;    // ending tempo   of segment
+		// [state][track]: last token of each tracked interpretation
+		std::vector<std::vector<MyCoord>> sstates; // at start of segment
+		std::vector<std::vector<MyCoord>> estates; // at end of segment
 };
 
 
@@ -10855,9 +10809,10 @@ class Tool_myank : public HumTool {
 		void      adjustGlobalInterpretations(HumdrumFile& infile, int ii,
 		                                std::vector<MeasureInfo>& outmeasures,
 		                                int index);
-		void      adjustGlobalInterpretationsStart(HumdrumFile& infile, int ii,
+		int       getStateIndex        (HTp token);
+		HTp       getStateChange       (HumdrumFile& infile,
 		                                std::vector<MeasureInfo>& outmeasures,
-		                                int index);
+		                                int index, int state, int track);
 		void      getMarkString        (std::ostream& out, HumdrumFile& infile);
 		void      printDoubleBarline   (HumdrumFile& infile, int line);
 		void      insertZerothMeasure  (std::vector<MeasureInfo>& measurelist,
@@ -10899,6 +10854,16 @@ class Tool_myank : public HumTool {
 		std::vector<MeasureInfo> m_measureOutList; // used with -m option
 		std::vector<MeasureInfo> m_measureInList;  // used with -m option
 		std::vector<std::vector<MyCoord> > m_metstates;
+
+		// interpretations kept at the start of an excerpt, in output order
+		std::vector<std::string> m_stateRegexes = {
+			R"(^\*clef)",
+			R"(^\*k\[.*\])",
+			R"(^\*[A-Ga-g][#-]?:)",
+			R"(^\*M\d+/\d+)",
+			R"(^\*met\(.*\))",
+			R"(^\*MM[\d.]+)",
+		};
 
 		std::string m_lineRange;              // used with -l option
 		std::vector<int> m_barNumbersPerLine;      // used with -l option

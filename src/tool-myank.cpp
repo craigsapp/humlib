@@ -132,44 +132,18 @@ ostream& operator<<(ostream& out, MeasureInfo& info) {
 	out << "STOP_STYLE  = " << info.stopStyle << endl;
 	out << "START_STYLE = " << info.startStyle << endl;
 
-	for (int i=1; i<(int)info.sclef.size(); i++) {
-		out << "TRACK " << i << ":" << endl;
-		if (info.sclef[i].isValid()) {
-			out << "   START CLEF    = " << infile.token(info.sclef[i].x, info.sclef[i].y)       << endl;
+	for (int i=0; i<(int)info.sstates.size(); i++) {
+		for (int j=1; j<(int)info.sstates[i].size(); j++) {
+			if (info.sstates[i][j].isValid()) {
+				out << "   TRACK " << j << " START = " << infile.token(info.sstates[i][j].x, info.sstates[i][j].y) << endl;
+			}
 		}
-		if (info.skeysig[i].isValid()) {
-			out << "   START KEYSIG  = " << infile.token(info.skeysig[i].x, info.skeysig[i].y)   << endl;
-		}
-		if (info.skey[i].isValid()) {
-			out << "   START KEY     = " << infile.token(info.skey[i].x, info.skey[i].y)         << endl;
-		}
-		if (info.stimesig[i].isValid()) {
-			out << "   START TIMESIG = " << infile.token(info.stimesig[i].x, info.stimesig[i].y) << endl;
-		}
-		if (info.smet[i].isValid()) {
-			out << "   START MET     = " << infile.token(info.smet[i].x, info.smet[i].y)         << endl;
-		}
-		if (info.stempo[i].isValid()) {
-			out << "   START TEMPO   = " << infile.token(info.stempo[i].x, info.stempo[i].y)     << endl;
-		}
-
-		if (info.eclef[i].isValid()) {
-			out << "   END CLEF    = " << infile.token(info.eclef[i].x, info.eclef[i].y)       << endl;
-		}
-		if (info.ekeysig[i].isValid()) {
-			out << "   END KEYSIG  = " << infile.token(info.ekeysig[i].x, info.ekeysig[i].y)   << endl;
-		}
-		if (info.ekey[i].isValid()) {
-			out << "   END KEY     = " << infile.token(info.ekey[i].x, info.ekey[i].y)         << endl;
-		}
-		if (info.etimesig[i].isValid()) {
-			out << "   END TIMESIG = " << infile.token(info.etimesig[i].x, info.etimesig[i].y) << endl;
-		}
-		if (info.emet[i].isValid()) {
-			out << "   END MET     = " << infile.token(info.emet[i].x, info.emet[i].y)         << endl;
-		}
-		if (info.etempo[i].isValid()) {
-			out << "   END TEMPO   = " << infile.token(info.etempo[i].x, info.etempo[i].y)     << endl;
+	}
+	for (int i=0; i<(int)info.estates.size(); i++) {
+		for (int j=1; j<(int)info.estates[i].size(); j++) {
+			if (info.estates[i][j].isValid()) {
+				out << "   TRACK " << j << " END   = " << infile.token(info.estates[i][j].x, info.estates[i][j].y) << endl;
+			}
 		}
 	}
 
@@ -871,449 +845,85 @@ void Tool_myank::collapseSpines(HumdrumFile& infile, int line) {
 
 //////////////////////////////
 //
-// Tool_myank::adjustGlobalInterpretations --
+// Tool_myank::adjustGlobalInterpretations -- print tracked interpretations
+//     that differ from the end of the previous segment.
 //
 
 void Tool_myank::adjustGlobalInterpretations(HumdrumFile& infile, int ii,
 		vector<MeasureInfo>& outmeasures, int index) {
 
-	if (index <= 0) {
-		adjustGlobalInterpretationsStart(infile, ii, outmeasures, index);
+	// ignore the zeroth measure
+	// (may not be proper).
+	if ((index == 0) && (outmeasures[index].num == 0)) {
 		return;
 	}
 
-	// the following lines will not work when non-contiguous measures are
-	// elided.
-	//   if (!infile[ii].isInterpretation()) {
-	//      return;
-	//   }
-
-	int clefQ    = 0;
-	int keysigQ  = 0;
-	int keyQ     = 0;
-	int timesigQ = 0;
-	int metQ     = 0;
-	int tempoQ   = 0;
-
-	int x, y;
-	int xo, yo;
-
-	int tracks = infile.getMaxTrack();
-
-	// these lines may cause bugs, but they get rid of zeroth measure
-	// problem.
-// ggg
-//   if ((outmeasures.size() > 1) && (outmeasures[index-1].num == 0)) {
-//      return;
-//   }
-//   if ((outmeasures.size() > 0) && (outmeasures[index].num == 0)) {
-//      return;
-//   }
-
-	for (int i=1; i<=tracks; i++) {
-		if (!clefQ && (outmeasures[index].sclef.size() > 0)) {
-			x  = outmeasures[index].sclef[i].x;
-			y  = outmeasures[index].sclef[i].y;
-			xo = outmeasures[index-1].eclef[i].x;
-			yo = outmeasures[index-1].eclef[i].y;
-			if ((x>=0)&&(y>=0)&&(xo>=0)&&(yo>=0)) {
-				if (*infile.token(x, y) != *infile.token(xo, yo)) {
-					clefQ = 1;
-				}
-			}
-		}
-
-		if (!keysigQ && (outmeasures[index].skeysig.size() > 0)) {
-			x  = outmeasures[index].skeysig[i].x;
-			y  = outmeasures[index].skeysig[i].y;
-			xo = outmeasures[index-1].ekeysig[i].x;
-			yo = outmeasures[index-1].ekeysig[i].y;
-			if ((x>=0)&&(y>=0)&&(xo>=0)&&(yo>=0)) {
-				if (*infile.token(x, y) != *infile.token(xo, yo)) {
-					keysigQ = 1;
-				}
-			}
-		}
-
-		if (!keyQ && (outmeasures[index].skey.size() > 0)) {
-			x  = outmeasures[index].skey[i].x;
-			y  = outmeasures[index].skey[i].y;
-			xo = outmeasures[index-1].ekey[i].x;
-			yo = outmeasures[index-1].ekey[i].y;
-			if ((x>=0)&&(y>=0)&&(xo>=0)&&(yo>=0)) {
-				if (*infile.token(x, y) != *infile.token(xo, yo)) {
-					keyQ = 1;
-				}
-			}
-		}
-
-		if (!timesigQ && (outmeasures[index].stimesig.size() > 0)) {
-			x  = outmeasures[index].stimesig[i].x;
-			y  = outmeasures[index].stimesig[i].y;
-			xo = outmeasures[index-1].etimesig[i].x;
-			yo = outmeasures[index-1].etimesig[i].y;
-			if ((x>=0)&&(y>=0)&&(xo>=0)&&(yo>=0)) {
-				if (*infile.token(x, y) != *infile.token(xo, yo)) {
-					timesigQ = 1;
-				}
-			}
-		}
-
-		if (!metQ && (outmeasures[index].smet.size() > 0)) {
-			x  = outmeasures[index].smet[i].x;
-			y  = outmeasures[index].smet[i].y;
-			xo = outmeasures[index-1].emet[i].x;
-			yo = outmeasures[index-1].emet[i].y;
-			if ((x>=0)&&(y>=0)&&(xo>=0)&&(yo>=0)) {
-				if (*infile.token(x, y) != *infile.token(xo, yo)) {
-					metQ = 1;
-				}
-			}
-		}
-
-		if (!tempoQ && (outmeasures[index].stempo.size() > 0)) {
-			x  = outmeasures[index].stempo[i].x;
-			y  = outmeasures[index].stempo[i].y;
-			xo = outmeasures[index-1].etempo[i].x;
-			yo = outmeasures[index-1].etempo[i].y;
-			if ((x>=0)&&(y>=0)&&(xo>=0)&&(yo>=0)) {
-				if (*infile.token(x, y) != *infile.token(xo, yo)) {
-					tempoQ = 1;
-				}
-			}
-		}
-	}
-
-	int track;
-
-	if (clefQ) {
+	for (int state=0; state<(int)m_stateRegexes.size(); state++) {
+		string line;
+		bool changed = false;
 		for (int i=0; i<infile[ii].getFieldCount(); i++) {
-			track = infile.token(ii, i)->getTrack();
-			x  = outmeasures[index].sclef[track].x;
-			y  = outmeasures[index].sclef[track].y;
-			xo = outmeasures[index-1].eclef[track].x;
-			yo = outmeasures[index-1].eclef[track].y;
-			if ((x>=0)&&(y>=0)&&(xo>=0)&&(yo>=0)) {
-				if (*infile.token(x, y) != *infile.token(xo, yo)) {
-					m_humdrum_text << infile.token(x, y);
-				} else {
-					m_humdrum_text << "*";
-				}
-			} else {
-				m_humdrum_text << "*";
+			int track = infile.token(ii, i)->getTrack();
+			HTp token = getStateChange(infile, outmeasures, index, state, track);
+			if (token) {
+				changed = true;
 			}
-			if (i < infile[ii].getFieldCount()-1) {
-				m_humdrum_text << "\t";
+			if (i > 0) {
+				line += "\t";
 			}
+			line += token ? *token : "*";
 		}
-		m_humdrum_text << "\n";
-	}
-
-	if (keysigQ) {
-		for (int i=0; i<infile[ii].getFieldCount(); i++) {
-			track = infile.token(ii, i)->getTrack();
-			x  = outmeasures[index].skeysig[track].x;
-			y  = outmeasures[index].skeysig[track].y;
-			xo = outmeasures[index-1].ekeysig[track].x;
-			yo = outmeasures[index-1].ekeysig[track].y;
-			if ((x>=0)&&(y>=0)&&(xo>=0)&&(yo>=0)) {
-				if (*infile.token(x, y) != *infile.token(xo, yo)) {
-					m_humdrum_text << infile.token(x, y);
-				} else {
-					m_humdrum_text << "*";
-				}
-			} else {
-				m_humdrum_text << "*";
-			}
-			if (i < infile[ii].getFieldCount()-1) {
-				m_humdrum_text << "\t";
-			}
+		if (changed) {
+			m_humdrum_text << line << "\n";
 		}
-		m_humdrum_text << "\n";
 	}
-
-	if (keyQ) {
-		for (int i=0; i<infile[ii].getFieldCount(); i++) {
-			track = infile.token(ii, i)->getTrack();
-			x  = outmeasures[index].skey[track].x;
-			y  = outmeasures[index].skey[track].y;
-			xo = outmeasures[index-1].ekey[track].x;
-			yo = outmeasures[index-1].ekey[track].y;
-			if ((x>=0)&&(y>=0)&&(xo>=0)&&(yo>=0)) {
-				if (*infile.token(x, y) != *infile.token(xo, yo)) {
-					m_humdrum_text << infile.token(x, y);
-				} else {
-					m_humdrum_text << "*";
-				}
-			} else {
-				m_humdrum_text << "*";
-			}
-			if (i < infile[ii].getFieldCount()-1) {
-				m_humdrum_text << "\t";
-			}
-		}
-		m_humdrum_text << "\n";
-	}
-
-	if (timesigQ) {
-		for (int i=0; i<infile[ii].getFieldCount(); i++) {
-			track = infile.token(ii, i)->getTrack();
-			x  = outmeasures[index].stimesig[track].x;
-			y  = outmeasures[index].stimesig[track].y;
-			xo = outmeasures[index-1].etimesig[track].x;
-			yo = outmeasures[index-1].etimesig[track].y;
-			if ((x>=0)&&(y>=0)&&(xo>=0)&&(yo>=0)) {
-				if (*infile.token(x, y) != *infile.token(xo, yo)) {
-					m_humdrum_text << infile.token(x, y);
-				} else {
-					m_humdrum_text << "*";
-				}
-			} else {
-				m_humdrum_text << "*";
-			}
-			if (i < infile[ii].getFieldCount()-1) {
-				m_humdrum_text << "\t";
-			}
-		}
-		m_humdrum_text << "\n";
-	}
-
-	if (metQ) {
-		for (int i=0; i<infile[ii].getFieldCount(); i++) {
-			track = infile.token(ii, i)->getTrack();
-			x  = outmeasures[index].smet[track].x;
-			y  = outmeasures[index].smet[track].y;
-			xo = outmeasures[index-1].emet[track].x;
-			yo = outmeasures[index-1].emet[track].y;
-			if ((x>=0)&&(y>=0)&&(xo>=0)&&(yo>=0)) {
-				if (*infile.token(x, y) != *infile.token(xo, yo)) {
-					m_humdrum_text << infile.token(x, y);
-				} else {
-					m_humdrum_text << "*";
-				}
-			} else {
-				m_humdrum_text << "*";
-			}
-			if (i < infile[ii].getFieldCount()-1) {
-				m_humdrum_text << "\t";
-			}
-		}
-		m_humdrum_text << "\n";
-	}
-
-	if (tempoQ) {
-		for (int i=0; i<infile[ii].getFieldCount(); i++) {
-			track = infile.token(ii, i)->getTrack();
-			x  = outmeasures[index].stempo[track].x;
-			y  = outmeasures[index].stempo[track].y;
-			xo = outmeasures[index-1].etempo[track].x;
-			yo = outmeasures[index-1].etempo[track].y;
-			if ((x>=0)&&(y>=0)&&(xo>=0)&&(yo>=0)) {
-				if (*infile.token(x, y) != *infile.token(xo, yo)) {
-					m_humdrum_text << infile.token(x, y);
-				} else {
-					m_humdrum_text << "*";
-				}
-			} else {
-				m_humdrum_text << "*";
-			}
-			if (i < infile[ii].getFieldCount()-1) {
-				m_humdrum_text << "\t";
-			}
-		}
-		m_humdrum_text << "\n";
-	}
-
 }
 
 
 
 //////////////////////////////
 //
-// Tool_myank::adjustGlobalInterpretationsStart --
+// Tool_myank::getStateChange -- return the token of a tracked state if it
+//     has to be printed at the start of the segment, otherwise NULL.
 //
 
-void Tool_myank::adjustGlobalInterpretationsStart(HumdrumFile& infile, int ii,
-		vector<MeasureInfo>& outmeasures, int index) {
-	if (index != 0) {
-		cerr << "Error in adjustGlobalInterpetationsStart" << endl;
-		exit(1);
+HTp Tool_myank::getStateChange(HumdrumFile& infile, vector<MeasureInfo>& outmeasures,
+		int index, int state, int track) {
+	auto getState = [&](vector<vector<MyCoord>>& states) {
+		bool exists = (state < (int)states.size()) && (track < (int)states[state].size());
+		return exists ? states[state][track] : MyCoord();
+	};
+
+	MyCoord current = getState(outmeasures[index].sstates);
+	if (!current.isValid()) {
+		return NULL;
 	}
-
-	int i;
-
-	int clefQ    = 0;
-	int keysigQ  = 0;
-	int keyQ     = 0;
-	int timesigQ = 0;
-	int metQ     = 0;
-	int tempoQ   = 0;
-
-	int x, y;
-
-	// ignore the zeroth measure
-	// (may not be proper).
-// ggg
-	if (outmeasures[index].num == 0) {
-		return;
+	HTp token = infile.token(current.x, current.y);
+	if (index == 0) {
+		return token;
 	}
+	MyCoord previous = getState(outmeasures[index-1].estates);
+	if (!previous.isValid()) {
+		return NULL;
+	}
+	return (*token != *infile.token(previous.x, previous.y)) ? token : NULL;
+}
 
-	int tracks = infile.getMaxTrack();
 
-	for (i=1; i<=tracks; i++) {
 
-		if (!clefQ) {
-			x  = outmeasures[index].sclef[i].x;
-			y  = outmeasures[index].sclef[i].y;
+//////////////////////////////
+//
+// Tool_myank::getStateIndex -- index of the tracked state the token
+//     belongs to, or -1.
+//
 
-			if ((x>=0)&&(y>=0)) {
-				clefQ = 1;
-			}
-		}
-
-		if (!keysigQ) {
-			x  = outmeasures[index].skeysig[i].x;
-			y  = outmeasures[index].skeysig[i].y;
-			if ((x>=0)&&(y>=0)) {
-				keysigQ = 1;
-			}
-		}
-
-		if (!keyQ) {
-			x  = outmeasures[index].skey[i].x;
-			y  = outmeasures[index].skey[i].y;
-			if ((x>=0)&&(y>=0)) {
-				keyQ = 1;
-			}
-		}
-
-		if (!timesigQ) {
-			x  = outmeasures[index].stimesig[i].x;
-			y  = outmeasures[index].stimesig[i].y;
-			if ((x>=0)&&(y>=0)) {
-				timesigQ = 1;
-			}
-		}
-
-		if (!metQ) {
-			x  = outmeasures[index].smet[i].x;
-			y  = outmeasures[index].smet[i].y;
-			if ((x>=0)&&(y>=0)) {
-				metQ = 1;
-			}
-		}
-
-		if (!tempoQ) {
-			x  = outmeasures[index].stempo[i].x;
-			y  = outmeasures[index].stempo[i].y;
-			if ((x>=0)&&(y>=0)) {
-				tempoQ = 1;
-			}
+int Tool_myank::getStateIndex(HTp token) {
+	HumRegex hre;
+	for (int i=0; i<(int)m_stateRegexes.size(); i++) {
+		if (hre.search(token, m_stateRegexes[i])) {
+			return i;
 		}
 	}
-
-	int ptrack;
-
-	if (clefQ) {
-		for (i=0; i<infile[ii].getFieldCount(); i++) {
-			ptrack = infile.token(ii, i)->getTrack();
-			x  = outmeasures[index].sclef[ptrack].x;
-			y  = outmeasures[index].sclef[ptrack].y;
-			if ((x>=0)&&(y>=0)) {
-				m_humdrum_text << infile.token(x, y);
-			} else {
-				m_humdrum_text << "*";
-			}
-			if (i < infile[ii].getFieldCount()-1) {
-				m_humdrum_text << "\t";
-			}
-		}
-		m_humdrum_text << "\n";
-	}
-
-	if (keysigQ) {
-		for (i=0; i<infile[ii].getFieldCount(); i++) {
-			ptrack = infile.token(ii, i)->getTrack();
-			x  = outmeasures[index].skeysig[ptrack].x;
-			y  = outmeasures[index].skeysig[ptrack].y;
-			if ((x>=0)&&(y>=0)) {
-				m_humdrum_text << infile.token(x, y);
-			} else {
-				m_humdrum_text << "*";
-			}
-			if (i < infile[ii].getFieldCount()-1) {
-				m_humdrum_text << "\t";
-			}
-		}
-		m_humdrum_text << "\n";
-	}
-
-	if (keyQ) {
-		for (i=0; i<infile[ii].getFieldCount(); i++) {
-			ptrack = infile.token(ii, i)->getTrack();
-			x  = outmeasures[index].skey[ptrack].x;
-			y  = outmeasures[index].skey[ptrack].y;
-			if ((x>=0)&&(y>=0)) {
-				m_humdrum_text << infile.token(x, y);
-			} else {
-				m_humdrum_text << "*";
-			}
-			if (i < infile[ii].getFieldCount()-1) {
-				m_humdrum_text << "\t";
-			}
-		}
-		m_humdrum_text << "\n";
-	}
-
-	if (timesigQ) {
-		for (i=0; i<infile[ii].getFieldCount(); i++) {
-			ptrack = infile.token(ii, i)->getTrack();
-			x  = outmeasures[index].stimesig[ptrack].x;
-			y  = outmeasures[index].stimesig[ptrack].y;
-			if ((x>=0)&&(y>=0)) {
-				m_humdrum_text << infile.token(x, y);
-			} else {
-				m_humdrum_text << "*";
-			}
-			if (i < infile[ii].getFieldCount()-1) {
-				m_humdrum_text << "\t";
-			}
-		}
-		m_humdrum_text << "\n";
-	}
-	if (metQ) {
-		for (i=0; i<infile[ii].getFieldCount(); i++) {
-			ptrack = infile.token(ii, i)->getTrack();
-			x  = outmeasures[index].smet[ptrack].x;
-			y  = outmeasures[index].smet[ptrack].y;
-			if ((x>=0)&&(y>=0)) {
-				m_humdrum_text << infile.token(x, y);
-			} else {
-				m_humdrum_text << "*";
-			}
-			if (i < infile[ii].getFieldCount()-1) {
-				m_humdrum_text << "\t";
-			}
-		}
-		m_humdrum_text << "\n";
-	}
-
-	if (tempoQ) {
-		for (i=0; i<infile[ii].getFieldCount(); i++) {
-			ptrack = infile.token(ii, i)->getTrack();
-			x  = outmeasures[index].stempo[ptrack].x;
-			y  = outmeasures[index].stempo[ptrack].y;
-			if ((x>=0)&&(y>=0)) {
-				m_humdrum_text << infile.token(x, y);
-			} else {
-				m_humdrum_text << "*";
-			}
-			if (i < infile[ii].getFieldCount()-1) {
-				m_humdrum_text << "\t";
-			}
-		}
-		m_humdrum_text << "\n";
-	}
+	return -1;
 }
 
 
@@ -2230,36 +1840,17 @@ void Tool_myank::expandMeasureOutList(vector<MeasureInfo>& measureout,
 
 void Tool_myank::fillGlobalDefaults(HumdrumFile& infile, vector<MeasureInfo>& measurein,
 		vector<int>& inmap) {
-	int i, j;
 	HumRegex hre;
 
 	int tracks = infile.getMaxTrack();
-	// cerr << "MAX TRACKS " << tracks << " ===============================" << endl;
-
-	vector<MyCoord> currclef(tracks+1);
-	vector<MyCoord> currkeysig(tracks+1);
-	vector<MyCoord> currkey(tracks+1);
-	vector<MyCoord> currtimesig(tracks+1);
-	vector<MyCoord> currmet(tracks+1);
-	vector<MyCoord> currtempo(tracks+1);
-
-	MyCoord undefMyCoord;
-	undefMyCoord.clear();
-
-	fill(currclef.begin(), currclef.end(), undefMyCoord);
-	fill(currkeysig.begin(), currkeysig.end(), undefMyCoord);
-	fill(currkey.begin(), currkey.end(), undefMyCoord);
-	fill(currtimesig.begin(), currtimesig.end(), undefMyCoord);
-	fill(currmet.begin(), currmet.end(), undefMyCoord);
-	fill(currtempo.begin(), currtempo.end(), undefMyCoord);
+	vector<vector<MyCoord>> states(m_stateRegexes.size(), vector<MyCoord>(tracks+1));
 
 	int currmeasure = -1;
 	int lastmeasure = -1;
 	int datafound   = 0;
-	int track;
 	int thingy = 0;
 
-	for (i=0; i<infile.getLineCount(); i++) {
+	for (int i=0; i<infile.getLineCount(); i++) {
 		if ((currmeasure == -1) && (thingy == 0) && infile[i].isData()) {
 			currmeasure = 0;
 		}
@@ -2271,12 +1862,7 @@ void Tool_myank::fillGlobalDefaults(HumdrumFile& infile, vector<MeasureInfo>& me
 
 			// store state of global music values at end of measure
 			if (currmeasure >= 0) {
-				measurein[inmap[currmeasure]].eclef    = currclef;
-				measurein[inmap[currmeasure]].ekeysig  = currkeysig;
-				measurein[inmap[currmeasure]].ekey     = currkey;
-				measurein[inmap[currmeasure]].etimesig = currtimesig;
-				measurein[inmap[currmeasure]].emet     = currmet;
-				measurein[inmap[currmeasure]].etempo   = currtempo;
+				measurein[inmap[currmeasure]].estates = states;
 			}
 
 			lastmeasure = currmeasure;
@@ -2290,83 +1876,29 @@ void Tool_myank::fillGlobalDefaults(HumdrumFile& infile, vector<MeasureInfo>& me
 					datafound = 0;
 					break;
 				}
-// cerr << "CURRCLEF: ";
-// for (int z=0; z<(int)currclef.size(); z++) {
-// cerr << "(" << currclef[z].x << "," << currclef[z].y << ") ";
-// }
-// cerr << endl;
-				measurein[inmap[currmeasure]].sclef    = currclef;
-				measurein[inmap[currmeasure]].skeysig  = currkeysig;
-				measurein[inmap[currmeasure]].skey     = currkey;
-				measurein[inmap[currmeasure]].stimesig = currtimesig;
-				// measurein[inmap[currmeasure]].smet     = metstates[i];
-				measurein[inmap[currmeasure]].smet     = currmet;
-				measurein[inmap[currmeasure]].stempo   = currtempo;
+				measurein[inmap[currmeasure]].sstates = states;
 			}
 
 			datafound   = 0;
 			continue;
 		}
 		if (infile[i].isInterpretation()) {
-			for (j=0; j<infile[i].getFieldCount(); j++) {
-				if (!infile.token(i, j)->isKern()) {
+			for (int j=0; j<infile[i].getFieldCount(); j++) {
+				HTp token = infile.token(i, j);
+				if (!token->isKern()) {
 					continue;
 				}
-				track = infile.token(i, j)->getTrack();
-
+				int state = getStateIndex(token);
+				if (state < 0) {
+					continue;
+				}
+				int track = token->getTrack();
+				// printed with the lines of the measure itself
 				if ((datafound == 0) && (lastmeasure >= 0)) {
-					if (infile.token(i, j)->compare(0, 5, "*clef") == 0) {
-						measurein[inmap[currmeasure]].sclef[track].x = -1;
-						measurein[inmap[currmeasure]].sclef[track].y = -1;
-					} else if (hre.search(infile.token(i, j), "^\\*k\\[.*\\]", "")) {
-						measurein[inmap[currmeasure]].skeysig[track].x = -1;
-						measurein[inmap[currmeasure]].skeysig[track].y = -1;
-					} else if (hre.search(infile.token(i, j), "^\\*[A-G][#-]?:", "i")) {
-						measurein[inmap[currmeasure]].skey[track].x = -1;
-						measurein[inmap[currmeasure]].skey[track].y = -1;
-					} else if (hre.search(infile.token(i, j), R"(^\*M\d+/\d+)")) {
-						measurein[inmap[currmeasure]].stimesig[track].x = -1;
-						measurein[inmap[currmeasure]].stimesig[track].y = -1;
-					} else if (hre.search(infile.token(i, j), R"(^\*met\(.*\))")) {
-						measurein[inmap[currmeasure]].smet[track].x = -1;
-						measurein[inmap[currmeasure]].smet[track].y = -1;
-					} else if (hre.search(infile.token(i, j), "^\\*MM\\d+", "i")) {
-						measurein[inmap[currmeasure]].stempo[track].x = -1;
-						measurein[inmap[currmeasure]].stempo[track].y = -1;
-					}
+					measurein[inmap[currmeasure]].sstates[state][track].clear();
 				}
-
-				if (infile.token(i, j)->compare(0, 5, "*clef") == 0) {
-					currclef[track].x = i;
-					currclef[track].y = j;
-					continue;
-				}
-				if (hre.search(infile.token(i, j), R"(^\*k\[.*\])")) {
-					currkeysig[track].x = i;
-					currkeysig[track].y = j;
-					continue;
-				}
-				if (hre.search(infile.token(i, j), "^\\*[A-G][#-]?:", "i")) {
-					currkey[track].x = i;
-					currkey[track].y = j;
-					continue;
-				}
-				if (hre.search(infile.token(i, j), R"(^\*M\d+/\d+)")) {
-					currtimesig[track].x = i;
-					currtimesig[track].y = j;
-					continue;
-				}
-				if (hre.search(infile.token(i, j), R"(^\*met\(.*\))")) {
-					currmet[track].x = i;
-					currmet[track].y = j;
-					continue;
-				}
-				if (hre.search(infile.token(i, j), R"(^\*MM[\d.]+)")) {
-					currtempo[track].x = i;
-					currtempo[track].y = j;
-					continue;
-				}
-
+				states[state][track].x = i;
+				states[state][track].y = j;
 			}
 		}
 		if (infile[i].isData()) {
@@ -2377,187 +1909,26 @@ void Tool_myank::fillGlobalDefaults(HumdrumFile& infile, vector<MeasureInfo>& me
 	// store state of global music values at end of music
 	if ((currmeasure >= 0) && (currmeasure < (int)inmap.size())
 			&& (inmap[currmeasure] >= 0)) {
-		measurein[inmap[currmeasure]].eclef    = currclef;
-		measurein[inmap[currmeasure]].ekeysig  = currkeysig;
-		measurein[inmap[currmeasure]].ekey     = currkey;
-		measurein[inmap[currmeasure]].etimesig = currtimesig;
-		measurein[inmap[currmeasure]].emet     = currmet;
-		measurein[inmap[currmeasure]].etempo   = currtempo;
+		measurein[inmap[currmeasure]].estates = states;
 	}
 
 	// go through the measure list and clean up start/end states
-	for (i=0; i<(int)measurein.size()-2; i++) {
-
-		if (measurein[i].sclef.size() == 0) {
-			measurein[i].sclef.resize(tracks+1);
-			fill(measurein[i].sclef.begin(), measurein[i].sclef.end(), undefMyCoord);
-		}
-		if (measurein[i].eclef.size() == 0) {
-			measurein[i].eclef.resize(tracks+1);
-			fill(measurein[i].eclef.begin(), measurein[i].eclef.end(), undefMyCoord);
-		}
-		if (measurein[i+1].sclef.size() == 0) {
-			measurein[i+1].sclef.resize(tracks+1);
-			fill(measurein[i+1].sclef.begin(), measurein[i+1].sclef.end(), undefMyCoord);
-		}
-		if (measurein[i+1].eclef.size() == 0) {
-			measurein[i+1].eclef.resize(tracks+1);
-			fill(measurein[i+1].eclef.begin(), measurein[i+1].eclef.end(), undefMyCoord);
-		}
-		for (j=1; j<(int)measurein[i].sclef.size(); j++) {
-			if (!measurein[i].eclef[j].isValid()) {
-				if (measurein[i].sclef[j].isValid()) {
-					measurein[i].eclef[j] = measurein[i].sclef[j];
-				}
-			}
-			if (!measurein[i+1].sclef[j].isValid()) {
-				if (measurein[i].eclef[j].isValid()) {
-					measurein[i+1].sclef[j] = measurein[i].eclef[j];
-				}
+	vector<vector<MyCoord>> undefined(m_stateRegexes.size(), vector<MyCoord>(tracks+1));
+	for (int i=0; i<(int)measurein.size()-2; i++) {
+		MeasureInfo& current = measurein[i];
+		MeasureInfo& next = measurein[i+1];
+		for (auto* measurestates : {&current.sstates, &current.estates, &next.sstates, &next.estates}) {
+			if (measurestates->empty()) {
+				*measurestates = undefined;
 			}
 		}
-
-		if (measurein[i].skeysig.size() == 0) {
-			measurein[i].skeysig.resize(tracks+1);
-			fill(measurein[i].skeysig.begin(), measurein[i].skeysig.end(), undefMyCoord);
-		}
-		if (measurein[i].ekeysig.size() == 0) {
-			measurein[i].ekeysig.resize(tracks+1);
-			fill(measurein[i].ekeysig.begin(), measurein[i].ekeysig.end(), undefMyCoord);
-		}
-		if (measurein[i+1].skeysig.size() == 0) {
-			measurein[i+1].skeysig.resize(tracks+1);
-			fill(measurein[i+1].skeysig.begin(), measurein[i+1].skeysig.end(), undefMyCoord);
-		}
-		if (measurein[i+1].ekeysig.size() == 0) {
-			measurein[i+1].ekeysig.resize(tracks+1);
-			fill(measurein[i+1].ekeysig.begin(), measurein[i+1].ekeysig.end(), undefMyCoord);
-		}
-		for (j=1; j<(int)measurein[i].skeysig.size(); j++) {
-			if (!measurein[i].ekeysig[j].isValid()) {
-				if (measurein[i].skeysig[j].isValid()) {
-					measurein[i].ekeysig[j] = measurein[i].skeysig[j];
+		for (int state=0; state<(int)m_stateRegexes.size(); state++) {
+			for (int track=1; track<=tracks; track++) {
+				if (!current.estates[state][track].isValid()) {
+					current.estates[state][track] = current.sstates[state][track];
 				}
-			}
-			if (!measurein[i+1].skeysig[j].isValid()) {
-				if (measurein[i].ekeysig[j].isValid()) {
-					measurein[i+1].skeysig[j] = measurein[i].ekeysig[j];
-				}
-			}
-		}
-
-		if (measurein[i].skey.size() == 0) {
-			measurein[i].skey.resize(tracks+1);
-			fill(measurein[i].skey.begin(), measurein[i].skey.end(), undefMyCoord);
-		}
-		if (measurein[i].ekey.size() == 0) {
-			measurein[i].ekey.resize(tracks+1);
-			fill(measurein[i].ekey.begin(), measurein[i].ekey.end(), undefMyCoord);
-		}
-		if (measurein[i+1].skey.size() == 0) {
-			measurein[i+1].skey.resize(tracks+1);
-			fill(measurein[i+1].skey.begin(), measurein[i+1].skey.end(), undefMyCoord);
-		}
-		if (measurein[i+1].ekey.size() == 0) {
-			measurein[i+1].ekey.resize(tracks+1);
-			fill(measurein[i+1].ekey.begin(), measurein[i+1].ekey.end(), undefMyCoord);
-		}
-		for (j=1; j<(int)measurein[i].skey.size(); j++) {
-			if (!measurein[i].ekey[j].isValid()) {
-				if (measurein[i].skey[j].isValid()) {
-					measurein[i].ekey[j] = measurein[i].skey[j];
-				}
-			}
-			if (!measurein[i+1].skey[j].isValid()) {
-				if (measurein[i].ekey[j].isValid()) {
-					measurein[i+1].skey[j] = measurein[i].ekey[j];
-				}
-			}
-		}
-
-		if (measurein[i].stimesig.size() == 0) {
-			measurein[i].stimesig.resize(tracks+1);
-			fill(measurein[i].stimesig.begin(), measurein[i].stimesig.end(), undefMyCoord);
-		}
-		if (measurein[i].etimesig.size() == 0) {
-			measurein[i].etimesig.resize(tracks+1);
-			fill(measurein[i].etimesig.begin(), measurein[i].etimesig.end(), undefMyCoord);
-		}
-		if (measurein[i+1].stimesig.size() == 0) {
-			measurein[i+1].stimesig.resize(tracks+1);
-			fill(measurein[i+1].stimesig.begin(), measurein[i+1].stimesig.end(), undefMyCoord);
-		}
-		if (measurein[i+1].etimesig.size() == 0) {
-			measurein[i+1].etimesig.resize(tracks+1);
-			fill(measurein[i+1].etimesig.begin(), measurein[i+1].etimesig.end(), undefMyCoord);
-		}
-		for (j=1; j<(int)measurein[i].stimesig.size(); j++) {
-			if (!measurein[i].etimesig[j].isValid()) {
-				if (measurein[i].stimesig[j].isValid()) {
-					measurein[i].etimesig[j] = measurein[i].stimesig[j];
-				}
-			}
-			if (!measurein[i+1].stimesig[j].isValid()) {
-				if (measurein[i].etimesig[j].isValid()) {
-					measurein[i+1].stimesig[j] = measurein[i].etimesig[j];
-				}
-			}
-		}
-
-		if (measurein[i].smet.size() == 0) {
-			measurein[i].smet.resize(tracks+1);
-			fill(measurein[i].smet.begin(), measurein[i].smet.end(), undefMyCoord);
-		}
-		if (measurein[i].emet.size() == 0) {
-			measurein[i].emet.resize(tracks+1);
-			fill(measurein[i].emet.begin(), measurein[i].emet.end(), undefMyCoord);
-		}
-		if (measurein[i+1].smet.size() == 0) {
-			measurein[i+1].smet.resize(tracks+1);
-			fill(measurein[i+1].smet.begin(), measurein[i+1].smet.end(), undefMyCoord);
-		}
-		if (measurein[i+1].emet.size() == 0) {
-			measurein[i+1].emet.resize(tracks+1);
-			fill(measurein[i+1].emet.begin(), measurein[i+1].emet.end(), undefMyCoord);
-		}
-		for (j=1; j<(int)measurein[i].smet.size(); j++) {
-			if (!measurein[i].emet[j].isValid()) {
-				if (measurein[i].smet[j].isValid()) {
-					measurein[i].emet[j] = measurein[i].smet[j];
-				}
-			}
-			if (!measurein[i+1].smet[j].isValid()) {
-				if (measurein[i].emet[j].isValid()) {
-					measurein[i+1].smet[j] = measurein[i].emet[j];
-				}
-			}
-		}
-
-		if (measurein[i].stempo.size() == 0) {
-			measurein[i].stempo.resize(tracks+1);
-			fill(measurein[i].stempo.begin(), measurein[i].stempo.end(), undefMyCoord);
-		}
-		if (measurein[i].etempo.size() == 0) {
-			measurein[i].etempo.resize(tracks+1);
-			fill(measurein[i].etempo.begin(), measurein[i].etempo.end(), undefMyCoord);
-		}
-		if (measurein[i+1].stempo.size() == 0) {
-			measurein[i+1].stempo.resize(tracks+1);
-			fill(measurein[i+1].stempo.begin(), measurein[i+1].stempo.end(), undefMyCoord);
-		}
-		if (measurein[i+1].etempo.size() == 0) {
-			measurein[i+1].etempo.resize(tracks+1);
-			fill(measurein[i+1].etempo.begin(), measurein[i+1].etempo.end(), undefMyCoord);
-		}
-		for (j=1; j<(int)measurein[i].stempo.size(); j++) {
-			if (!measurein[i].etempo[j].isValid()) {
-				if (measurein[i].stempo[j].isValid()) {
-					measurein[i].etempo[j] = measurein[i].stempo[j];
-				}
-			}
-			if (!measurein[i+1].stempo[j].isValid()) {
-				if (measurein[i].etempo[j].isValid()) {
-					measurein[i+1].stempo[j] = measurein[i].etempo[j];
+				if (!next.sstates[state][track].isValid()) {
+					next.sstates[state][track] = current.estates[state][track];
 				}
 			}
 		}
@@ -2631,19 +2002,8 @@ void Tool_myank::processFieldEntry(vector<MeasureInfo>& field,
 					current.start = inmeasures[inmap[i]].start;
 					current.stop = inmeasures[inmap[i]].stop;
 
-					current.sclef    = inmeasures[inmap[i]].sclef;
-					current.skeysig  = inmeasures[inmap[i]].skeysig;
-					current.skey     = inmeasures[inmap[i]].skey;
-					current.stimesig = inmeasures[inmap[i]].stimesig;
-					current.smet     = inmeasures[inmap[i]].smet;
-					current.stempo   = inmeasures[inmap[i]].stempo;
-
-					current.eclef    = inmeasures[inmap[i]].eclef;
-					current.ekeysig  = inmeasures[inmap[i]].ekeysig;
-					current.ekey     = inmeasures[inmap[i]].ekey;
-					current.etimesig = inmeasures[inmap[i]].etimesig;
-					current.emet     = inmeasures[inmap[i]].emet;
-					current.etempo   = inmeasures[inmap[i]].etempo;
+					current.sstates = inmeasures[inmap[i]].sstates;
+					current.estates = inmeasures[inmap[i]].estates;
 
 					field.push_back(current);
 				}
@@ -2658,19 +2018,8 @@ void Tool_myank::processFieldEntry(vector<MeasureInfo>& field,
 					current.start = inmeasures[inmap[i]].start;
 					current.stop = inmeasures[inmap[i]].stop;
 
-					current.sclef    = inmeasures[inmap[i]].sclef;
-					current.skeysig  = inmeasures[inmap[i]].skeysig;
-					current.skey     = inmeasures[inmap[i]].skey;
-					current.stimesig = inmeasures[inmap[i]].stimesig;
-					current.smet     = inmeasures[inmap[i]].smet;
-					current.stempo   = inmeasures[inmap[i]].stempo;
-
-					current.eclef    = inmeasures[inmap[i]].eclef;
-					current.ekeysig  = inmeasures[inmap[i]].ekeysig;
-					current.ekey     = inmeasures[inmap[i]].ekey;
-					current.etimesig = inmeasures[inmap[i]].etimesig;
-					current.emet     = inmeasures[inmap[i]].emet;
-					current.etempo   = inmeasures[inmap[i]].etempo;
+					current.sstates = inmeasures[inmap[i]].sstates;
+					current.estates = inmeasures[inmap[i]].estates;
 
 					field.push_back(current);
 				}
@@ -2694,19 +2043,8 @@ void Tool_myank::processFieldEntry(vector<MeasureInfo>& field,
 			current.start = inmeasures[inmap[value]].start;
 			current.stop = inmeasures[inmap[value]].stop;
 
-			current.sclef    = inmeasures[inmap[value]].sclef;
-			current.skeysig  = inmeasures[inmap[value]].skeysig;
-			current.skey     = inmeasures[inmap[value]].skey;
-			current.stimesig = inmeasures[inmap[value]].stimesig;
-			current.smet     = inmeasures[inmap[value]].smet;
-			current.stempo   = inmeasures[inmap[value]].stempo;
-
-			current.eclef    = inmeasures[inmap[value]].eclef;
-			current.ekeysig  = inmeasures[inmap[value]].ekeysig;
-			current.ekey     = inmeasures[inmap[value]].ekey;
-			current.etimesig = inmeasures[inmap[value]].etimesig;
-			current.emet     = inmeasures[inmap[value]].emet;
-			current.etempo   = inmeasures[inmap[value]].etempo;
+			current.sstates = inmeasures[inmap[value]].sstates;
+			current.estates = inmeasures[inmap[value]].estates;
 
 			field.push_back(current);
 		}
