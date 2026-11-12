@@ -891,12 +891,10 @@ HTp Tool_myank::getStateChange(HumdrumFile& infile, vector<MeasureInfo>& outmeas
 		return NULL;
 	}
 	HTp token = infile.token(current.x, current.y);
-	if (index == 0) {
-		return token;
-	}
-	MyCoord previous = getState(outmeasures[index-1].estates);
+	MyCoord previous = index > 0 ? getState(outmeasures[index-1].estates) : MyCoord();
 	if (!previous.isValid()) {
-		return NULL;
+		// *X cancels a state, e.g. *X8va
+		return (token->compare(0, 2, "*X") == 0) ? NULL : token;
 	}
 	return (*token != *infile.token(previous.x, previous.y)) ? token : NULL;
 }

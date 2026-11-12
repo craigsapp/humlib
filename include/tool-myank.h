@@ -157,6 +157,7 @@ class Tool_myank : public HumTool {
 			R"(^\*Trd)",
 			R"(^\*ITrd)",
 			R"(^\*rscale:)",
+			R"(^\*X?(8va|8ba|15ma|15ba)$)",
 		};
 
 		std::string m_lineRange;              // used with -l option

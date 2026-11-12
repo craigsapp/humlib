@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Nov 12 20:49:00 UTC 2026
+// Last Modified: Thu Nov 12 20:54:22 UTC 2026
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -10872,6 +10872,7 @@ class Tool_myank : public HumTool {
 			R"(^\*Trd)",
 			R"(^\*ITrd)",
 			R"(^\*rscale:)",
+			R"(^\*X?(8va|8ba|15ma|15ba)$)",
 		};
 
 		std::string m_lineRange;              // used with -l option
