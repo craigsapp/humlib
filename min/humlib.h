@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Nov 12 20:43:49 UTC 2026
+// Last Modified: Thu Nov 12 20:44:14 UTC 2026
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -10858,10 +10858,14 @@ class Tool_myank : public HumTool {
 		// interpretations kept at the start of an excerpt, in output order
 		std::vector<std::string> m_stateRegexes = {
 			R"(^\*clef)",
+			R"(^\*mclef)",
+			R"(^\*oclef)",
 			R"(^\*k\[.*\])",
 			R"(^\*[A-Ga-g][#-]?:)",
 			R"(^\*M\d+/\d+)",
 			R"(^\*met\(.*\))",
+			R"(^\*mmet\(.*\))",
+			R"(^\*omet\(.*\))",
 			R"(^\*MM[\d.]+)",
 		};
 

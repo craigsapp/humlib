@@ -143,10 +143,14 @@ class Tool_myank : public HumTool {
 		// interpretations kept at the start of an excerpt, in output order
 		std::vector<std::string> m_stateRegexes = {
 			R"(^\*clef)",
+			R"(^\*mclef)",
+			R"(^\*oclef)",
 			R"(^\*k\[.*\])",
 			R"(^\*[A-Ga-g][#-]?:)",
 			R"(^\*M\d+/\d+)",
 			R"(^\*met\(.*\))",
+			R"(^\*mmet\(.*\))",
+			R"(^\*omet\(.*\))",
 			R"(^\*MM[\d.]+)",
 		};
 
