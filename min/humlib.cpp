@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Nov 12 20:48:23 UTC 2026
+// Last Modified: Thu Nov 12 20:49:00 UTC 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -126187,6 +126187,11 @@ void Tool_myank::printStarting(HumdrumFile& infile) {
 
 	int hasI = 0;
 
+	// tracked states like *ITrd are printed by adjustGlobalInterpretations
+	auto isInstrument = [&](HTp token) {
+		return (token->compare(0, 2, "*I") == 0) && (getStateIndex(token) < 0);
+	};
+
 	if (m_instrumentQ) {
 		// print any tandem interpretations which start with *I found
 		// at the start of the data before measures, notes, or any
@@ -126206,14 +126211,14 @@ void Tool_myank::printStarting(HumdrumFile& infile) {
 			}
 			hasI = 0;
 			for (j=0; j<infile[i].getFieldCount(); j++) {
-				if (infile.token(i, j)->compare(0, 2, "*I") == 0) {
+				if (isInstrument(infile.token(i, j))) {
 					hasI = 1;
 					break;
 				}
 			}
 			if (hasI) {
 				for (j=0; j<infile[i].getFieldCount(); j++) {
-					if (infile.token(i, j)->compare(0, 2, "*I") == 0) {
+					if (isInstrument(infile.token(i, j))) {
 						m_humdrum_text << infile.token(i, j);
 					} else {
 						m_humdrum_text << "*";

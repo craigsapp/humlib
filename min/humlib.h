@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Nov 12 20:48:23 UTC 2026
+// Last Modified: Thu Nov 12 20:49:00 UTC 2026
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -10861,12 +10861,17 @@ class Tool_myank : public HumTool {
 			R"(^\*mclef)",
 			R"(^\*oclef)",
 			R"(^\*k\[.*\])",
+			R"(^\*ok\[.*\])",
 			R"(^\*[A-Ga-g][#-]?:)",
 			R"(^\*M\d+/\d+)",
 			R"(^\*met\(.*\))",
 			R"(^\*mmet\(.*\))",
 			R"(^\*omet\(.*\))",
 			R"(^\*MM[\d.]+)",
+			R"(^\*MM\[)",
+			R"(^\*Trd)",
+			R"(^\*ITrd)",
+			R"(^\*rscale:)",
 		};
 
 		std::string m_lineRange;              // used with -l option

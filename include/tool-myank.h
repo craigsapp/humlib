@@ -146,12 +146,17 @@ class Tool_myank : public HumTool {
 			R"(^\*mclef)",
 			R"(^\*oclef)",
 			R"(^\*k\[.*\])",
+			R"(^\*ok\[.*\])",
 			R"(^\*[A-Ga-g][#-]?:)",
 			R"(^\*M\d+/\d+)",
 			R"(^\*met\(.*\))",
 			R"(^\*mmet\(.*\))",
 			R"(^\*omet\(.*\))",
 			R"(^\*MM[\d.]+)",
+			R"(^\*MM\[)",
+			R"(^\*Trd)",
+			R"(^\*ITrd)",
+			R"(^\*rscale:)",
 		};
 
 		std::string m_lineRange;              // used with -l option
