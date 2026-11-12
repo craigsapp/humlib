@@ -1882,7 +1882,7 @@ void Tool_myank::fillGlobalDefaults(HumdrumFile& infile, vector<MeasureInfo>& me
 		if (infile[i].isInterpretation()) {
 			for (int j=0; j<infile[i].getFieldCount(); j++) {
 				HTp token = infile.token(i, j);
-				if (!token->isKern()) {
+				if (!token->isStaff()) {
 					continue;
 				}
 				int state = getStateIndex(token);

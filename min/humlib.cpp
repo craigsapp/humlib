@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Nov 12 20:47:54 UTC 2026
+// Last Modified: Thu Nov 12 20:48:23 UTC 2026
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -126696,7 +126696,7 @@ void Tool_myank::fillGlobalDefaults(HumdrumFile& infile, vector<MeasureInfo>& me
 		if (infile[i].isInterpretation()) {
 			for (int j=0; j<infile[i].getFieldCount(); j++) {
 				HTp token = infile.token(i, j);
-				if (!token->isKern()) {
+				if (!token->isStaff()) {
 					continue;
 				}
 				int state = getStateIndex(token);
