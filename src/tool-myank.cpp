@@ -610,7 +610,6 @@ void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
 	int measurestart = 1;
 	int lastbarnum = -1;
 	int barnum = -1;
-	int datastart = 0;
 	int bartextcount = 0;
 	bool startLineHandled = false;
 
@@ -684,9 +683,9 @@ void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
 		for (i=startLine; i<endLine; i++) {
 			counter++;
 			if ((!printed) && ((mcount == 0) || (counter == 2))) {
-				if ((datastart == 0) && outmeasures[h].num == 0) {
-					// not ideal setup...
-					datastart = 1;
+				if ((outmeasures[h].num == 0) && !infile[startLine].isData()) {
+					// segment prints its own starting interpretations
+					printed = 1;
 				} else{
 					// Fix adjustGlobalInterpretations when line is a global comment
 					int nextLineIndexWithSpines = i;
@@ -851,12 +850,6 @@ void Tool_myank::collapseSpines(HumdrumFile& infile, int line) {
 
 void Tool_myank::adjustGlobalInterpretations(HumdrumFile& infile, int ii,
 		vector<MeasureInfo>& outmeasures, int index) {
-
-	// ignore the zeroth measure
-	// (may not be proper).
-	if ((index == 0) && (outmeasures[index].num == 0)) {
-		return;
-	}
 
 	for (int state=0; state<(int)m_stateRegexes.size(); state++) {
 		string line;
@@ -1853,6 +1846,10 @@ void Tool_myank::fillGlobalDefaults(HumdrumFile& infile, vector<MeasureInfo>& me
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if ((currmeasure == -1) && (thingy == 0) && infile[i].isData()) {
 			currmeasure = 0;
+			// pickup measure starts at its first data line
+			if (!inmap.empty() && (inmap[0] >= 0)) {
+				measurein[inmap[0]].sstates = states;
+			}
 		}
 		if (infile[i].isBarline()) {
 			if (!hre.search(infile.token(i, 0), "(\\d+)", "")) {
