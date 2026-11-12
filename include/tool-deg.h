@@ -186,6 +186,9 @@ class Tool_deg : public HumTool {
 		std::string     createDegInterpretation  (const std::string& degtok, int refLine, bool addPreSpine);
 		std::string     printDegInterpretation   (const std::string& interp, HumdrumFile& infile, int lineIndex);
 		void            getModeAndTonic          (std::string& mode, int& b40tonic, const std::string& token);
+		std::string     normalizeKeyOption       (const std::string& key);
+		bool            isValidKeyOption         (const std::string& key);
+		bool            hasValidKeyOptions       (void);
 
 		bool            isDegAboveLine           (HumdrumFile& infile, int lineIndex);
 		bool            isDegArrowLine           (HumdrumFile& infile, int lineIndex);

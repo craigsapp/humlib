@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Nov  4 12:31:25 CET 2026
+// Last Modified: Do.  5 Nov. 2026 17:33:51 CET
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -37734,6 +37734,17 @@ bool HumdrumToken::isKeyDesignation(void) {
 	}
 	// maybe check for modal cases here
 	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isUndefinedKey -- True for *?: which resets the key context.
+//
+
+bool HumdrumToken::isUndefinedKey(void) {
+	return *this == "*?:";
 }
 
 
@@ -83119,6 +83130,10 @@ bool Tool_deg::run(HumdrumFile& infile, ostream& out) {
 
 bool Tool_deg::run(HumdrumFile& infile) {
 	initialize();
+	if (!hasValidKeyOptions()) {
+		m_humdrum_text << infile;
+		return false;
+	}
 	processFile(infile);
 	return true;
 }
@@ -83160,34 +83175,39 @@ void Tool_deg::initialize(void) {
 	}
 
 	if (getBoolean("default-key")) {
-		m_defaultKey = getString("default-key");
-		if (!m_defaultKey.empty()) {
-			if (m_defaultKey[0] != '*') {
-				m_defaultKey = "*" + m_defaultKey;
-			}
-			if (m_defaultKey.find(":") == string::npos) {
-				m_defaultKey += ":";
-			}
-		}
+		m_defaultKey = normalizeKeyOption(getString("default-key"));
 	}
 
 	if (getBoolean("forced-key")) {
 		m_defaultKey.clear(); // override --default-key option
 
-		m_forcedKey = getString("forced-key");
-		if (!m_forcedKey.empty()) {
-			if (m_forcedKey[0] != '*') {
-				m_forcedKey = "*" + m_forcedKey;
-			}
-			if (m_forcedKey.find(":") == string::npos) {
-				m_forcedKey += ":";
-			}
-			Tool_deg::ScaleDegree::setForcedKey(m_forcedKey);
-		}
+		m_forcedKey = normalizeKeyOption(getString("forced-key"));
+		Tool_deg::ScaleDegree::setForcedKey(m_forcedKey);
 	}
 
 	Tool_deg::ScaleDegree::setShowTies(m_degTiesQ);
 	Tool_deg::ScaleDegree::setShowZeros(getBoolean("zeros"));
+}
+
+
+
+//////////////////////////////
+//
+// Tool_deg::hasValidKeyOptions -- Check --default-key and --forced-key and
+//    write a warning for an invalid key.
+//
+
+bool Tool_deg::hasValidKeyOptions(void) {
+	bool valid = true;
+	if (!m_defaultKey.empty() && !isValidKeyOption(m_defaultKey)) {
+		m_warning_text << "Invalid key for --default-key: " << getString("default-key") << endl;
+		valid = false;
+	}
+	if (!m_forcedKey.empty() && !isValidKeyOption(m_forcedKey)) {
+		m_warning_text << "Invalid key for --forced-key: " << getString("forced-key") << endl;
+		valid = false;
+	}
+	return valid;
 }
 
 
@@ -83752,7 +83772,7 @@ bool Tool_deg::isKeyDesignationLine(HumdrumFile& infile, int lineIndex) {
 	}
 	for (int i=0; i<infile[lineIndex].getFieldCount(); i++) {
 		HTp token = infile.token(lineIndex, i);
-		if (token->isKeyDesignation()) {
+		if (token->isKeyDesignation() || token->isUndefinedKey()) {
 			return true;
 		}
 	}
@@ -84513,9 +84533,8 @@ void Tool_deg::prepareDegSpine(vector<vector<ScaleDegree>>& degspine, HTp kernst
 			current = current->getNextToken();
 			continue;
 		}
-		if (current->isKeyDesignation()) {
+		if (current->isKeyDesignation() || current->isUndefinedKey()) {
 			getModeAndTonic(mode, b40tonic, *current);
-
 		}
 		if (current->isClef()) {
 			if (*current == "*clefX") {
@@ -84556,6 +84575,36 @@ void Tool_deg::prepareDegSpine(vector<vector<ScaleDegree>>& degspine, HTp kernst
 
 //////////////////////////////
 //
+// Tool_deg::normalizeKeyOption -- Convert option value such as "G" into "*G:".
+//
+
+string Tool_deg::normalizeKeyOption(const string& key) {
+	string output = key;
+	if (output.empty() || (output[0] != '*')) {
+		output = "*" + output;
+	}
+	if (output.find(":") == string::npos) {
+		output += ":";
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_deg::isValidKeyOption -- True for a normalized key such as *G: or *d:dor.
+//
+
+bool Tool_deg::isValidKeyOption(const string& key) {
+	HumRegex hre;
+	return hre.search(key, "^\\*[A-Ga-g](#*|-*):(dor|phr|lyd|mix|aeo|loc|ion)?$");
+}
+
+
+
+//////////////////////////////
+//
 // Tool_deg::getModeAndTonic -- Convert key designation interpretation into a mode
 //     string and a base-40 tonic pitch (162 = middle C)
 //
@@ -84564,6 +84613,11 @@ void Tool_deg::getModeAndTonic(string& mode, int& b40tonic, const string& token)
 	string newtoken = token;
 	if (!m_forcedKey.empty()) {
 		newtoken = m_forcedKey;
+	}
+	if (newtoken == "*?:") {
+		mode = "unknown";
+		b40tonic = -1;
+		return;
 	}
 	HumRegex hre;
 	if (hre.search(newtoken, "^\\*?([A-Ga-g][-#]*):?(.*)$")) {
@@ -84881,6 +84935,9 @@ string Tool_deg::ScaleDegree::getDegToken(void) const {
 	}
 
 	if (m_unpitched) {
+		return ".";
+	}
+	if ((m_mode == m_unknown_mode) && !token->isRest()) {
 		return ".";
 	}
 
@@ -85287,7 +85344,7 @@ string Tool_deg::ScaleDegree::getManipulator(void) const {
 
 bool Tool_deg::ScaleDegree::isKeyDesignation(void) const {
 	HTp token = getLinkedKernToken();
-	if (token && token->isInterpretation() && token->isKeyDesignation()) {
+	if (token && token->isInterpretation() && (token->isKeyDesignation() || token->isUndefinedKey())) {
 		return true;
 	} else {
 		return false;
